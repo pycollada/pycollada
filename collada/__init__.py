@@ -130,6 +130,7 @@ class Collada(object):
         self.loadMaterials()
         self.loadGeometry()
         self.loadLights()
+        self.loadNodes()
         self.loadCameras()
         self.loadScenes()
         self.loadDefaultScene()
@@ -261,6 +262,18 @@ class Collada(object):
                     else:
                         self.materials.append( effect )
                         self.materialById[matid] = effect
+
+    def loadNodes(self):
+        self.nodes = []
+        self.nodeById = {}
+        libnode = self.root.find( tag('library_nodes') )
+        if libnode != None:
+            for node in libnode.findall(tag('node')):
+                try: N = scene.loadNode(self, node)
+                except DaeError, ex: self.handleError(ex)
+                else:
+                    self.nodes.append( N )
+                    self.nodeById[N.id] = N
 
     def loadScenes(self):
         """Load scene library."""

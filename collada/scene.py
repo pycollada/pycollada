@@ -334,6 +334,14 @@ def loadNode( collada, node ):
     elif node.tag == tag('instance_geometry'): return GeometryNode.load(collada, node)
     elif node.tag == tag('instance_camera'): return CameraNode.load(collada, node)
     elif node.tag == tag('instance_light'): return LightNode.load(collada, node)
+    elif node.tag == tag('instance_node'):
+        url = node.get('url')
+        if not url.startswith('#'):
+            raise DaeMalformedError('Invalid url in camera instance')
+        referred_node = collada.nodeById.get(url[1:])
+        if not referred_node:
+            raise DaeBrokenRefError('Node %s not found in library'%url)
+        return referred_node
     else: raise DaeUnsupportedError('Unknown scene node '+node.tag)
 
 class Scene(DaeObject):
