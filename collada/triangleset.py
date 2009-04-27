@@ -253,7 +253,7 @@ class BoundTriangleSet(object):
 
     def __init__(self, ts, matrix, materialnodebysymbol):
         """Create a bound triangle set from a triangle set, transform and material mapping"""
-        M = numpy.asmatrix(matrix)
+        M = numpy.asmatrix(matrix).transpose()
         self._vertex = numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = numpy.asarray(ts._normal * M[:3,:3])
         self._texcoordset = ts._texcoordset
