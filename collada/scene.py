@@ -142,6 +142,41 @@ class TransformNode(SceneNode):
                     m.shape = (4, 4)
                     matrices.append(m)
                     toremove.append(tnode)
+                elif tnode.tag == tag('lookat'):
+                    m = numpy.identity(4)
+                    lookat = [ float(x) for x in tnode.text.split() ]
+                    
+                    position = lookat[0:3]
+                    target = lookat[3:6]
+                    up = lookat[6:9]
+                    up = up / numpy.sqrt(numpy.vdot(up, up)) #normalize
+                    
+                    front = numpy.subtract(position,target)
+                    front = up / numpy.sqrt(numpy.vdot(front, front)) #normalize
+    
+                    side = numpy.cross(front, up)
+                    side = side / numpy.sqrt(numpy.vdot(side, side)) #normalize
+                    side = numpy.multiply(-1, side)
+
+                    m[0][0] = side[0]
+                    m[0][1] = side[1]
+                    m[0][2] = side[2]
+    
+                    m[1][0] = up[0]
+                    m[1][1] = up[1]
+                    m[1][2] = up[2]
+    
+                    m[2][0] = front[0]
+                    m[2][1] = front[1]
+                    m[2][2] = front[2]
+    
+                    m[3][0] = position[0]
+                    m[3][1] = position[1]
+                    m[3][2] = position[2]
+                    
+                    matrices.append(m)
+                    toremove.append(tnode)
+                    # TODO: LOOKAT Transform: is this correct?
         except ValueError, ex: raise DaeMalformedError('Corrupted transformation node')
         while len(matrices) > 1:
             matrices = matrices[:-2] + [ numpy.dot(matrices[-2], matrices[-1]) ]
