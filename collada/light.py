@@ -15,7 +15,7 @@
 from xml.etree import ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, tag
+                    DaeMalformedError, DaeUnsupportedError, tag
 
 class Light(DaeObject):
     """Abstract light class holding data from <light> tags."""
