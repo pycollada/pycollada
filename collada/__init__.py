@@ -21,6 +21,8 @@ file is not what is expected.
 from xml.etree import ElementTree
 import zipfile
 from StringIO import StringIO
+import types
+import traceback
 
 
 def tag( text ):
@@ -103,37 +105,46 @@ class Collada(object):
     """
 
     def __init__(self, filename, ignore = []):
-        """Load collada data from filename or file like object."""
-        if type(filename) in ['str', 'unicode']:
-            fdata = open(filename, 'rb').read()
-        else:
-            fdata = filename # assume it is a file like object
-        try: self.zfile = zipfile.ZipFile( fdata, 'r' )
-        except zipfile.BadZipfile, ex: self.zfile = None
-        if self.zfile:
-            self.filename = ''
-            for name in self.zfile.namelist():
-                if name.endswith('.dae') or name.endswith('.DAE'):
-                    self.filename = name
-                    break
-            if not self.filename: raise DaeIncompleteError('No DAE found inside zip compressed file')
-            data = self.zfile.read(self.filename)
-        else:
-            data = fdata.read()
-        self.errors = []
-        self.maskedErrors = []
-        self.ignoreErrors( *ignore )
-        self.root = ElementTree.fromstring(data)
-        self.validate()
-        self.loadImages()
-        self.loadEffects()
-        self.loadMaterials()
-        self.loadGeometry()
-        self.loadLights()
-        self.loadNodes()
-        self.loadCameras()
-        self.loadScenes()
-        self.loadDefaultScene()
+        try:
+            """Load collada data from filename or file like object."""
+            if type(filename) in [types.StringType, types.UnicodeType]:
+                fdata = open(filename, 'rb')
+            else:
+                fdata = filename # assume it is a file like object
+            strdata = fdata.read()
+            
+            try:
+                self.zfile = zipfile.ZipFile(StringIO(strdata), 'r')
+            except:
+                self.zfile = None
+            
+            if self.zfile:
+                self.filename = ''
+                for name in self.zfile.namelist():
+                    if name.upper().endswith('.DAE'):
+                        self.filename = name
+                        break
+                if not self.filename: raise DaeIncompleteError('No DAE found inside zip compressed file')
+                data = self.zfile.read(self.filename)
+            else:
+                data = strdata
+            
+            self.errors = []
+            self.maskedErrors = []
+            self.ignoreErrors( *ignore )
+            self.root = ElementTree.fromstring(data)
+            self.validate()
+            self.loadImages()
+            self.loadEffects()
+            self.loadMaterials()
+            self.loadGeometry()
+            self.loadLights()
+            self.loadNodes()
+            self.loadCameras()
+            self.loadScenes()
+            self.loadDefaultScene()
+        except:
+            traceback.print_exc()
 
     def validate(self):
         """TODO: Validate the xml tree."""
@@ -141,7 +152,8 @@ class Collada(object):
 
     def handleError(self, error):
         self.errors.append(error)
-        if not type(error) in self.maskedErrors: raise error
+        if not type(error) in self.maskedErrors:
+            raise
 
     def ignoreErrors(self, *args):
         """Add exceptions to the mask for ignoring or clear the mask if None given.
