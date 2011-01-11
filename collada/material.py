@@ -322,7 +322,14 @@ class Map(DaeObject):
         samplerid = node.get('texture')
         texcoord = node.get('texcoord')
         sampler = localscope.get(samplerid)
-        if sampler is None or type(sampler) != Sampler2D: raise DaeBrokenRefError('Missing sampler ' + samplerid)
+        #Check for the sampler ID as the texture ID because some exporters suck
+        if sampler is None:
+            for s2d in localscope.itervalues():
+                if type(s2d) is Sampler2D:
+                    if s2d.surface.image.id == samplerid:
+                        sampler = s2d
+        if sampler is None or type(sampler) != Sampler2D:
+            raise DaeBrokenRefError('Missing sampler ' + samplerid + ' in node ' + node.tag)
         return Map(sampler, texcoord, xmlnode = node)
 
     def save(self):
@@ -364,8 +371,8 @@ class Effect(DaeObject):
             using textures.
           shadingtype
             The tag of the node this properties are coming
-            from. At the moment we are only parsing phong and
-            lambert nodes. This could be refactored in the
+            from. At the moment we are only parsing phong,
+            lambert and blinn nodes. This could be refactored in the
             future if a strong support for materials is needed.
           emission : 3-float tuple (RGB)
             property
@@ -450,6 +457,9 @@ class Effect(DaeObject):
         if shadnode is None:
             shadnode = tecnode.find( tag('lambert') )
             shadingtype = 'lambert'
+        if shadnode is None:
+            shadnode = tecnode.find( tag('blinn') )
+            shadingtype = 'blinn'
         if shadnode is None: raise DaeIncompleteError('No material properties found in effect')
         props = {}
         for key in Effect.supported:
@@ -490,6 +500,7 @@ class Effect(DaeObject):
         tecnode.set('sid', 'common')
         shadnode = tecnode.find( tag('phong') )
         if shadnode is None: shadnode = tecnode.find( tag('lambert') )
+        if shadnode is None: shadnode = tecnode.find( tag('blinn') )
         if self.specular != None or self.shininess != None:
             shadnode.tag = 'phong'
 
