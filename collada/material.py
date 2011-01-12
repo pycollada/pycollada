@@ -29,6 +29,10 @@ try:
 except:
     pil = None
 
+class DaeMissingSampler2D(Exception):
+    """Raised when a <texture> tag references a texture without a sampler."""
+    pass
+
 class CImage(DaeObject):
     """Class containing data coming from a <image> tag.
 
@@ -329,7 +333,9 @@ class Map(DaeObject):
                     if s2d.surface.image.id == samplerid:
                         sampler = s2d
         if sampler is None or type(sampler) != Sampler2D:
-            raise DaeBrokenRefError('Missing sampler ' + samplerid + ' in node ' + node.tag)
+            err = DaeMissingSampler2D('Missing sampler ' + samplerid + ' in node ' + node.tag)
+            err.samplerid = samplerid
+            raise err
         return Map(sampler, texcoord, xmlnode = node)
 
     def save(self):
@@ -467,6 +473,19 @@ class Effect(DaeObject):
             if pnode is None: props[key] = None
             else:
                 try: props[key] = Effect.loadShadingParam(collada, localscope, pnode)
+                except DaeMissingSampler2D, ex:
+                    if ex.samplerid in collada.imageById:
+                        #Whoever exported this collada file didn't include the proper references so we will create them
+                        surf = Surface(ex.samplerid + '-surface', collada.imageById[ex.samplerid], 'A8R8G8B8')
+                        sampler = Sampler2D(ex.samplerid, surf, None, None);
+                        params.append(surf)
+                        params.append(sampler)
+                        localscope[surf.id] = surf
+                        localscope[sampler.id] = sampler
+                        try: props[key] = Effect.loadShadingParam(collada, localscope, pnode)
+                        except DaeUnsupportedError, ex:
+                            props[key] = None
+                            collada.handleError(ex)
                 except DaeUnsupportedError, ex:
                     props[key] = None
                     collada.handleError(ex) # Give the chance to ignore error and load the rest
