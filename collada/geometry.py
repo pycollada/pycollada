@@ -92,7 +92,8 @@ class Geometry( DaeObject ):
                 vertexsource = subnode.get('id')
             elif subnode.tag == tag('triangles'):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
-            elif subnode.tag != tag('source'): print 'Ignoring unknown geometry tag', subnode.tag
+            elif subnode.tag != tag('source'):
+                raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
         geom = Geometry( sources, sourcebyid, vertexsource, _primitives, xmlnode=node )
         return geom
 
