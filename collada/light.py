@@ -30,6 +30,8 @@ class Light(DaeObject):
             return SunLight.load( collada, localscope, node )
         elif lightnode.tag == tag('point'):
             return PointLight.load( collada, localscope, node )
+        elif lightnode.tag == tag('ambient'):
+            return AmbientLight.load( collada, localscope, node )
         else:
             raise DaeUnsupportedError('Unrecognized light type: %s'%lightnode.tag)
 
@@ -89,6 +91,60 @@ class SunLight(Light):
     def bind(self, matrix):
         """Create a bound light of itself based on a transform matrix."""
         return BoundSunLight(self, matrix)
+
+class AmbientLight(Light):
+    """Ambient light as defined in COLLADA tag <ambient>."""
+
+    def __init__(self, id, color, xmlnode = None):
+        """Create a new ambient light.
+
+        :Parameters:
+          id
+            Id for the object
+          color
+            Light color
+          xmlnode
+            If load form xml, the xml node
+
+        """
+        self.id = id
+        """Id in the light library."""
+        self.color = color
+        """Light color."""
+        if xmlnode != None: self.xmlnode = xmlnode
+        else:
+            self.xmlnode = ElementTree.Element( tag('light') )
+            tecnode = ElementTree.Element( tag('technique_common') )
+            self.xmlnode.append(tecnode)
+            dirnode = ElementTree.Element( tag('ambient') )
+            tecnode.append( dirnode )
+            colornode = ElementTree.Element( tag('color') )
+            dirnode.append( colornode )
+            colornode.text = ' '.join( [ str(v) for v in self.color ] )
+            self.xmlnode.set('id', self.id)
+            self.xmlnode.set('name', self.id)
+
+    def save(self):
+        self.xmlnode.set('id', self.id)
+        self.xmlnode.set('name', self.id)
+        colornode = self.xmlnode.find( '%s/%s/%s'%(tag('technique_common'),tag('ambient'), 
+                                                  tag('color') ) )
+        colornode.text = ' '.join( [ str(v) for v in self.color ] )
+
+        
+    @staticmethod
+    def load(collada, localscope, node):
+        colornode = node.find( '%s/%s/%s'%(tag('technique_common'),tag('ambient'), 
+                                           tag('color') ) )
+        if colornode is None: raise DaeIncompleteError('Missing color for ambient light')
+        try: color = tuple( [ float(v) for v in colornode.text.split() ] )
+        except ValueError, ex: 
+            raise DaeMalformedError('Corrupted color values in light definition')
+        return AmbientLight(node.get('id'), color, xmlnode = node)
+    
+    def bind(self, matrix):
+        """Create a bound light of itself based on a transform matrix."""
+        return BoundAmbientLight(self, matrix)
 
 class PointLight(Light):
     """Point light as defined in COLLADA tag <point>."""
@@ -216,3 +272,13 @@ class BoundSunLight(object):
     def __str__(self): return 'SunLight(from %s)' % str(self.direction)
     def __repr__(self): return str(self)
 
+class BoundAmbientLight(object):
+    """Ambient light bount to a scene with transformation."""
+
+    def __init__(self, slight, matrix):
+        self.color = slight.color
+        self.original = slight
+
+    def __str__(self): return 'AmbientLight'
+    def __repr__(self): return str(self)
+    
