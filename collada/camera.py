@@ -93,7 +93,7 @@ class Camera(DaeObject):
         else:
             xfovnode = persnode.find( tag('xfov') )
             if xfovnode != None: 
-                fov = xfovnode
+                fov = xfovnode.text
                 rationode = persnode.find( tag('aspect_ratio') )
                 if rationode != None: correction = rationode.text
             else: fov = 45.0
