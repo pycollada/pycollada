@@ -101,6 +101,8 @@ class Source(DaeObject):
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
+        if len(components) == 2 and components[0] == 'U' and components[1] == 'V':
+            components = ['S', 'T'] #FIXME !!!!!
         source = Source( sourceid, data, tuple(components), xmlnode=node )
         return source
 
