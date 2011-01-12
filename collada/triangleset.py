@@ -207,7 +207,7 @@ class TriangleSet(primitive.Primitive):
         texcoord_sourceset = []
         setToTexcoord = {}
         for offset, semantic, source, set in inputs[2:]:
-            if semantic != 'TEXCOORD': raise DaeUnsupportedError('Found unexpected input in triange set')
+            if semantic != 'TEXCOORD': raise DaeUnsupportedError('Found unexpected input in triangle set: %s' % semantic)
             if set: setToTexcoord[set] = offset - 2
             if len(source) < 2 or source[0] != '#':
                 raise DaeMalformedError('Incorrect source id in TEXCOORD input')
