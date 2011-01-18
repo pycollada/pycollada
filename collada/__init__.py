@@ -144,7 +144,7 @@ class Collada(object):
             self.loadScenes()
             self.loadDefaultScene()
         except:
-            traceback.print_exc()
+            raise
 
     def validate(self):
         """TODO: Validate the xml tree."""
