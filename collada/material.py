@@ -354,6 +354,8 @@ class Effect(DaeObject):
                   'shininess', 'reflective', 'reflectivity',
                   'transparent', 'transparency' ]
     """Supported material properties list."""
+    shaders = [ 'phong', 'lambert', 'blinn', 'constant']
+    """Supported shader list."""
     
     def __init__(self, id, params, shadingtype,
                        emission = (0.0, 0.0, 0.0),
@@ -377,9 +379,9 @@ class Effect(DaeObject):
             using textures.
           shadingtype
             The tag of the node this properties are coming
-            from. At the moment we are only parsing phong,
-            lambert and blinn nodes. This could be refactored in the
-            future if a strong support for materials is needed.
+            from. At the moment we are only parsing shader types
+            listed in Effect.shaders. This could be refactored in
+            the future if a strong support for materials is needed.
           emission : 3-float tuple (RGB)
             property
           ambient : 3-float tuple (RGB)
@@ -427,7 +429,7 @@ class Effect(DaeObject):
             tecnode = ElementTree.Element( tag('technique') )
             profilenode.append(tecnode)
             tecnode.set('sid', 'common')
-            shadnode = ElementTree.Element( tag('phong') )
+            shadnode = ElementTree.Element( tag(self.shadingtype) )
             tecnode.append(shadnode)
             for prop in self.supported:
                 value = getattr(self, prop)
@@ -458,14 +460,12 @@ class Effect(DaeObject):
             params.append(param)
             localscope[param.id] = param
         tecnode = profilenode.find( tag('technique') )
-        shadnode = tecnode.find( tag('phong') )
-        shadingtype = 'phong'
-        if shadnode is None:
-            shadnode = tecnode.find( tag('lambert') )
-            shadingtype = 'lambert'
-        if shadnode is None:
-            shadnode = tecnode.find( tag('blinn') )
-            shadingtype = 'blinn'
+        shadnode = None
+        for shad in Effect.shaders:
+            shadnode = tecnode.find(tag(shad))
+            shadingtype = shad
+            if not shadnode is None:
+                break
         if shadnode is None: raise DaeIncompleteError('No material properties found in effect')
         props = {}
         for key in Effect.supported:
@@ -517,12 +517,10 @@ class Effect(DaeObject):
         for param in self.params: param.save()
         tecnode = profilenode.find( tag('technique') )
         tecnode.set('sid', 'common')
-        shadnode = tecnode.find( tag('phong') )
-        if shadnode is None: shadnode = tecnode.find( tag('lambert') )
-        if shadnode is None: shadnode = tecnode.find( tag('blinn') )
-        if self.specular != None or self.shininess != None:
-            shadnode.tag = 'phong'
-
+        for shad in self.shaders:
+            shadnode = tecnode.find(tag(shad))
+            if not shadnode is None:
+                break
         for prop in self.supported:
             value = getattr(self, prop)
             if value is None: continue
