@@ -124,7 +124,7 @@ class TriangleSet(primitive.Primitive):
         self.ntriangles = len(self.index)
         self.maxvertexindex = numpy.max( self.index[:,:,self.offsets[0]] )
         self.maxnormalindex = numpy.max( self.index[:,:,self.offsets[1]] )
-        self.maxtexcoordsetindex = [ numpy.max( self.index[:,:,2+i] ) 
+        self.maxtexcoordsetindex = [ numpy.max( self.index[:,:,self.offsets[2]+i] ) 
                                      for i in xrange(self.nsources-2) ]
         checkSource(self.sourceById[self._vertex_source], ('X', 'Y', 'Z'), self.maxvertexindex)
         checkSource(self.sourceById[self._normal_source], ('X', 'Y', 'Z'), self.maxnormalindex)
