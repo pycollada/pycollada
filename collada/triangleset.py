@@ -16,6 +16,7 @@ import numpy
 from xml.etree import ElementTree
 import primitive
 import types
+from util import toUnitVec
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag
 
@@ -100,34 +101,46 @@ class TriangleSet(primitive.Primitive):
             in (vertex, normal, uv1, uv2, ...)
 
         """
+
         self.sourceById = sourceById
+        self.texcoord_start = 1 if normal_source is None else 2
         if offsets: self.offsets = offsets
-        else: self.offsets = range(2 + len(texcoord_sourceset))
+        else: self.offsets = range(self.texcoord_start + len(texcoord_sourceset))
         self.nindices = max(self.offsets) + 1
         self._vertex_source = vertex_source
         self._normal_source = normal_source
         self._texcoord_sourceset = tuple(texcoord_sourceset)
         try:
             self._vertex = self.sourceById[vertex_source].data
-            self._normal = self.sourceById[normal_source].data
+            if self._normal_source is None:
+                self._normal = None
+            else:
+                self._normal = self.sourceById[normal_source].data
             self._texcoordset = tuple([ sourceById[c].data for c in texcoord_sourceset ])
         except KeyError, ex:
             raise DaeBrokenRefError('Referenced missing source in triangle set\n'+str(ex))
         self.material = material
         self.setToTexcoord = stt
         self.index = index
-        self.nsources = len(self._texcoord_sourceset) + 2
+        self.nsources = len(self._texcoord_sourceset) + (1 if self._normal is None else 2)
         self.index.shape = (-1, 3, self.nindices)
         self._vertex_index = self.index[:,:, self.offsets[0]]
-        self._normal_index = self.index[:,:, self.offsets[1]]
-        self._texcoord_indexset = tuple([ self.index[:,:, self.offsets[2+i]] for i in xrange(len(self._texcoord_sourceset)) ])
+        if self._normal is None:
+            self._normal_index = None
+        else:
+            self._normal_index = self.index[:,:, self.offsets[1]]
+        self._texcoord_indexset = tuple([ self.index[:,:, self.offsets[self.texcoord_start+i]] for i in xrange(len(self._texcoord_sourceset)) ])
         self.ntriangles = len(self.index)
         self.maxvertexindex = numpy.max( self.index[:,:,self.offsets[0]] )
-        self.maxnormalindex = numpy.max( self.index[:,:,self.offsets[1]] )
-        self.maxtexcoordsetindex = [ numpy.max( self.index[:,:,self.offsets[2]+i] ) 
-                                     for i in xrange(self.nsources-2) ]
+        if self._normal is None:
+            self.maxnormalindex = -1
+        else:
+            self.maxnormalindex = numpy.max( self.index[:,:,self.offsets[1]] )
+        self.maxtexcoordsetindex = [ numpy.max( self.index[:,:,self.offsets[self.texcoord_start]+i] ) 
+                                     for i in xrange(self.nsources-(1 if self._normal is None else 2)) ]
         checkSource(self.sourceById[self._vertex_source], ('X', 'Y', 'Z'), self.maxvertexindex)
-        checkSource(self.sourceById[self._normal_source], ('X', 'Y', 'Z'), self.maxnormalindex)
+        if not self._normal_source is None:
+            checkSource(self.sourceById[self._normal_source], ('X', 'Y', 'Z'), self.maxnormalindex)
         for i, c in enumerate(self._texcoord_sourceset):
             checkSource(self.sourceById[c], ('S', 'T'), self.maxtexcoordsetindex[i])
         if xmlnode: self.xmlnode = xmlnode
@@ -211,27 +224,47 @@ class TriangleSet(primitive.Primitive):
                         inputs.append([offset, inputsemantic, '#' + inputsource.id, set])
         
         inputs.sort()
+        
+        #make sure vertex is first and normal is second
         vertex_i = -1
         for i in range(0,len(inputs)):
             if inputs[i][1] == 'VERTEX':
                 vertex_i = i
         if vertex_i != -1 and vertex_i != 0:
             inputs.insert(0, inputs.pop(vertex_i))
+        normal_i = -1
+        for i in range(0,len(inputs)):
+            if inputs[i][1] == 'NORMAL':
+                normal_i = i
+        if normal_i != -1 and normal_i != 1:
+            inputs.insert(1, inputs.pop(normal_i))
+            tex_start = 2
+            has_normal = True
+        elif normal_i == 1:
+            tex_start = 2
+            has_normal = True
+        else:
+            tex_start = 1
+            has_normal = False
 
-        if len(inputs) < 2: raise DaeIncompleteError('A triangle set needs at least two inputs for vertex and normals')
+        if len(inputs) == 0: raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
         if inputs[0][1] != 'VERTEX': raise DaeMalformedError('First input in triangle set must be the vertex list')
-        if inputs[1][1] != 'NORMAL': raise DaeMalformedError('Second input in triangle set must be the normal list')
         if len(inputs[0][2]) < 2 or inputs[0][2][0] != '#':
             raise DaeMalformedError('Incorrect source id in VERTEX input')
-        if len(inputs[1][2]) < 2 or inputs[0][2][0] != '#':
-            raise DaeMalformedError('Incorrect source id in NORMAL input')
+        
+        if has_normal:
+            if len(inputs[1][2]) < 2 or inputs[1][2][0] != '#':
+                raise DaeMalformedError('Incorrect source id in NORMAL input')
+            normal_source = inputs[1][2][1:]
+        else:
+            normal_source = None
+            
         vertex_source = inputs[0][2][1:]
-        normal_source = inputs[1][2][1:]
         texcoord_sourceset = []
         setToTexcoord = {}
-        for offset, semantic, source, set in inputs[2:]:
+        for offset, semantic, source, set in inputs[tex_start:]:
             if semantic != 'TEXCOORD': raise DaeUnsupportedError('Found unexpected input in triangle set: %s' % semantic)
-            if set: setToTexcoord[set] = offset - 2
+            if set: setToTexcoord[set] = offset - tex_start
             if len(source) < 2 or source[0] != '#':
                 raise DaeMalformedError('Incorrect source id in TEXCOORD input')
             texcoord_sourceset.append( source[1:] )
@@ -278,7 +311,7 @@ class BoundTriangleSet(object):
         """Create a bound triangle set from a triangle set, transform and material mapping"""
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
-        self._normal = numpy.asarray(ts._normal * M[:3,:3])
+        self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3,:3])
         self._texcoordset = ts._texcoordset
         matnode = materialnodebysymbol.get( ts.material )
         if matnode:
@@ -298,7 +331,16 @@ class BoundTriangleSet(object):
 
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
-        n = self._normal[ self._normal_index[i] ]
+        if self._normal is None:
+            #generate normals
+            #TODO: is this correct?
+            vec1 = numpy.subtract(v[0], v[1])
+            vec2 = numpy.subtract(v[2], v[0])
+            vec3 = toUnitVec(numpy.cross(toUnitVec(vec2), toUnitVec(vec1)))
+            n = numpy.array([vec3, vec3, vec3])
+        else:
+            n = self._normal[ self._normal_index[i] ]
+            print n
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
             uv.append( self._texcoordset[j][ uvindex[i] ] )
