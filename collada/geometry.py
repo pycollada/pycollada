@@ -60,8 +60,10 @@ class Geometry( DaeObject ):
             self.xmlnode.append( mesh )
             for source in sources:
                 mesh.append( source.xmlnode )
-            vxml = '<vertices id="%s"><input semantic="POSITION" source="#%s" /></vertices>'%(
-                        self.vertexsource, self.sourceById[self.vertexsource].id)
+            vxml = ''
+            for semantic, source in self.sourceById[self.vertexsource].items():
+                vxml.append('<input semantic="%s" source="#%s" />' % (semantic, source.id))
+            vxml = '<vertices id="%s">%s</vertices>' % (self.vertexsource, vxml)
             mesh.append( ElementTree.fromstring(vxml) )
             for tset in _primitives:
                 mesh.append(tset.xmlnode)
@@ -84,11 +86,17 @@ class Geometry( DaeObject ):
         vertexsource = None
         for subnode in meshnode:
             if subnode.tag == tag('vertices'):
-                inputnode = subnode.find(tag('input'))
-                if (inputnode is None or not inputnode.get('source') or 
-                    not subnode.get('id') or not inputnode.get('source').startswith('#')):
-                    raise DaeIncompleteError('Bad vertex input definition in geometry')
-                sourcebyid[subnode.get('id')] = sourcebyid.get(inputnode.get('source')[1:])
+                inputnodes = {}
+                for inputnode in subnode.findall(tag('input')):
+                    semantic = inputnode.get('semantic')
+                    inputsource = inputnode.get('source')
+                    if not semantic or not inputsource or not inputsource.startswith('#'):
+                        raise DaeIncompleteError('Bad input definition inside vertices')
+                    inputnodes[semantic] = sourcebyid.get(inputsource[1:])
+                if (not subnode.get('id') or len(inputnodes)==0 or 
+                    not 'POSITION' in inputnodes):
+                    raise DaeIncompleteError('Bad vertices definition in mesh')
+                sourcebyid[subnode.get('id')] = inputnodes
                 vertexsource = subnode.get('id')
             elif subnode.tag == tag('triangles'):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
@@ -98,6 +106,7 @@ class Geometry( DaeObject ):
         return geom
 
     def save(self):
+        #TODO: Update this with new sourceById format
         for ch in self.sources: ch.save()
         vnode = self.xmlnode.find(tag('mesh')).find(tag('vertices'))
         vinput = vnode.find(tag('input'))

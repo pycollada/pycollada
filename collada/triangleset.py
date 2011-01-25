@@ -15,6 +15,7 @@
 import numpy
 from xml.etree import ElementTree
 import primitive
+import types
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag
 
@@ -121,8 +122,8 @@ class TriangleSet(primitive.Primitive):
         self._normal_index = self.index[:,:, self.offsets[1]]
         self._texcoord_indexset = tuple([ self.index[:,:, self.offsets[2+i]] for i in xrange(len(self._texcoord_sourceset)) ])
         self.ntriangles = len(self.index)
-        self.maxvertexindex = numpy.max( self.index[:,:,0] )
-        self.maxnormalindex = numpy.max( self.index[:,:,1] )
+        self.maxvertexindex = numpy.max( self.index[:,:,self.offsets[0]] )
+        self.maxnormalindex = numpy.max( self.index[:,:,self.offsets[1]] )
         self.maxtexcoordsetindex = [ numpy.max( self.index[:,:,2+i] ) 
                                      for i in xrange(self.nsources-2) ]
         checkSource(self.sourceById[self._vertex_source], ('X', 'Y', 'Z'), self.maxvertexindex)
@@ -194,7 +195,29 @@ class TriangleSet(primitive.Primitive):
             inputs = [ (int(i.get('offset')), i.get('semantic'), i.get('source'), i.get('set')) 
                            for i in node.findall(tag('input')) ]
         except ValueError, ex: raise DaeMalformedError('Corrupted index or offsets in triangle set')
+        
+        vertex_i = -1
+        for i in range(0,len(inputs)):
+            if inputs[i][1] == 'VERTEX':
+                vertex_i = i
+        if vertex_i != -1:
+            offset, semantic, source, set = inputs[vertex_i]
+            vertex_source = localscope.get(source[1:])
+            if type(vertex_source) == types.DictType:
+                for inputsemantic, inputsource in vertex_source.items():
+                    if inputsemantic == 'POSITION':
+                        inputs[vertex_i] = [inputs[vertex_i][0], 'VERTEX', '#' + inputsource.id, inputs[vertex_i][3]]
+                    else:
+                        inputs.append([offset, inputsemantic, '#' + inputsource.id, set])
+        
         inputs.sort()
+        vertex_i = -1
+        for i in range(0,len(inputs)):
+            if inputs[i][1] == 'VERTEX':
+                vertex_i = i
+        if vertex_i != -1 and vertex_i != 0:
+            inputs.insert(0, inputs.pop(vertex_i))
+
         if len(inputs) < 2: raise DaeIncompleteError('A triangle set needs at least two inputs for vertex and normals')
         if inputs[0][1] != 'VERTEX': raise DaeMalformedError('First input in triangle set must be the vertex list')
         if inputs[1][1] != 'NORMAL': raise DaeMalformedError('Second input in triangle set must be the normal list')
