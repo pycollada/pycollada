@@ -23,6 +23,7 @@ Supported scene nodes are:
 
 from xml.etree import ElementTree
 import numpy
+from util import toUnitVec
 from collada import DaeObject, DaeError, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag
 
@@ -148,15 +149,9 @@ class TransformNode(SceneNode):
                     
                     position = lookat[0:3]
                     target = lookat[3:6]
-                    up = lookat[6:9]
-                    up = up / numpy.sqrt(numpy.vdot(up, up)) #normalize
-                    
-                    front = numpy.subtract(position,target)
-                    front = up / numpy.sqrt(numpy.vdot(front, front)) #normalize
-    
-                    side = numpy.cross(front, up)
-                    side = side / numpy.sqrt(numpy.vdot(side, side)) #normalize
-                    side = numpy.multiply(-1, side)
+                    up = toUnitVec(lookat[6:9])
+                    front = toUnitVec(numpy.subtract(position,target))
+                    side = numpy.multiply(-1, toUnitVec(numpy.cross(front, up)))
 
                     m[0][0] = side[0]
                     m[0][1] = side[1]
