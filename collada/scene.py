@@ -353,6 +353,25 @@ class LightNode(SceneNode):
     def save(self):
         self.xmlnode.set('url', '#'+self.light.id)
 
+class ExtraNode(SceneNode):
+    """Stores an <extra> tag."""
+
+    def __init__(self, xmlnode):
+        """Create an ExtraNode which stores arbitrary xml."""
+        if xmlnode != None: self.xmlnode = xmlnode
+        else:
+            self.xmlnode = ElementTree.Element( tag('extra') )
+            
+    def objects(self, tipo, matrix=None):
+        return self.xmlnode.findall(tag(tipo))
+
+    @staticmethod
+    def load( collada, node ):
+        return ExtraNode(node)
+
+    def save(self):
+        pass
+
 def loadNode( collada, node ):
     """Generic scene node loading from a xml `node` and a `collada` object.
 
@@ -372,6 +391,8 @@ def loadNode( collada, node ):
         if not referred_node:
             raise DaeBrokenRefError('Node %s not found in library'%url)
         return referred_node
+    elif node.tag == tag('extra'):
+        return ExtraNode.load(collada, node)
     else: raise DaeUnsupportedError('Unknown scene node '+node.tag)
 
 class Scene(DaeObject):
