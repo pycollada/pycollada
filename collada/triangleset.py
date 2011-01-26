@@ -340,7 +340,6 @@ class BoundTriangleSet(object):
             n = numpy.array([vec3, vec3, vec3])
         else:
             n = self._normal[ self._normal_index[i] ]
-            print n
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
             uv.append( self._texcoordset[j][ uvindex[i] ] )
