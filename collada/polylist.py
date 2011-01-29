@@ -10,7 +10,7 @@
 #                                                                  #
 ####################################################################
 
-"""Module containing classes and functions for the <triangle> primitive."""
+"""Module containing classes and functions for the <polylist> primitive."""
 
 import numpy
 from xml.etree import ElementTree
@@ -20,10 +20,10 @@ from util import toUnitVec, checkSource
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag
 
-class Triangle(object):
-    """Single triangle representation."""
+class Polygon(object):
+    """Single polygon representation."""
     def __init__(self, indices, vertices, normals, texcoords, material):
-        """Create a triangle from numpy arrays.
+        """Create a polygon from numpy arrays.
 
         :Parameters:
           indices
@@ -50,16 +50,15 @@ class Triangle(object):
         """Symbol (string) or the material object itself if bound."""
 
     def __repr__(self): 
-        return 'Triangle(%s, %s, %s, "%s")'%(str(self.vertices[0]), str(self.vertices[1]), 
-                                             str(self.vertices[2]), str(self.material))
+        return 'Polygon (vertices=%d)' % len(self.vertices)
     def __str__(self): return repr(self)
 
-class TriangleSet(primitive.Primitive):
-    """Class containing the data COLLADA puts in a <triangle> tag, a collection of faces."""
+class PolygonList(primitive.Primitive):
+    """Class containing the data COLLADA puts in a <polylist> tag, a collection of faces."""
 
     def __init__(self, sourceById, vertex_source, normal_source, texcoord_sourceset, 
-                 material, index, xmlnode=None, stt={}, offsets=None):
-        """Create a triangle set.
+                 material, index, vcounts, xmlnode=None, stt={}, offsets=None):
+        """Create a polygon list.
 
         :Parameters:
           sourceById 
@@ -74,6 +73,8 @@ class TriangleSet(primitive.Primitive):
             A string with the symbol of the material
           index
             An array with the indexes as they come from the collada file
+          vcounts
+            A list with the lengths of each individual polygon
           xmlnode
             An xml node in case this is loaded from there
           stt
@@ -83,7 +84,7 @@ class TriangleSet(primitive.Primitive):
             in (vertex, normal, uv1, uv2, ...)
 
         """
-
+        
         self.sourceById = sourceById
         self.texcoord_start = 1 if normal_source is None else 2
         if offsets: self.offsets = offsets
@@ -104,22 +105,39 @@ class TriangleSet(primitive.Primitive):
         self.material = material
         self.setToTexcoord = stt
         self.index = index
+        self.vcounts = vcounts
         self.nsources = len(self._texcoord_sourceset) + (1 if self._normal is None else 2)
-        self.index.shape = (-1, 3, self.nindices)
-        self._vertex_index = self.index[:,:, self.offsets[0]]
+
+        try:
+            newshape = []
+            at = 0
+            for ct in self.vcounts:
+                thispoly = self.index[self.nindices*at:self.nindices*(at+ct)]
+                thispoly.shape = (ct, self.nindices)
+                newshape.append(numpy.array(thispoly))
+                at+=ct
+            self.index = newshape
+        except:
+            raise # DaeMalformedError('Corrupted vcounts or index in polylist')
+
+        self._vertex_index = [poly[:, self.offsets[0]] for poly in self.index]
         if self._normal is None:
             self._normal_index = None
         else:
-            self._normal_index = self.index[:,:, self.offsets[1]]
-        self._texcoord_indexset = tuple([ self.index[:,:, self.offsets[self.texcoord_start+i]] for i in xrange(len(self._texcoord_sourceset)) ])
-        self.ntriangles = len(self.index)
-        self.maxvertexindex = numpy.max( self.index[:,:,self.offsets[0]] )
+            self._normal_index = [poly[:, self.offsets[1]] for poly in self.index]
+        self._texcoord_indexset = tuple( [[poly[:,self.offsets[self.texcoord_start+i]] for poly in self.index] 
+                                         for i in xrange(len(self._texcoord_sourceset)) ])
+        self.npolygons = len(self.index)
+        self.maxvertexindex = numpy.max( [numpy.max(poly) for poly in self._vertex_index] )
         if self._normal is None:
             self.maxnormalindex = -1
         else:
-            self.maxnormalindex = numpy.max( self.index[:,:,self.offsets[1]] )
-        self.maxtexcoordsetindex = [ numpy.max( self.index[:,:,self.offsets[self.texcoord_start]+i] ) 
-                                     for i in xrange(self.nsources-(1 if self._normal is None else 2)) ]
+            self.maxnormalindex = numpy.max( [numpy.max(poly) for poly in self._normal_index] )
+        if len(self._texcoord_sourceset) == 0:
+            self.maxtexcoordsetindex = -1
+        else:
+            self.maxtexcoordsetindex = [ numpy.max([ numpy.max([p for p in poly])
+                        for poly in each ]) for each in self._texcoord_indexset ]
         checkSource(self.sourceById[self._vertex_source], ('X', 'Y', 'Z'), self.maxvertexindex)
         if not self._normal_source is None:
             checkSource(self.sourceById[self._normal_source], ('X', 'Y', 'Z'), self.maxnormalindex)
@@ -127,7 +145,7 @@ class TriangleSet(primitive.Primitive):
             checkSource(self.sourceById[c], ('S', 'T'), self.maxtexcoordsetindex[i])
         if xmlnode: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.fromstring("<triangles> <p></p> </triangles>")
+            self.xmlnode = ElementTree.fromstring("<polylist> <vcount></vcount> <p></p> </polylist>")
 
     def __len__(self): return len(self.index)
 
@@ -148,13 +166,13 @@ class TriangleSet(primitive.Primitive):
     def set_vertex_source(self, c):
         try: self._vertex = checkSource(self.sourceById[c], 
                                          ('X', 'Y', 'Z'), self.maxvertexindex).data
-        except KeyError, ex: raise DaeBrokenRefError('Setting missing vertex source in triangle set')
+        except KeyError, ex: raise DaeBrokenRefError('Setting missing vertex source in polygon list')
         self._vertex_source = c
     
     def set_normal_source(self, c):
         try: self._normal = checkSource(self.sourceById[c],
                                          ('X', 'Y', 'Z'), self.maxnormalindex).data
-        except KeyError, ex: raise DaeBrokenRefError('Setting missing normal source in triangle set')
+        except KeyError, ex: raise DaeBrokenRefError('Setting missing normal source in polygon list')
         self._normal_source = c
 
     def set_texcoord_sourceset(self, t):
@@ -163,7 +181,7 @@ class TriangleSet(primitive.Primitive):
         try: self._texcoordset = tuple([ 
                     checkSource(self.sourceById[c], ('S', 'T'), 
                                  self.maxtexcoordsetindex[i]).data for i,c in enumerate(t)])
-        except KeyError, ex: raise DaeBrokenRefError('Setting missing texcoord source in triangle set')
+        except KeyError, ex: raise DaeBrokenRefError('Setting missing texcoord source in polygon list')
         self._texcoord_sourceset = tuple(t)
 
     vertex_source = property( lambda s: s._vertex_source, set_vertex_source )
@@ -179,18 +197,24 @@ class TriangleSet(primitive.Primitive):
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
             uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Triangle(self._vertex_index[i], v, n, uv, self.material)
+        return Polygon(self._vertex_index[i], v, n, uv, self.material)
 
     @staticmethod
     def load( collada, localscope, node ):
         indexnode = node.find(tag('p'))
-        if indexnode is None: raise DaeIncompleteError('Missing index in triangle set')
-        
+        if indexnode is None: raise DaeIncompleteError('Missing index in polylist')
+        vcountnode = node.find(tag('vcount'))
+        if vcountnode is None: raise DaeIncompleteError('Missing vcount in polylist')
+
+        try: 
+            vcounts = numpy.array([float(v) for v in vcountnode.text.split()], dtype=numpy.int32)
+        except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
+
         [vertex_i, has_normal, tex_start, index, inputs] = \
             primitive.Primitive.getInputs(localscope, indexnode, node.findall(tag('input')))
 
-        if len(inputs) == 0: raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
-        if inputs[0][1] != 'VERTEX': raise DaeMalformedError('First input in triangle set must be the vertex list')
+        if len(inputs) == 0: raise DaeIncompleteError('A polylist set needs at least one input for vertex positions')
+        if inputs[0][1] != 'VERTEX': raise DaeMalformedError('First input in polylist set must be the vertex list')
         if len(inputs[0][2]) < 2 or inputs[0][2][0] != '#':
             raise DaeMalformedError('Incorrect source id in VERTEX input')
         
@@ -205,15 +229,16 @@ class TriangleSet(primitive.Primitive):
         texcoord_sourceset = []
         setToTexcoord = {}
         for offset, semantic, source, set in inputs[tex_start:]:
-            if semantic != 'TEXCOORD': raise DaeUnsupportedError('Found unexpected input in triangle set: %s' % semantic)
+            if semantic != 'TEXCOORD': raise DaeUnsupportedError('Found unexpected input in polylist set: %s' % semantic)
             if set: setToTexcoord[set] = offset - tex_start
             if len(source) < 2 or source[0] != '#':
                 raise DaeMalformedError('Incorrect source id in TEXCOORD input')
             texcoord_sourceset.append( source[1:] )
-        triset = TriangleSet(localscope, vertex_source, normal_source, texcoord_sourceset, 
-                             node.get('material'), index, setToTexcoord, offsets=[ t[0] for t in inputs])
-        triset.xmlnode = node
-        return triset
+        polylist = PolygonList(localscope, vertex_source, normal_source, texcoord_sourceset, 
+                             node.get('material'), index, vcounts, setToTexcoord,
+                             offsets=[ t[0] for t in inputs])
+        polylist.xmlnode = node
+        return polylist
 
     def getXmlInput(self, semantic, offset):
         """Return the xml node for the given input and create it if it isn't there."""
@@ -243,31 +268,31 @@ class TriangleSet(primitive.Primitive):
         self.xmlnode.set('count', str(len(self.index)))
     
     def bind(self, matrix, materialnodebysymbol):
-        """Create a bound triangle set from this triangle set, transform and material mapping"""
-        return BoundTriangleSet( self, matrix, materialnodebysymbol)
+        """Create a bound polygon list from this polygon list, transform and material mapping"""
+        return BoundPolygonList( self, matrix, materialnodebysymbol)
 
-class BoundTriangleSet(object):
-    """A triangle set bound to a transform matrix and materials mapping."""
+class BoundPolygonList(object):
+    """A polygon set bound to a transform matrix and materials mapping."""
 
-    def __init__(self, ts, matrix, materialnodebysymbol):
-        """Create a bound triangle set from a triangle set, transform and material mapping"""
+    def __init__(self, pl, matrix, materialnodebysymbol):
+        """Create a bound polygon list from a polygon list, transform and material mapping"""
         M = numpy.asmatrix(matrix).transpose()
-        self._vertex = numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
-        self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3,:3])
-        self._texcoordset = ts._texcoordset
-        matnode = materialnodebysymbol.get( ts.material )
+        self._vertex = numpy.asarray(pl._vertex * M[:3,:3]) + matrix[:3,3]
+        self._normal = None if pl._normal is None else numpy.asarray(pl._normal * M[:3,:3])
+        self._texcoordset = pl._texcoordset
+        matnode = materialnodebysymbol.get( pl.material )
         if matnode:
             self.material = matnode.target
             self.inputmap = dict([ (sem, (input_sem, set)) for sem, input_sem, set in matnode.inputs ])
         else: self.inputmap = self.material = None
-        self.setToTexcoord = ts.setToTexcoord
-        self.index = ts.index
-        self.nsources = ts.nsources
-        self._vertex_index = ts._vertex_index
-        self._normal_index = ts._normal_index
-        self._texcoord_indexset = ts._texcoord_indexset
-        self.ntriangles = ts.ntriangles
-        self.original = ts
+        self.setToTexcoord = pl.setToTexcoord
+        self.index = pl.index
+        self.nsources = pl.nsources
+        self._vertex_index = pl._vertex_index
+        self._normal_index = pl._normal_index
+        self._texcoord_indexset = pl._texcoord_indexset
+        self.npolygons = pl.npolygons
+        self.original = pl
     
     def __len__(self): return len(self.index)
 
@@ -285,15 +310,15 @@ class BoundTriangleSet(object):
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
             uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Triangle(self._vertex_index[i], v, n, uv, self.material)
+        return Polygon(self._vertex_index[i], v, n, uv, self.material)
 
-    def triangles(self):
-        """Iterate through all the triangles contained in the set."""
-        for i in xrange(self.ntriangles): yield self[i]
+    def polygons(self):
+        """Iterate through all the polygons contained in the set."""
+        for i in xrange(self.npolygons): yield self[i]
 
     def shapes(self):
         """Iterate through all the primitives contained in the set."""
-        return self.triangles()
+        return self.polygons()
 
     def texsource(self, input):
         """Return the UV source no. for the input symbol coming from a material"""

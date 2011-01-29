@@ -7,32 +7,23 @@ import sys
 def inspectGeometry(obj):
     """Display contents of a geometry object found in the scene."""
     avgpoint = numpy.zeros( (3,), dtype=numpy.float32 )
-    avgtexcoord = numpy.zeros( (2,), dtype=numpy.float32 )
     num = 0
     numuv = 0
     materials = set()
     for prim in obj.primitives():
         materials.add( prim.material )
-        # iterate triangles to sum up the points for the average
+        # iterate shapes to sum up the points for the average
         # we could also use the prim.vertex attribute which is a
         # numpy array of all the vertices in the primitive
-        for tri in prim.triangles():
-            avgpoint += tri.vertices[0] + tri.vertices[1] + tri.vertices[2]
-            if tri.texcoords:
-                # primitives can have more than one texcoord channel
-                # we average the first one (tri.texcoords[0])
-                avgtexcoord += (tri.texcoords[0][0] + tri.texcoords[0][1] + 
-                                tri.texcoords[0][2])
-                numuv += 3
-            num += 3
+        for shape in prim.shapes():
+            for vertex in shape.vertices:
+                avgpoint += vertex
+                num += 1
     avgpoint /= float(num)
-    if numuv:
-        avgtexcoord /= float(numuv)
-        print '    Geometry %s: %d primitives, avg point %s avgUV %s'%(
-                   obj.original.id, len(obj), str(avgpoint), str(avgtexcoord))
-    else:
-        print '    Geometry %s: %d primitives, avg point %s'%(
-                   obj.original.id, len(obj), str(avgpoint))
+    print '    Geometry (id=%s): %d primitives, avg point %s'%(
+               obj.original.id, len(obj), str(avgpoint))
+    for prim in obj.primitives():
+        print '        Primitive (type=%s): len=%d' % (type(prim).__name__, len(prim))
     for mat in materials:
         if mat: inspectMaterial( mat )
 

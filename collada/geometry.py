@@ -16,6 +16,7 @@ from xml.etree import ElementTree
 import numpy
 import source
 import triangleset
+import polylist
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag
 
@@ -98,6 +99,8 @@ class Geometry( DaeObject ):
                     raise DaeIncompleteError('Bad vertices definition in mesh')
                 sourcebyid[subnode.get('id')] = inputnodes
                 vertexsource = subnode.get('id')
+            elif subnode.tag == tag('polylist'):
+                _primitives.append( polylist.PolygonList.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('triangles'):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag != tag('source'):
