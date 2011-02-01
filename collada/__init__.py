@@ -339,6 +339,15 @@ class Collada(object):
         libnode = self.root.find( tag('library_visual_scenes') )
         if libnode != None:
             for scenenode in libnode.findall(tag('visual_scene')):
+                if not self.assetInfo['up_axis'] == 'Z_UP':
+                    prev_elements = list(scenenode)
+                    for e in prev_elements:
+                        scenenode.remove(e)
+                    extranode = ElementTree.SubElement(scenenode, tag('node'), {'id':'pycolladarotate', 'name':'pycolladarotate'})
+                    rotatenode = ElementTree.SubElement(extranode, tag('rotate'), {'sid':'rotateX'})
+                    rotatenode.text = "1 0 0 90" if self.assetInfo['up_axis'] == 'Y_UP' else "0 1 0 90"
+                    for e in prev_elements:
+                        extranode.append(e)
                 try: S = scene.Scene.load( self, scenenode )
                 except DaeError, ex: self.handleError(ex)
                 else:
