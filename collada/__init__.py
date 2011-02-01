@@ -23,6 +23,7 @@ import zipfile
 from StringIO import StringIO
 import types
 import traceback
+from datetime import datetime
 
 
 def tag( text ):
@@ -134,6 +135,7 @@ class Collada(object):
             self.ignoreErrors( *ignore )
             self.root = ElementTree.fromstring(data)
             self.validate()
+            self.loadAssetInfo()
             self.loadImages()
             self.loadEffects()
             self.loadMaterials()
@@ -183,6 +185,49 @@ class Collada(object):
             raise DaeBrokenRefError('Auxiliar file %s not found in archive'%fname)
         return self.zfile.read( fname )
 
+    def loadAssetInfo(self):
+        """Load information in <asset> tag"""
+        assetnode = self.root.find( tag('asset') )
+        self.assetInfo = {}
+        if assetnode != None:
+            for subnode in list(assetnode):
+                if subnode.tag == tag('up_axis'):
+                    self.assetInfo['up_axis'] = subnode.text
+                    if not( subnode.text == 'X_UP' or subnode.text == 'Y_UP' or subnode.text == 'Z_UP' ):
+                        raise DaeMalformedError('up_axis was unknown value of %s' % subnode.text)
+                elif subnode.tag == tag('contributor'):
+                    contributor_info = {}
+                    for subsubnode in list(subnode):
+                        if subsubnode.tag == tag('author'):
+                            contributor_info['author'] = subsubnode.text
+                        elif subsubnode.tag == tag('authoring_tool'):
+                            contributor_info['authoring_tool'] = subsubnode.text
+                        elif subsubnode.tag == tag('comments'):
+                            contributor_info['comments'] = subsubnode.text
+                        elif subsubnode.tag == tag('copyright'):
+                            contributor_info['copyright'] = subsubnode.text
+                        elif subsubnode.tag == tag('source_data'):
+                            contributor_info['source_data'] = subsubnode.text
+                    self.assetInfo['contributor'] = contributor_info
+                elif subnode.tag == tag('unit'):
+                    name = subnode.get('name')
+                    meter = subnode.get('meter')
+                    if name is None or meter is None:
+                        raise DaeMalformedError('unit tag does not contain name and meter')
+                    try: meter = float(meter)
+                    except ValueError, ex: raise DaeMalformedError('Corrupted meter value in unit tag')
+                    self.assetInfo['unit'] = {'name':name, 'meter':meter}
+                elif subnode.tag == tag('created'):
+                    try: self.assetInfo['created'] = datetime.strptime(subnode.text, "%Y-%m-%dT%H:%M:%SZ" )
+                    except: pass
+                elif subnode.tag == tag('modified'):
+                    try: self.assetInfo['modified'] = datetime.strptime(subnode.text, "%Y-%m-%dT%H:%M:%SZ" )
+                    except: pass
+                elif subnode.tag == tag('revision'):
+                    self.assetInfo['revision'] = subnode.text
+        if not 'up_axis' in self.assetInfo:
+            self.assetInfo['up_axis'] = 'Y_UP'
+                    
     def loadGeometry(self):
         """Load geometry library."""
         self.geometries = []
