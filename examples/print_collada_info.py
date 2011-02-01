@@ -56,6 +56,9 @@ def inspectCollada(col):
     print '  Cameras:'
     for cam in col.scene.objects('camera'):
         print '    Camera %s: position '%cam.original.id, cam.position
+    print '  Lights:'
+    for light in col.scene.objects('light'):
+        print '    Light %s: color =' % light.original.id, light.color
 
     if not col.errors: print 'File read without errors'
     else:
