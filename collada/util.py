@@ -1,5 +1,7 @@
 import numpy
 
+from collada import DaeMalformedError
+
 def toUnitVec(vec):
     return vec / numpy.sqrt(numpy.vdot(vec, vec))
 
