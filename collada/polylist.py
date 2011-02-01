@@ -16,6 +16,7 @@ import numpy
 from xml.etree import ElementTree
 import primitive
 import types
+import triangleset
 from util import toUnitVec, checkSource
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag
@@ -27,27 +28,54 @@ class Polygon(object):
 
         :Parameters:
           indices
-            A (3,) int array with vertex indexes in the vertex array
+            A (3,) int array with vertex indexes in the vertex array.
           vertices
-            A (3, 3) float array for points a b c
+            A (N, 3) float array for points in the polygon.
           normals
-            A (3, 3) float array with the normals por points a b c
+            A (N, 3) float array with the normals for points in the polygon. Can be None.
           texcoords
-            A tuple with (3, 2) float arrays with the texcoords for points 
-            a b c
+            A tuple with (N, 2) float arrays with the texcoords for points.
           material
             If coming from a not bound set, a symbol (string),
-            otherwise, the material object itself
+            otherwise, the material object itself.
 
         """
         self.vertices = vertices
-        """A (3, 3) float array for points a b c."""
+        """A (N, 3) float array for points in the polygon."""
         self.normals = normals
-        """A (3, 3) float array with the normals por points a b c."""
+        """A (N, 3) float array with the normals for points in the polygon. Can be None."""
         self.texcoords = texcoords
-        """A tuple with (3, 2) float arrays with the texcoords."""
+        """A tuple with (N, 2) float arrays with the texcoords for points.."""
         self.material = material
         """Symbol (string) or the material object itself if bound."""
+
+    def triangulate(self):
+        """Triangulates this polygon. Returns a list of Triangle objects"""
+        
+        tris = []
+        npts = len(self.vertices)
+
+        for i in range(npts-2):
+            tri_vertices = numpy.array([
+                self.vertices[0], self.vertices[i+1], self.vertices[i+2]
+                ])
+            
+            if self.normals is None:
+                tri_normals = None
+            else:
+                tri_normals = numpy.array([
+                    self.normals[0], self.normals[i+1], self.normals[i+2]
+                    ])
+            
+            tri_texcoords = []
+            for texcoord in self.texcoords:
+                tri_texcoords.append([texcoord[0], texcoord[i+1], texcoord[i+2]])
+            tri_texcoords = numpy.array(tri_texcoords)
+            
+            tri = triangleset.Triangle(None, tri_vertices, tri_normals, tri_texcoords, self.material)
+            tris.append(tri)
+            
+        return tris
 
     def __repr__(self): 
         return 'Polygon (vertices=%d)' % len(self.vertices)
@@ -299,12 +327,9 @@ class BoundPolygonList(object):
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
         if self._normal is None:
-            #generate normals
-            #TODO: is this correct?
-            vec1 = numpy.subtract(v[0], v[1])
-            vec2 = numpy.subtract(v[2], v[0])
-            vec3 = toUnitVec(numpy.cross(toUnitVec(vec2), toUnitVec(vec1)))
-            n = numpy.array([vec3, vec3, vec3])
+            #don't general normals for polygons
+            #let them get generated after triangulation
+            n = None
         else:
             n = self._normal[ self._normal_index[i] ]
         uv = []

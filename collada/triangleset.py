@@ -49,6 +49,13 @@ class Triangle(object):
         self.material = material
         """Symbol (string) or the material object itself if bound."""
 
+        if self.normals is None:
+            #generate normals
+            vec1 = numpy.subtract(vertices[0], vertices[1])
+            vec2 = numpy.subtract(vertices[2], vertices[0])
+            vec3 = toUnitVec(numpy.cross(toUnitVec(vec2), toUnitVec(vec1)))
+            self.normals = numpy.array([vec3, vec3, vec3])
+
     def __repr__(self): 
         return 'Triangle(%s, %s, %s, "%s")'%(str(self.vertices[0]), str(self.vertices[1]), 
                                              str(self.vertices[2]), str(self.material))
@@ -274,12 +281,7 @@ class BoundTriangleSet(object):
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
         if self._normal is None:
-            #generate normals
-            #TODO: is this correct?
-            vec1 = numpy.subtract(v[0], v[1])
-            vec2 = numpy.subtract(v[2], v[0])
-            vec3 = toUnitVec(numpy.cross(toUnitVec(vec2), toUnitVec(vec1)))
-            n = numpy.array([vec3, vec3, vec3])
+            n = None
         else:
             n = self._normal[ self._normal_index[i] ]
         uv = []
