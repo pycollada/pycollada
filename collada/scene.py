@@ -27,10 +27,6 @@ from util import toUnitVec
 from collada import DaeObject, DaeError, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag
 
-def cleanId( text ):
-    if text and text[0] == '#': return text[1:]
-    else: return text
-
 class SceneNode(DaeObject):
     """Base class for all <scene> stuff."""
 

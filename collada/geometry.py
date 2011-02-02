@@ -20,10 +20,6 @@ import polylist
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag
 
-def cleanId( text ):
-    if text and text[0] == '#': return text[1:]
-    else: return text
-
 class Geometry( DaeObject ):
     """A class containing the data coming from a COLLADA <geometry> tag"""
 

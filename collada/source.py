@@ -17,10 +17,6 @@ import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, tag
 
-def cleanId( text ):
-    if text and text[0] == '#': return text[1:]
-    else: return text
-
 class Source(DaeObject):
     """Data source as it appears in <source> tags inside geometry
 
