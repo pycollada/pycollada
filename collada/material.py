@@ -452,6 +452,8 @@ class Effect(DaeObject):
         params = []
         id = node.get('id')
         profilenode = node.find( tag('profile_COMMON') )
+        if profilenode is None:
+            raise DaeUnsupportedError('Found effect with profile other than profile_COMMON')
         for paramnode in profilenode.findall( tag('newparam') ):
             if paramnode.find( tag('surface') ) != None:
                 param = Surface.load(collada, localscope, paramnode)
