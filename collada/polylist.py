@@ -48,14 +48,19 @@ class Polygon(object):
         """A tuple with (N, 2) float arrays with the texcoords for points.."""
         self.material = material
         """Symbol (string) or the material object itself if bound."""
+        self.indices = indices
 
-    def triangulate(self):
-        """Triangulates this polygon. Returns a list of Triangle objects"""
+    def triangles(self):
+        """Generates triangle objects from this polygon"""
         
-        tris = []
         npts = len(self.vertices)
 
         for i in range(npts-2):
+            
+            tri_indices = numpy.array([
+                self.indices[0], self.indices[i+1], self.indices[i+2]
+                ])
+            
             tri_vertices = numpy.array([
                 self.vertices[0], self.vertices[i+1], self.vertices[i+2]
                 ])
@@ -72,10 +77,8 @@ class Polygon(object):
                 tri_texcoords.append([texcoord[0], texcoord[i+1], texcoord[i+2]])
             tri_texcoords = numpy.array(tri_texcoords)
             
-            tri = triangleset.Triangle(None, tri_vertices, tri_normals, tri_texcoords, self.material)
-            tris.append(tri)
-            
-        return tris
+            tri = triangleset.Triangle(tri_indices, tri_vertices, tri_normals, tri_texcoords, self.material)
+            yield tri
 
     def __repr__(self): 
         return 'Polygon (vertices=%d)' % len(self.vertices)
@@ -135,6 +138,7 @@ class PolygonList(primitive.Primitive):
         self.index = index
         self.vcounts = vcounts
         self.nsources = len(self._texcoord_sourceset) + (1 if self._normal is None else 2)
+        self.nvertices = 0
 
         try:
             newshape = []
@@ -142,11 +146,12 @@ class PolygonList(primitive.Primitive):
             for ct in self.vcounts:
                 thispoly = self.index[self.nindices*at:self.nindices*(at+ct)]
                 thispoly.shape = (ct, self.nindices)
+                self.nvertices += ct
                 newshape.append(numpy.array(thispoly))
                 at+=ct
             self.index = newshape
         except:
-            raise # DaeMalformedError('Corrupted vcounts or index in polylist')
+            raise DaeMalformedError('Corrupted vcounts or index in polylist')
 
         self._vertex_index = [poly[:, self.offsets[0]] for poly in self.index]
         if self._normal is None:
@@ -316,6 +321,7 @@ class BoundPolygonList(object):
         self.setToTexcoord = pl.setToTexcoord
         self.index = pl.index
         self.nsources = pl.nsources
+        self.nvertices = pl.nvertices
         self._vertex_index = pl._vertex_index
         self._normal_index = pl._normal_index
         self._texcoord_indexset = pl._texcoord_indexset

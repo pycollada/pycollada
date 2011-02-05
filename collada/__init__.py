@@ -95,6 +95,7 @@ import scene
 import material
 import camera
 import light
+import controller
 
 class Collada(object):
     """Class used to access collada (dae,zae,kmz) files.
@@ -140,6 +141,7 @@ class Collada(object):
             self.loadEffects()
             self.loadMaterials()
             self.loadGeometry()
+            self.loadControllers()
             self.loadLights()
             self.loadNodes()
             self.loadCameras()
@@ -241,6 +243,21 @@ class Collada(object):
                 else:
                     self.geometries.append( G )
                     self.geometryById[ G.id ] = G
+    
+    def loadControllers(self):
+        """Load controller library."""
+        self.controllers = []
+        self.controllerById = {}
+        libnode = self.root.find( tag('library_controllers') )
+        if libnode != None:
+            for controlnode in libnode.findall(tag('controller')):
+                if controlnode.find(tag('skin')) is None and controlnode.find(tag('morph')) is None:
+                    continue
+                try: C = controller.Controller.load( self, {}, controlnode )
+                except DaeError, ex: self.handleError(ex)
+                else:
+                    self.controllers.append( C )
+                    self.controllerById[ C.id ] = C
     
     def loadLights(self):
         """Load light library."""

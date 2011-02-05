@@ -48,6 +48,7 @@ class Triangle(object):
         """A tuple with (3, 2) float arrays with the texcoords."""
         self.material = material
         """Symbol (string) or the material object itself if bound."""
+        self.indices = indices
 
         if self.normals is None:
             #generate normals
@@ -111,6 +112,7 @@ class TriangleSet(primitive.Primitive):
         self.material = material
         self.setToTexcoord = stt
         self.index = index
+        self.indices = self.index
         self.nsources = len(self._texcoord_sourceset) + (1 if self._normal is None else 2)
         self.index.shape = (-1, 3, self.nindices)
         self._vertex_index = self.index[:,:, self.offsets[0]]

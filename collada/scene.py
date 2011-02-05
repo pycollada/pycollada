@@ -229,6 +229,58 @@ class GeometryNode(SceneNode):
         self.xmlnode.set('url', '#'+self.geometry.id)
         for mat in self.materials: mat.save()
 
+class ControllerNode(SceneNode):
+    """Data coming from <instance_controller> inside the scene tree."""
+
+    def __init__(self, controller, materials, xmlnode=None):
+        """Create a ControllerNode.
+
+        :Parameters:
+          controller
+            A `Controller` instance from controller library
+          materials
+            A list of `MaterialNode` objects inside this node
+          xmlnode
+            If loaded from XML, the node it comes from
+
+        """
+        self.controller = controller
+        """A `Controller` instance from controller library."""
+        self.materials = materials
+        """A list of `MaterialNode` objects inside this node."""
+        if xmlnode != None: self.xmlnode = xmlnode
+        else:
+            self.xmlnode = ElementTree.Element( tag('instance_controller') )
+            bindnode = ElementTree.Element( tag('bind_material') )
+            technode = ElementTree.Element( tag('technique_common') )
+            bindnode.append( technode )
+            self.xmlnode.append( bindnode )
+            for mat in materials: technode.append( mat.xmlnode )
+            
+    def objects(self, tipo, matrix=None):
+        if tipo == 'controller':
+            if matrix is None: matrix = numpy.identity(4)
+            materialnodesbysymbol = {}
+            for mat in self.materials:
+                materialnodesbysymbol[mat.symbol] = mat
+            yield self.controller.bind(matrix, materialnodesbysymbol)
+
+    @staticmethod
+    def load( collada, node ):
+        url = node.get('url')
+        if not url.startswith('#'): raise DaeMalformedError('Invalid url in controller instance')
+        controller = collada.controllerById.get(url[1:])
+        if not controller: raise DaeBrokenRefError('Controller %s not found in library'%url)
+        matnodes = node.findall('%s/%s/%s'%( tag('bind_material'), tag('technique_common'), tag('instance_material') ) )
+        materials = []
+        for matnode in matnodes:
+            materials.append( MaterialNode.load(collada, matnode) )
+        return ControllerNode( controller, materials, xmlnode=node)
+
+    def save(self):
+        self.xmlnode.set('url', '#'+self.controller.id)
+        for mat in self.materials: mat.save()
+        
 class MaterialNode(SceneNode):
     """Data coming from <instance_material> inside <instance_geometry> in scene tree."""
 
@@ -359,7 +411,9 @@ class ExtraNode(SceneNode):
             self.xmlnode = ElementTree.Element( tag('extra') )
             
     def objects(self, tipo, matrix=None):
-        return self.xmlnode.findall(tag(tipo))
+        if tipo == 'extra':
+            for e in self.xmlnode.findall(tag(tipo)):
+                yield e
 
     @staticmethod
     def load( collada, node ):
@@ -379,6 +433,7 @@ def loadNode( collada, node ):
     elif node.tag == tag('instance_geometry'): return GeometryNode.load(collada, node)
     elif node.tag == tag('instance_camera'): return CameraNode.load(collada, node)
     elif node.tag == tag('instance_light'): return LightNode.load(collada, node)
+    elif node.tag == tag('instance_controller'): return ControllerNode.load(collada, node)
     elif node.tag == tag('instance_node'):
         url = node.get('url')
         if not url.startswith('#'):

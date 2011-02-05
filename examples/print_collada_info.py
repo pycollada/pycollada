@@ -4,6 +4,13 @@ import collada
 import numpy
 import sys
 
+def inspectController(controller):
+    """Display contents of a controller object found in the scene."""
+    print '    Controller (id=%s) (type=%s)' % (controller.skin.id, type(controller).__name__)
+    print '       Vertex weights:%d, joints:%d' % (len(controller), len(controller.joint_matrices))
+    for controlled_prim in controller.primitives():
+        print '       Primitive', type(controlled_prim.primitive).__name__
+
 def inspectGeometry(obj):
     """Display contents of a geometry object found in the scene."""
     avgpoint = numpy.zeros( (3,), dtype=numpy.float32 )
@@ -60,6 +67,9 @@ def inspectCollada(col):
     print '  Geometry:'
     for geom in col.scene.objects('geometry'):
         inspectGeometry( geom )
+    print '  Controllers:'
+    for controller in col.scene.objects('controller'):
+        inspectController( controller )
     print '  Cameras:'
     for cam in col.scene.objects('camera'):
         print '    Camera %s: position '%cam.original.id, cam.position
