@@ -178,7 +178,7 @@ for controller in col.scene.objects('controller'):
             ch = Character('simplechar')
             bundle = ch.getBundle(0)
             skeleton = PartGroup(bundle, '<skeleton>')
-            
+
             character_joints = {}
             for (name, joint_matrix) in controller.joint_matrices.iteritems():
                 joint_matrix.shape = (-1)
@@ -221,13 +221,21 @@ for controller in col.scene.objects('controller'):
                 for poly in controlled_prim.primitive.polygons():
                     for tri in poly.triangles():
                         for tri_pt in range(3):
-                            print tri.vertices[tri_pt]
                             vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
                             normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
                             if len(controlled_prim.primitive._texcoordset) > 0:
                                 texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
                             transform.addData1i(tri.indices[tri_pt])
                         numtris+=1
+            elif type(controlled_prim.primitive) is collada.triangleset.BoundTriangleSet:
+                for tri in controlled_prim.primitive.triangles():
+                    for tri_pt in range(3):
+                        vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
+                        normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
+                        if len(controlled_prim.primitive._texcoordset) > 0:
+                            texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
+                        transform.addData1i(tri.indices[tri_pt])
+                    numtris+=1
                         
             tbtable.setRows(SparseArray.lowerOn(vdata.getNumRows())) 
             
@@ -267,7 +275,7 @@ for controller in col.scene.objects('controller'):
             np = NodePath(ch) 
             anim = NodePath(wiggle) 
             a = Actor(np, {'simplechar' : anim}) 
-            a.reparentTo(nodePath) 
+            a.reparentTo(nodePath)
             #a.setPos(0, 0, 0)
             a.loop('simplechar')
         
