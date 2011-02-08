@@ -87,19 +87,15 @@ class Polygon(object):
 class PolygonList(primitive.Primitive):
     """Class containing the data COLLADA puts in a <polylist> tag, a collection of faces."""
 
-    def __init__(self, sourceById, vertex_source, normal_source, texcoord_sourceset, 
-                 material, index, vcounts, xmlnode=None, stt={}, offsets=None):
+    def __init__(self, sources, material, index, vcounts, xmlnode=None):
         """Create a polygon list.
 
         :Parameters:
-          sourceById 
-            A dict mapping id's to a collada source
-          vertex_source 
-            The string id for the vertex source
-          normal_source 
-            The string id for the normal source
-          texcoord_sourceset
-            A tuple of strings with texcoord source ids
+          sources
+            A dict mapping source types to an array of tuples in the form:
+            {input_type: (offset, semantic, sourceid, set, Source)}
+            Example:
+            {'VERTEX': (0, 'VERTEX', '#vertex-inputs', '0', <collada.source.FloatSource>)}
           material
             A string with the symbol of the material
           index
@@ -108,38 +104,23 @@ class PolygonList(primitive.Primitive):
             A list with the lengths of each individual polygon
           xmlnode
             An xml node in case this is loaded from there
-          stt
-            Ignored for now
-          offsets
-            A list with the offsets in the index array for each source
-            in (vertex, normal, uv1, uv2, ...)
 
         """
         
-        self.sourceById = sourceById
-        self.texcoord_start = 1 if normal_source is None else 2
-        if offsets: self.offsets = offsets
-        else: self.offsets = range(self.texcoord_start + len(texcoord_sourceset))
-        self.nindices = max(self.offsets) + 1
-        self._vertex_source = vertex_source
-        self._normal_source = normal_source
-        self._texcoord_sourceset = tuple(texcoord_sourceset)
-        try:
-            self._vertex = self.sourceById[vertex_source].data
-            if self._normal_source is None:
-                self._normal = None
-            else:
-                self._normal = self.sourceById[normal_source].data
-            self._texcoordset = tuple([ sourceById[c].data for c in texcoord_sourceset ])
-        except KeyError, ex:
-            raise DaeBrokenRefError('Referenced missing source in triangle set\n'+str(ex))
-        self.material = material
-        self.setToTexcoord = stt
-        self.index = index
-        self.vcounts = vcounts
-        self.nsources = len(self._texcoord_sourceset) + (1 if self._normal is None else 2)
-        self.nvertices = 0
+        if len(sources) == 0: raise DaeIncompleteError('A polylist set needs at least one input for vertex positions')
+        if not 'VERTEX' in sources: raise DaeIncompleteError('Polylist requires vertex input')
 
+        #find max offset
+        max_offset = max([ max([input[0] for input in input_type_array])
+                          for input_type_array in sources.itervalues() if len(input_type_array) > 0])
+
+        self.material = material
+        self.index = index
+        self.indices = self.index
+        self.nindices = max_offset + 1
+        self.vcounts = vcounts
+
+        self.nvertices = 0
         try:
             newshape = []
             at = 0
@@ -153,29 +134,36 @@ class PolygonList(primitive.Primitive):
         except:
             raise DaeMalformedError('Corrupted vcounts or index in polylist')
 
-        self._vertex_index = [poly[:, self.offsets[0]] for poly in self.index]
-        if self._normal is None:
-            self._normal_index = None
-        else:
-            self._normal_index = [poly[:, self.offsets[1]] for poly in self.index]
-        self._texcoord_indexset = tuple( [[poly[:,self.offsets[self.texcoord_start+i]] for poly in self.index] 
-                                         for i in xrange(len(self._texcoord_sourceset)) ])
         self.npolygons = len(self.index)
+
+        self._vertex = sources['VERTEX'][0][4].data
+        self._vertex_index = [poly[:,sources['VERTEX'][0][0]] for poly in self.index]
         self.maxvertexindex = numpy.max( [numpy.max(poly) for poly in self._vertex_index] )
-        if self._normal is None:
-            self.maxnormalindex = -1
-        else:
+        checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
+
+        if 'NORMAL' in sources and len(sources['NORMAL']) > 0:
+            self._normal = sources['NORMAL'][0][4].data
+            self._normal_index = [poly[:,sources['NORMAL'][0][0]] for poly in self.index]
             self.maxnormalindex = numpy.max( [numpy.max(poly) for poly in self._normal_index] )
-        if len(self._texcoord_sourceset) == 0:
-            self.maxtexcoordsetindex = -1
+            checkSource(sources['NORMAL'][0][4], ('X', 'Y', 'Z'), self.maxnormalindex)
         else:
+            self._normal = None
+            self._normal_index = None
+            self.maxnormalindex = -1
+            
+        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0:
+            self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
+            self._texcoord_indexset = tuple([ [poly[:,sources['TEXCOORD'][i][0]] for poly in self.index]
+                                             for i in xrange(len(sources['TEXCOORD'])) ])
             self.maxtexcoordsetindex = [ numpy.max([ numpy.max([p for p in poly])
-                        for poly in each ]) for each in self._texcoord_indexset ]
-        checkSource(self.sourceById[self._vertex_source], ('X', 'Y', 'Z'), self.maxvertexindex)
-        if not self._normal_source is None:
-            checkSource(self.sourceById[self._normal_source], ('X', 'Y', 'Z'), self.maxnormalindex)
-        for i, c in enumerate(self._texcoord_sourceset):
-            checkSource(self.sourceById[c], ('S', 'T'), self.maxtexcoordsetindex[i])
+                                        for poly in each ]) for each in self._texcoord_indexset ]
+            for i, texinput in enumerate(sources['TEXCOORD']):
+                checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
+        else:
+            self._texcoordset = tuple()
+            self._texcoord_indexset = tuple()
+            self.maxtexcoordsetindex = -1
+            
         if xmlnode: self.xmlnode = xmlnode
         else:
             self.xmlnode = ElementTree.fromstring("<polylist> <vcount></vcount> <p></p> </polylist>")
@@ -243,33 +231,13 @@ class PolygonList(primitive.Primitive):
             vcounts = numpy.array([float(v) for v in vcountnode.text.split()], dtype=numpy.int32)
         except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
 
-        [vertex_i, has_normal, tex_start, index, inputs] = \
-            primitive.Primitive.getInputs(localscope, indexnode, node.findall(tag('input')))
+        all_inputs = primitive.Primitive.getInputs(localscope, node.findall(tag('input')))
 
-        if len(inputs) == 0: raise DaeIncompleteError('A polylist set needs at least one input for vertex positions')
-        if inputs[0][1] != 'VERTEX': raise DaeMalformedError('First input in polylist set must be the vertex list')
-        if len(inputs[0][2]) < 2 or inputs[0][2][0] != '#':
-            raise DaeMalformedError('Incorrect source id in VERTEX input')
-        
-        if has_normal:
-            if len(inputs[1][2]) < 2 or inputs[1][2][0] != '#':
-                raise DaeMalformedError('Incorrect source id in NORMAL input')
-            normal_source = inputs[1][2][1:]
-        else:
-            normal_source = None
-            
-        vertex_source = inputs[0][2][1:]
-        texcoord_sourceset = []
-        setToTexcoord = {}
-        for offset, semantic, source, set in inputs[tex_start:]:
-            if semantic != 'TEXCOORD': raise DaeUnsupportedError('Found unexpected input in polylist set: %s' % semantic)
-            if set: setToTexcoord[set] = offset - tex_start
-            if len(source) < 2 or source[0] != '#':
-                raise DaeMalformedError('Incorrect source id in TEXCOORD input')
-            texcoord_sourceset.append( source[1:] )
-        polylist = PolygonList(localscope, vertex_source, normal_source, texcoord_sourceset, 
-                             node.get('material'), index, vcounts, setToTexcoord,
-                             offsets=[ t[0] for t in inputs])
+        try:
+            index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
+        except: raise DaeMalformedError('Corrupted index in polylist')
+
+        polylist = PolygonList(all_inputs, node.get('material'), index, vcounts)
         polylist.xmlnode = node
         return polylist
 
@@ -318,9 +286,7 @@ class BoundPolygonList(object):
             self.material = matnode.target
             self.inputmap = dict([ (sem, (input_sem, set)) for sem, input_sem, set in matnode.inputs ])
         else: self.inputmap = self.material = None
-        self.setToTexcoord = pl.setToTexcoord
         self.index = pl.index
-        self.nsources = pl.nsources
         self.nvertices = pl.nvertices
         self._vertex_index = pl._vertex_index
         self._normal_index = pl._normal_index
