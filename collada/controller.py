@@ -113,8 +113,10 @@ class Skin(Controller):
         
         if not(joint_source in sourcebyid and joint_matrix_source in sourcebyid):
             raise DaeBrokenRefError("Input in joints not found")
-        if not type(sourcebyid[joint_source]) is source.NameSource or not type(sourcebyid[joint_matrix_source]) is source.FloatSource:
-            raise DaeIncompleteError("Not enough inputs in joints of skin")
+        if not(type(sourcebyid[joint_source]) is source.NameSource or type(sourcebyid[joint_source]) is source.IDRefSource):
+            raise DaeIncompleteError("Could not find joint name input for skin")
+        if not type(sourcebyid[joint_matrix_source]) is source.FloatSource:
+            raise DaeIncompleteError("Could not find joint matrix source for skin")
         joint_names = [j for j in sourcebyid[joint_source]]
         joint_matrices = sourcebyid[joint_matrix_source].data
         joint_matrices.shape = (-1,4,4)
@@ -126,8 +128,10 @@ class Skin(Controller):
         
         if not(weight_source in sourcebyid and weight_joint_source in sourcebyid):
             raise DaeBrokenRefError("Weights input in joints not found")
-        if not type(sourcebyid[weight_source]) is source.FloatSource or not type(sourcebyid[weight_joint_source]) is source.NameSource:
-            raise DaeIncompleteError("Not enough inputs in weights of skin")
+        if not type(sourcebyid[weight_source]) is source.FloatSource:
+            raise DaeIncompleteError("Could not find weight inputs for skin")
+        if not(type(sourcebyid[weight_joint_source]) is source.NameSource or type(sourcebyid[weight_joint_source]) is source.IDRefSource):
+            raise DaeIncompleteError("Could not find weight joint source input for skin")
         self.weights = sourcebyid[weight_source]
         self.weight_joints = sourcebyid[weight_joint_source]
         
