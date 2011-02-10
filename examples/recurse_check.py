@@ -50,6 +50,10 @@ def main():
         try:
             col = collada.Collada(c, \
                 ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError])
+            
+            if col.scene is None:
+                col.errors.append(collada.DaeIncompleteError("No scene node"))
+            
             if len(col.errors) > 0:
                 print "WARNINGS:", len(col.errors)
                 err_names = [type(e).__name__ for e in col.errors]
@@ -62,13 +66,13 @@ def main():
                 print "SUCCESS"
                 
             #do some sanity checks looping through result
-            for geom in col.scene.objects('geometry'):
-                for prim in geom.primitives():
-                    assert(prim.material)
-                    assert(len(prim))
-            for cam in col.scene.objects('camera'):
-                assert(cam.original.id)
-                assert(len(cam.position) == 3)
+            if not col.scene is None:
+                for geom in col.scene.objects('geometry'):
+                    for prim in geom.primitives():
+                        assert(len(prim))
+                for cam in col.scene.objects('camera'):
+                    assert(cam.original.id)
+                    assert(len(cam.position) == 3)
         except (KeyboardInterrupt, SystemExit):
             print
             sys.exit("Keyboard interrupt. Exiting.")

@@ -45,46 +45,47 @@ def getStateFromMaterial(prim_material):
     reflection = None
     reflectivity = None
     
-    for prop in prim_material.supported:
-        value = getattr(prim_material, prop)
-        
-        if value is None:
-            continue
-        
-        if type(value) is tuple:
-            val4 = value[3] if len(value) > 3 else 1.0
-            value = VBase4(value[0], value[1], value[2], val4)
-        
-        if isinstance(value, collada.material.Map):
-            texture_file = value.sampler.surface.image.path
-            if not texture_file is None:
-                (root, leaf) = os.path.split(sys.argv[1])
-                tex_absolute = os.path.join(root, texture_file)
-                myImage = PNMImage()
-                myImage.read(Filename(tex_absolute))
-                myTexture = Texture(texture_file)
-                myTexture.load(myImage)
-                state = state.addAttrib(TextureAttrib.make(myTexture))
-        elif prop == 'emission':
-            emission = value
-        elif prop == 'ambient':
-            ambient = value
-        elif prop == 'diffuse':
-            diffuse = value
-        elif prop == 'specular':
-            specular = value
-        elif prop == 'shininess':
-            shininess = value
-        elif prop == 'reflective':
-            reflective = value
-        elif prop == 'reflectivity':
-            reflectivity = value
-        elif prop == 'transparent':
-            pass
-        elif prop == 'transparency':
-            pass
-        else:
-            raise
+    if prim_material:
+        for prop in prim_material.supported:
+            value = getattr(prim_material, prop)
+            
+            if value is None:
+                continue
+            
+            if type(value) is tuple:
+                val4 = value[3] if len(value) > 3 else 1.0
+                value = VBase4(value[0], value[1], value[2], val4)
+            
+            if isinstance(value, collada.material.Map):
+                texture_file = value.sampler.surface.image.path
+                if not texture_file is None:
+                    (root, leaf) = os.path.split(sys.argv[1])
+                    tex_absolute = os.path.join(root, texture_file)
+                    myImage = PNMImage()
+                    myImage.read(Filename(tex_absolute))
+                    myTexture = Texture(texture_file)
+                    myTexture.load(myImage)
+                    state = state.addAttrib(TextureAttrib.make(myTexture))
+            elif prop == 'emission':
+                emission = value
+            elif prop == 'ambient':
+                ambient = value
+            elif prop == 'diffuse':
+                diffuse = value
+            elif prop == 'specular':
+                specular = value
+            elif prop == 'shininess':
+                shininess = value
+            elif prop == 'reflective':
+                reflective = value
+            elif prop == 'reflectivity':
+                reflectivity = value
+            elif prop == 'transparent':
+                pass
+            elif prop == 'transparency':
+                pass
+            else:
+                raise
     
     mat = Material()
     
@@ -129,7 +130,10 @@ for geom in col.scene.objects('geometry'):
     for prim in geom.primitives():
         
         format = GeomVertexFormat.getV3n3t2()
-        dataname = geom.original.id + '-' + prim.material.id
+        if prim.material:
+            dataname = geom.original.id + '-' + prim.material.id
+        else:
+            dataname = geom.original.id
         vdata = GeomVertexData(dataname, format, Geom.UHStatic)
         vertex = GeomVertexWriter(vdata, 'vertex')
         normal = GeomVertexWriter(vdata, 'normal')
@@ -256,19 +260,19 @@ for controller in col.scene.objects('controller'):
             skeleton = AnimGroup(bundle, '<skeleton>')
             root = AnimChannelMatrixXfmTable(skeleton, 'root')
             
-            hjoint = AnimChannelMatrixXfmTable(root, 'joint1') 
-            table = [10, 11, 12, 13, 14, 15, 14, 13, 12, 11] 
-            data = PTAFloat.emptyArray(len(table)) 
-            for i in range(len(table)): 
-                data.setElement(i, table[i]) 
-            hjoint.setTable(ord('i'), CPTAFloat(data)) 
+            #hjoint = AnimChannelMatrixXfmTable(root, 'joint1') 
+            #table = [10, 11, 12, 13, 14, 15, 14, 13, 12, 11] 
+            #data = PTAFloat.emptyArray(len(table)) 
+            #for i in range(len(table)): 
+            #    data.setElement(i, table[i]) 
+            #hjoint.setTable(ord('i'), CPTAFloat(data)) 
             
-            vjoint = AnimChannelMatrixXfmTable(hjoint, 'joint2') 
-            table = [10, 9, 8, 7, 6, 5, 6, 7, 8, 9] 
-            data = PTAFloat.emptyArray(len(table)) 
-            for i in range(len(table)): 
-                data.setElement(i, table[i]) 
-            vjoint.setTable(ord('j'), CPTAFloat(data)) 
+            #vjoint = AnimChannelMatrixXfmTable(hjoint, 'joint2') 
+            #table = [10, 9, 8, 7, 6, 5, 6, 7, 8, 9] 
+            #data = PTAFloat.emptyArray(len(table)) 
+            #for i in range(len(table)): 
+            #    data.setElement(i, table[i]) 
+            #vjoint.setTable(ord('j'), CPTAFloat(data)) 
 
             wiggle = AnimBundleNode('wiggle', bundle)
 
@@ -298,7 +302,7 @@ def spinCameraTask(task):
     curSpot = task.time % speed
     angleDegrees = (curSpot / speed) * 360
     angleRadians = angleDegrees * (pi / 180.0)
-    base.camera.setPos(25.0 * sin(angleRadians), -25.0 * cos(angleRadians), 0)
+    base.camera.setPos(15.0 * sin(angleRadians), -15.0 * cos(angleRadians), 0)
     base.camera.lookAt(0.0, 0.0, 0.0)
     return Task.cont
 
