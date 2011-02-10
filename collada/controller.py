@@ -180,6 +180,7 @@ class Skin(Controller):
         bind_shape_mat = skinnode.find(tag('bind_shape_matrix'))
         if bind_shape_mat is None:
             bind_shape_mat = numpy.identity(4, dtype=numpy.float32)
+            bind_shape_mat.shape = (-1,)
         else:
             try: values = [ float(v) for v in bind_shape_mat.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted bind shape matrix in skin')
