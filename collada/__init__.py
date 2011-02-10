@@ -214,9 +214,8 @@ class Collada(object):
                 elif subnode.tag == tag('unit'):
                     name = subnode.get('name')
                     meter = subnode.get('meter')
-                    if name is None or meter is None:
-                        raise DaeMalformedError('unit tag does not contain name and meter')
-                    try: meter = float(meter)
+                    try:
+                        if not meter is None: meter = float(meter)
                     except ValueError, ex: raise DaeMalformedError('Corrupted meter value in unit tag')
                     self.assetInfo['unit'] = {'name':name, 'meter':meter}
                 elif subnode.tag == tag('created'):
