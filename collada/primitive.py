@@ -82,10 +82,10 @@ class Primitive(DaeObject):
                 normal_inputs.append(input)
             elif semantic == 'TEXCOORD':
                 texcoord_inputs.append(input)
-            #elif semantic == 'TEXTANGENT':
-            #    textangent_inputs.append(input)
-            #elif semantic == 'TEXBINORMAL':
-            #    texbinormal_inputs.append(input)
+            elif semantic == 'TEXTANGENT':
+                textangent_inputs.append(input)
+            elif semantic == 'TEXBINORMAL':
+                texbinormal_inputs.append(input)
             else:  
                 raise DaeUnsupportedError('Unknown input semantic: %s' % semantic)
             
