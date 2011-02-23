@@ -19,7 +19,7 @@ This module contains all the functionality to load and manage:
 
 """
 
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag
@@ -418,7 +418,7 @@ class Effect(DaeObject):
         self.reflectivity = reflectivity
         self.transparent = transparent
         self.transparency = transparency
-        if xmlnode: self.xmlnode = xmlnode
+        if xmlnode is not None: self.xmlnode = xmlnode
         else:
             self.xmlnode = ElementTree.Element( tag('effect') )
             self.xmlnode.set('id', self.id)

@@ -12,7 +12,7 @@
 
 """Module for <controller> data loading."""
 
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import numpy
 import source
 from util import checkSource

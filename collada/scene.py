@@ -21,7 +21,7 @@ Supported scene nodes are:
 
 """
 
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import numpy
 from util import toUnitVec
 from collada import DaeObject, DaeError, DaeIncompleteError, DaeBrokenRefError, \
@@ -85,7 +85,7 @@ class TransformNode(SceneNode):
         """Numpy transform matrix."""
         self.nodes = nodes
         """child node list."""
-        if xmlnode: self.xmlnode = xmlnode
+        if xmlnode is not None: self.xmlnode = xmlnode
         else:
             self.xmlnode = ElementTree.Element(tag('node'))
             for node in nodes:
@@ -305,7 +305,7 @@ class MaterialNode(SceneNode):
         """The id of the material to assign to the symbol."""
         self.inputs = inputs
         """A list of tuples (semantic, input_semantic, set) mapping material inputs."""
-        if xmlnode: self.xmlnode = xmlnode
+        if xmlnode is not None: self.xmlnode = xmlnode
         else:
             self.xmlnode = ElementTree.Element( tag('instance_material') )
             self.xmlnode.set('symbol', symbol)
