@@ -10,7 +10,7 @@
 #                                                                  #
 ####################################################################
 
-"""Module containing classes and functions for the <triangle> primitive."""
+"""Module containing classes and functions for the <triangles> primitive."""
 
 import numpy
 from xml.etree import ElementTree
@@ -63,7 +63,7 @@ class Triangle(object):
     def __str__(self): return repr(self)
 
 class TriangleSet(primitive.Primitive):
-    """Class containing the data COLLADA puts in a <triangle> tag, a collection of faces."""
+    """Class containing the data COLLADA puts in a <triangles> tag, a collection of faces."""
 
     def __init__(self, sources, material, index, xmlnode=None):
         """Create a triangle set.
