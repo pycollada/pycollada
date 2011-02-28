@@ -84,7 +84,7 @@ class TriangleSet(primitive.Primitive):
         """
 
         if len(sources) == 0: raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
-        if not 'VERTEX' in sources: raise DaeIncompleteError('Triangleset requires vertex input')
+        if not 'VERTEX' in sources: raise DaeIncompleteError('Triangle set requires vertex input')
 
         #find max offset
         max_offset = max([ max([input[0] for input in input_type_array])
