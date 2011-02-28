@@ -16,6 +16,7 @@ from xml.etree import ElementTree
 import numpy
 import source
 import triangleset
+import lineset
 import polylist
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag
@@ -99,6 +100,8 @@ class Geometry( DaeObject ):
                 _primitives.append( polylist.PolygonList.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('triangles'):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
+            elif subnode.tag == tag('lines'):
+                _primitives.append( lineset.LineSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag != tag('source'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
         geom = Geometry( sources, sourcebyid, vertexsource, _primitives, xmlnode=node )
