@@ -43,7 +43,7 @@ class Triangle(object):
         self.vertices = vertices
         """A (3, 3) float array for points a b c."""
         self.normals = normals
-        """A (3, 3) float array with the normals por points a b c."""
+        """A (3, 3) float array with the normals for points a b c."""
         self.texcoords = texcoords
         """A tuple with (3, 2) float arrays with the texcoords."""
         self.material = material
