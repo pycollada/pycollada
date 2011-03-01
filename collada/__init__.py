@@ -18,7 +18,7 @@ file is not what is expected.
 
 """
 
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import zipfile
 from StringIO import StringIO
 import types
@@ -134,7 +134,7 @@ class Collada(object):
             self.errors = []
             self.maskedErrors = []
             self.ignoreErrors( *ignore )
-            self.root = ElementTree.fromstring(data)
+            self.root = ElementTree.ElementTree(element=None, file=StringIO(data))
             self.validate()
             self.loadAssetInfo()
             self.loadImages()

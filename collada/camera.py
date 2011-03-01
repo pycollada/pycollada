@@ -12,7 +12,7 @@
 
 """Camera module, class and tools."""
 
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, tag

@@ -13,7 +13,7 @@
 """Module containing classes and functions for the <polylist> primitive."""
 
 import numpy
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import primitive
 import types
 import triangleset
@@ -164,7 +164,7 @@ class PolygonList(primitive.Primitive):
             self._texcoord_indexset = tuple()
             self.maxtexcoordsetindex = -1
             
-        if xmlnode: self.xmlnode = xmlnode
+        if xmlnode is not None: self.xmlnode = xmlnode
         else:
             self.xmlnode = ElementTree.fromstring("<polylist> <vcount></vcount> <p></p> </polylist>")
 

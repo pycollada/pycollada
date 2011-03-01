@@ -13,7 +13,7 @@
 """Module containing classes and functions for the <triangles> primitive."""
 
 import numpy
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import primitive
 import types
 from util import toUnitVec, checkSource
@@ -124,7 +124,7 @@ class TriangleSet(primitive.Primitive):
             self._texcoord_indexset = tuple()
             self.maxtexcoordsetindex = -1
             
-        if xmlnode: self.xmlnode = xmlnode
+        if xmlnode is not None: self.xmlnode = xmlnode
         else:
             self.xmlnode = ElementTree.fromstring("<triangles> <p></p> </triangles>")
 
