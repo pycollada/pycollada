@@ -11,6 +11,7 @@ from panda3d.core import GeomVertexFormat
 from panda3d.core import GeomVertexData
 from panda3d.core import GeomVertexWriter
 from panda3d.core import GeomTriangles
+from panda3d.core import GeomLines
 from panda3d.core import Geom
 from panda3d.core import GeomNode
 from panda3d.core import PNMImage
@@ -20,7 +21,7 @@ from panda3d.core import RenderState
 from panda3d.core import TextureAttrib
 from panda3d.core import MaterialAttrib
 from panda3d.core import Material, SparseArray
-from panda3d.core import VBase4, Vec4, Point3, Mat4
+from panda3d.core import VBase4, Vec4, Point3, Mat4, Point2
 from panda3d.core import AmbientLight, DirectionalLight
 from panda3d.core import Character, PartGroup, CharacterJoint
 from panda3d.core import TransformBlend, TransformBlendTable, JointVertexTransform
@@ -28,156 +29,14 @@ from panda3d.core import GeomVertexAnimationSpec, GeomVertexArrayFormat, Interna
 from panda3d.core import AnimBundle, AnimGroup, AnimChannelMatrixXfmTable
 from panda3d.core import PTAFloat, CPTAFloat, AnimBundleNode, NodePath
 from direct.actor.Actor import Actor
+from panda3d.core import loadPrcFileData
 
 if len(sys.argv) != 2 or not os.path.isfile(sys.argv[1]):
     print "Usage: python panda_display_collada.py <file>"
     print "   Loads the given file with pycollada and then tries to display with panda3d"
     sys.exit(1)
 
-def getStateFromMaterial(prim_material):
-    state = RenderState.makeFullDefault()
-    
-    emission = None
-    ambient = None
-    diffuse = None
-    specular = None
-    shininess = None
-    reflection = None
-    reflectivity = None
-    
-    if prim_material:
-        for prop in prim_material.supported:
-            value = getattr(prim_material, prop)
-            
-            if value is None:
-                continue
-            
-            if type(value) is tuple:
-                val4 = value[3] if len(value) > 3 else 1.0
-                value = VBase4(value[0], value[1], value[2], val4)
-            
-            if isinstance(value, collada.material.Map):
-                texture_file = value.sampler.surface.image.path
-                if not texture_file is None:
-                    (root, leaf) = os.path.split(sys.argv[1])
-                    tex_absolute = os.path.join(root, texture_file)
-                    myImage = PNMImage()
-                    myImage.read(Filename(tex_absolute))
-                    myTexture = Texture(texture_file)
-                    myTexture.load(myImage)
-                    state = state.addAttrib(TextureAttrib.make(myTexture))
-            elif prop == 'emission':
-                emission = value
-            elif prop == 'ambient':
-                ambient = value
-            elif prop == 'diffuse':
-                diffuse = value
-            elif prop == 'specular':
-                specular = value
-            elif prop == 'shininess':
-                shininess = value
-            elif prop == 'reflective':
-                reflective = value
-            elif prop == 'reflectivity':
-                reflectivity = value
-            elif prop == 'transparent':
-                pass
-            elif prop == 'transparency':
-                pass
-            else:
-                raise
-    
-    mat = Material()
-    
-    if not emission is None:
-        mat.setEmission(emission)
-    if not ambient is None:
-        mat.setAmbient(ambient)
-    if not diffuse is None:
-        mat.setDiffuse(diffuse)
-    if not specular is None:
-        mat.setSpecular(specular)
-    if not shininess is None:
-        mat.setShininess(shininess)
-        
-    state = state.addAttrib(MaterialAttrib.make(mat))
-    return state
-
-
-start_time = time.time()
-    
-try:
-    col = collada.Collada(sys.argv[1])
-except:
-    print "Error loading file: "
-    print
-    traceback.print_exc()
-    sys.exit(2)
-
-collada_time = time.time()
-
-if len(col.errors) > 0:
-    print "Warnings when loading file. Quitting."
-    print
-    sys.exit(3)
-
-p3dApp = ShowBase()
-
-globNode = GeomNode("collada")
-nodePath = render.attachNewNode(globNode)
-
-for geom in col.scene.objects('geometry'):
-    for prim in geom.primitives():
-        
-        format = GeomVertexFormat.getV3n3t2()
-        if prim.material:
-            dataname = geom.original.id + '-' + prim.material.id
-        else:
-            dataname = geom.original.id
-        vdata = GeomVertexData(dataname, format, Geom.UHStatic)
-        vertex = GeomVertexWriter(vdata, 'vertex')
-        normal = GeomVertexWriter(vdata, 'normal')
-        texcoord = GeomVertexWriter(vdata, 'texcoord')
-        
-        numtris = 0
-        
-        if type(prim) is collada.triangleset.BoundTriangleSet:
-            for tri in prim.triangles():
-                for tri_pt in range(3):
-                    vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
-                    normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
-                    if len(prim._texcoordset) > 0:
-                        texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
-                numtris+=1
-                
-        elif type(prim) is collada.polylist.BoundPolygonList:
-            for poly in prim.polygons():
-                for tri in poly.triangles():
-                    for tri_pt in range(3):
-                        vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
-                        normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
-                        if len(prim._texcoordset) > 0:
-                            texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
-                    numtris+=1
-
-        else:
-            sys.exit("Error: Unsupported primitive type. Exiting.")
-        
-        gprim = GeomTriangles(Geom.UHStatic)
-        for i in range(numtris):
-            gprim.addVertices(i*3, i*3+1, i*3+2)
-            gprim.closePrimitive()
-            
-        pgeom = Geom(vdata)
-        pgeom.addPrimitive(gprim)
-        
-        render_state = getStateFromMaterial(prim.material)
-        node = GeomNode("primitive")
-        node.addGeom(pgeom, render_state)
-        nodePath.attachNewNode(node)
-
-for controller in col.scene.objects('controller'):
-    for controlled_prim in controller.primitives():
+def getNodeFromController(controller, controlled_prim):
         if type(controlled_prim) is collada.controller.BoundSkinPrimitive:
             ch = Character('simplechar')
             bundle = ch.getBundle(0)
@@ -278,13 +137,177 @@ for controller in col.scene.objects('controller'):
 
             np = NodePath(ch) 
             anim = NodePath(wiggle) 
-            a = Actor(np, {'simplechar' : anim}) 
-            a.reparentTo(nodePath)
+            a = Actor(np, {'simplechar' : anim})
+            a.loop('simplechar') 
+            return a
             #a.setPos(0, 0, 0)
-            a.loop('simplechar')
         
         else:
-            sys.exit("Error: unsupported controller type")
+            raise Exception("Error: unsupported controller type")
+
+def getNodeFromGeom(prim):
+        format = GeomVertexFormat.getV3n3t2()
+        vdata = GeomVertexData("dataname", format, Geom.UHStatic)
+        vertex = GeomVertexWriter(vdata, 'vertex')
+        normal = GeomVertexWriter(vdata, 'normal')
+        texcoord = GeomVertexWriter(vdata, 'texcoord')
+        
+        if type(prim) is collada.triangleset.BoundTriangleSet:
+            numtris = 0
+            for tri in prim.triangles():
+                for tri_pt in range(3):
+                    vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
+                    normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
+                    if len(prim._texcoordset) > 0:
+                        texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
+                numtris+=1
+                
+            gprim = GeomTriangles(Geom.UHStatic)
+            for i in range(numtris):
+                gprim.addVertices(i*3, i*3+1, i*3+2)
+                gprim.closePrimitive()
+                
+        elif type(prim) is collada.polylist.BoundPolygonList:
+            numtris = 0
+            for poly in prim.polygons():
+                for tri in poly.triangles():
+                    for tri_pt in range(3):
+                        vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
+                        normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
+                        if len(prim._texcoordset) > 0:
+                            texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
+                    numtris+=1
+
+            gprim = GeomTriangles(Geom.UHStatic)
+            for i in range(numtris):
+                gprim.addVertices(i*3, i*3+1, i*3+2)
+                gprim.closePrimitive()
+                
+        elif type(prim) is collada.lineset.BoundLineSet:
+            numlines = 0
+            for line in prim.lines():
+                for line_pt in range(2):
+                    vertex.addData3f(line.vertices[line_pt][0], line.vertices[line_pt][1], line.vertices[line_pt][2])
+                numlines+=1
+
+            gprim = GeomLines(Geom.UHStatic)
+            for i in range(numlines):
+                gprim.addVertices(i*2, i*2+1)
+                gprim.closePrimitive()
+
+        else:
+            raise Exception("Error: Unsupported primitive type. Exiting.")
+            
+        pgeom = Geom(vdata)
+        pgeom.addPrimitive(gprim)
+        
+        render_state = getStateFromMaterial(prim.material)
+        node = GeomNode("primitive")
+        node.addGeom(pgeom, render_state)
+        
+        return node
+
+def getStateFromMaterial(prim_material):
+    state = RenderState.makeFullDefault()
+    
+    emission = None
+    ambient = None
+    diffuse = None
+    specular = None
+    shininess = None
+    reflection = None
+    reflectivity = None
+    
+    if prim_material:
+        for prop in prim_material.supported:
+            value = getattr(prim_material, prop)
+            
+            if value is None:
+                continue
+            
+            if type(value) is tuple:
+                val4 = value[3] if len(value) > 3 else 1.0
+                value = VBase4(value[0], value[1], value[2], val4)
+            
+            if isinstance(value, collada.material.Map):
+                texture_file = value.sampler.surface.image.path
+                if not texture_file is None:
+                    (root, leaf) = os.path.split(sys.argv[1])
+                    tex_absolute = os.path.join(root, texture_file)
+                    myImage = PNMImage()
+                    myImage.read(Filename(tex_absolute))
+                    myTexture = Texture(texture_file)
+                    myTexture.load(myImage)
+                    state = state.addAttrib(TextureAttrib.make(myTexture))
+            elif prop == 'emission':
+                emission = value
+            elif prop == 'ambient':
+                ambient = value
+            elif prop == 'diffuse':
+                diffuse = value
+            elif prop == 'specular':
+                specular = value
+            elif prop == 'shininess':
+                shininess = value
+            elif prop == 'reflective':
+                reflective = value
+            elif prop == 'reflectivity':
+                reflectivity = value
+            elif prop == 'transparent':
+                pass
+            elif prop == 'transparency':
+                pass
+            else:
+                raise
+    
+    mat = Material()
+    
+    if not emission is None:
+        mat.setEmission(emission)
+    if not ambient is None:
+        mat.setAmbient(ambient)
+    if not diffuse is None:
+        mat.setDiffuse(diffuse)
+    if not specular is None:
+        mat.setSpecular(specular)
+    if not shininess is None:
+        mat.setShininess(shininess)
+        
+    state = state.addAttrib(MaterialAttrib.make(mat))
+    return state
+
+
+start_time = time.time()
+    
+try:
+    col = collada.Collada(sys.argv[1])
+except:
+    print "Error loading file: "
+    print
+    traceback.print_exc()
+    sys.exit(2)
+
+collada_time = time.time()
+
+if len(col.errors) > 0:
+    print "Warnings when loading file. Quitting."
+    print
+    sys.exit(3)
+
+p3dApp = ShowBase()
+
+globNode = GeomNode("collada")
+nodePath = render.attachNewNode(globNode)
+
+for geom in col.scene.objects('geometry'):
+    for prim in geom.primitives():
+        node = getNodeFromGeom(prim)
+        nodePath.attachNewNode(node)
+
+for controller in col.scene.objects('controller'):
+    for controlled_prim in controller.primitives():
+        a = getNodeFromController(controller, controlled_prim)
+        a.reparentTo(nodePath)
 
 boundingSphere = nodePath.getBounds()
 scale = 5.0 / boundingSphere.getRadius()
@@ -306,6 +329,8 @@ def spinCameraTask(task):
     base.camera.lookAt(0.0, 0.0, 0.0)
     return Task.cont
 
+base.camera.setPos(10, -10, 0)
+base.camera.lookAt(0.0, 0.0, 0.0)
 p3dApp.taskMgr.add(spinCameraTask, "SpinCameraTask")
 
 base.setBackgroundColor(0.8,0.8,0.8)
