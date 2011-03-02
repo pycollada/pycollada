@@ -13,7 +13,7 @@
 """Module containing classes and functions for the <lines> primitive."""
 
 import numpy
-from xml.etree import ElementTree
+from lxml import etree as ElementTree
 import primitive
 import types
 from util import toUnitVec, checkSource
