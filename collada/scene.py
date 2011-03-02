@@ -26,6 +26,7 @@ import numpy
 from util import toUnitVec
 from collada import DaeObject, DaeError, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag
+import copy
 
 class SceneNode(DaeObject):
     """Base class for all <scene> stuff."""
@@ -478,7 +479,21 @@ class Scene(DaeObject):
     def load( collada, node ):
         id = node.get('id')
         nodes = []
-        for nodenode in node.findall( tag('node') ):
+        
+        realnode = node
+        if not collada.assetInfo['up_axis'] == 'Z_UP':
+            newscene = ElementTree.Element(tag('visual_scene'), {'id':'pycolladavisualscene', 'name':'pycolladavisualscene'})
+            extranode = ElementTree.SubElement(newscene, tag('node'), {'id':'pycolladarotate', 'name':'pycolladarotate'})
+            rotatenode = ElementTree.SubElement(extranode, tag('rotate'), {'sid':'rotateX'})
+            rotatenode.text = "1 0 0 90" if collada.assetInfo['up_axis'] == 'Y_UP' else "0 1 0 90"
+            
+            prev_elements = list(node)
+            for e in prev_elements:
+                extranode.append(copy.deepcopy(e))
+                
+            realnode = newscene
+        
+        for nodenode in realnode.findall( tag('node') ):
             try: nodes.append( loadNode(collada, nodenode) )
             except DaeError, ex: collada.handleError(ex)
         return Scene(id, nodes, xmlnode=node)
