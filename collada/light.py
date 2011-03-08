@@ -15,7 +15,7 @@
 from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, DaeUnsupportedError, tag
+                    DaeMalformedError, DaeUnsupportedError, tag, E
 
 class Light(DaeObject):
     """Abstract light class holding data from <light> tags."""
@@ -59,16 +59,13 @@ class SunLight(Light):
         """Light color."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('light') )
-            tecnode = ElementTree.Element( tag('technique_common') )
-            self.xmlnode.append(tecnode)
-            dirnode = ElementTree.Element( tag('directional') )
-            tecnode.append( dirnode )
-            colornode = ElementTree.Element( tag('color') )
-            dirnode.append( colornode )
-            colornode.text = ' '.join( [ str(v) for v in self.color ] )
-            self.xmlnode.set('id', self.id)
-            self.xmlnode.set('name', self.id)
+            self.xmlnode = E.light(
+                E.technique_common(
+                    E.directional(
+                        E.color(' '.join( [ str(v) for v in self.color ] ))
+                    )
+                )
+            , id=self.id, name=self.id)
 
     def save(self):
         self.xmlnode.set('id', self.id)
@@ -113,16 +110,13 @@ class AmbientLight(Light):
         """Light color."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('light') )
-            tecnode = ElementTree.Element( tag('technique_common') )
-            self.xmlnode.append(tecnode)
-            dirnode = ElementTree.Element( tag('ambient') )
-            tecnode.append( dirnode )
-            colornode = ElementTree.Element( tag('color') )
-            dirnode.append( colornode )
-            colornode.text = ' '.join( [ str(v) for v in self.color ] )
-            self.xmlnode.set('id', self.id)
-            self.xmlnode.set('name', self.id)
+            self.xmlnode = E.light(
+                E.technique_common(
+                    E.ambient(
+                        E.color(' '.join( [ str(v) for v in self.color ] ))
+                    )
+                )
+            , id=self.id, name=self.id)
 
     def save(self):
         self.xmlnode.set('id', self.id)
@@ -181,30 +175,16 @@ class PointLight(Light):
         """Quadratic attenuation factor."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('light') )
-            tecnode = ElementTree.Element( tag('technique_common') )
-            self.xmlnode.append(tecnode)
-            pnode = ElementTree.Element( tag('point') )
-            tecnode.append( pnode )
-
-            colornode = ElementTree.Element( tag('color') )
-            pnode.append( colornode )
-            colornode.text = ' '.join( [ str(v) for v in self.color ] )
-
-            attnode = ElementTree.Element( tag('constant_attenuation') )
-            pnode.append( attnode )
-            attnode.text = str(self.constant_att)
-
-            attnode = ElementTree.Element( tag('linear_attenuation') )
-            pnode.append( attnode )
-            attnode.text = str(self.linear_att)
-
-            attnode = ElementTree.Element( tag('quadratic_attenuation') )
-            pnode.append( attnode )
-            attnode.text = str(self.quad_att)
-
-            self.xmlnode.set('id', self.id)
-            self.xmlnode.set('name', self.id)
+            self.xmlnode = E.light(
+                E.technique_common(
+                    E.point(
+                        E.color(' '.join( [ str(v) for v in self.color ] )),
+                        E.constant_attenuation(str(self.constant_att)),
+                        E.linear_attenuation(str(self.linear_att)),
+                        E.quadratic_attenuation(str(self.quad_att))
+                    )
+                )
+            , id=self.id, name=self.id)
 
     def save(self):
         self.xmlnode.set('id', self.id)
