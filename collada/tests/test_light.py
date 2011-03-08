@@ -17,20 +17,24 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(sunlight.id, "mysunlight")
         self.assertTupleEqual(sunlight.color, (1,1,1))
         sunlight.color = (0.1, 0.2, 0.3)
+        sunlight.id = "yoursunlight"
         sunlight.save()
         loaded_sunlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(sunlight.xmlnode)))
         self.assertTrue(isinstance(loaded_sunlight, collada.light.SunLight))
         self.assertTupleEqual(sunlight.color, (0.1, 0.2, 0.3))
+        self.assertEqual(sunlight.id, "yoursunlight")
         
     def test_ambient_light_saving(self):
         ambientlight = collada.light.AmbientLight("myambientlight", (1,1,1))
         self.assertEqual(ambientlight.id, "myambientlight")
         self.assertTupleEqual(ambientlight.color, (1,1,1))
         ambientlight.color = (0.1, 0.2, 0.3)
+        ambientlight.id = "yourambientlight"
         ambientlight.save()
         loaded_ambientlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(ambientlight.xmlnode)))
         self.assertTrue(isinstance(loaded_ambientlight, collada.light.AmbientLight))
         self.assertTupleEqual(ambientlight.color, (0.1, 0.2, 0.3))
+        self.assertEqual(ambientlight.id, "yourambientlight")
         
     def test_point_light_saving(self):
         pointlight = collada.light.PointLight("mypointlight", (1,1,1), 0.4, 0.5, 0.6)
@@ -43,6 +47,7 @@ class TestLight(unittest2.TestCase):
         pointlight.constant_att = 0.7
         pointlight.linear_att = 0.8
         pointlight.quad_att = 0.9
+        pointlight.id = "yourpointlight"
         pointlight.save()
         loaded_pointlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(pointlight.xmlnode)))
         self.assertTrue(isinstance(loaded_pointlight, collada.light.PointLight))
@@ -50,6 +55,7 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(pointlight.constant_att, 0.7)
         self.assertEqual(pointlight.linear_att, 0.8)
         self.assertEqual(pointlight.quad_att, 0.9)
+        self.assertEqual(pointlight.id, "yourpointlight")
 
 if __name__ == '__main__':
     unittest2.main()
