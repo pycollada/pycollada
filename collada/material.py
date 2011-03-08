@@ -89,15 +89,11 @@ class CImage(DaeObject):
             if not data: 
                 self._pilimage = 'failed'
                 return None
-            #try: data = self.collada.getFileData( self.path )
-            #except DaeBrokenRefError, ex:
-            #    self._pilimage = 'failed'
-            #    self.collada.handleError(ex)
-            #    return None
-            try: self._pilimage = pil.open( StringIO(data) )
+            try:
+                self._pilimage = pil.open( StringIO(data) )
+                self._pilimage.load()
             except IOError, ex: 
                 self._pilimage = 'failed'
-                print 'PIL failed to load image'
                 return None
             return self._pilimage
 

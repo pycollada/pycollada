@@ -25,6 +25,8 @@ from StringIO import StringIO
 import types
 import traceback
 from datetime import datetime
+import posixpath
+import os.path
 
 
 E = ElementMaker(namespace='http://www.collada.org/2005/11/COLLADASchema',
@@ -109,7 +111,7 @@ class Collada(object):
 
     """
 
-    def __init__(self, filename, ignore = []):
+    def __init__(self, filename, ignore = [], aux_file_loader = None):
         try:
             """Load collada data from filename or file like object."""
             if type(filename) in [types.StringType, types.UnicodeType]:
@@ -131,8 +133,14 @@ class Collada(object):
                         break
                 if not self.filename: raise DaeIncompleteError('No DAE found inside zip compressed file')
                 data = self.zfile.read(self.filename)
+                self.getFileData = self.getFileFromZip
             else:
                 data = strdata
+                self.filename = filename
+                self.getFileData = self.getFileFromDisk
+            
+            if aux_file_loader is not None:
+                self.getFileData = aux_file_loader
             
             self.errors = []
             self.maskedErrors = []
@@ -174,21 +182,27 @@ class Collada(object):
             self.maskedErrors = []
         else:
             for e in args: self.maskedErrors.append(e)
-
-    def getFileData(self, fname):
-        """Return the binary data from an auxiliary file as a string."""
+    
+    def getFileFromZip(self, fname):
+        """Return the binary data of an auxiliary file from a zip archive as a string."""
         if not self.zfile:
             raise DaeBrokenRefError('Trying to load an auxiliar file %s but we are not reading from a zip'%fname)
-        basepath = self.filename.split('/')[:-1]
-        if fname.startswith('/'): fname = fname[1:]
-        else:
-            while fname.startswith('../') and basepath:
-                fname = fname[3:]
-                basepath = basepath[:-1]
-            if basepath: fname = '/'.join(basepath) + '/' + fname
-        if fname not in self.zfile.namelist():
+        basepath = posixpath.dirname(self.filename)
+        aux_path = posixpath.normpath(posixpath.join(basepath, fname))
+        if aux_path not in self.zfile.namelist():
             raise DaeBrokenRefError('Auxiliar file %s not found in archive'%fname)
-        return self.zfile.read( fname )
+        return self.zfile.read( aux_path )
+
+    def getFileFromDisk(self, fname):
+        """Return the binary data of an auxiliary file from the local disk relative to the file path loaded."""
+        if self.zfile:
+            raise DaeBrokenRefError('Trying to load an auxiliar file %s from disk but we are reading from a zip file'%fname)
+        basepath = os.path.dirname(self.filename)
+        aux_path = os.path.normpath(os.path.join(basepath, fname))
+        if not os.path.exists(aux_path):
+            raise DaeBrokenRefError('Auxiliar file %s not found on disk'%fname)
+        fdata = open(aux_path, 'rb')
+        return fdata.read()
 
     def loadAssetInfo(self):
         """Load information in <asset> tag"""
