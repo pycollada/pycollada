@@ -2,7 +2,8 @@ from math import pi, sin, cos
 import numpy
 import collada
 import sys
-import os, os.path
+import posixpath
+import os.path
 import traceback
 import time
 from direct.showbase.ShowBase import ShowBase
@@ -16,6 +17,7 @@ from panda3d.core import Geom
 from panda3d.core import GeomNode
 from panda3d.core import PNMImage
 from panda3d.core import Texture
+from panda3d.core import StringStream
 from panda3d.core import Filename
 from panda3d.core import RenderState
 from panda3d.core import TextureAttrib
@@ -230,13 +232,11 @@ def getStateFromMaterial(prim_material):
                 value = VBase4(value[0], value[1], value[2], val4)
             
             if isinstance(value, collada.material.Map):
-                texture_file = value.sampler.surface.image.path
-                if not texture_file is None:
-                    (root, leaf) = os.path.split(sys.argv[1])
-                    tex_absolute = os.path.join(root, texture_file)
+                image_data = value.sampler.surface.image.data
+                if image_data:
                     myImage = PNMImage()
-                    myImage.read(Filename(tex_absolute))
-                    myTexture = Texture(texture_file)
+                    myImage.read(StringStream(image_data), posixpath.basename(value.sampler.surface.image.path))
+                    myTexture = Texture(value.sampler.surface.image.id)
                     myTexture.load(myImage)
                     state = state.addAttrib(TextureAttrib.make(myTexture))
             elif prop == 'emission':
