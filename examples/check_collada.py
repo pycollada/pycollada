@@ -11,6 +11,7 @@ except:
     traceback.print_exc()
     print
     print "Failed to load collada file."
+    sys.exit(1)
 
 print
 print 'Successfully loaded collada file.'
