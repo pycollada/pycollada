@@ -76,7 +76,7 @@ class Camera(DaeObject):
             znearnode.text = str(self.near)
         if self.far:
             zfarnode = persnode.find( tag('zfar') )
-            zfarnode.text = str(self.near)
+            zfarnode.text = str(self.far)
 
         
     @staticmethod
