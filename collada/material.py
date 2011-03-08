@@ -22,7 +22,7 @@ This module contains all the functionality to load and manage:
 from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, DaeUnsupportedError, tag
+                    DaeMalformedError, DaeUnsupportedError, tag, ColladaMaker
 from StringIO import StringIO
 try:
     import Image as pil
@@ -420,29 +420,29 @@ class Effect(DaeObject):
         self.transparency = transparency
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('effect') )
+            self.xmlnode = ColladaMaker('effect')
             self.xmlnode.set('id', self.id)
             self.xmlnode.set('name', self.id)
-            profilenode = ElementTree.Element( tag('profile_COMMON') )
+            profilenode = ColladaMaker('profile_COMMON')
             self.xmlnode.append(profilenode)
             for param in self.params: profilenode.append( param.xmlnode )
-            tecnode = ElementTree.Element( tag('technique') )
+            tecnode = ColladaMaker('technique')
             profilenode.append(tecnode)
             tecnode.set('sid', 'common')
-            shadnode = ElementTree.Element( tag(self.shadingtype) )
+            shadnode = ColladaMaker(self.shadingtype)
             tecnode.append(shadnode)
             for prop in self.supported:
                 value = getattr(self, prop)
                 if value is None: continue
-                propnode = ElementTree.Element( tag(prop) )
+                propnode = ColladaMaker(prop)
                 shadnode.append( propnode )
                 if type(value) is Map: propnode.append( value.xmlnode )
                 elif type(value) is float:
-                    floatnode = ElementTree.ElementTree( tag('float') )
+                    floatnode = ColladaMaker('float')
                     floatnode.text = str(value)
                     propnode.append(floatnode)
                 else:
-                    colornode = ElementTree.ElementTree( tag('color') )
+                    colornode = ColladaMaker('color')
                     colornode.text = ' '.join( [ str(v) for v in value] )
                     propnode.append(colornode)
 

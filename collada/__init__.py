@@ -19,6 +19,7 @@ file is not what is expected.
 """
 
 from lxml import etree as ElementTree
+from lxml.builder import ElementMaker
 import zipfile
 from StringIO import StringIO
 import types
@@ -26,6 +27,8 @@ import traceback
 from datetime import datetime
 
 
+ColladaMaker = ElementMaker(namespace='http://www.collada.org/2005/11/COLLADASchema',
+                            nsmap={None: 'http://www.collada.org/2005/11/COLLADASchema'})
 def tag( text ):
     return str(ElementTree.QName( 'http://www.collada.org/2005/11/COLLADASchema', text ))
 
