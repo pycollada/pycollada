@@ -20,6 +20,8 @@ def main():
                         help='If warnings present, print warning type')
     parser.add_argument('--show-errors', '-e', default=False, action='store_true',
                         help='If errors present, print error and traceback')
+    parser.add_argument('--show-summary', '-s', default=False, action='store_true',
+                        help='Print a summary at the end of how many files had warnings and errors')
     
     args = parser.parse_args()
     
@@ -40,6 +42,10 @@ def main():
     
     collada_files.sort()
     
+    file_success_count = 0
+    file_warning_count = 0
+    file_error_count = 0
+    
     for c in collada_files:
         (root, leaf) = os.path.split(c)
         print "'%s'..." % leaf,
@@ -51,11 +57,9 @@ def main():
             col = collada.Collada(c, \
                 ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError])
             
-            if col.scene is None:
-                col.errors.append(collada.DaeIncompleteError("No scene node"))
-            
             if len(col.errors) > 0:
                 print "WARNINGS:", len(col.errors)
+                file_warning_count += 1
                 err_names = [type(e).__name__ for e in col.errors]
                 unique = set(err_names)
                 type_cts = [(e, err_names.count(e)) for e in unique]
@@ -64,6 +68,7 @@ def main():
                         print "   %s: %d" % (e, ct)
             else:
                 print "SUCCESS"
+                file_success_count += 1
                 
             #do some sanity checks looping through result
             if not col.scene is None:
@@ -78,6 +83,7 @@ def main():
             sys.exit("Keyboard interrupt. Exiting.")
         except:
             print "ERROR"
+            file_error_count += 1
             if args.show_errors:
                 print
                 traceback.print_exc()
@@ -87,5 +93,14 @@ def main():
         if args.show_time:
             print "   Loaded in %.3f seconds" % (end_time-start_time)
 
+    if args.show_summary:
+        print
+        print
+        print "Summary"
+        print "======="
+        print "Files loaded successfully: %d" % file_success_count
+        print "Files with warnings: %d" % file_warning_count
+        print "Files with errors: %d" % file_error_count
+            
 if __name__ == "__main__":
     main()

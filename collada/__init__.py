@@ -198,7 +198,9 @@ class Collada(object):
             for subnode in list(assetnode):
                 if subnode.tag == tag('up_axis'):
                     self.assetInfo['up_axis'] = subnode.text
-                    if not( subnode.text == 'X_UP' or subnode.text == 'Y_UP' or subnode.text == 'Z_UP' ):
+                    if subnode.text is None:
+                       self.assetInfo['up_axis'] = 'Y_UP'
+                    if not( self.assetInfo['up_axis'] == 'X_UP' or self.assetInfo['up_axis'] == 'Y_UP' or self.assetInfo['up_axis'] == 'Z_UP' ):
                         raise DaeMalformedError('up_axis was unknown value of %s' % subnode.text)
                 elif subnode.tag == tag('contributor'):
                     contributor_info = {}
