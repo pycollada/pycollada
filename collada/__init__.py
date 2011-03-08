@@ -27,8 +27,8 @@ import traceback
 from datetime import datetime
 
 
-ColladaMaker = ElementMaker(namespace='http://www.collada.org/2005/11/COLLADASchema',
-                            nsmap={None: 'http://www.collada.org/2005/11/COLLADASchema'})
+E = ElementMaker(namespace='http://www.collada.org/2005/11/COLLADASchema',
+                 nsmap={None: 'http://www.collada.org/2005/11/COLLADASchema'})
 def tag( text ):
     return str(ElementTree.QName( 'http://www.collada.org/2005/11/COLLADASchema', text ))
 

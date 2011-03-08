@@ -15,7 +15,7 @@
 from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, tag
+                    DaeMalformedError, tag, E
 
 class Camera(DaeObject):
     """Camera data as defined in COLLADA tag <camera>."""
@@ -52,20 +52,17 @@ class Camera(DaeObject):
         """Up vector of the camera."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('camera') )
-            opticsnode = ElementTree.Element( tag('optics') )
-            self.xmlnode.append( opticsnode )
-            tecnode = ElementTree.Element( tag('technique_common') )
-            opticsnode.append(tecnode)
-            persnode = ElementTree.Element( tag('perspective') )
-            tecnode.append( persnode )
-            params = [ ElementTree.Element( tag(t) ) for t in ('yfov', 'znear', 'zfar') ]
-            for p in params: persnode.append( p )
-            p[0].text = str(self.fov)
-            p[1].text = str(self.near)
-            p[2].text = str(self.far)
-            self.xmlnode.set('id', self.id)
-            self.xmlnode.set('name', self.id)
+            self.xmlnode = E.camera(
+                E.optics(
+                    E.technique_common(
+                        E.perspective(
+                            E.yfov(str(self.fov)),
+                            E.znear(str(self.near)),
+                            E.zfar(str(self.far))
+                        )
+                    )
+                )
+            , id=self.id, name=self.id)
 
     def save(self):
         self.xmlnode.set('id', self.id)

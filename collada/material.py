@@ -22,7 +22,7 @@ This module contains all the functionality to load and manage:
 from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, DaeUnsupportedError, tag, ColladaMaker
+                    DaeMalformedError, DaeUnsupportedError, tag, E
 from StringIO import StringIO
 try:
     import Image as pil
@@ -420,29 +420,29 @@ class Effect(DaeObject):
         self.transparency = transparency
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ColladaMaker('effect')
+            self.xmlnode = E('effect')
             self.xmlnode.set('id', self.id)
             self.xmlnode.set('name', self.id)
-            profilenode = ColladaMaker('profile_COMMON')
+            profilenode = E('profile_COMMON')
             self.xmlnode.append(profilenode)
             for param in self.params: profilenode.append( param.xmlnode )
-            tecnode = ColladaMaker('technique')
+            tecnode = E('technique')
             profilenode.append(tecnode)
             tecnode.set('sid', 'common')
-            shadnode = ColladaMaker(self.shadingtype)
+            shadnode = E(self.shadingtype)
             tecnode.append(shadnode)
             for prop in self.supported:
                 value = getattr(self, prop)
                 if value is None: continue
-                propnode = ColladaMaker(prop)
+                propnode = E(prop)
                 shadnode.append( propnode )
                 if type(value) is Map: propnode.append( value.xmlnode )
                 elif type(value) is float:
-                    floatnode = ColladaMaker('float')
+                    floatnode = E('float')
                     floatnode.text = str(value)
                     propnode.append(floatnode)
                 else:
-                    colornode = ColladaMaker('color')
+                    colornode = E('color')
                     colornode.text = ' '.join( [ str(v) for v in value] )
                     propnode.append(colornode)
 
