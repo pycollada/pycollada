@@ -18,7 +18,9 @@ def checkSource( source, components, maxindex):
 
     """
     if len(source.data) <= maxindex:
-        raise DaeMalformedError('Indexes for %s go beyond the limits of the source'%source.id)
+        raise DaeMalformedError(
+            "Indexes (maxindex=%d) for source '%s' (len=%d) go beyond the limits of the source"
+            % (maxindex, source.id, len(source.data)) )
     if source.components != components:
         raise DaeMalformedError('Wrong format in source %s'%source.id)
     return source
