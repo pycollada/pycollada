@@ -15,7 +15,7 @@
 from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, tag
+                    DaeMalformedError, tag, E
 
 class Source(DaeObject):
     """Abstract class for loading source arrays"""
@@ -71,19 +71,22 @@ class FloatSource(Source):
         """Tuple of strings describing the semantic of the data like ('X','Y','Z')."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('source') )
-            self.xmlnode.set('id', self.id)
-            arraynode = ElementTree.Element( tag('float_array') )
-            tecnode = ElementTree.Element( tag('technique_common') )
-            accessor = ElementTree.Element( tag('accessor') )
-            self.xmlnode.append(arraynode)
-            tecnode.append(accessor)
-            self.xmlnode.append(tecnode)
-            for c in self.components:
-                param = ElementTree.Element('param')
-                param.set('type', 'float')
-                param.set('name', c )
-                accessor.append( param )
+            self.data.shape = (-1,)
+            txtdata = ' '.join([ str(f) for f in self.data ])
+            rawlen = len( self.data )
+            self.data.shape = (-1, len(self.components) )
+            acclen = len( self.data )
+            stridelen = len(self.components)
+            sourcename = "%s-array"%self.id
+            
+            self.xmlnode = E.source(
+                E.float_array(txtdata, count=str(rawlen), id=sourcename),
+                E.technique_common(
+                    E.accessor(
+                        *[E.param(type='float', name=c) for c in self.components]
+                    , count=str(acclen), stride=str(stridelen), source=sourcename)
+                )
+            , id=self.id )
 
     def __len__(self): return len(self.data)
 
@@ -91,7 +94,7 @@ class FloatSource(Source):
 
     def save(self):
         self.data.shape = (-1,)
-        txtdata = ' '.join([ str(f) for f in self.data ])#str(self.data)[1:-1]
+        txtdata = ' '.join([ str(f) for f in self.data ])
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )
@@ -100,9 +103,12 @@ class FloatSource(Source):
         node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
         node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
+        node.clear()
         node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
         node.set('stride', str(len(self.components)))
+        for c in self.components:
+            node.append(E.param(type='float', name=c))
         self.xmlnode.set('id', self.id )
     
     @staticmethod
@@ -146,7 +152,7 @@ class IDRefSource(Source):
           id
             Id for later access
           data
-            List of strings, each a reference value
+            Numpy array of strings, each a reference value (unshaped)
           components
             Tuple of strings describing the semantic of the data 
             like ('MORPH_TARGET')
@@ -158,39 +164,51 @@ class IDRefSource(Source):
         self.id = id
         """Object id in the global scope."""
         self.data = data
-        """List of strings, each a reference value."""
+        """Numpy array of strings, each a reference value."""
+        self.data.shape = (-1, len(components) )
         self.components = components
         """Tuple of strings describing the semantic of the data like ('MORPH_TARGET')."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('source') )
-            self.xmlnode.set('id', self.id)
-            arraynode = ElementTree.Element( tag('IDREF_array') )
-            tecnode = ElementTree.Element( tag('technique_common') )
-            accessor = ElementTree.Element( tag('accessor') )
-            self.xmlnode.append(arraynode)
-            tecnode.append(accessor)
-            self.xmlnode.append(tecnode)
-            for c in self.components:
-                param = ElementTree.Element('param')
-                param.set('type', 'IDREF')
-                param.set('name', c )
-                accessor.append( param )
+            self.data.shape = (-1,)
+            txtdata = ' '.join([ str(f) for f in self.data ])
+            rawlen = len( self.data )
+            self.data.shape = (-1, len(self.components) )
+            acclen = len( self.data )
+            stridelen = len(self.components)
+            sourcename = "%s-array"%self.id
+            
+            self.xmlnode = E.source(
+                E.IDREF_array(txtdata, count=str(rawlen), id=sourcename),
+                E.technique_common(
+                    E.accessor(
+                        *[E.param(type='IDREF', name=c) for c in self.components]
+                    , count=str(acclen), stride=str(stridelen), source=sourcename)
+                )
+            , id=self.id )
 
     def __len__(self): return len(self.data)
 
     def __getitem__(self, i): return self.data[i]
 
     def save(self):
-        txtdata = ' '.join([ f for f in self.data ])
+        self.data.shape = (-1,)
+        txtdata = ' '.join([ str(f) for f in self.data ])
+        rawlen = len( self.data )
+        self.data.shape = (-1, len(self.components) )
+        acclen = len( self.data )
+        
         node = self.xmlnode.find(tag('IDREF_array'))
         node.text = txtdata
-        node.set('count', str(len(self.data)))
+        node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
         node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
-        node.set('count', str(len(self.components)))
+        node.clear()
+        node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
         node.set('stride', str(len(self.components)))
+        for c in self.components:
+            node.append(E.param(type='IDREF', name=c))
         self.xmlnode.set('id', self.id )
     
     @staticmethod
@@ -203,7 +221,7 @@ class IDRefSource(Source):
         else:
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted IDREF array')
-        data = values
+        data = numpy.array( values, dtype=numpy.string_ )
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
@@ -223,7 +241,7 @@ class NameSource(Source):
           id
             Id for later access
           data
-            List of strings
+            Numpy array of strings (unshaped)
           components
             Tuple of strings describing the semantic of the data 
             like ('JOINT')
@@ -235,39 +253,51 @@ class NameSource(Source):
         self.id = id
         """Object id in the global scope."""
         self.data = data
-        """List of strings."""
+        """Numpy array of strings."""
+        self.data.shape = (-1, len(components) )
         self.components = components
         """Tuple of strings describing the semantic of the data like ('JOINT')."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('source') )
-            self.xmlnode.set('id', self.id)
-            arraynode = ElementTree.Element( tag('Name_array') )
-            tecnode = ElementTree.Element( tag('technique_common') )
-            accessor = ElementTree.Element( tag('accessor') )
-            self.xmlnode.append(arraynode)
-            tecnode.append(accessor)
-            self.xmlnode.append(tecnode)
-            for c in self.components:
-                param = ElementTree.Element('param')
-                param.set('type', 'Name')
-                param.set('name', c )
-                accessor.append( param )
-
+            self.data.shape = (-1,)
+            txtdata = ' '.join([ str(f) for f in self.data ])
+            rawlen = len( self.data )
+            self.data.shape = (-1, len(self.components) )
+            acclen = len( self.data )
+            stridelen = len(self.components)
+            sourcename = "%s-array"%self.id
+            
+            self.xmlnode = E.source(
+                E.Name_array(txtdata, count=str(rawlen), id=sourcename),
+                E.technique_common(
+                    E.accessor(
+                        *[E.param(type='Name', name=c) for c in self.components]
+                    , count=str(acclen), stride=str(stridelen), source=sourcename)
+                )
+            , id=self.id )
+            
     def __len__(self): return len(self.data)
 
     def __getitem__(self, i): return self.data[i]
 
     def save(self):
-        txtdata = ' '.join([ f for f in self.data ])
+        self.data.shape = (-1,)
+        txtdata = ' '.join([ str(f) for f in self.data ])
+        rawlen = len( self.data )
+        self.data.shape = (-1, len(self.components) )
+        acclen = len( self.data )
+
         node = self.xmlnode.find(tag('Name_array'))
         node.text = txtdata
-        node.set('count', str(len(self.data)))
+        node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
         node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
-        node.set('count', str(len(self.components)))
+        node.clear()
+        node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
         node.set('stride', str(len(self.components)))
+        for c in self.components:
+            node.append(E.param(type='IDREF', name=c))
         self.xmlnode.set('id', self.id )
     
     @staticmethod
@@ -280,7 +310,7 @@ class NameSource(Source):
         else:
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted Name array')
-        data = values
+        data = numpy.array( values, dtype=numpy.string_ )
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
