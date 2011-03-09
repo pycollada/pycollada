@@ -66,12 +66,9 @@ class CImage(DaeObject):
         self._floatarray = None
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('image') )
-            initnode = ElementTree.Element( tag('init_from') )
-            initnode.text = path
-            self.xmlnode.append(initnode)
-            self.xmlnode.set('id', id)
-            self.xmlnode.set('name', id)
+            self.xmlnode = E.image(
+                E.init_from(path)
+            , id=self.id, name=self.id)
 
     def getData(self):
         if self._data is None:
@@ -152,27 +149,22 @@ class Surface(DaeObject):
 
     """
 
-    def __init__(self, id, img, format, xmlnode=None):
+    def __init__(self, id, img, format=None, xmlnode=None):
         """Create a surface from an id in the local scope, image and format."""
         self.id = id
         """Id of the node in the local scope of the material."""
         self.image = img
         """CImage object from the image library."""
-        self.format = format
+        self.format = format if format is not None else "A8R8G8B8"
         """Format string."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('newparam') )
-            surfacenode = ElementTree.Element( tag('surface') )
-            initnode = ElementTree.Element( tag('init_from') )
-            initnode.text = self.image.id
-            formatnode = ElementTree.Element( tag('format') )
-            formatnode.text = 'A8R8G8B8'
-            surfacenode.append( initnode )
-            surfacenode.append( formatnode )
-            self.xmlnode.append( surfacenode )
-            self.xmlnode.set('sid', self.id)
-            surfacenode.set('type', '2D')
+            self.xmlnode = E.newparam(
+                E.surface(
+                    E.init_from(self.image.id),
+                    E.format(self.format)
+                , type="2D")
+            , sid=self.id)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -182,7 +174,7 @@ class Surface(DaeObject):
         initnode = surfacenode.find( tag('init_from') )
         if initnode is None: raise DaeIncompleteError('No init image found in surface')
         formatnode = surfacenode.find( tag('format') )
-        if formatnode is None: format = None #raise Exception('No format found in surface')
+        if formatnode is None: format = None
         else: format = formatnode.text
         imgid = initnode.text
         id = node.get('sid')
@@ -209,7 +201,7 @@ class Sampler2D(DaeObject):
 
     """
 
-    def __init__(self, id, surface, minfilter, maxfilter, xmlnode=None):
+    def __init__(self, id, surface, minfilter=None, magfilter=None, xmlnode=None):
         """Create a sampler object.
         
         :Parameters:
@@ -219,9 +211,9 @@ class Sampler2D(DaeObject):
             Surface instance that this object samples from
           minfilter
             Minification filter string id, see collada specs
-          maxfilter
+          magfilter
             Maximization filter string id, see collada specs
-          maxfilter
+          xmlnode
             If loaded from XML, the node data comes from
 
         """
@@ -231,25 +223,17 @@ class Sampler2D(DaeObject):
         """Surface class instance this object samples from."""
         self.minfilter = minfilter
         """Minification filter string id, see collada specs."""
-        self.maxfilter = maxfilter
+        self.magfilter = magfilter
         """Maximization filter string id, see collada specs."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('newparam') )
-            samplernode = ElementTree.Element( tag('sampler2D') )
-            sourcenode = ElementTree.Element( tag('source') )
-            sourcenode.text = self.surface.id
-            samplernode.append( sourcenode )
-            if minfilter: 
-                minnode = ElementTree.Element( tag('minfilter') )
-                minnode.text = self.minfilter
-                samplernode.append( minnode )
-            if maxfilter: 
-                maxnode = ElementTree.Element( tag('maxfilter') )
-                maxnode.text = self.maxfilter
-                samplernode.append( maxnode )
-            self.xmlnode.append( samplernode )
-            self.xmlnode.set('sid', self.id)
+            sampler_node = E.sampler2D(E.source(self.surface.id))
+            if minfilter:
+                sampler_node.append(E.minfilter(self.minfilter))
+            if magfilter:
+                sampler_node.append(E.magfilter(self.magfilter))
+                
+            self.xmlnode = E.newparam(sampler_node, sid=self.id)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -260,15 +244,15 @@ class Sampler2D(DaeObject):
         minnode = samplernode.find( tag('minfilter') )
         if minnode is None: minfilter = None
         else: minfilter = minnode.text
-        maxnode = samplernode.find( tag('maxfilter') )
-        if maxnode is None: maxfilter = None
-        else: maxfilter = maxnode.text
+        magnode = samplernode.find( tag('magfilter') )
+        if magnode is None: magfilter = None
+        else: magfilter = magnode.text
 
         surfaceid = sourcenode.text
         id = node.get('sid')
         surface = localscope.get(surfaceid)
         if surface is None or type(surface) != Surface: raise DaeBrokenRefError('Missing surface ' + surfaceid)
-        return Sampler2D(id, surface, minfilter, maxfilter, xmlnode=node)
+        return Sampler2D(id, surface, minfilter, magfilter, xmlnode=node)
 
     def save(self):
         samplernode = self.xmlnode.find( tag('sampler2D') )
@@ -276,9 +260,9 @@ class Sampler2D(DaeObject):
         if self.minfilter:
             minnode = samplernode.find( tag('minfilter') )
             minnode.text = self.minfilter
-        if self.maxfilter:
-            maxnode = samplernode.find( tag('maxfilter') )
-            maxnode.text = self.maxfilter
+        if self.magfilter:
+            maxnode = samplernode.find( tag('magfilter') )
+            maxnode.text = self.magfilter
         sourcenode.text = self.surface.id
         self.xmlnode.set('sid', self.id)
 
@@ -313,9 +297,7 @@ class Map(DaeObject):
         """Texture coord channel symbol to use."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('texture') )
-            self.xmlnode.set('texture', self.sampler.id)
-            self.xmlnode.set('texcoord', self.texcoord)
+            self.xmlnode = E.texture(texture=self.sampler.id, texcoord=self.texcoord)
     
     @staticmethod
     def load( collada, localscope, node ):
@@ -416,31 +398,25 @@ class Effect(DaeObject):
         self.transparency = transparency
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = E('effect')
-            self.xmlnode.set('id', self.id)
-            self.xmlnode.set('name', self.id)
-            profilenode = E('profile_COMMON')
-            self.xmlnode.append(profilenode)
-            for param in self.params: profilenode.append( param.xmlnode )
-            tecnode = E('technique')
-            profilenode.append(tecnode)
-            tecnode.set('sid', 'common')
             shadnode = E(self.shadingtype)
-            tecnode.append(shadnode)
+            
             for prop in self.supported:
                 value = getattr(self, prop)
                 if value is None: continue
                 propnode = E(prop)
                 shadnode.append( propnode )
-                if type(value) is Map: propnode.append( value.xmlnode )
+                if type(value) is Map:
+                    propnode.append(value.xmlnode)
                 elif type(value) is float:
-                    floatnode = E('float')
-                    floatnode.text = str(value)
-                    propnode.append(floatnode)
+                    propnode.append(E.float(str(value)))
                 else:
-                    colornode = E('color')
-                    colornode.text = ' '.join( [ str(v) for v in value] )
-                    propnode.append(colornode)
+                    propnode.append(E.color(' '.join( [ str(v) for v in value] )))
+            
+            effect_nodes = [param.xmlnode for param in self.params]
+            effect_nodes.append(E.technique(shadnode, sid='common'))
+            self.xmlnode = E.effect(
+                E.profile_COMMON(*effect_nodes)
+            , id=self.id, name=self.id)
 
     @staticmethod
     def load(collada, localscope, node):
@@ -509,25 +485,25 @@ class Effect(DaeObject):
         return value
 
     def save(self):
+        self.xmlnode.clear()
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        profilenode = self.xmlnode.find( tag('profile_COMMON') )
-        for param in self.params: param.save()
-        tecnode = profilenode.find( tag('technique') )
-        tecnode.set('sid', 'common')
-        for shad in self.shaders:
-            shadnode = tecnode.find(tag(shad))
-            if not shadnode is None:
-                break
+        
+        shadnode = E(self.shadingtype)
         for prop in self.supported:
             value = getattr(self, prop)
             if value is None: continue
-            propnode = shadnode.find( tag(prop) )
-            if type(value) is Map: value.save()
+            propnode = E(prop)
+            shadnode.append( propnode )
+            if type(value) is Map:
+                propnode.append(value.xmlnode)
             elif type(value) is float:
-                floatnode = propnode.find( tag('float') )
-                floatnode.text = str(value)
+                propnode.append(E.float(str(value)))
             else:
-                colornode = propnode.find( tag('color') )
-                colornode.text = ' '.join( [ str(v) for v in value] )
+                propnode.append(E.color(' '.join( [ str(v) for v in value] )))
+        
+        effect_nodes = [param.xmlnode for param in self.params]
+        effect_nodes.append(E.technique(shadnode, sid='common'))
+        self.xmlnode.append(E.profile_COMMON(*effect_nodes))
+        
 
