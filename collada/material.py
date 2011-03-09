@@ -420,6 +420,7 @@ class Effect(DaeObject):
             self.xmlnode = E.effect(
                 E.profile_COMMON(*effect_nodes)
             , id=self.id, name=self.id)
+            
 
     @staticmethod
     def load(collada, localscope, node):
@@ -492,9 +493,24 @@ class Effect(DaeObject):
         return value
 
     def save(self):
-        self.xmlnode.clear()
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
+        profilenode = self.xmlnode.find( tag('profile_COMMON') )
+        tecnode = profilenode.find( tag('technique') )
+        tecnode.clear()
+        tecnode.set('sid', 'common')
+        
+        for param in self.params:
+            param.save()
+            if param.xmlnode not in profilenode.getchildren():
+                profilenode.insert(profilenode.index(tecnode), param.xmlnode)
+        
+        deletenodes = []
+        for oldparam in profilenode.findall( tag('newparam') ):
+            if oldparam not in [param.xmlnode for param in self.params]:
+                deletenodes.append(oldparam)
+        for d in deletenodes:
+            profilenode.remove(d)
         
         shadnode = E(self.shadingtype)
         for prop in self.supported:
@@ -508,9 +524,4 @@ class Effect(DaeObject):
                 propnode.append(E.float(str(value)))
             else:
                 propnode.append(E.color(' '.join( [ str(v) for v in value] )))
-        
-        effect_nodes = [param.xmlnode for param in self.params]
-        effect_nodes.append(E.technique(shadnode, sid='common'))
-        self.xmlnode.append(E.profile_COMMON(*effect_nodes))
-        
-
+        tecnode.append(shadnode)

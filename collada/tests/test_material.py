@@ -186,15 +186,20 @@ class TestMaterial(unittest2.TestCase):
         other_cimage = collada.material.CImage("yourcimage", "./whatever.tga", self.dummy)
         other_surface = collada.material.Surface("yoursurface", other_cimage)
         other_sampler2d = collada.material.Sampler2D("yoursampler2d", other_surface)
-        effect.params = [other_surface, other_sampler2d]
+        effect.params.pop()
+        effect.params.append(other_surface)
+        effect.params.append(other_sampler2d)
         effect.save()
         
+        self.dummy.imageById["mycimage"] = self.dummy_cimage
         loaded_effect = collada.material.Effect.load(self.dummy, {}, fromstring(tostring(effect.xmlnode)))
-        self.assertEqual(len(loaded_effect.params), 2)
+        self.assertEqual(len(loaded_effect.params), 3)
         self.assertTrue(type(loaded_effect.params[0]) is collada.material.Surface)
-        self.assertEqual(loaded_effect.params[0].id, "yoursurface")
-        self.assertTrue(type(loaded_effect.params[1]) is collada.material.Sampler2D)
-        self.assertEqual(loaded_effect.params[1].id, "yoursampler2d")
+        self.assertEqual(loaded_effect.params[0].id, "mysurface")
+        self.assertTrue(type(loaded_effect.params[1]) is collada.material.Surface)
+        self.assertEqual(loaded_effect.params[1].id, "yoursurface")
+        self.assertTrue(type(loaded_effect.params[2]) is collada.material.Sampler2D)
+        self.assertEqual(loaded_effect.params[2].id, "yoursampler2d")
 
 if __name__ == '__main__':
     unittest2.main()
