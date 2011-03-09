@@ -178,7 +178,10 @@ class Surface(DaeObject):
         else: format = formatnode.text
         imgid = initnode.text
         id = node.get('sid')
-        img = collada.imageById.get(imgid)
+        if imgid in localscope:
+            img = localscope[imgid]
+        else:
+            img = collada.imageById.get(imgid)
         if img is None: raise DaeBrokenRefError('Missing image ' + imgid)
         return Surface(id, img, format, xmlnode=node)
 
@@ -426,6 +429,10 @@ class Effect(DaeObject):
         profilenode = node.find( tag('profile_COMMON') )
         if profilenode is None:
             raise DaeUnsupportedError('Found effect with profile other than profile_COMMON')
+        #<image> can be local to a material instead of global in <library_images>
+        for imgnode in profilenode.findall( tag('image') ):
+            local_image = CImage.load(collada, localscope, imgnode)
+            localscope[local_image.id] = local_image
         for paramnode in profilenode.findall( tag('newparam') ):
             if paramnode.find( tag('surface') ) != None:
                 param = Surface.load(collada, localscope, paramnode)
