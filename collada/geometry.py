@@ -80,29 +80,33 @@ class Geometry( DaeObject ):
             ch = source.Source.load(collada, {}, sourcenode)
             sources.append(ch)
             sourcebyid[ch.id] = ch
+            
+        verticesnode = meshnode.find(tag('vertices'))
+        if verticesnode is None:
+            vertexsource = None
+        else:
+            inputnodes = {}
+            for inputnode in verticesnode.findall(tag('input')):
+                semantic = inputnode.get('semantic')
+                inputsource = inputnode.get('source')
+                if not semantic or not inputsource or not inputsource.startswith('#'):
+                    raise DaeIncompleteError('Bad input definition inside vertices')
+                inputnodes[semantic] = sourcebyid.get(inputsource[1:])
+            if (not verticesnode.get('id') or len(inputnodes)==0 or 
+                not 'POSITION' in inputnodes):
+                raise DaeIncompleteError('Bad vertices definition in mesh')
+            sourcebyid[verticesnode.get('id')] = inputnodes
+            vertexsource = verticesnode.get('id')
+            
         _primitives = []
-        vertexsource = None
         for subnode in meshnode:
-            if subnode.tag == tag('vertices'):
-                inputnodes = {}
-                for inputnode in subnode.findall(tag('input')):
-                    semantic = inputnode.get('semantic')
-                    inputsource = inputnode.get('source')
-                    if not semantic or not inputsource or not inputsource.startswith('#'):
-                        raise DaeIncompleteError('Bad input definition inside vertices')
-                    inputnodes[semantic] = sourcebyid.get(inputsource[1:])
-                if (not subnode.get('id') or len(inputnodes)==0 or 
-                    not 'POSITION' in inputnodes):
-                    raise DaeIncompleteError('Bad vertices definition in mesh')
-                sourcebyid[subnode.get('id')] = inputnodes
-                vertexsource = subnode.get('id')
-            elif subnode.tag == tag('polylist'):
+            if subnode.tag == tag('polylist'):
                 _primitives.append( polylist.PolygonList.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('triangles'):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('lines'):
                 _primitives.append( lineset.LineSet.load( collada, sourcebyid, subnode ) )
-            elif subnode.tag != tag('source'):
+            elif subnode.tag != tag('source') and subnode.tag != tag('vertices'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
         geom = Geometry( sources, sourcebyid, vertexsource, _primitives, xmlnode=node )
         return geom
