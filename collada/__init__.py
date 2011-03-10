@@ -154,8 +154,8 @@ class Collada(object):
             self.loadGeometry()
             self.loadControllers()
             self.loadLights()
-            self.loadNodes()
             self.loadCameras()
+            self.loadNodes()
             self.loadScenes()
             self.loadDefaultScene()
         except:
