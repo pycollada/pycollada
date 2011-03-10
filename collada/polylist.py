@@ -136,12 +136,17 @@ class PolygonList(primitive.Primitive):
 
         self.npolygons = len(self.index)
 
-        self._vertex = sources['VERTEX'][0][4].data
-        self._vertex_index = [poly[:,sources['VERTEX'][0][0]] for poly in self.index]
-        self.maxvertexindex = numpy.max( [numpy.max(poly) for poly in self._vertex_index] )
-        checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
+        if len(self.index) > 0:
+            self._vertex = sources['VERTEX'][0][4].data
+            self._vertex_index = [poly[:,sources['VERTEX'][0][0]] for poly in self.index]
+            self.maxvertexindex = numpy.max( [numpy.max(poly) for poly in self._vertex_index] )
+            checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
+        else:
+            self._vertex = None
+            self._vertex_index = None
+            self.maxvertexindex = -1
 
-        if 'NORMAL' in sources and len(sources['NORMAL']) > 0:
+        if 'NORMAL' in sources and len(sources['NORMAL']) > 0 and len(self.index) > 0:
             self._normal = sources['NORMAL'][0][4].data
             self._normal_index = [poly[:,sources['NORMAL'][0][0]] for poly in self.index]
             self.maxnormalindex = numpy.max( [numpy.max(poly) for poly in self._normal_index] )
@@ -151,7 +156,7 @@ class PolygonList(primitive.Primitive):
             self._normal_index = None
             self.maxnormalindex = -1
             
-        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0:
+        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
             self._texcoord_indexset = tuple([ [poly[:,sources['TEXCOORD'][i][0]] for poly in self.index]
                                              for i in xrange(len(sources['TEXCOORD'])) ])
@@ -227,14 +232,20 @@ class PolygonList(primitive.Primitive):
         vcountnode = node.find(tag('vcount'))
         if vcountnode is None: raise DaeIncompleteError('Missing vcount in polylist')
 
-        try: 
-            vcounts = numpy.array([float(v) for v in vcountnode.text.split()], dtype=numpy.int32)
+        try:
+            if vcountnode.text is None:
+                vcounts = numpy.array([], dtype=numpy.int32)
+            else:
+                vcounts = numpy.array([float(v) for v in vcountnode.text.split()], dtype=numpy.int32)
         except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
 
         all_inputs = primitive.Primitive.getInputs(localscope, node.findall(tag('input')))
 
         try:
-            index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
+            if indexnode.text is None:
+                index = numpy.array([], dtype=numpy.int32)
+            else:
+                index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
         except: raise DaeMalformedError('Corrupted index in polylist')
 
         polylist = PolygonList(all_inputs, node.get('material'), index, vcounts)
@@ -278,7 +289,7 @@ class BoundPolygonList(object):
     def __init__(self, pl, matrix, materialnodebysymbol):
         """Create a bound polygon list from a polygon list, transform and material mapping"""
         M = numpy.asmatrix(matrix).transpose()
-        self._vertex = numpy.asarray(pl._vertex * M[:3,:3]) + matrix[:3,3]
+        self._vertex = None if pl._vertex is None else numpy.asarray(pl._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if pl._normal is None else numpy.asarray(pl._normal * M[:3,:3])
         self._texcoordset = pl._texcoordset
         matnode = materialnodebysymbol.get( pl.material )

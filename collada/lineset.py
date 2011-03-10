@@ -18,7 +18,7 @@ import primitive
 import types
 from util import toUnitVec, checkSource
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
-                    DaeUnsupportedError, tag
+                    DaeUnsupportedError, tag, E
 
 class Line(object):
     """Single line representation."""
@@ -91,12 +91,17 @@ class LineSet(primitive.Primitive):
         self.index.shape = (-1, 2, self.nindices)
         self.nlines = len(self.index)
 
-        self._vertex = sources['VERTEX'][0][4].data
-        self._vertex_index = self.index[:,:, sources['VERTEX'][0][0]]
-        self.maxvertexindex = numpy.max( self._vertex_index )
-        checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
+        if len(self.index) > 0:
+            self._vertex = sources['VERTEX'][0][4].data
+            self._vertex_index = self.index[:,:, sources['VERTEX'][0][0]]
+            self.maxvertexindex = numpy.max( self._vertex_index )
+            checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
+        else:
+            self._vertex = None
+            self._vertex_index = None
+            self.maxvertexindex = -1
 
-        if 'NORMAL' in sources and len(sources['NORMAL']) > 0:
+        if 'NORMAL' in sources and len(sources['NORMAL']) > 0 and len(self.index) > 0:
             self._normal = sources['NORMAL'][0][4].data
             self._normal_index = self.index[:,:, sources['NORMAL'][0][0]]
             self.maxnormalindex = numpy.max( self._normal_index )
@@ -106,7 +111,7 @@ class LineSet(primitive.Primitive):
             self._normal_index = None
             self.maxnormalindex = -1
             
-        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0:
+        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
             self._texcoord_indexset = tuple([ self.index[:,:, sources['TEXCOORD'][i][0]]
                                              for i in xrange(len(sources['TEXCOORD'])) ])
@@ -120,7 +125,14 @@ class LineSet(primitive.Primitive):
             
         if xmlnode: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.fromstring("<lines> <p></p> </lines>")
+            self.index.shape = (-1)
+            acclen = len(self.index)
+            txtindices = ' '.join([str(i) for i in self.index])
+            self.index.shape = (-1, 2, self.nindices)
+            
+            self.xmlnode = E.lines(
+                E.p(txtindices)
+            , count=str(self.nlines))
 
     def __len__(self): return len(self.index)
 
@@ -182,7 +194,10 @@ class LineSet(primitive.Primitive):
         source_array = primitive.Primitive.getInputs(localscope, node.findall(tag('input')))
             
         try:
-            index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
+            if indexnode.text is None:
+                index = numpy.array([],  dtype=numpy.int32)
+            else:
+                index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
         except: raise DaeMalformedError('Corrupted index in line set')
         
         lineset = LineSet(source_array, node.get('material'), index)
@@ -223,23 +238,23 @@ class LineSet(primitive.Primitive):
 class BoundLineSet(object):
     """A line set bound to a transform matrix and materials mapping."""
 
-    def __init__(self, ts, matrix, materialnodebysymbol):
+    def __init__(self, ls, matrix, materialnodebysymbol):
         """Create a bound line set from a line set, transform and material mapping"""
         M = numpy.asmatrix(matrix).transpose()
-        self._vertex = numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
-        self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3,:3])
-        self._texcoordset = ts._texcoordset
-        matnode = materialnodebysymbol.get( ts.material )
+        self._vertex = None if ls._vertex is None else numpy.asarray(ls._vertex * M[:3,:3]) + matrix[:3,3]
+        self._normal = None if ls._normal is None else numpy.asarray(ls._normal * M[:3,:3])
+        self._texcoordset = ls._texcoordset
+        matnode = materialnodebysymbol.get( ls.material )
         if matnode:
             self.material = matnode.target
             self.inputmap = dict([ (sem, (input_sem, set)) for sem, input_sem, set in matnode.inputs ])
         else: self.inputmap = self.material = None
-        self.index = ts.index
-        self._vertex_index = ts._vertex_index
-        self._normal_index = ts._normal_index
-        self._texcoord_indexset = ts._texcoord_indexset
-        self.nlines = ts.nlines
-        self.original = ts
+        self.index = ls.index
+        self._vertex_index = ls._vertex_index
+        self._normal_index = ls._normal_index
+        self._texcoord_indexset = ls._texcoord_indexset
+        self.nlines = ls.nlines
+        self.original = ls
     
     def __len__(self): return len(self.index)
 
