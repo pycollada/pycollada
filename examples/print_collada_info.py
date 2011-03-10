@@ -13,24 +13,13 @@ def inspectController(controller):
 
 def inspectGeometry(obj):
     """Display contents of a geometry object found in the scene."""
-    avgpoint = numpy.zeros( (3,), dtype=numpy.float32 )
-    num = 0
-    numuv = 0
     materials = set()
     for prim in obj.primitives():
         materials.add( prim.material )
-        # iterate shapes to sum up the points for the average
-        # we could also use the prim.vertex attribute which is a
-        # numpy array of all the vertices in the primitive
-        for shape in prim.shapes():
-            for vertex in shape.vertices:
-                avgpoint += vertex
-                num += 1
-    avgpoint /= float(num)
-    print '    Geometry (id=%s): %d primitives, avg point %s'%(
-               obj.original.id, len(obj), str(avgpoint))
+
+    print '    Geometry (id=%s): %d primitives'%(obj.original.id, len(obj))
     for prim in obj.primitives():
-        print '        Primitive (type=%s): len=%d' % (type(prim).__name__, len(prim))
+        print '        Primitive (type=%s): len=%d vertices=%d' % (type(prim).__name__, len(prim), len(prim.vertex))
     for mat in materials:
         if mat: inspectMaterial( mat )
 

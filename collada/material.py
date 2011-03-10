@@ -435,12 +435,22 @@ class Effect(DaeObject):
             local_image = CImage.load(collada, localscope, imgnode)
             localscope[local_image.id] = local_image
         for paramnode in profilenode.findall( tag('newparam') ):
-            if paramnode.find( tag('surface') ) != None:
+            if paramnode.find( tag('surface') ) is not None:
                 param = Surface.load(collada, localscope, paramnode)
-            elif paramnode.find( tag('sampler2D') ) != None:
+                params.append(param)
+                localscope[param.id] = param
+            elif paramnode.find( tag('sampler2D') ) is not None:
                 param = Sampler2D.load(collada, localscope, paramnode)
-            params.append(param)
-            localscope[param.id] = param
+                params.append(param)
+                localscope[param.id] = param
+            else:
+                floatnode = paramnode.find( tag('float') )
+                if floatnode is None: floatnode = paramnode.find( tag('float2') )
+                if floatnode is None: floatnode = paramnode.find( tag('float3') )
+                if floatnode is None: floatnode = paramnode.find( tag('float4') )
+                paramid = paramnode.get('sid')
+                if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
+                    localscope[paramid] = [float(v) for v in floatnode.text.split()]
         tecnode = profilenode.find( tag('technique') )
         shadnode = None
         for shad in Effect.shaders:
@@ -489,6 +499,12 @@ class Effect(DaeObject):
             except ValueError, ex: raise DaeMalformedError('Corrupted float definition in effect '+id)
         elif vnode.tag == tag('texture'):
             value = Map.load(collada, localscope, vnode)
+        elif vnode.tag == tag('param'):
+            refid = vnode.get('ref')
+            if refid is not None and refid in localscope:
+                value = localscope[refid]
+            else:
+                return None
         else: raise DaeUnsupportedError('Unknown shading param definition ' + vnode.tag)
         return value
 
