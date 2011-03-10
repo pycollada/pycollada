@@ -168,7 +168,7 @@ class Collada(object):
     def handleError(self, error):
         self.errors.append(error)
         if not type(error) in self.maskedErrors:
-            raise
+            raise error
 
     def ignoreErrors(self, *args):
         """Add exceptions to the mask for ignoring or clear the mask if None given.
@@ -387,7 +387,7 @@ class Collada(object):
         if node != None:
             sceneid = node.get('url')
             if not sceneid.startswith('#'):
-                self.handleError( DaeMalformedError('Malformed default scene reference: '+sceneid) )
+                self.handleError( DaeMalformedError('Malformed default scene reference to %s: '%sceneid) )
             self.scene = self.sceneById.get(sceneid[1:])
             if not self.scene:
                 self.handleError( DaeBrokenRefError('Default scene %s not found'%sceneid) )
