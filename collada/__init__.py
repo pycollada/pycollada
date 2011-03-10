@@ -346,7 +346,7 @@ class Collada(object):
                 effectid = inseffnode.get('url')
                 try:
                     if not effectid.startswith('#'): 
-                        raise DaeMalformedError('Corrupted effect reference in material')
+                        raise DaeMalformedError('Corrupted effect reference in material %s' % effectid)
                     else:
                         matid = materialnode.get('id')
                         effect = self.effectById.get(effectid[1:])
