@@ -189,7 +189,7 @@ class IDRefSource(Source):
 
     def __len__(self): return len(self.data)
 
-    def __getitem__(self, i): return self.data[i]
+    def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
 
     def save(self):
         self.data.shape = (-1,)
@@ -278,7 +278,7 @@ class NameSource(Source):
             
     def __len__(self): return len(self.data)
 
-    def __getitem__(self, i): return self.data[i]
+    def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
 
     def save(self):
         self.data.shape = (-1,)
