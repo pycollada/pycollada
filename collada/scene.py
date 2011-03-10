@@ -445,7 +445,7 @@ def loadNode( collada, node ):
         return referred_node
     elif node.tag == tag('extra'):
         return ExtraNode.load(collada, node)
-    else: raise DaeUnsupportedError('Unknown scene node '+node.tag)
+    else: raise DaeUnsupportedError('Unknown scene node %s' % str(node.tag))
 
 class Scene(DaeObject):
     """Scene data (a tree) for <scene> tag and children."""
