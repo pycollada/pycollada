@@ -168,7 +168,7 @@ class Collada(object):
     def handleError(self, error):
         self.errors.append(error)
         if not type(error) in self.maskedErrors:
-            raise error
+            raise
 
     def ignoreErrors(self, *args):
         """Add exceptions to the mask for ignoring or clear the mask if None given.
@@ -344,16 +344,18 @@ class Collada(object):
                 inseffnode = materialnode.find( tag('instance_effect'))
                 if inseffnode is None: continue
                 effectid = inseffnode.get('url')
-                if not effectid.startswith('#'): 
-                    self.handleError(DaeMalformedError('Corrupted effect reference in material'))
-                else:
-                    matid = materialnode.get('id')
-                    effect = self.effectById.get(effectid[1:])
-                    if not effect: 
-                        self.handleError(DaeBrokenRefError('Effect not found: '+effectid))
+                try:
+                    if not effectid.startswith('#'): 
+                        raise DaeMalformedError('Corrupted effect reference in material')
                     else:
-                        self.materials.append( effect )
-                        self.materialById[matid] = effect
+                        matid = materialnode.get('id')
+                        effect = self.effectById.get(effectid[1:])
+                        if not effect: 
+                            raise DaeBrokenRefError('Effect not found: '+effectid)
+                        else:
+                            self.materials.append( effect )
+                            self.materialById[matid] = effect
+                except DaeError, ex: self.handleError(ex)
 
     def loadNodes(self):
         self.nodes = []
@@ -384,13 +386,15 @@ class Collada(object):
         """Loads the default scene from <scene> tag in the root node."""
         node = self.root.find('%s/%s'%( tag('scene'), tag('instance_visual_scene') ) )
         self.scene = None
-        if node != None:
-            sceneid = node.get('url')
-            if not sceneid.startswith('#'):
-                self.handleError( DaeMalformedError('Malformed default scene reference to %s: '%sceneid) )
-            self.scene = self.sceneById.get(sceneid[1:])
-            if not self.scene:
-                self.handleError( DaeBrokenRefError('Default scene %s not found'%sceneid) )
+        try:
+            if node != None:
+                sceneid = node.get('url')
+                if not sceneid.startswith('#'):
+                    raise DaeMalformedError('Malformed default scene reference to %s: '%sceneid)
+                self.scene = self.sceneById.get(sceneid[1:])
+                if not self.scene:
+                    raise DaeBrokenRefError('Default scene %s not found'%sceneid)
+        except DaeError, ex: self.handleError(ex)
 
     def save(self):
         """Save back all the data to the xml tree."""
