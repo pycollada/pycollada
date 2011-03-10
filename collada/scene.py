@@ -217,7 +217,7 @@ class GeometryNode(SceneNode):
     @staticmethod
     def load( collada, node ):
         url = node.get('url')
-        if not url.startswith('#'): raise DaeMalformedError('Invalid url in geometry instance')
+        if not url.startswith('#'): raise DaeMalformedError('Invalid url in geometry instance %s' % url)
         geometry = collada.geometryById.get(url[1:])
         if not geometry: raise DaeBrokenRefError('Geometry %s not found in library'%url)
         matnodes = node.findall('%s/%s/%s'%( tag('bind_material'), tag('technique_common'), tag('instance_material') ) )
@@ -269,7 +269,7 @@ class ControllerNode(SceneNode):
     @staticmethod
     def load( collada, node ):
         url = node.get('url')
-        if not url.startswith('#'): raise DaeMalformedError('Invalid url in controller instance')
+        if not url.startswith('#'): raise DaeMalformedError('Invalid url in controller instance %s' % url)
         controller = collada.controllerById.get(url[1:])
         if not controller: raise DaeBrokenRefError('Controller %s not found in library'%url)
         matnodes = node.findall('%s/%s/%s'%( tag('bind_material'), tag('technique_common'), tag('instance_material') ) )
@@ -366,7 +366,7 @@ class CameraNode(SceneNode):
     @staticmethod
     def load( collada, node ):
         url = node.get('url')
-        if not url.startswith('#'): raise DaeMalformedError('Invalid url in camera instance')
+        if not url.startswith('#'): raise DaeMalformedError('Invalid url in camera instance %s' % url)
         camera = collada.cameraById.get(url[1:])
         if not camera: raise DaeBrokenRefError('Camera %s not found in library'%url)
         return CameraNode( camera, xmlnode=node)
@@ -394,7 +394,7 @@ class LightNode(SceneNode):
     @staticmethod
     def load( collada, node ):
         url = node.get('url')
-        if not url.startswith('#'): raise DaeMalformedError('Invalid url in light instance')
+        if not url.startswith('#'): raise DaeMalformedError('Invalid url in light instance %s' % url)
         light = collada.lightById.get(url[1:])
         if not light: raise DaeBrokenRefError('Light %s not found in library'%url)
         return LightNode( light, xmlnode=node)
@@ -438,7 +438,7 @@ def loadNode( collada, node ):
     elif node.tag == tag('instance_node'):
         url = node.get('url')
         if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in camera instance')
+            raise DaeMalformedError('Invalid url in camera instance %s' % url)
         referred_node = collada.nodeById.get(url[1:])
         if not referred_node:
             raise DaeBrokenRefError('Node %s not found in library'%url)
