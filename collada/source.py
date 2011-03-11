@@ -117,11 +117,10 @@ class FloatSource(Source):
         arraynode = node.find(tag('float_array'))
         if arraynode is None: raise DaeIncompleteError('No float_array in source node')
         if arraynode.text is None:
-            values = []
+            data = numpy.array([], dtype=float32)
         else:
-            try: values = [ float(v) for v in arraynode.text.split()]
+            try: data = numpy.fromstring(arraynode.text, dtype=numpy.float32, sep=' ')
             except ValueError: raise DaeMalformedError('Corrupted float array')
-        data = numpy.array( values, dtype=numpy.float32 )
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]

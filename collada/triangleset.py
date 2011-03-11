@@ -192,7 +192,7 @@ class TriangleSet(primitive.Primitive):
             if indexnode.text is None:
                 index = numpy.array([], dtype=numpy.int32)
             else:
-                index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
+                index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
         except: raise DaeMalformedError('Corrupted index in triangleset')
         
         triset = TriangleSet(source_array, node.get('material'), index, node)
