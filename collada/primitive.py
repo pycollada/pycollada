@@ -16,6 +16,33 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
 import numpy
 import types
 
+class InputList(DaeObject):
+    class Input:
+        def __init__(self, offset, semantic, src, set=None):
+            self.offset = offset
+            self.semantic = semantic
+            self.source = src
+            self.set = set
+    
+    semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT"]
+    
+    def __init__(self):
+        self.inputs = {}
+        for s in self.semantics:
+            self.inputs[s] = []
+            
+    def addInput(self, offset, semantic, src, set=None):
+        if semantic not in self.semantics:
+            raise DaeUnsupportedError("Unsupported semantic %s" % semantic)
+        self.inputs[semantic].append(self.Input(offset, semantic, src, set))
+        
+    def getList(self):
+        retlist = []
+        for inplist in self.inputs.itervalues():
+            for inp in inplist:
+                 retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
+        return retlist
+
 class Primitive(DaeObject):
     """Base class for all primitive sets like triangle sets."""
 
@@ -37,13 +64,8 @@ class Primitive(DaeObject):
         pass
 
     @staticmethod
-    def getInputs(localscope, inputnodes):
-        try: 
-            inputs = [ (int(i.get('offset')), i.get('semantic'), i.get('source'), i.get('set')) 
-                           for i in inputnodes ]
-        except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
-        
-        #first let's save any of the souce that are references to a dict
+    def getInputsFromList(localscope, inputs):
+        #first let's save any of the source that are references to a dict
         to_append = []
         for input in inputs:
             offset, semantic, source, set = input
@@ -97,3 +119,12 @@ class Primitive(DaeObject):
         all_inputs['TEXTANGENT'] = textangent_inputs
         
         return all_inputs
+
+    @staticmethod
+    def getInputs(localscope, inputnodes):
+        try: 
+            inputs = [ (int(i.get('offset')), i.get('semantic'), i.get('source'), i.get('set')) 
+                           for i in inputnodes ]
+        except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
+        
+        return Primitive.getInputsFromList(localscope, inputs)

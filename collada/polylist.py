@@ -17,9 +17,10 @@ from lxml import etree as ElementTree
 import primitive
 import types
 import triangleset
+import itertools
 from util import toUnitVec, checkSource
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
-                    DaeUnsupportedError, tag
+                    DaeUnsupportedError, tag, E
 
 class Polygon(object):
     """Single polygon representation."""
@@ -95,7 +96,7 @@ class PolygonList(primitive.Primitive):
             A dict mapping source types to an array of tuples in the form:
             {input_type: (offset, semantic, sourceid, set, Source)}
             Example:
-            {'VERTEX': (0, 'VERTEX', '#vertex-inputs', '0', <collada.source.FloatSource>)}
+            {'VERTEX': [(0, 'VERTEX', '#vertex-inputs', '0', <collada.source.FloatSource>)]}
           material
             A string with the symbol of the material
           index
@@ -119,6 +120,7 @@ class PolygonList(primitive.Primitive):
         self.indices = self.index
         self.nindices = max_offset + 1
         self.vcounts = vcounts
+        self.sources = sources
 
         self.nvertices = 0
         try:
@@ -171,7 +173,23 @@ class PolygonList(primitive.Primitive):
             
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.fromstring("<polylist> <vcount></vcount> <p></p> </polylist>")
+            txtindices = ' '.join(str(f) for f in self.indices)
+            acclen = len(self.indices) 
+
+            self.xmlnode = E.polylist(count=str(self.npolygons), material=self.material)
+            
+            all_inputs = []
+            for semantic_list in self.sources.itervalues():
+                all_inputs.extend(semantic_list)
+            for offset, semantic, sourceid, set, src in all_inputs:
+                inpnode = E.input(offset=str(offset), semantic=semantic, source=sourceid)
+                if set is not None:
+                    inpnode.set('set', str(set))
+                self.xmlnode.append(inpnode)
+            
+            vcountnode = E.vcount(' '.join(str(v) for v in self.vcounts))
+            self.xmlnode.append(vcountnode)
+            self.xmlnode.append(E.p(txtindices))
 
     def __len__(self): return len(self.index)
 
@@ -189,32 +207,11 @@ class PolygonList(primitive.Primitive):
     texcoord_indexset = property( lambda s: s._texcoord_indexset )
     """A tuple of arrays of indices for texcoord arrays, shape=(n,3)."""
 
-    def set_vertex_source(self, c):
-        try: self._vertex = checkSource(self.sourceById[c], 
-                                         ('X', 'Y', 'Z'), self.maxvertexindex).data
-        except KeyError, ex: raise DaeBrokenRefError('Setting missing vertex source in polygon list')
-        self._vertex_source = c
-    
-    def set_normal_source(self, c):
-        try: self._normal = checkSource(self.sourceById[c],
-                                         ('X', 'Y', 'Z'), self.maxnormalindex).data
-        except KeyError, ex: raise DaeBrokenRefError('Setting missing normal source in polygon list')
-        self._normal_source = c
-
-    def set_texcoord_sourceset(self, t):
-        if len(t) != len(self._texcoord_sourceset):
-            raise DaeMalformedError('Wrong number of texcoord sources')
-        try: self._texcoordset = tuple([ 
-                    checkSource(self.sourceById[c], ('S', 'T'), 
-                                 self.maxtexcoordsetindex[i]).data for i,c in enumerate(t)])
-        except KeyError, ex: raise DaeBrokenRefError('Setting missing texcoord source in polygon list')
-        self._texcoord_sourceset = tuple(t)
-
-    vertex_source = property( lambda s: s._vertex_source, set_vertex_source )
+    vertex_source = property( lambda s: s._vertex_source )
     """Channel id (string) inside the parent geometry node to use as vertex."""
-    normal_source = property( lambda s: s._normal_source, set_normal_source )
+    normal_source = property( lambda s: s._normal_source )
     """Channel id (string) inside the parent geometry node to use as normal."""
-    texcoord_sourceset = property( lambda s: s._texcoord_sourceset, set_texcoord_sourceset )
+    texcoord_sourceset = property( lambda s: s._texcoord_sourceset )
     """Channel ids (tuple of strings) inside the parent geometry node to use as texcoords."""
 
     def __getitem__(self, i):
@@ -251,33 +248,6 @@ class PolygonList(primitive.Primitive):
         polylist = PolygonList(all_inputs, node.get('material'), index, vcounts)
         polylist.xmlnode = node
         return polylist
-
-    def getXmlInput(self, semantic, offset):
-        """Return the xml node for the given input and create it if it isn't there."""
-        for input in self.xmlnode.findall(tag('input')):
-            if input.get('offset') == str(offset) and input.get('semantic') == semantic: 
-                return input
-        insertpoint = len(self.xmlnode) - 1
-        input = ElementTree.Element('input')
-        input.set('semantic', semantic)
-        input.set('offset', str(offset))
-        input.tail = '\n'
-        if semantic == 'TEXCOORD': input.set('set', str(offset-2))
-        self.xmlnode.insert(insertpoint, input)
-        return input
-
-    def save(self):
-        vnode = self.getXmlInput('VERTEX', 0)
-        nnode = self.getXmlInput('NORMAL', 1)
-        vnode.set('source', '#'+self._vertex_source)
-        nnode.set('source', '#'+self._normal_source)
-        for i, source in enumerate( self._texcoord_sourceset ):
-            node = self.getXmlInput('TEXCOORD', i+2)
-            node.set('source', '#'+source)
-        indexnode = self.xmlnode.find(tag('p'))
-        indexnode.text = str(numpy.reshape(self.index, (-1,)))[1:-1]
-        self.xmlnode.set('material', self.material)
-        self.xmlnode.set('count', str(len(self.index)))
     
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound polygon list from this polygon list, transform and material mapping"""

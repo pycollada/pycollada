@@ -18,59 +18,132 @@ import source
 import triangleset
 import lineset
 import polylist
+import types
+import primitive
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, DaeUnsupportedError, tag
+                    DaeMalformedError, DaeUnsupportedError, tag, E
 
 class Geometry( DaeObject ):
     """A class containing the data coming from a COLLADA <geometry> tag"""
 
-    # TODO: poner el id como argumento
-    def __init__(self, sources, sourcebyid, vertexsource, primitives, xmlnode=None):
+    def __init__(self, collada, id, name, sourcebyid, primitives=[], xmlnode=None):
         """Create a geometry instance
 
         :Parameters:
-          sources
-            A list of data sources (source.Source)
+          collada
+            The collada object this geometry belongs to
+          id
+            A unique identifier for the geometry
+          name
+            A text string naming the geometry
           sourcebyid
-            A dictionary mapping source ids to the actual objects
-          vertexsource
-            A string selecting one of the sources as vertex source 
+            A list of Source objects or
+            a dictionary mapping source ids to the actual objects
           primitives
             List of primitive objects contained
           xmlnode
             When loaded, the xmlnode it comes from
 
         """
-        self.sources = sources
-        """Source list inside this geometry tag."""
+        
+        self.collada = collada
+        """The collada object this geometry belongs to"""
+        
+        self.id = id
+        """A unique identifier for the geometry"""
+        
+        self.name = name
+        """A text string naming the geometry"""
+
         self.sourceById = sourcebyid
         """Sources indexed by id."""
-        self.vertexsource = vertexsource
-        """The source id used as vertex list."""
-        self._primitives = primitives
+
+        if type(sourcebyid) is types.ListType:
+            self.sourceById = {}
+            for src in sourcebyid:
+                self.sourceById[src.id] = src
+        
+        self.primitives = primitives
+        """Primitive object list inside this geometry."""
+        
         if xmlnode != None: 
             self.xmlnode = xmlnode
-            self.id = xmlnode.get('id')
         else:
-            self.id = gid or 'geometry' + str(id(self))
-            self.xmlnode = ElementTree.Element('geometry')
-            mesh = ElementTree.Element('mesh')
-            self.xmlnode.append( mesh )
-            for source in sources:
-                mesh.append( source.xmlnode )
-            vxml = ''
-            for semantic, source in self.sourceById[self.vertexsource].items():
-                vxml.append('<input semantic="%s" source="#%s" />' % (semantic, source.id))
-            vxml = '<vertices id="%s">%s</vertices>' % (self.vertexsource, vxml)
-            mesh.append( ElementTree.fromstring(vxml) )
-            for tset in _primitives:
-                mesh.append(tset.xmlnode)
+            sourcenodes = []
+            verticesnode = None
+            for srcid, src in self.sourceById.iteritems():
+                sourcenodes.append(src.xmlnode)
+                if verticesnode is None:
+                    #pick first source to be in the useless <vertices> tag
+                    verticesnode = E.vertices(E.input(semantic='POSITION', source="#%s"%srcid),
+                                              id=srcid + '-vertices')
+            meshnode = E.mesh(*sourcenodes)
+            meshnode.append(verticesnode)
+            self.xmlnode = E.geometry(meshnode)
+            if len(self.id) > 0: self.xmlnode.set("id", self.id)
+            if len(self.name) > 0: self.xmlnode.set("name", self.name)
 
-    primitives = property( lambda s: tuple(s._primitives) )
-    """Primitive object list inside this geometry."""
+    def createLineSet(self, indices, inputlist, materialid):
+        """Add a set of lines to this geometry instance.
+        
+        :Parameters:
+          indices
+            unshaped numpy array that contains the indices for
+            the inputs referenced in inputlist
+          inputlist
+            InputList object that refers to the inputs for this primitive
+          materialid
+            A string containing the id of a material in the current collada file
+            
+        :Returns:
+          A LineSet object
+        """
+        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        return lineset.LineSet(inputdict, materialid, indices)
+
+    def createTriangleSet(self, indices, inputlist, materialid):
+        """Add a set of triangles to this geometry instance.
+        
+        :Parameters:
+          indices
+            unshaped numpy array that contains the indices for
+            the inputs referenced in inputlist
+          inputlist
+            InputList object that refers to the inputs for this primitive
+          materialid
+            A string containing the id of a material in the current collada file
+            
+        :Returns:
+          A TriangleSet object
+        """
+        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        return triangleset.TriangleSet(inputdict, materialid, indices)
+
+    def createPolyList(self, indices, vcounts, inputlist, materialid):
+        """Add a list of polygons to this geometry instance.
+        
+        :Parameters:
+          indices
+            unshaped numpy array that contains the indices for
+            the inputs referenced in inputlist
+          vcounts
+            unshaped numpy array that contains the vertex count
+            for each polygon in this polylist
+          inputlist
+            InputList object that refers to the inputs for this primitive
+          materialid
+            A string containing the id of a material in the current collada file
+            
+        :Returns:
+          A TriangleSet object
+        """
+        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        return polylist.PolygonList(inputdict, materialid, indices, vcounts)
 
     @staticmethod
     def load( collada, localscope, node ):
+        id = node.get("id") or ""
+        name = node.get("name") or ""
         meshnode = node.find(tag('mesh'))
         if meshnode is None: raise DaeUnsupportedError('Unknown geometry node')
         sourcebyid = {}
@@ -108,19 +181,46 @@ class Geometry( DaeObject ):
                 _primitives.append( lineset.LineSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag != tag('source') and subnode.tag != tag('vertices'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
-        geom = Geometry( sources, sourcebyid, vertexsource, _primitives, xmlnode=node )
+        geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node )
         return geom
 
     def save(self):
-        #TODO: Update this with new sourceById format
-        for ch in self.sources: ch.save()
+        meshnode = self.xmlnode.find(tag('mesh'))
+        for src in self.sourceById.itervalues():
+            if isinstance(src, source.Source):
+                src.save()
+                if src.xmlnode not in meshnode.getchildren():
+                    meshnode.insert(0, src.xmlnode)
+        
+        deletenodes = []
+        for oldsrcnode in meshnode.findall( tag('source') ):
+            if oldsrcnode not in [src.xmlnode for src in self.sourceById.itervalues() if isinstance(src, source.Source)]:
+                deletenodes.append(oldsrcnode)
+        for d in deletenodes:
+            meshnode.remove(d)
+        
         vnode = self.xmlnode.find(tag('mesh')).find(tag('vertices'))
-        vinput = vnode.find(tag('input'))
-        vnode.set('id', self.vertexsource)
-        vinput.set('source', '#'+self.sourceById[self.vertexsource].id)
-        for t in self._primitives: t.save()
+        input_vnode = vnode.find(tag('input'))
+        srcref = input_vnode.get('source')[1:]
+        if srcref not in self.sourceById:
+            newsrcref = list(self.sourceById.iterkeys())[0]
+            input_vnode.set('source', "#%s" % newsrcref)
+            vnode.set('id', "#%s-vertices" % newsrcref)
+
         self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.id)
+        self.xmlnode.set('name', self.name)
+        
+        for prim in self.primitives:
+            if prim.xmlnode not in meshnode.getchildren():
+                meshnode.append(prim.xmlnode)
+                
+        deletenodes = []
+        primnodes = [prim.xmlnode for prim in self.primitives]
+        for child in meshnode.getchildren():
+            if child.tag != tag('vertices') and child.tag != tag('source') and child not in primnodes:
+                deletenodes.append(child)
+        for d in deletenodes:
+            meshnode.remove(d)
 
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound geometry from this one, transform and material mapping"""
@@ -133,7 +233,7 @@ class BoundGeometry( object ):
         """Create a bound geometry from a geometry, transform and material mapping"""
         self.matrix = matrix
         self.materialnodebysymbol = materialnodebysymbol
-        self._primitives = geom._primitives
+        self._primitives = geom.primitives
         self.original = geom
 
     def __len__(self): return len(self._primitives)
