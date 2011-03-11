@@ -195,7 +195,7 @@ class TriangleSet(primitive.Primitive):
                 index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
         except: raise DaeMalformedError('Corrupted index in triangleset')
         
-        triset = TriangleSet(source_array, node.get('material'), index)
+        triset = TriangleSet(source_array, node.get('material'), index, node)
         triset.xmlnode = node
         return triset
     
