@@ -100,7 +100,7 @@ class TransformNode(SceneNode):
                 yield obj
 
     def save(self):
-        if not (self.matrix == numpy.identity(4)).all():
+        if not (self.matrix == numpy.identity(4, dtype=numpy.float32)).all():
             mnode = self.xmlnode.find('matrix')
             if mnode is None:
                 mnode = ElementTree.Element(tag('matrix'))
@@ -114,13 +114,13 @@ class TransformNode(SceneNode):
     @staticmethod
     def load( collada, node ):
         id = node.get('id')
-        matrices = [ numpy.identity(4) ]
+        matrices = [ numpy.identity(4, dtype=numpy.float32) ]
         nodes = []
         toremove = []
         try:
             for tnode in node:
                 if tnode.tag == tag('translate'):
-                    m = numpy.identity(4)
+                    m = numpy.identity(4, dtype=numpy.float32)
                     m[:3,3] = [ float(x) for x in tnode.text.split()]
                     matrices.append(m)
                     toremove.append(tnode)
@@ -129,7 +129,7 @@ class TransformNode(SceneNode):
                     matrices.append( makeRotationMatrix(vx, vy, vz, angle*numpy.pi/180.0) )
                     toremove.append(tnode)
                 elif tnode.tag == tag('scale'):
-                    m = numpy.identity(4)
+                    m = numpy.identity(4, dtype=numpy.float32)
                     t = [ float(x) for x in tnode.text.split()]
                     for i in xrange(3): m[i,i] = t[i]
                     matrices.append(m)
@@ -141,7 +141,7 @@ class TransformNode(SceneNode):
                     matrices.append(m)
                     toremove.append(tnode)
                 elif tnode.tag == tag('lookat'):
-                    m = numpy.identity(4)
+                    m = numpy.identity(4, dtype=numpy.float32)
                     lookat = [ float(x) for x in tnode.text.split() ]
                     
                     position = lookat[0:3]
@@ -208,7 +208,7 @@ class GeometryNode(SceneNode):
             
     def objects(self, tipo, matrix=None):
         if tipo == 'geometry':
-            if matrix is None: matrix = numpy.identity(4)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
             for mat in self.materials:
                 materialnodesbysymbol[mat.symbol] = mat
@@ -260,7 +260,7 @@ class ControllerNode(SceneNode):
             
     def objects(self, tipo, matrix=None):
         if tipo == 'controller':
-            if matrix is None: matrix = numpy.identity(4)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
             for mat in self.materials:
                 materialnodesbysymbol[mat.symbol] = mat
@@ -360,7 +360,7 @@ class CameraNode(SceneNode):
             
     def objects(self, tipo, matrix=None):
         if tipo == 'camera':
-            if matrix is None: matrix = numpy.identity(4)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.camera.bind(matrix)
 
     @staticmethod
@@ -388,7 +388,7 @@ class LightNode(SceneNode):
             
     def objects(self, tipo, matrix=None):
         if tipo == 'light':
-            if matrix is None: matrix = numpy.identity(4)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.light.bind(matrix)
 
     @staticmethod
