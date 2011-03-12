@@ -16,7 +16,7 @@ import numpy
 from lxml import etree as ElementTree
 import primitive
 import types
-from util import toUnitVec, checkSource
+from util import toUnitVec, checkSource, normalize_v3
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
 
@@ -86,7 +86,6 @@ class TriangleSet(primitive.Primitive):
         if len(sources) == 0: raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
         if not 'VERTEX' in sources: raise DaeIncompleteError('Triangle set requires vertex input')
 
-        #find max offset
         max_offset = max([ max([input[0] for input in input_type_array])
                           for input_type_array in sources.itervalues() if len(input_type_array) > 0])
 
@@ -251,6 +250,20 @@ class BoundTriangleSet(object):
         sem, set = self.inputmap[input]
         assert sem == 'TEXCOORD' # we only support mapping to at the time
         return sel.setToTexcoord[set]
+    
+    def generateNormals(self):
+        """ Generates normals from vertex data """
+        norms = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
+        tris = self._vertex[self._vertex_index]
+        n = numpy.cross( tris[::,1] - tris[::,0], tris[::,2] - tris[::,0] )
+        normalize_v3(n)
+        norms[ self._vertex_index[:,0] ] += n
+        norms[ self._vertex_index[:,1] ] += n
+        norms[ self._vertex_index[:,2] ] += n
+        normalize_v3(norms)
+        
+        self._normal = norms
+        self._normal_index = self._vertex_index
     
     vertex = property( lambda s: s._vertex )
     normal = property( lambda s: s._normal )
