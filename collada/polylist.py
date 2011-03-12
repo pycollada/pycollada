@@ -233,7 +233,7 @@ class PolygonList(primitive.Primitive):
             if vcountnode.text is None:
                 vcounts = numpy.array([], dtype=numpy.int32)
             else:
-                vcounts = numpy.array([float(v) for v in vcountnode.text.split()], dtype=numpy.int32)
+                vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
         except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
 
         all_inputs = primitive.Primitive.getInputs(localscope, node.findall(tag('input')))
@@ -242,11 +242,10 @@ class PolygonList(primitive.Primitive):
             if indexnode.text is None:
                 index = numpy.array([], dtype=numpy.int32)
             else:
-                index = numpy.array([float(v) for v in indexnode.text.split()], dtype=numpy.int32)
+                index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
         except: raise DaeMalformedError('Corrupted index in polylist')
 
-        polylist = PolygonList(all_inputs, node.get('material'), index, vcounts)
-        polylist.xmlnode = node
+        polylist = PolygonList(all_inputs, node.get('material'), index, vcounts, node)
         return polylist
     
     def bind(self, matrix, materialnodebysymbol):
