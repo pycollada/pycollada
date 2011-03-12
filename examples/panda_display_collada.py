@@ -8,8 +8,8 @@ import traceback
 import time
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
-from panda3d.core import GeomVertexFormat
-from panda3d.core import GeomVertexData
+from panda3d.core import GeomVertexFormat, GeomVertexArrayData
+from panda3d.core import GeomVertexData, GeomEnums
 from panda3d.core import GeomVertexWriter
 from panda3d.core import GeomTriangles
 from panda3d.core import GeomLines
@@ -19,7 +19,7 @@ from panda3d.core import PNMImage
 from panda3d.core import Texture
 from panda3d.core import StringStream
 from panda3d.core import Filename
-from panda3d.core import RenderState
+from panda3d.core import RenderState, ShadeModelAttrib
 from panda3d.core import TextureAttrib
 from panda3d.core import MaterialAttrib
 from panda3d.core import Material, SparseArray
@@ -32,6 +32,8 @@ from panda3d.core import AnimBundle, AnimGroup, AnimChannelMatrixXfmTable
 from panda3d.core import PTAFloat, CPTAFloat, AnimBundleNode, NodePath
 from direct.actor.Actor import Actor
 from panda3d.core import loadPrcFileData
+
+import struct
 
 if len(sys.argv) != 2 or not os.path.isfile(sys.argv[1]):
     print "Usage: python panda_display_collada.py <file>"
@@ -147,29 +149,82 @@ def getNodeFromController(controller, controlled_prim):
         else:
             raise Exception("Error: unsupported controller type")
 
+def getVertexData(vertex, vertex_index, normal, normal_index, texcoordset, texcoord_indexset):
+        vertex_data = vertex[vertex_index]
+        vertex_data.shape = (-1, 3)
+        stacked = vertex_data
+        if normal is not None:
+            normal_data = normal[normal_index]
+            normal_data.shape = (-1, 3)
+            collada.util.normalize_v3(normal_data)
+            stacked = numpy.hstack((stacked, normal_data))
+        if len(texcoordset) > 0:
+            texcoord_data = texcoordset[0][texcoord_indexset[0]]
+            texcoord_data.shape = (-1, 2)
+            stacked = numpy.hstack((stacked, texcoord_data))
+
+        if normal is None and len(texcoordset) == 0:
+            format = GeomVertexFormat.getV3() #just vertices
+            stride = 12
+        elif normal is not None and len(texcoordset) == 0:
+            format = GeomVertexFormat.getV3n3() #vertices + normals
+            stride = 24
+        elif normal is None and len(texcoordset) > 0:
+            format = GeomVertexFormat.getV3t2() #vertices + texcoords
+            stride = 20
+        else:
+            format = GeomVertexFormat.getV3n3t2()
+            stride = 32
+            
+        assert(stacked.shape[1]*4 == stride)
+
+        stacked = stacked.flatten()
+        stacked.shape = (-1)
+        assert(stacked.dtype == numpy.float32)
+        all_data = stacked.tostring()
+
+        vdata = GeomVertexData("dataname", format, Geom.UHStatic)
+        arr = GeomVertexArrayData(vdata.getArray(0).getArrayFormat(), GeomEnums.UHStream)
+        datahandle = arr.modifyHandle()
+        datahandle.setData(all_data)
+        vdata.setArray(0, arr)
+        
+        return vdata
+
 def getNodeFromGeom(prim):
+        
         format = GeomVertexFormat.getV3n3t2()
         vdata = GeomVertexData("dataname", format, Geom.UHStatic)
         vertex = GeomVertexWriter(vdata, 'vertex')
         normal = GeomVertexWriter(vdata, 'normal')
         texcoord = GeomVertexWriter(vdata, 'texcoord')
         
+        #print type(prim)
         if type(prim) is collada.triangleset.BoundTriangleSet:
-            numtris = 0
-            for tri in prim.triangles():
-                for tri_pt in range(3):
-                    vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
-                    normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
-                    if len(prim._texcoordset) > 0:
-                        texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
-                numtris+=1
-                
+
+            if prim.normal is None:
+                prim.generateNormals()
+
+            vdata = getVertexData(prim.vertex, prim.vertex_index,
+                                  prim.normal, prim.normal_index,
+                                  prim.texcoordset, prim.texcoord_indexset)
+
             gprim = GeomTriangles(Geom.UHStatic)
-            for i in range(numtris):
-                gprim.addVertices(i*3, i*3+1, i*3+2)
-                gprim.closePrimitive()
+            gprim.addConsecutiveVertices(0, 3*prim.ntriangles)
+            gprim.closePrimitive()
                 
         elif type(prim) is collada.polylist.BoundPolygonList:
+            
+            #print type(prim.index)
+            #print len(prim.index)
+            #print prim.index[0]
+            #p = prim[0]
+            #print p
+            #print p.indices
+            #tris = list(p.triangles())
+            #for t in tris:
+            #    print t.indices
+            
             numtris = 0
             for poly in prim.polygons():
                 for tri in poly.triangles():
@@ -212,18 +267,11 @@ def getNodeFromGeom(prim):
 def getStateFromMaterial(prim_material):
     state = RenderState.makeFullDefault()
     
-    emission = None
-    ambient = None
-    diffuse = None
-    specular = None
-    shininess = None
-    reflection = None
-    reflectivity = None
+    mat = Material()
     
     if prim_material:
         for prop in prim_material.supported:
             value = getattr(prim_material, prop)
-            
             if value is None:
                 continue
             
@@ -240,39 +288,25 @@ def getStateFromMaterial(prim_material):
                     myTexture.load(myImage)
                     state = state.addAttrib(TextureAttrib.make(myTexture))
             elif prop == 'emission':
-                emission = value
+                mat.setEmission(value)
             elif prop == 'ambient':
-                ambient = value
+                mat.setAmbient(value)
             elif prop == 'diffuse':
-                diffuse = value
+                mat.setDiffuse(value)
             elif prop == 'specular':
-                specular = value
+                #mat.setSpecular(value)
+                pass
             elif prop == 'shininess':
-                shininess = value
+                mat.setShininess(value)
             elif prop == 'reflective':
-                reflective = value
+                pass
             elif prop == 'reflectivity':
-                reflectivity = value
+                pass
             elif prop == 'transparent':
                 pass
             elif prop == 'transparency':
                 pass
-            else:
-                raise
-    
-    mat = Material()
-    
-    if not emission is None:
-        mat.setEmission(emission)
-    if not ambient is None:
-        mat.setAmbient(ambient)
-    if not diffuse is None:
-        mat.setDiffuse(diffuse)
-    if not specular is None:
-        mat.setSpecular(specular)
-    if not shininess is None:
-        mat.setShininess(shininess)
-        
+
     state = state.addAttrib(MaterialAttrib.make(mat))
     return state
 
@@ -333,7 +367,7 @@ base.camera.setPos(10, -10, 0)
 base.camera.lookAt(0.0, 0.0, 0.0)
 p3dApp.taskMgr.add(spinCameraTask, "SpinCameraTask")
 
-base.setBackgroundColor(0.8,0.8,0.8)
+#base.setBackgroundColor(0.8,0.8,0.8)
 base.disableMouse()
 
 # Create Ambient Light
