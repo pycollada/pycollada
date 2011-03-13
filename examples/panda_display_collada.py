@@ -191,6 +191,20 @@ def getVertexData(vertex, vertex_index, normal, normal_index, texcoordset, texco
         
         return vdata
 
+def getPrimAndDataFromTri(triset):
+        if triset.normal is None:
+            triset.generateNormals()
+
+        vdata = getVertexData(triset.vertex, triset.vertex_index,
+                              triset.normal, triset.normal_index,
+                              triset.texcoordset, triset.texcoord_indexset)
+
+        gprim = GeomTriangles(Geom.UHStatic)
+        gprim.addConsecutiveVertices(0, 3*triset.ntriangles)
+        gprim.closePrimitive()
+        
+        return (vdata, gprim)
+
 def getNodeFromGeom(prim):
         
         format = GeomVertexFormat.getV3n3t2()
@@ -202,43 +216,13 @@ def getNodeFromGeom(prim):
         #print type(prim)
         if type(prim) is collada.triangleset.BoundTriangleSet:
 
-            if prim.normal is None:
-                prim.generateNormals()
-
-            vdata = getVertexData(prim.vertex, prim.vertex_index,
-                                  prim.normal, prim.normal_index,
-                                  prim.texcoordset, prim.texcoord_indexset)
-
-            gprim = GeomTriangles(Geom.UHStatic)
-            gprim.addConsecutiveVertices(0, 3*prim.ntriangles)
-            gprim.closePrimitive()
+            (vdata, gprim) = getPrimAndDataFromTri(prim)
                 
         elif type(prim) is collada.polylist.BoundPolygonList:
             
-            #print type(prim.index)
-            #print len(prim.index)
-            #print prim.index[0]
-            #p = prim[0]
-            #print p
-            #print p.indices
-            #tris = list(p.triangles())
-            #for t in tris:
-            #    print t.indices
-            
-            numtris = 0
-            for poly in prim.polygons():
-                for tri in poly.triangles():
-                    for tri_pt in range(3):
-                        vertex.addData3f(tri.vertices[tri_pt][0], tri.vertices[tri_pt][1], tri.vertices[tri_pt][2])
-                        normal.addData3f(tri.normals[tri_pt][0], tri.normals[tri_pt][1], tri.normals[tri_pt][2])
-                        if len(prim._texcoordset) > 0:
-                            texcoord.addData2f(tri.texcoords[0][tri_pt][0], tri.texcoords[0][tri_pt][1])
-                    numtris+=1
+            triset = prim.triangleset()
+            (vdata, gprim) = getPrimAndDataFromTri(triset)
 
-            gprim = GeomTriangles(Geom.UHStatic)
-            for i in range(numtris):
-                gprim.addVertices(i*3, i*3+1, i*3+2)
-                gprim.closePrimitive()
                 
         elif type(prim) is collada.lineset.BoundLineSet:
             numlines = 0
@@ -311,85 +295,89 @@ def getStateFromMaterial(prim_material):
     return state
 
 
-start_time = time.time()
+def main():
+    start_time = time.time()
+        
+    try:
+        col = collada.Collada(sys.argv[1])
+    except:
+        print "Error loading file: "
+        print
+        traceback.print_exc()
+        sys.exit(2)
     
-try:
-    col = collada.Collada(sys.argv[1])
-except:
-    print "Error loading file: "
-    print
-    traceback.print_exc()
-    sys.exit(2)
-
-collada_time = time.time()
-
-if len(col.errors) > 0:
-    print "Warnings when loading file. Quitting."
-    print
-    sys.exit(3)
-
-p3dApp = ShowBase()
-
-globNode = GeomNode("collada")
-nodePath = render.attachNewNode(globNode)
-
-for geom in col.scene.objects('geometry'):
-    for prim in geom.primitives():
-        node = getNodeFromGeom(prim)
-        nodePath.attachNewNode(node)
-
-for controller in col.scene.objects('controller'):
-    for controlled_prim in controller.primitives():
-        a = getNodeFromController(controller, controlled_prim)
-        a.reparentTo(nodePath)
-
-boundingSphere = nodePath.getBounds()
-scale = 5.0 / boundingSphere.getRadius()
-
-nodePath.setScale(scale, scale, scale)
-boundingSphere = nodePath.getBounds()
-nodePath.setPos(-1 * boundingSphere.getCenter().getX(),
-                -1 * boundingSphere.getCenter().getY(),
-                -1 * boundingSphere.getCenter().getZ())
-nodePath.setHpr(0,0,0)
-
-# Define a procedure to move the camera.
-def spinCameraTask(task):
-    speed = 5.0
-    curSpot = task.time % speed
-    angleDegrees = (curSpot / speed) * 360
-    angleRadians = angleDegrees * (pi / 180.0)
-    base.camera.setPos(15.0 * sin(angleRadians), -15.0 * cos(angleRadians), 0)
+    collada_time = time.time()
+    
+    if len(col.errors) > 0:
+        print "Warnings when loading file. Quitting."
+        print
+        sys.exit(3)
+    
+    p3dApp = ShowBase()
+    
+    globNode = GeomNode("collada")
+    nodePath = render.attachNewNode(globNode)
+    
+    for geom in col.scene.objects('geometry'):
+        for prim in geom.primitives():
+            node = getNodeFromGeom(prim)
+            nodePath.attachNewNode(node)
+    
+    for controller in col.scene.objects('controller'):
+        for controlled_prim in controller.primitives():
+            a = getNodeFromController(controller, controlled_prim)
+            a.reparentTo(nodePath)
+    
+    boundingSphere = nodePath.getBounds()
+    scale = 5.0 / boundingSphere.getRadius()
+    
+    nodePath.setScale(scale, scale, scale)
+    boundingSphere = nodePath.getBounds()
+    nodePath.setPos(-1 * boundingSphere.getCenter().getX(),
+                    -1 * boundingSphere.getCenter().getY(),
+                    -1 * boundingSphere.getCenter().getZ())
+    nodePath.setHpr(0,0,0)
+    
+    # Define a procedure to move the camera.
+    def spinCameraTask(task):
+        speed = 5.0
+        curSpot = task.time % speed
+        angleDegrees = (curSpot / speed) * 360
+        angleRadians = angleDegrees * (pi / 180.0)
+        base.camera.setPos(15.0 * sin(angleRadians), -15.0 * cos(angleRadians), 0)
+        base.camera.lookAt(0.0, 0.0, 0.0)
+        return Task.cont
+    
+    base.camera.setPos(10, -10, 0)
     base.camera.lookAt(0.0, 0.0, 0.0)
-    return Task.cont
+    p3dApp.taskMgr.add(spinCameraTask, "SpinCameraTask")
+    
+    #base.setBackgroundColor(0.8,0.8,0.8)
+    base.disableMouse()
+    
+    # Create Ambient Light
+    ambientLight = AmbientLight('ambientLight')
+    ambientLight.setColor(Vec4(0.1, 0.1, 0.1, 1))
+    ambientLightNP = render.attachNewNode(ambientLight)
+    render.setLight(ambientLightNP)
+    
+    directionalPoints = [(10,0,0), (-10,0,0),
+                         (0,-10,0), (0,10,0),
+                         (0, 0, -10), (0,0,10)]
+    
+    for pt in directionalPoints:
+        directionalLight = DirectionalLight('directionalLight')
+        directionalLight.setColor(Vec4(0.4, 0.4, 0.4, 1))
+        directionalLightNP = render.attachNewNode(directionalLight)
+        directionalLightNP.setPos(pt[0], pt[1], pt[2])
+        directionalLightNP.lookAt(0,0,0)
+        render.setLight(directionalLightNP)
+    
+    end_time = time.time()
+    print "Loaded in %.3f seconds" % (end_time-start_time)
+    print "Collada file loaded in %.3f seconds" % (collada_time-start_time)
+    
+    p3dApp.run()
 
-base.camera.setPos(10, -10, 0)
-base.camera.lookAt(0.0, 0.0, 0.0)
-p3dApp.taskMgr.add(spinCameraTask, "SpinCameraTask")
-
-#base.setBackgroundColor(0.8,0.8,0.8)
-base.disableMouse()
-
-# Create Ambient Light
-ambientLight = AmbientLight('ambientLight')
-ambientLight.setColor(Vec4(0.1, 0.1, 0.1, 1))
-ambientLightNP = render.attachNewNode(ambientLight)
-render.setLight(ambientLightNP)
-
-directionalPoints = [(10,0,0), (-10,0,0),
-                     (0,-10,0), (0,10,0),
-                     (0, 0, -10), (0,0,10)]
-
-for pt in directionalPoints:
-    directionalLight = DirectionalLight('directionalLight')
-    directionalLight.setColor(Vec4(0.4, 0.4, 0.4, 1))
-    directionalLightNP = render.attachNewNode(directionalLight)
-    directionalLightNP.setPos(pt[0], pt[1], pt[2])
-    directionalLightNP.lookAt(0,0,0)
-    render.setLight(directionalLightNP)
-
-end_time = time.time()
-print "Loaded in %.3f seconds" % (end_time-start_time)
-print "Collada file loaded in %.3f seconds" % (collada_time-start_time)
-
-p3dApp.run()
+if __name__ == '__main__':
+    main()

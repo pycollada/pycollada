@@ -121,27 +121,17 @@ class PolygonList(primitive.Primitive):
         self.nindices = max_offset + 1
         self.vcounts = vcounts
         self.sources = sources
-
-        self.nvertices = 0
-        try:
-            newshape = []
-            at = 0
-            for ct in self.vcounts:
-                thispoly = self.index[self.nindices*at:self.nindices*(at+ct)]
-                thispoly.shape = (ct, self.nindices)
-                self.nvertices += ct
-                newshape.append(numpy.array(thispoly))
-                at+=ct
-            self.index = newshape
-        except:
-            raise DaeMalformedError('Corrupted vcounts or index in polylist')
-
-        self.npolygons = len(self.index)
+        self.index.shape = (-1, self.nindices)
+        self.npolygons = len(self.vcounts)
+        self.nvertices = numpy.sum(self.vcounts) if len(self.index) > 0 else 0
+        self.polyends = numpy.cumsum(self.vcounts)
+        self.polystarts = self.polyends - self.vcounts
+        self.polyindex = numpy.dstack((self.polystarts, self.polyends))[0]
 
         if len(self.index) > 0:
             self._vertex = sources['VERTEX'][0][4].data
-            self._vertex_index = [poly[:,sources['VERTEX'][0][0]] for poly in self.index]
-            self.maxvertexindex = numpy.max( [numpy.max(poly) for poly in self._vertex_index] )
+            self._vertex_index = self.index[:,sources['VERTEX'][0][0]]
+            self.maxvertexindex = numpy.max( self._vertex_index )
             checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
         else:
             self._vertex = None
@@ -150,8 +140,8 @@ class PolygonList(primitive.Primitive):
 
         if 'NORMAL' in sources and len(sources['NORMAL']) > 0 and len(self.index) > 0:
             self._normal = sources['NORMAL'][0][4].data
-            self._normal_index = [poly[:,sources['NORMAL'][0][0]] for poly in self.index]
-            self.maxnormalindex = numpy.max( [numpy.max(poly) for poly in self._normal_index] )
+            self._normal_index = self.index[:,sources['NORMAL'][0][0]]
+            self.maxnormalindex = numpy.max( self._normal_index )
             checkSource(sources['NORMAL'][0][4], ('X', 'Y', 'Z'), self.maxnormalindex)
         else:
             self._normal = None
@@ -160,10 +150,9 @@ class PolygonList(primitive.Primitive):
             
         if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
-            self._texcoord_indexset = tuple([ [poly[:,sources['TEXCOORD'][i][0]] for poly in self.index]
+            self._texcoord_indexset = tuple([ self.index[:,sources['TEXCOORD'][i][0]]
                                              for i in xrange(len(sources['TEXCOORD'])) ])
-            self.maxtexcoordsetindex = [ numpy.max([ numpy.max([p for p in poly])
-                                        for poly in each ]) for each in self._texcoord_indexset ]
+            self.maxtexcoordsetindex = [ numpy.max(each) for each in self._texcoord_indexset ]
             for i, texinput in enumerate(sources['TEXCOORD']):
                 checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
         else:
@@ -191,7 +180,7 @@ class PolygonList(primitive.Primitive):
             self.xmlnode.append(vcountnode)
             self.xmlnode.append(E.p(txtindices))
 
-    def __len__(self): return len(self.index)
+    def __len__(self): return self.npolygons
 
     vertex = property( lambda s: s._vertex )
     """Read only vertex array, shape=(nv,3)."""
@@ -215,12 +204,39 @@ class PolygonList(primitive.Primitive):
     """Channel ids (tuple of strings) inside the parent geometry node to use as texcoords."""
 
     def __getitem__(self, i):
-        v = self._vertex[ self._vertex_index[i] ]
-        n = self._normal[ self._normal_index[i] ]
+        polyrange = self.polyindex[i]
+        vertindex = self._vertex_index[polyrange[0]:polyrange[1]]
+        v = self._vertex[vertindex]
+        if self.normal is None:
+            n = None
+        else:
+            n = self._normal[ self._normal_index[polyrange[0]:polyrange[1]] ]
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Polygon(self._vertex_index[i], v, n, uv, self.material)
+            uv.append( self._texcoordset[j][ uvindex[polyrange[0]:polyrange[1]] ] )
+        return Polygon(vertindex, v, n, uv, self.material)
+
+    _triangleset = None
+    def triangleset(self):
+        if self._triangleset is None:
+            indexselector = numpy.zeros(self.nvertices) == 0
+            indexselector[self.polyindex[:,1]-1] = False
+            indexselector[self.polyindex[:,1]-2] = False
+            indexselector = numpy.arange(self.nvertices)[indexselector]
+            
+            firstpolyindex = numpy.arange(self.nvertices)
+            firstpolyindex = firstpolyindex - numpy.repeat(self.polyends - self.vcounts, self.vcounts)
+            firstpolyindex = firstpolyindex[indexselector]
+            
+            triindex = numpy.dstack( (self.index[indexselector-firstpolyindex],
+                                      self.index[indexselector+1],
+                                      self.index[indexselector+2]) )
+            triindex = numpy.swapaxes(triindex, 1,2).flatten()
+            
+            triset = triangleset.TriangleSet(self.sources, self.material, triindex, self.xmlnode)
+            
+            self._triangleset = triset
+        return self._triangleset
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -271,23 +287,34 @@ class BoundPolygonList(object):
         self._vertex_index = pl._vertex_index
         self._normal_index = pl._normal_index
         self._texcoord_indexset = pl._texcoord_indexset
+        self.polyindex = pl.polyindex
         self.npolygons = pl.npolygons
+        self.matrix = matrix
+        self.materialnodebysymbol = materialnodebysymbol
         self.original = pl
     
     def __len__(self): return len(self.index)
 
     def __getitem__(self, i):
-        v = self._vertex[ self._vertex_index[i] ]
-        if self._normal is None:
-            #don't general normals for polygons
-            #let them get generated after triangulation
+        polyrange = self.polyindex[i]
+        vertindex = self._vertex_index[polyrange[0]:polyrange[1]]
+        v = self._vertex[vertindex]
+        if self.normal is None:
             n = None
         else:
-            n = self._normal[ self._normal_index[i] ]
+            n = self._normal[ self._normal_index[polyrange[0]:polyrange[1]] ]
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Polygon(self._vertex_index[i], v, n, uv, self.material)
+            uv.append( self._texcoordset[j][ uvindex[polyrange[0]:polyrange[1]] ] )
+        return Polygon(vertindex, v, n, uv, self.material)
+
+    _triangleset = None
+    def triangleset(self):
+        if self._triangleset is None:
+            triset = self.original.triangleset()
+            boundtriset = triset.bind(self.matrix, self.materialnodebysymbol)
+            self._triangleset = boundtriset
+        return self._triangleset
 
     def polygons(self):
         """Iterate through all the polygons contained in the set."""
@@ -296,7 +323,7 @@ class BoundPolygonList(object):
     def shapes(self):
         """Iterate through all the primitives contained in the set."""
         return self.polygons()
-
+        
     def texsource(self, input):
         """Return the UV source no. for the input symbol coming from a material"""
         if self.inputmap is None or input not in self.inputmap: return None
