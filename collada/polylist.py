@@ -162,7 +162,7 @@ class PolygonList(primitive.Primitive):
             
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            txtindices = ' '.join(str(f) for f in self.indices)
+            txtindices = ' '.join(str(f) for f in self.indices.flat)
             acclen = len(self.indices) 
 
             self.xmlnode = E.polylist(count=str(self.npolygons), material=self.material)
