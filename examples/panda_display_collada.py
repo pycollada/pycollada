@@ -149,7 +149,7 @@ def getNodeFromController(controller, controlled_prim):
         else:
             raise Exception("Error: unsupported controller type")
 
-def getVertexData(vertex, vertex_index, normal, normal_index, texcoordset, texcoord_indexset):
+def getVertexData(vertex, vertex_index, normal=None, normal_index=None, texcoordset=(), texcoord_indexset=()):
         vertex_data = vertex[vertex_index]
         vertex_data.shape = (-1, 3)
         stacked = vertex_data
@@ -206,36 +206,22 @@ def getPrimAndDataFromTri(triset):
         return (vdata, gprim)
 
 def getNodeFromGeom(prim):
-        
-        format = GeomVertexFormat.getV3n3t2()
-        vdata = GeomVertexData("dataname", format, Geom.UHStatic)
-        vertex = GeomVertexWriter(vdata, 'vertex')
-        normal = GeomVertexWriter(vdata, 'normal')
-        texcoord = GeomVertexWriter(vdata, 'texcoord')
-        
-        #print type(prim)
         if type(prim) is collada.triangleset.BoundTriangleSet:
-
+            
             (vdata, gprim) = getPrimAndDataFromTri(prim)
-                
+            
         elif type(prim) is collada.polylist.BoundPolygonList:
             
             triset = prim.triangleset()
             (vdata, gprim) = getPrimAndDataFromTri(triset)
-
-                
+            
         elif type(prim) is collada.lineset.BoundLineSet:
-            numlines = 0
-            for line in prim.lines():
-                for line_pt in range(2):
-                    vertex.addData3f(line.vertices[line_pt][0], line.vertices[line_pt][1], line.vertices[line_pt][2])
-                numlines+=1
-
+            
+            vdata = getVertexData(prim.vertex, prim.vertex_index)           
             gprim = GeomLines(Geom.UHStatic)
-            for i in range(numlines):
-                gprim.addVertices(i*2, i*2+1)
-                gprim.closePrimitive()
-
+            gprim.addConsecutiveVertices(0, 2*prim.nlines)
+            gprim.closePrimitive()
+            
         else:
             raise Exception("Error: Unsupported primitive type. Exiting.")
             
