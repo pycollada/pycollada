@@ -84,7 +84,7 @@ class FloatSource(Source):
                 E.technique_common(
                     E.accessor(
                         *[E.param(type='float', name=c) for c in self.components]
-                    , count=str(acclen), stride=str(stridelen), source="#%s"%sourcename)
+                    , **{'count':str(acclen), 'stride':str(stridelen), 'source':"#%s"%sourcename} )
                 )
             , id=self.id )
 
@@ -182,7 +182,7 @@ class IDRefSource(Source):
                 E.technique_common(
                     E.accessor(
                         *[E.param(type='IDREF', name=c) for c in self.components]
-                    , count=str(acclen), stride=str(stridelen), source=sourcename)
+                    , **{'count':str(acclen), 'stride':str(stridelen), 'source':sourcename})
                 )
             , id=self.id )
 
@@ -271,7 +271,7 @@ class NameSource(Source):
                 E.technique_common(
                     E.accessor(
                         *[E.param(type='Name', name=c) for c in self.components]
-                    , count=str(acclen), stride=str(stridelen), source=sourcename)
+                    , **{'count':str(acclen), 'stride':str(stridelen), 'source':sourcename})
                 )
             , id=self.id )
             
