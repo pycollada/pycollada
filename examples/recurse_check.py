@@ -22,6 +22,8 @@ def main():
                         help='If errors present, print error and traceback')
     parser.add_argument('--show-summary', '-s', default=False, action='store_true',
                         help='Print a summary at the end of how many files had warnings and errors')
+    parser.add_argument('--zip', '-z', default=False, action='store_true',
+                        help='Include .zip files when searching for files to load')
     
     args = parser.parse_args()
     
@@ -36,6 +38,8 @@ def main():
             fullpath = os.path.join(directory,name)
             (root, ext) = os.path.splitext(fullpath)
             if os.path.isfile(fullpath) and ext.lower() == ".dae":
+                collada_files.append(fullpath)
+            elif os.path.isfile(fullpath) and ext.lower() == ".zip":
                 collada_files.append(fullpath)
             elif os.path.isdir(fullpath):
                 directories.append(fullpath)
@@ -65,7 +69,12 @@ def main():
                 type_cts = [(e, err_names.count(e)) for e in unique]
                 if args.show_warnings:
                     for e, ct in type_cts:
-                        print "   %s: %d" % (e, ct)
+                        for err in col.errors:
+                            if type(err).__name__ == e:
+                                print "   %s" % str(err)
+                                break
+                        if ct > 1:
+                            print "   %s: %d additional warnings of this type" % (e, ct-1)
             else:
                 print "SUCCESS"
                 file_success_count += 1
@@ -74,7 +83,7 @@ def main():
             if not col.scene is None:
                 for geom in col.scene.objects('geometry'):
                     for prim in geom.primitives():
-                        assert(len(prim))
+                        assert(len(prim) >= 0)
                 for cam in col.scene.objects('camera'):
                     assert(cam.original.id)
                     assert(len(cam.position) == 3)
