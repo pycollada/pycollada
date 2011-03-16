@@ -29,7 +29,6 @@ def checkSource( source, components, maxindex):
             source.components == (None,)*len(components):
         source.components = components
     
-    print source.components, components
     if source.components != components:
         raise DaeMalformedError('Wrong format in source %s'%source.id)
     return source
