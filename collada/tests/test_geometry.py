@@ -56,7 +56,7 @@ class TestGeometry(unittest2.TestCase):
         self.assertEqual(len(loaded_geometry.primitives), 2)
 
         loaded_geometry.primitives.pop(0)
-        lineset3 = loaded_geometry.createLineSet(indices, input_list, "mymaterial3")
+        lineset3 = loaded_geometry.createLineSet(indices, input_list, "mymaterial")
         
         loaded_lineset = collada.lineset.LineSet.load(self.dummy, geometry.sourceById, fromstring(tostring(lineset3.xmlnode)))
         self.assertEqual(len(loaded_lineset), 5)

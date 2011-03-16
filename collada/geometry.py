@@ -93,7 +93,8 @@ class Geometry( DaeObject ):
           inputlist
             InputList object that refers to the inputs for this primitive
           materialid
-            A string containing the id of a material in the current collada file
+            A string containing a symbol that will get used to bind this lineset
+            to a material when instantiating into a scene
             
         :Returns:
           A LineSet object
@@ -111,7 +112,8 @@ class Geometry( DaeObject ):
           inputlist
             InputList object that refers to the inputs for this primitive
           materialid
-            A string containing the id of a material in the current collada file
+            A string containing a symbol that will get used to bind this triangleset
+            to a material when instantiating into a scene
             
         :Returns:
           A TriangleSet object
@@ -132,7 +134,8 @@ class Geometry( DaeObject ):
           inputlist
             InputList object that refers to the inputs for this primitive
           materialid
-            A string containing the id of a material in the current collada file
+            A string containing a symbol that will get used to bind this polylist
+            to a material when instantiating into a scene
             
         :Returns:
           A TriangleSet object
