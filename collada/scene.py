@@ -13,7 +13,7 @@
 """This module contains several classes to load nodes under <scene> tag.
 
 Supported scene nodes are:
-- <node> which is treated as a TransformNode
+- <node> which is treated as a Node
 - <instance_camera> which is treated as CameraNode
 - <instance_material> which is treated as MaterialNode
 - <instance_geometry> which is treated as GeometryNode
@@ -25,7 +25,7 @@ from lxml import etree as ElementTree
 import numpy
 from util import toUnitVec
 from collada import DaeObject, DaeError, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, DaeUnsupportedError, tag
+                    DaeMalformedError, DaeUnsupportedError, tag, E
 import copy
 
 class SceneNode(DaeObject):
@@ -57,126 +57,185 @@ def makeRotationMatrix(x, y, z, angle):
                         [0,           0,           0,           1]],
                        dtype=numpy.float32 )
 
-class TransformNode(SceneNode):
+class Transform(DaeObject):
+    """Base class for all transformation types"""
+
+class TranslateTransform(Transform):
+    def __init__(self, x, y, z, xmlnode=None):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        self.matrix[:3,3] = [ x, y, z ]
+        self.xmlnode = xmlnode
+        if xmlnode is None:
+            self.xmlnode = E.translate(' '.join([str(x),str(y),str(z)]))
+    @staticmethod
+    def load(collada, node):
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        if len(floats) != 3:
+            raise DaeMalformedError("Transform node requires three float values")
+        return TranslateTransform(floats[0], floats[1], floats[2], node)
+    
+class RotateTransform(Transform):
+    def __init__(self, x, y, z, angle, xmlnode=None):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.angle = angle
+        self.matrix = makeRotationMatrix(x, y, z, angle*numpy.pi/180.0)
+        self.xmlnode = xmlnode
+        if xmlnode is None:
+            self.xmlnode = E.rotate(' '.join([str(x),str(y),str(z),str(angle)]))
+    @staticmethod
+    def load(collada, node):
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        if len(floats) != 4:
+            raise DaeMalformedError("Rotate node requires four float values")
+        return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
+    
+class ScaleTransform(Transform):
+    def __init__(self, x, y, z, xmlnode=None):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        self.matrix[0,0] = x
+        self.matrix[1,1] = y
+        self.matrix[2,2] = z
+        self.xmlnode = xmlnode
+        if xmlnode is None:
+            self.xmlnode = E.scale(' '.join([str(x),str(y),str(z)]))
+    @staticmethod
+    def load(collada, node):
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        if len(floats) != 3:
+            raise DaeMalformedError("Scale node requires three float values")
+        return ScaleTransform(floats[0], floats[1], floats[2], node)
+    
+class MatrixTransform(Transform):
+    def __init__(self, matrix, xmlnode=None):
+        self.matrix = matrix
+        if len(self.matrix) != 16: raise DaeMalformedError('Corrupted matrix transformation node')
+        self.matrix.shape = (4, 4)
+        self.xmlnode = xmlnode
+        if xmlnode is None:
+            self.xmlnode = E.matrix(' '.join([str(v) for v in self.matrix.flat]))
+    @staticmethod
+    def load(collada, node):
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        return MatrixTransform(floats, node)
+
+class LookAtTransform(Transform):
+    def __init__(self, eye, interest, upvector, xmlnode=None):
+        self.eye = eye
+        self.interest = interest
+        self.upvector = upvector
+
+        if len(eye) != 3 or len(interest) != 3 or len(upvector) != 3:
+            raise DaeMalformedError('Corrupted lookat transformation node')
+        
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+
+        front = toUnitVec(numpy.subtract(eye,interest))
+        side = numpy.multiply(-1, toUnitVec(numpy.cross(front, upvector)))
+        self.matrix[0,0:3] = side
+        self.matrix[1,0:3] = upvector
+        self.matrix[2,0:3] = front
+        self.matrix[3,0:3] = eye
+
+        self.xmlnode = xmlnode
+        if xmlnode is None:
+            self.xmlnode = E.lookat(' '.join([str(f) for f in 
+                                        numpy.concatenate((self.eye, self.interest, self.upvector)) ]))
+    @staticmethod
+    def load(collada, node):
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        if len(floats) != 9:
+            raise DaeMalformedError("Lookat node requires 9 float values")
+        return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], node)
+
+class Node(SceneNode):
     """Class containing data from <node> tags
 
     Since all node tags can contain transform directives we treat
-    all of them as TransformNode, even if the transform is the
+    all of them as Node, even if the transform is the
     identity.
 
     """
 
-    def __init__(self, id, matrix, nodes, xmlnode=None):
-        """Create a TransformNode.
+    def __init__(self, id, children=[], transforms=[], xmlnode=None):
+        """Create a Node.
 
         :Parameters:
           id
             Id inside scene
-          matrix
-            A 4x4 numpy array with the transform matrix
-          nodes
-            child node list
+          children
+            A list of child nodes of this node
+          transforms
+            A list of transformations of type Transform
           xmlnode
             If loaded from XML, the xml node it comes from
 
         """
         self.id = id
         """Id inside scene."""
-        self.matrix = matrix
-        """Numpy transform matrix."""
-        self.nodes = nodes
-        """child node list."""
+        self.transforms = transforms
+        """A list of transformations of type Transform"""
+        self.children = children
+        """A list of child nodes of this node"""
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        """numpy transformation matrix that combines all transform matrices"""
+
+        for t in transforms:
+            self.matrix = numpy.dot(self.matrix, t.matrix)
+
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element(tag('node'))
-            for node in nodes:
-                self.xmlnode.append( node.xmlnode )
+            self.xmlnode = E.node(id=self.id, name=self.id)
+            for t in self.transforms:
+                self.xmlnode.append(t.xmlnode)
+            for c in self.children:
+                self.xmlnode.append(c.xmlnode)
    
     def objects(self, tipo, matrix=None):
         if matrix != None: M = numpy.dot( matrix, self.matrix )
         else: M = self.matrix
-        for node in self.nodes:
+        for node in self.children:
             for obj in node.objects(tipo, M):
                 yield obj
 
     def save(self):
-        if not (self.matrix == numpy.identity(4, dtype=numpy.float32)).all():
-            mnode = self.xmlnode.find('matrix')
-            if mnode is None:
-                mnode = ElementTree.Element(tag('matrix'))
-                self.xmlnode.insert(0, mnode)
-            mnode.text = str(numpy.reshape(self.matrix, (-1,)))[1:-1]
-        else:
-            mnode = self.xmlnode.find('matrix')
-            if mnode != None: self.xmlnode.remove(mnode)
-        for n in self.nodes: n.save()
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        for t in self.transforms:
+            self.matrix = numpy.dot(self.matrix, t.matrix)
+        
+        for child in self.children:
+            child.save()
+            
+        self.xmlnode.clear()
+        self.xmlnode = E.node(id=self.id, name=self.id)
+        for t in self.transforms:
+            self.xmlnode.append(t.xmlnode)
+        for c in self.children:
+            self.xmlnode.append(c.xmlnode)
 
     @staticmethod
     def load( collada, node ):
         id = node.get('id')
-        matrices = [ numpy.identity(4, dtype=numpy.float32) ]
-        nodes = []
-        toremove = []
-        try:
-            for tnode in node:
-                if tnode.tag == tag('translate'):
-                    m = numpy.identity(4, dtype=numpy.float32)
-                    m[:3,3] = [ float(x) for x in tnode.text.split()]
-                    matrices.append(m)
-                    toremove.append(tnode)
-                elif tnode.tag == tag('rotate'):
-                    vx, vy, vz, angle = [ float(x) for x in tnode.text.split()]
-                    matrices.append( makeRotationMatrix(vx, vy, vz, angle*numpy.pi/180.0) )
-                    toremove.append(tnode)
-                elif tnode.tag == tag('scale'):
-                    m = numpy.identity(4, dtype=numpy.float32)
-                    t = [ float(x) for x in tnode.text.split()]
-                    for i in xrange(3): m[i,i] = t[i]
-                    matrices.append(m)
-                    toremove.append(tnode)
-                elif tnode.tag == tag('matrix'):
-                    m = numpy.array([ float(x) for x in tnode.text.split()], dtype=numpy.float32)
-                    if len(m) != 16: raise DaeMalformedError('Corrupted transformation node')
-                    m.shape = (4, 4)
-                    matrices.append(m)
-                    toremove.append(tnode)
-                elif tnode.tag == tag('lookat'):
-                    m = numpy.identity(4, dtype=numpy.float32)
-                    lookat = [ float(x) for x in tnode.text.split() ]
-                    
-                    position = lookat[0:3]
-                    target = lookat[3:6]
-                    up = toUnitVec(lookat[6:9])
-                    front = toUnitVec(numpy.subtract(position,target))
-                    side = numpy.multiply(-1, toUnitVec(numpy.cross(front, up)))
+        children = []
+        transforms = []
 
-                    m[0][0] = side[0]
-                    m[0][1] = side[1]
-                    m[0][2] = side[2]
-    
-                    m[1][0] = up[0]
-                    m[1][1] = up[1]
-                    m[1][2] = up[2]
-    
-                    m[2][0] = front[0]
-                    m[2][1] = front[1]
-                    m[2][2] = front[2]
-    
-                    m[3][0] = position[0]
-                    m[3][1] = position[1]
-                    m[3][2] = position[2]
-                    
-                    matrices.append(m)
-                    toremove.append(tnode)
-                    # TODO: LOOKAT Transform: is this correct?
-        except ValueError, ex: raise DaeMalformedError('Corrupted transformation node')
-        while len(matrices) > 1:
-            matrices = matrices[:-2] + [ numpy.dot(matrices[-2], matrices[-1]) ]
-        for n in toremove: node.remove(n)
-        for nodenode in node:
-            try: nodes.append( loadNode(collada, nodenode) )
+        for subnode in node:
+            try:
+                n = loadNode(collada, subnode)
+                if isinstance(n, Transform):
+                    transforms.append(n)
+                else:
+                    children.append(n)
             except DaeError, ex: collada.handleError(ex)
-        return TransformNode(id, matrices[0], nodes, xmlnode=node)
+
+        return Node(id, children, transforms, xmlnode=node)
 
 class GeometryNode(SceneNode):
     """Data coming from <instance_geometry> inside the scene tree."""
@@ -355,8 +414,7 @@ class CameraNode(SceneNode):
         """Original camera from the library."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('instance_camera') )
-            self.xmlnode.set('url', '#'+camera.id)
+            self.xmlnode = E.instance_camera(url="#%s"%camera.id)
             
     def objects(self, tipo, matrix=None):
         if tipo == 'camera':
@@ -383,8 +441,7 @@ class LightNode(SceneNode):
         """Original camera from the library."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('instance_light') )
-            self.xmlnode.set('url', '#'+light.id)
+            self.xmlnode = E.instance_light(url="#%s"%light.id)
             
     def objects(self, tipo, matrix=None):
         if tipo == 'light':
@@ -409,7 +466,7 @@ class ExtraNode(SceneNode):
         """Create an ExtraNode which stores arbitrary xml."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('extra') )
+            self.xmlnode = E.extra()
             
     def objects(self, tipo, matrix=None):
         if tipo == 'extra':
@@ -430,7 +487,12 @@ def loadNode( collada, node ):
     and return it.
 
     """
-    if node.tag == tag('node'): return TransformNode.load(collada, node)
+    if node.tag == tag('node'): return Node.load(collada, node)
+    elif node.tag == tag('translate'): return TranslateTransform.load(collada, node)
+    elif node.tag == tag('rotate'): return RotateTransform.load(collada, node)
+    elif node.tag == tag('scale'): return ScaleTransform.load(collada, node)
+    elif node.tag == tag('matrix'): return MatrixTransform.load(collada, node)
+    elif node.tag == tag('lookat'): return LookAtTransform.load(collada, node)
     elif node.tag == tag('instance_geometry'): return GeometryNode.load(collada, node)
     elif node.tag == tag('instance_camera'): return CameraNode.load(collada, node)
     elif node.tag == tag('instance_light'): return LightNode.load(collada, node)
