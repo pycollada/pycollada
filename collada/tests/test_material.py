@@ -186,13 +186,16 @@ class TestMaterial(unittest2.TestCase):
         other_cimage = collada.material.CImage("yourcimage", "./whatever.tga", self.dummy)
         other_surface = collada.material.Surface("yoursurface", other_cimage)
         other_sampler2d = collada.material.Sampler2D("yoursampler2d", other_surface)
+        other_map = collada.material.Map(other_sampler2d, "TEX0")
         effect.params.pop()
         effect.params.append(other_surface)
         effect.params.append(other_sampler2d)
+        effect.diffuse = other_map
         effect.save()
         
         self.dummy.imageById["mycimage"] = self.dummy_cimage
         loaded_effect = collada.material.Effect.load(self.dummy, {}, fromstring(tostring(effect.xmlnode)))
+        self.assertEqual(type(loaded_effect.diffuse), collada.material.Map)
         self.assertEqual(len(loaded_effect.params), 3)
         self.assertTrue(type(loaded_effect.params[0]) is collada.material.Surface)
         self.assertEqual(loaded_effect.params[0].id, "mysurface")
