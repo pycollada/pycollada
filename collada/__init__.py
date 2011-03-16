@@ -145,7 +145,8 @@ class Collada(object):
             self.errors = []
             self.maskedErrors = []
             self.ignoreErrors( *ignore )
-            self.root = ElementTree.ElementTree(element=None, file=StringIO(data))
+            self.root = ElementTree.ElementTree(element=None, file=StringIO(data),
+                                                parser=ElementTree.XMLParser(remove_comments=True))
             self.validate()
             self.loadAssetInfo()
             self.loadImages()
