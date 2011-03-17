@@ -124,7 +124,7 @@ class LineSet(primitive.Primitive):
             self._texcoord_indexset = tuple()
             self.maxtexcoordsetindex = -1
             
-        if xmlnode: self.xmlnode = xmlnode
+        if xmlnode is not None: self.xmlnode = xmlnode
         else:
             self.index.shape = (-1)
             acclen = len(self.index)
@@ -189,7 +189,7 @@ class LineSet(primitive.Primitive):
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
         except: raise DaeMalformedError('Corrupted index in line set')
         
-        lineset = LineSet(source_array, node.get('material'), index)
+        lineset = LineSet(source_array, node.get('material'), index, node)
         lineset.xmlnode = node
         return lineset
     
