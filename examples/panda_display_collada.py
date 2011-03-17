@@ -210,7 +210,8 @@ def getNodeFromGeom(prim):
             
             (vdata, gprim) = getPrimAndDataFromTri(prim)
             
-        elif type(prim) is collada.polylist.BoundPolygonList:
+        elif type(prim) is collada.polylist.BoundPolygonList or \
+            type(prim) is collada.polygons.BoundPolygons:
             
             triset = prim.triangleset()
             (vdata, gprim) = getPrimAndDataFromTri(triset)
@@ -285,7 +286,9 @@ def main():
     start_time = time.time()
         
     try:
-        col = collada.Collada(sys.argv[1])
+        col = collada.Collada(sys.argv[1], ignore=[
+                        collada.DaeUnsupportedError,
+                        collada.DaeBrokenRefError ])
     except:
         print "Error loading file: "
         print
@@ -295,9 +298,7 @@ def main():
     collada_time = time.time()
     
     if len(col.errors) > 0:
-        print "Warnings when loading file. Quitting."
-        print
-        sys.exit(3)
+        print "Warnings when loading file. Your results may vary."
     
     p3dApp = ShowBase()
     

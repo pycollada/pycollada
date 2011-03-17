@@ -126,6 +126,39 @@ class TestGeometry(unittest2.TestCase):
         self.assertEqual(len(loaded_geometry.primitives), 1)
         self.assertEqual(len(loaded_geometry.primitives[0]), 6)
         
+    def test_geometry_polygons_adding(self):
+        vert_floats = [-50,50,50,50,50,50,-50,-50,50,50,-50,50,-50,50,-50,50,50,-50,-50,-50,-50,50,-50,-50]
+        normal_floats = [0,0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,
+                         -1,0,0,-1,0,0,-1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1]
+        vert_src = collada.source.FloatSource("cubeverts-array", numpy.array(vert_floats), ('X', 'Y', 'Z'))
+        normal_src = collada.source.FloatSource("cubenormals-array", numpy.array(normal_floats), ('X', 'Y', 'Z'))
+        
+        geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mycube", [vert_src, normal_src], [])
+        
+        input_list = collada.primitive.InputList()
+        input_list.addInput(0, 'VERTEX', "#cubeverts-array")
+        input_list.addInput(1, 'NORMAL', "#cubenormals-array")
+        
+        indices = []
+        indices.append(numpy.array([0,0,2,1,3,2,1,3], dtype=numpy.int32))
+        indices.append(numpy.array([0,4,1,5,5,6,4,7], dtype=numpy.int32))
+        indices.append(numpy.array([6,8,7,9,3,10,2,11], dtype=numpy.int32))
+        indices.append(numpy.array([0,12,4,13,6,14,2,15], dtype=numpy.int32))
+        indices.append(numpy.array([3,16,7,17,5,18,1,19], dtype=numpy.int32))
+        indices.append(numpy.array([5,20,7,21,6,22,4,23], dtype=numpy.int32))
+
+        polygons = geometry.createPolygons(indices, input_list, "cubematerial")
+        
+        loaded_polygons = collada.polygons.Polygons.load(self.dummy, geometry.sourceById, fromstring(tostring(polygons.xmlnode)))
+        self.assertEqual(len(loaded_polygons), 6)
+        
+        geometry.primitives.append(polygons)
+        geometry.save()
+
+        loaded_geometry = collada.geometry.Geometry.load(self.dummy, {}, fromstring(tostring(geometry.xmlnode)))
+        
+        self.assertEqual(len(loaded_geometry.primitives), 1)
+        self.assertEqual(len(loaded_geometry.primitives[0]), 6)
 
 if __name__ == '__main__':
     unittest2.main()

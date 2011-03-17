@@ -18,6 +18,7 @@ import source
 import triangleset
 import lineset
 import polylist
+import polygons
 import types
 import primitive
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
@@ -143,6 +144,25 @@ class Geometry( DaeObject ):
         inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
         return polylist.PolygonList(inputdict, materialid, indices, vcounts)
 
+    def createPolygons(self, indices, inputlist, materialid):
+        """Add a list of polygons to this geometry instance.
+        
+        :Parameters:
+          indices
+            list of unshaped numpy arrays that each contain the indices for
+            a single polygon
+          inputlist
+            InputList object that refers to the inputs for this primitive
+          materialid
+            A string containing a symbol that will get used to bind this polylist
+            to a material when instantiating into a scene
+            
+        :Returns:
+          A Polygons object
+        """
+        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        return polygons.Polygons(inputdict, materialid, indices)
+
     @staticmethod
     def load( collada, localscope, node ):
         id = node.get("id") or ""
@@ -182,6 +202,8 @@ class Geometry( DaeObject ):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('lines'):
                 _primitives.append( lineset.LineSet.load( collada, sourcebyid, subnode ) )
+            elif subnode.tag == tag('polygons'):
+                _primitives.append( polygons.Polygons.load( collada, sourcebyid, subnode ) )
             elif subnode.tag != tag('source') and subnode.tag != tag('vertices'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
         geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node )
