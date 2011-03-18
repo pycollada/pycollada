@@ -24,7 +24,7 @@ class InputList(DaeObject):
             self.source = src
             self.set = set
     
-    semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT"]
+    semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT", "COLOR"]
     
     def __init__(self):
         self.inputs = {}
@@ -90,6 +90,7 @@ class Primitive(DaeObject):
         texcoord_inputs = []
         textangent_inputs = []
         texbinormal_inputs = []
+        color_inputs = []
         
         for input in inputs:
             offset, semantic, source, set = input
@@ -108,6 +109,8 @@ class Primitive(DaeObject):
                 textangent_inputs.append(input)
             elif semantic == 'TEXBINORMAL':
                 texbinormal_inputs.append(input)
+            elif semantic == 'COLOR':
+                color_inputs.append(input)
             else:  
                 raise DaeUnsupportedError('Unknown input semantic: %s' % semantic)
             
@@ -117,6 +120,7 @@ class Primitive(DaeObject):
         all_inputs['TEXCOORD'] = texcoord_inputs
         all_inputs['TEXBINORMAL'] = textangent_inputs
         all_inputs['TEXTANGENT'] = textangent_inputs
+        all_inputs['COLOR'] = color_inputs
         
         return all_inputs
 
