@@ -204,7 +204,7 @@ class Geometry( DaeObject ):
                 _primitives.append( lineset.LineSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('polygons'):
                 _primitives.append( polygons.Polygons.load( collada, sourcebyid, subnode ) )
-            elif subnode.tag != tag('source') and subnode.tag != tag('vertices'):
+            elif subnode.tag != tag('source') and subnode.tag != tag('vertices') and subnode.tag != tag('extra'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
         geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node )
         return geom
