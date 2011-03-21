@@ -127,10 +127,15 @@ class Collada(object):
             
             if self.zfile:
                 self.filename = ''
+                daefiles = []
                 for name in self.zfile.namelist():
                     if name.upper().endswith('.DAE'):
+                        daefiles.append(name)
+                for name in daefiles:
+                    if not self.filename:
                         self.filename = name
-                        break
+                    elif "MACOSX" in self.filename:
+                        self.filename = name
                 if not self.filename: raise DaeIncompleteError('No DAE found inside zip compressed file')
                 data = self.zfile.read(self.filename)
                 self.getFileData = self.getFileFromZip
