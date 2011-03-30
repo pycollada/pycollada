@@ -23,7 +23,7 @@ from util import toUnitVec, checkSource
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
 
-class Polygons(polylist.PolygonList):
+class Polygons(polylist.Polylist):
     """Class containing the data COLLADA puts in a <polygons> tag, a collection of faces and holes."""
 
     def __init__(self, sources, material, polygons, xmlnode=None):
@@ -91,7 +91,7 @@ class Polygons(polylist.PolygonList):
         """Create a bound polygon list from this polygon list, transform and material mapping"""
         return BoundPolygons( self, matrix, materialnodebysymbol )
 
-class BoundPolygons(polylist.BoundPolygonList):
+class BoundPolygons(polylist.BoundPolylist):
     """Polygons bound to a transform matrix and materials mapping."""
 
     def __init__(self, pl, matrix, materialnodebysymbol):

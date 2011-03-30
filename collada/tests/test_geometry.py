@@ -115,7 +115,7 @@ class TestGeometry(unittest2.TestCase):
                                15,3,16,7,17,5,18,1,19,5,20,7,21,6,22,4,23])
         polylist = geometry.createPolyList(indices, vcounts, input_list, "cubematerial")
         
-        loaded_polylist = collada.polylist.PolygonList.load(self.dummy, geometry.sourceById, fromstring(tostring(polylist.xmlnode)))
+        loaded_polylist = collada.polylist.Polylist.load(self.dummy, geometry.sourceById, fromstring(tostring(polylist.xmlnode)))
         self.assertEqual(len(loaded_polylist), 6)
         
         geometry.primitives.append(polylist)

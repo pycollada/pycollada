@@ -142,7 +142,7 @@ class Geometry( DaeObject ):
           A TriangleSet object
         """
         inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
-        return polylist.PolygonList(inputdict, materialid, indices, vcounts)
+        return polylist.Polylist(inputdict, materialid, indices, vcounts)
 
     def createPolygons(self, indices, inputlist, materialid):
         """Add a list of polygons to this geometry instance.
@@ -197,7 +197,7 @@ class Geometry( DaeObject ):
         _primitives = []
         for subnode in meshnode:
             if subnode.tag == tag('polylist'):
-                _primitives.append( polylist.PolygonList.load( collada, sourcebyid, subnode ) )
+                _primitives.append( polylist.Polylist.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('triangles'):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('lines'):

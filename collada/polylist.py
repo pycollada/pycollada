@@ -85,7 +85,7 @@ class Polygon(object):
         return 'Polygon (vertices=%d)' % len(self.vertices)
     def __str__(self): return repr(self)
 
-class PolygonList(primitive.Primitive):
+class Polylist(primitive.Primitive):
     """Class containing the data COLLADA puts in a <polylist> tag, a collection of faces."""
 
     def __init__(self, sources, material, index, vcounts, xmlnode=None):
@@ -261,14 +261,14 @@ class PolygonList(primitive.Primitive):
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
         except: raise DaeMalformedError('Corrupted index in polylist')
 
-        polylist = PolygonList(all_inputs, node.get('material'), index, vcounts, node)
+        polylist = Polylist(all_inputs, node.get('material'), index, vcounts, node)
         return polylist
     
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound polygon list from this polygon list, transform and material mapping"""
-        return BoundPolygonList( self, matrix, materialnodebysymbol)
+        return BoundPolylist( self, matrix, materialnodebysymbol)
 
-class BoundPolygonList(object):
+class BoundPolylist(object):
     """A polygon set bound to a transform matrix and materials mapping."""
 
     def __init__(self, pl, matrix, materialnodebysymbol):
