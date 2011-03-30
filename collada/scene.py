@@ -238,7 +238,7 @@ class Node(SceneNode):
                 n = loadNode(collada, subnode)
                 if isinstance(n, Transform):
                     transforms.append(n)
-                else:
+                elif n is not None:
                     children.append(n)
             except DaeError, ex: collada.handleError(ex)
 
@@ -489,6 +489,8 @@ def loadNode( collada, node ):
         return referred_node
     elif node.tag == tag('extra'):
         return ExtraNode.load(collada, node)
+    elif node.tag == tag('asset'):
+        return None
     else: raise DaeUnsupportedError('Unknown scene node %s' % str(node.tag))
 
 class Scene(DaeObject):
