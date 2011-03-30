@@ -213,12 +213,19 @@ class Node(SceneNode):
         for child in self.children:
             child.save()
             
-        self.xmlnode.clear()
-        self.xmlnode = E.node(id=self.id, name=self.id)
+        self.xmlnode.set('id', self.id)
+        self.xmlnode.set('name', self.id)
         for t in self.transforms:
-            self.xmlnode.append(t.xmlnode)
+            if t.xmlnode not in self.xmlnode:
+                self.xmlnode.append(t.xmlnode)
         for c in self.children:
-            self.xmlnode.append(c.xmlnode)
+            if c.xmlnode not in self.xmlnode:
+                self.xmlnode.append(c.xmlnode)
+        xmlnodes = [c.xmlnode for c in self.children]
+        xmlnodes.extend([t.xmlnode for t in self.transforms])
+        for n in self.xmlnode:
+            if n not in xmlnodes:
+                self.xmlnode.remove(n)
 
     @staticmethod
     def load( collada, node ):
@@ -258,12 +265,13 @@ class GeometryNode(SceneNode):
         """A list of `MaterialNode` objects inside this node."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('instance_geometry') )
-            bindnode = ElementTree.Element( tag('bind_material') )
-            technode = ElementTree.Element( tag('technique_common') )
-            bindnode.append( technode )
-            self.xmlnode.append( bindnode )
-            for mat in materials: technode.append( mat.xmlnode )
+            self.xmlnode = E.instance_geometry(
+                E.bind_material(
+                    E.technique_common(
+                        *[mat.xmlnode for mat in self.materials]
+                    )
+                )
+            , url="#%s" % self.geometry.id)
             
     def objects(self, tipo, matrix=None):
         if tipo == 'geometry':
@@ -284,10 +292,6 @@ class GeometryNode(SceneNode):
         for matnode in matnodes:
             materials.append( MaterialNode.load(collada, matnode) )
         return GeometryNode( geometry, materials, xmlnode=node)
-
-    def save(self):
-        self.xmlnode.set('url', '#'+self.geometry.id)
-        for mat in self.materials: mat.save()
 
 class ControllerNode(SceneNode):
     """Data coming from <instance_controller> inside the scene tree."""
@@ -351,7 +355,7 @@ class MaterialNode(SceneNode):
           symbol
             The symbol string (inside the geometry object) we are defining
           target
-            The id of the material to assign to the symbol
+            The material.Effect object this refers to
           inputs
             A list of tuples (semantic, input_semantic, set) mapping geometry
             texcoords or other inputs to material input channels (semantic)
@@ -367,32 +371,10 @@ class MaterialNode(SceneNode):
         """A list of tuples (semantic, input_semantic, set) mapping material inputs."""
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element( tag('instance_material') )
-            self.xmlnode.set('symbol', symbol)
-            self.xmlnode.set('target', '#' + target.id)
-            for sem, input_sem, set in inputs:
-                inputnode = ElementTree.ElementTree( tag('bind_vertex_input') )
-                inputnode.set('semantic', sem)
-                inputnode.set('input_semantic', input_sem)
-                inputnode.set('input_set', set)
-                self.xmlnode.append( inputnode )
-
-    def findInput(self, semantic):
-        """Return the xml node assigning something to `semantic`."""
-        for node in self.xmlnode.findall(tag('bind_vertex_input')):
-            if node.get('semantic') == semantic: return node
-        node = ElementTree.Element(tag('bind_vertex_input'))
-        node.set('semantic', semantic)
-        self.xmlnode.append( node )
-        return node
-
-    def save(self):
-        self.xmlnode.set( 'symbol', self.symbol )
-        self.xmlnode.set( 'target', '#'+self.target.id )
-        for sem, input_sem, set in self.inputs:
-            inputnode = self.findInput(sem)
-            inputnode.set('input_semantic', input_sem)
-            inputnode.set('input_set', set)
+            self.xmlnode = E.instance_material(
+                *[E.bind_vertex_input(semantic=sem, input_semantic=input_sem, input_set=set)
+                  for sem, input_sem, set in self.inputs]
+            , **{'symbol': self.symbol, 'target':"#%s"%self.target.id} )
             
     @staticmethod
     def load(collada, node):
@@ -520,7 +502,7 @@ class Scene(DaeObject):
         """Children node list."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
-            self.xmlnode = ElementTree.Element(tag('visual_scene'))
+            self.xmlnode = E.visual_scene(id=self.id)
             for node in nodes:
                 self.xmlnode.append( node.xmlnode )
 
@@ -543,7 +525,7 @@ class Scene(DaeObject):
         nodes = []
         
         realnode = node
-        if not collada.assetInfo['up_axis'] == 'Z_UP':
+        if collada.assetInfo['up_axis'] == 'X_UP' or collada.assetInfo['up_axis'] == 'Y_UP':
             newscene = ElementTree.Element(tag('visual_scene'), {'id':'pycolladavisualscene', 'name':'pycolladavisualscene'})
             extranode = ElementTree.SubElement(newscene, tag('node'), {'id':'pycolladarotate', 'name':'pycolladarotate'})
             rotatenode = ElementTree.SubElement(extranode, tag('rotate'), {'sid':'rotateX'})
@@ -564,4 +546,9 @@ class Scene(DaeObject):
         self.xmlnode.set('id', self.id)
         for node in self.nodes:
             node.save()
-
+            if node.xmlnode not in self.xmlnode:
+                self.xmlnode.append(node.xmlnode)
+        xmlnodes = [n.xmlnode for n in self.nodes]
+        for node in self.xmlnode:
+            if node not in xmlnodes:
+                self.xmlnode.remove(node)

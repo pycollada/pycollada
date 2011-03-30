@@ -18,6 +18,25 @@ class TestScene(unittest2.TestCase):
         
         self.yoursunlight = collada.light.SunLight("yoursunlight", (1,1,1))
         self.dummy.lightById['yoursunlight'] = self.yoursunlight
+        
+        cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
+        surface = collada.material.Surface("mysurface", cimage)
+        sampler2d = collada.material.Sampler2D("mysampler2d", surface)
+        mymap = collada.material.Map(sampler2d, "TEX0")
+        self.effect = collada.material.Effect("myeffect", [surface, sampler2d], "phong",
+                       emission = (0.1, 0.2, 0.3),
+                       ambient = (0.4, 0.5, 0.6),
+                       diffuse = mymap,
+                       specular = (0.3, 0.2, 0.1))
+        self.dummy.materials.append(self.effect)
+        self.dummy.materialById[self.effect.id] = self.effect
+        
+        self.floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'Z'))
+        self.geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mygeometry", {"myfloatsource":self.floatsource})
+        self.dummy.geometries.append(self.geometry)
+        self.dummy.geometryById[self.geometry.id] = self.geometry
+        
+        self.dummy.assetInfo['up_axis'] = 'Z_UP'
 
     def test_scene_light_node_saving(self):
         sunlight = collada.light.SunLight("mysunlight", (1,1,1))
@@ -160,5 +179,97 @@ class TestScene(unittest2.TestCase):
         self.assertTrue(type(yournode.transforms[0]) is collada.scene.ScaleTransform)
         self.assertTrue(type(yournode.transforms[1]) is collada.scene.TranslateTransform)
 
+    def test_scene_material_node(self):
+        binding = ("TEX0", "TEXCOORD", "0")
+        matnode = collada.scene.MaterialNode("mygeommatref", self.effect, [binding])
+        
+        self.assertEqual(matnode.target, self.effect)
+        self.assertEqual(matnode.symbol, "mygeommatref")
+        self.assertListEqual(matnode.inputs, [binding])
+        
+        loaded_matnode = collada.scene.MaterialNode.load(self.dummy, fromstring(tostring(matnode.xmlnode)))
+        self.assertEqual(loaded_matnode.target.id, self.effect.id)
+        self.assertEqual(loaded_matnode.symbol, "mygeommatref")
+        self.assertListEqual(loaded_matnode.inputs, [binding])
+        
+    def test_scene_geometry_node(self):
+        binding = ("TEX0", "TEXCOORD", "0")
+        matnode = collada.scene.MaterialNode("mygeommatref", self.effect, [binding])
+        geomnode = collada.scene.GeometryNode(self.geometry, [matnode])
+        bindtest = list(geomnode.objects('geometry'))
+        self.assertEqual(len(bindtest), 1)
+        self.assertEqual(bindtest[0].original, self.geometry)
+        self.assertEqual(geomnode.geometry, self.geometry)
+        self.assertListEqual(geomnode.materials, [matnode])
+        loaded_geomnode = collada.scene.loadNode(self.dummy, fromstring(tostring(geomnode.xmlnode)))
+        self.assertEqual(loaded_geomnode.geometry.id, self.geometry.id)
+        self.assertEqual(len(loaded_geomnode.materials), 1)
+        self.assertEqual(loaded_geomnode.materials[0].target, matnode.target)
+        self.assertEqual(loaded_geomnode.materials[0].symbol, "mygeommatref")
+        self.assertListEqual(loaded_geomnode.materials[0].inputs, [binding])
+    
+    def test_scene_node_with_instances(self):
+        binding = ("TEX0", "TEXCOORD", "0")
+        matnode = collada.scene.MaterialNode("mygeommatref", self.effect, [binding])
+        geomnode = collada.scene.GeometryNode(self.geometry, [matnode])
+        camnode = collada.scene.CameraNode(self.yourcam)
+        lightnode = collada.scene.LightNode(self.yoursunlight)
+        myemptynode = collada.scene.Node('myemptynode')
+        rotate = collada.scene.RotateTransform(0.1, 0.2, 0.3, 90)
+        scale = collada.scene.ScaleTransform(0.1, 0.2, 0.3)
+        mynode = collada.scene.Node('mynode',
+                                    children=[myemptynode, geomnode, camnode, lightnode],
+                                    transforms=[rotate, scale])
+        
+        self.assertEqual(len(mynode.children), 4)
+        self.assertEqual(mynode.children[0], myemptynode)
+        self.assertEqual(mynode.children[1], geomnode)
+        self.assertEqual(mynode.children[2], camnode)
+        self.assertEqual(mynode.children[3], lightnode)
+        self.assertEqual(mynode.transforms[0], rotate)
+        self.assertEqual(mynode.transforms[1], scale)
+        
+        mynode.id = 'yournode'
+        mynode.children.pop(0)
+        mynode.save()
+        
+        yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)))
+        self.assertEqual(yournode.id, 'yournode')
+        self.assertEqual(len(yournode.children), 3)
+        self.assertEqual(len(yournode.transforms), 2)
+        self.assertEqual(yournode.children[0].geometry.id, self.geometry.id)
+        self.assertEqual(yournode.children[1].camera.id, self.yourcam.id)
+        self.assertEqual(yournode.children[2].light.id, self.yoursunlight.id)
+        self.assertTrue(type(yournode.transforms[0]) is collada.scene.RotateTransform)
+        self.assertTrue(type(yournode.transforms[1]) is collada.scene.ScaleTransform)
+        
+    def test_scene_with_nodes(self):
+        rotate = collada.scene.RotateTransform(0.1, 0.2, 0.3, 90)
+        scale = collada.scene.ScaleTransform(0.1, 0.2, 0.3)
+        mynode = collada.scene.Node('mynode', children=[], transforms=[rotate, scale])
+        yournode = collada.scene.Node('yournode', children=[], transforms=[])
+        othernode = collada.scene.Node('othernode', children=[], transforms=[])
+        scene = collada.scene.Scene('myscene', [mynode, yournode, othernode])
+        
+        self.assertEqual(scene.id, 'myscene')
+        self.assertEqual(len(scene.nodes), 3)
+        self.assertEqual(scene.nodes[0], mynode)
+        self.assertEqual(scene.nodes[1], yournode)
+        self.assertEqual(scene.nodes[2], othernode)
+        
+        scene.id = 'yourscene'
+        scene.nodes.pop(1)
+        anothernode = collada.scene.Node('anothernode')
+        scene.nodes.append(anothernode)
+        scene.save()
+        
+        loaded_scene = collada.scene.Scene.load(self.dummy, fromstring(tostring(scene.xmlnode)))
+        
+        self.assertEqual(loaded_scene.id, 'yourscene')
+        self.assertEqual(len(loaded_scene.nodes), 3)
+        self.assertEqual(loaded_scene.nodes[0].id, 'mynode')
+        self.assertEqual(loaded_scene.nodes[1].id, 'othernode')
+        self.assertEqual(loaded_scene.nodes[2].id, 'anothernode')
+        
 if __name__ == '__main__':
     unittest2.main()
