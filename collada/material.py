@@ -181,7 +181,7 @@ class Surface(DaeObject):
         if imgid in localscope:
             img = localscope[imgid]
         else:
-            img = collada.imageById.get(imgid)
+            img = collada.images.get(imgid)
         if img is None: raise DaeBrokenRefError('Missing image ' + imgid)
         return Surface(id, img, format, xmlnode=node)
 
@@ -466,9 +466,9 @@ class Effect(DaeObject):
             else:
                 try: props[key] = Effect.loadShadingParam(collada, localscope, pnode)
                 except DaeMissingSampler2D, ex:
-                    if ex.samplerid in collada.imageById:
+                    if ex.samplerid in collada.images:
                         #Whoever exported this collada file didn't include the proper references so we will create them
-                        surf = Surface(ex.samplerid + '-surface', collada.imageById[ex.samplerid], 'A8R8G8B8')
+                        surf = Surface(ex.samplerid + '-surface', collada.images[ex.samplerid], 'A8R8G8B8')
                         sampler = Sampler2D(ex.samplerid, surf, None, None);
                         params.append(surf)
                         params.append(sampler)

@@ -173,9 +173,9 @@ class Skin(Controller):
         geometry_source = skinnode.get('source')
         if geometry_source is None or len(geometry_source) < 2 or geometry_source[0] != '#':
             raise DaeBrokenRefError('Invalid source attribute of skin node')
-        if not geometry_source[1:] in collada.geometryById:
+        if not geometry_source[1:] in collada.geometries:
             raise DaeBrokenRefError('Source geometry for skin node not found')
-        geometry = collada.geometryById[geometry_source[1:]]
+        geometry = collada.geometries[geometry_source[1:]]
         
         bind_shape_mat = skinnode.find(tag('bind_shape_matrix'))
         if bind_shape_mat is None:
@@ -313,9 +313,9 @@ class Morph(Controller):
     @staticmethod
     def load( collada, localscope, morphnode, controllernode ):        
         baseid = morphnode.get('source')
-        if len(baseid) < 2 or baseid[0] != '#' or not baseid[1:] in collada.geometryById:
+        if len(baseid) < 2 or baseid[0] != '#' or not baseid[1:] in collada.geometries:
             raise DaeBrokenRefError('Base source of morph %s not found'%baseid)
-        basegeom = collada.geometryById[baseid[1:]]
+        basegeom = collada.geometries[baseid[1:]]
         
         method = morphnode.get('method')
         if method is None:
@@ -348,9 +348,9 @@ class Morph(Controller):
 
         target_list = []
         for target, weight in zip(target_source, weight_source):
-            if len(target) < 1 or not(target in collada.geometryById):
+            if len(target) < 1 or not(target in collada.geometries):
                 raise DaeBrokenRefError("Targeted geometry %s in morph not found"%target)
-            target_list.append((collada.geometryById[target], weight[0]))
+            target_list.append((collada.geometries[target], weight[0]))
 
         return Morph(basegeom, target_list, controllernode)
     

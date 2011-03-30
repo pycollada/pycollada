@@ -16,7 +16,9 @@ class TestMaterial(unittest2.TestCase):
                         aux_file_loader = self.image_dummy_loader)
         
         self.dummy_cimage = collada.material.CImage("yourcimage", "./whatever.tga", self.dummy)
-        self.dummy.imageById["yourcimage"] = self.dummy_cimage
+        self.cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
+        self.dummy.images.append(self.dummy_cimage)
+        self.dummy.images.append(self.cimage)
 
     def test_effect_saving(self):
         effect = collada.material.Effect("myeffect", [], "phong",
@@ -169,8 +171,7 @@ class TestMaterial(unittest2.TestCase):
         self.assertEqual(map.texcoord, "TEX1")
         
     def test_effect_with_params(self):
-        cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
-        surface = collada.material.Surface("mysurface", cimage)
+        surface = collada.material.Surface("mysurface", self.cimage)
         sampler2d = collada.material.Sampler2D("mysampler2d", surface)
         effect = collada.material.Effect("myeffect", [surface, sampler2d], "phong",
                        emission = (0.1, 0.2, 0.3),
@@ -193,7 +194,7 @@ class TestMaterial(unittest2.TestCase):
         effect.diffuse = other_map
         effect.save()
         
-        self.dummy.imageById["mycimage"] = self.dummy_cimage
+        self.dummy.images.append(self.dummy_cimage)
         loaded_effect = collada.material.Effect.load(self.dummy, {}, fromstring(tostring(effect.xmlnode)))
         self.assertEqual(type(loaded_effect.diffuse), collada.material.Map)
         self.assertEqual(len(loaded_effect.params), 3)

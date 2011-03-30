@@ -14,10 +14,10 @@ class TestScene(unittest2.TestCase):
         self.dummy = collada.Collada(StringIO.StringIO(self.dummy_collada_text))
         
         self.yourcam = collada.camera.Camera("yourcam", 45.0, 0.01, 1000.0)
-        self.dummy.cameraById['yourcam'] = self.yourcam
+        self.dummy.cameras.append(self.yourcam)
         
         self.yoursunlight = collada.light.SunLight("yoursunlight", (1,1,1))
-        self.dummy.lightById['yoursunlight'] = self.yoursunlight
+        self.dummy.lights.append(self.yoursunlight)
         
         cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
         surface = collada.material.Surface("mysurface", cimage)
@@ -29,12 +29,10 @@ class TestScene(unittest2.TestCase):
                        diffuse = mymap,
                        specular = (0.3, 0.2, 0.1))
         self.dummy.materials.append(self.effect)
-        self.dummy.materialById[self.effect.id] = self.effect
         
         self.floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'Z'))
         self.geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mygeometry", {"myfloatsource":self.floatsource})
         self.dummy.geometries.append(self.geometry)
-        self.dummy.geometryById[self.geometry.id] = self.geometry
         
         self.dummy.assetInfo['up_axis'] = 'Z_UP'
 

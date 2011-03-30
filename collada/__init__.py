@@ -101,6 +101,7 @@ import material
 import camera
 import light
 import controller
+from util import IndexedList
 
 class Collada(object):
     """Class used to access collada (dae,zae,kmz) files.
@@ -152,6 +153,18 @@ class Collada(object):
             self.ignoreErrors( *ignore )
             self.root = ElementTree.ElementTree(element=None, file=StringIO(data),
                                                 parser=ElementTree.XMLParser(remove_comments=True))
+            
+            self.assetInfo = {}
+            self.geometries = IndexedList([], ('id',))
+            self.controllers = IndexedList([], ('id',))
+            self.lights = IndexedList([], ('id',))
+            self.cameras = IndexedList([], ('id',))
+            self.images = IndexedList([], ('id',))
+            self.effects = IndexedList([], ('id',))
+            self.materials = IndexedList([], ('id',))
+            self.nodes = IndexedList([], ('id',))
+            self.scenes = IndexedList([], ('id',))
+            
             self.validate()
             self.loadAssetInfo()
             self.loadImages()
@@ -213,7 +226,6 @@ class Collada(object):
     def loadAssetInfo(self):
         """Load information in <asset> tag"""
         assetnode = self.root.find( tag('asset') )
-        self.assetInfo = {}
         if assetnode != None:
             for subnode in list(assetnode):
                 if subnode.tag == tag('up_axis'):
@@ -256,8 +268,6 @@ class Collada(object):
                     
     def loadGeometry(self):
         """Load geometry library."""
-        self.geometries = []
-        self.geometryById = {}
         libnode = self.root.find( tag('library_geometries') )
         if libnode != None:
             for geomnode in libnode.findall(tag('geometry')):
@@ -266,12 +276,9 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.geometries.append( G )
-                    self.geometryById[ G.id ] = G
     
     def loadControllers(self):
         """Load controller library."""
-        self.controllers = []
-        self.controllerById = {}
         libnode = self.root.find( tag('library_controllers') )
         if libnode != None:
             for controlnode in libnode.findall(tag('controller')):
@@ -281,12 +288,9 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.controllers.append( C )
-                    self.controllerById[ C.id ] = C
     
     def loadLights(self):
         """Load light library."""
-        self.lights = []
-        self.lightById = {}
         libnode = self.root.find( tag('library_lights') )
         if libnode != None:
             for lightnode in libnode.findall(tag('light')):
@@ -294,12 +298,9 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.lights.append( lig )
-                    self.lightById[ lig.id ] = lig
 
     def loadCameras(self):
         """Load camera library."""
-        self.cameras = []
-        self.cameraById = {}
         libnode = self.root.find( tag('library_cameras') )
         if libnode != None:
             for cameranode in libnode.findall(tag('camera')):
@@ -307,12 +308,9 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.cameras.append( cam )
-                    self.cameraById[ cam.id ] = cam
 
     def loadImages(self):
         """Load image library."""
-        self.images = []
-        self.imageById = {}
         libnode = self.root.find( tag('library_images') )
         if libnode != None:
             for imgnode in libnode.findall(tag('image')):
@@ -320,12 +318,9 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.images.append( img )
-                    self.imageById[ img.id ] = img
 
     def loadEffects(self):
         """Load effect library."""
-        self.effects = []
-        self.effectById = {}
         libnode = self.root.find( tag('library_effects') )
         if libnode != None:
             for effectnode in libnode.findall(tag('effect')):
@@ -333,7 +328,6 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.effects.append( effect )
-                    self.effectById[ effect.id ] = effect
 
     def loadMaterials(self):
         """Load material library.
@@ -342,8 +336,6 @@ class Collada(object):
         But this might change in the future.
 
         """
-        self.materials = []
-        self.materialById = {}
         libnode = self.root.find( tag('library_materials'))
         if libnode != None:
             for materialnode in libnode.findall(tag('material')):
@@ -355,30 +347,36 @@ class Collada(object):
                         raise DaeMalformedError('Corrupted effect reference in material %s' % effectid)
                     else:
                         matid = materialnode.get('id')
-                        effect = self.effectById.get(effectid[1:])
+                        effect = self.effects.get(effectid[1:])
                         if not effect: 
                             raise DaeBrokenRefError('Effect not found: '+effectid)
                         else:
-                            self.materials.append( effect )
-                            self.materialById[matid] = effect
+                            #TODO: Materials can have params
+                            mateffect = material.Effect(matid, effect.params, effect.shadingtype,
+                                                        effect.emission,
+                                                        effect.ambient,
+                                                        effect.diffuse,
+                                                        effect.specular,
+                                                        effect.shininess,
+                                                        effect.reflective,
+                                                        effect.reflectivity,
+                                                        effect.transparent,
+                                                        effect.transparency)
+                            self.materials.append( mateffect )
                 except DaeError, ex: self.handleError(ex)
 
     def loadNodes(self):
-        self.nodes = []
-        self.nodeById = {}
         libnode = self.root.find( tag('library_nodes') )
         if libnode != None:
             for node in libnode.findall(tag('node')):
                 try: N = scene.loadNode(self, node)
                 except DaeError, ex: self.handleError(ex)
                 else:
-                    self.nodes.append( N )
-                    self.nodeById[N.id] = N
+                    if N is not None:
+                        self.nodes.append( N )
 
     def loadScenes(self):
         """Load scene library."""
-        self.scenes = []
-        self.sceneById = {}
         libnode = self.root.find( tag('library_visual_scenes') )
         if libnode != None:
             for scenenode in libnode.findall(tag('visual_scene')):
@@ -386,7 +384,6 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.scenes.append( S )
-                    self.sceneById[S.id] = S
 
     def loadDefaultScene(self):
         """Loads the default scene from <scene> tag in the root node."""
@@ -397,7 +394,7 @@ class Collada(object):
                 sceneid = node.get('url')
                 if not sceneid.startswith('#'):
                     raise DaeMalformedError('Malformed default scene reference to %s: '%sceneid)
-                self.scene = self.sceneById.get(sceneid[1:])
+                self.scene = self.scenes.get(sceneid[1:])
                 if not self.scene:
                     raise DaeBrokenRefError('Default scene %s not found'%sceneid)
         except DaeError, ex: self.handleError(ex)
