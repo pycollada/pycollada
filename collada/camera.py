@@ -44,7 +44,9 @@ class Camera(DaeObject):
         """Near plane distance."""
         self.far = far
         """Far plane distance."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the data."""
         else:
             self.xmlnode = E.camera(
                 E.optics(
@@ -119,7 +121,7 @@ class Camera(DaeObject):
                 matrix
                   A numpy transformation matrix of size 4x4
             :Returns:
-                A :class:`collada.camera.BoundCamera`
+                :class:`collada.camera.BoundCamera`
         """
         return BoundCamera(self, matrix)
 

@@ -10,7 +10,9 @@
 #                                                                  #
 ####################################################################
 
-"""Module for <controller> data loading."""
+"""Contains objects representing controllers. Currently has partial 
+    support for loading Skin and Morph. **This module is highly
+    experimental. More support will be added in version 0.3.**"""
 
 from lxml import etree as ElementTree
 import numpy
@@ -24,7 +26,6 @@ class Controller(DaeObject):
     """Base controller class holding data from <controller> tags."""
 
     def bind(self, matrix, materialnodebysymbol):
-        """Create a bound controller from this one, transform and material mapping"""
         pass
 
     @staticmethod
@@ -51,6 +52,7 @@ class BoundController( object ):
     """Base class for a controller bound to a transform matrix and materials mapping."""
 
 class Skin(Controller):
+    """Class containing data collada holds in the <skin> tag"""
     
     def __init__(self, sourcebyid, bind_shape_matrix, joint_source, joint_matrix_source,
                  weight_source, weight_joint_source, vcounts, vertex_weight_index,
@@ -239,9 +241,9 @@ class Skin(Controller):
                     vcounts, index, offsets, geometry, controllernode, skinnode)
     
 class BoundSkin(BoundController):
+    """A skin bound to a transform matrix and materials mapping."""
     
     def __init__(self, skin, matrix, materialnodebysymbol):
-        """Create a bound skin from a skin, transform and material mapping"""
         self.matrix = matrix
         self.materialnodebysymbol = materialnodebysymbol
         self.skin = skin
@@ -262,9 +264,9 @@ class BoundSkin(BoundController):
             yield bsp
     
 class BoundSkinPrimitive(object):
+    """A bound skin bound to a primitive."""
     
     def __init__(self, primitive, boundskin):
-        """Create a bound skim primitive"""
         self.primitive = primitive
         self.boundskin = boundskin
     
@@ -277,6 +279,7 @@ class BoundSkinPrimitive(object):
             yield shape
     
 class Morph(Controller):
+    """Class containing data collada holds in the <morph> tag"""
     
     def __init__(self, source_geometry, target_list, xmlnode=None):
         """Create a morph instance
@@ -359,9 +362,9 @@ class Morph(Controller):
         pass
         
 class BoundMorph(BoundController):
+    """A morph bound to a transform matrix and materials mapping."""
     
     def __init__(self, morph, matrix, materialnodebysymbol):
-        """Create a bound morph from a morph, transform and material mapping"""
         self.matrix = matrix
         self.materialnodebysymbol = materialnodebysymbol
         self.original = morph
