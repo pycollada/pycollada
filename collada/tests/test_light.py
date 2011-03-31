@@ -12,17 +12,18 @@ class TestLight(unittest2.TestCase):
         """
         self.dummy = collada.Collada(StringIO.StringIO(self.dummy_collada_text))
 
-    def test_sun_light_saving(self):
+    def test_directional_light_saving(self):
         dirlight = collada.light.DirectionalLight("mydirlight", (1,1,1))
         self.assertEqual(dirlight.id, "mydirlight")
         self.assertTupleEqual(dirlight.color, (1,1,1))
+        self.assertTupleEqual(tuple(dirlight.direction), (0,0,-1))
         dirlight.color = (0.1, 0.2, 0.3)
         dirlight.id = "yourdirlight"
         dirlight.save()
         loaded_dirlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(dirlight.xmlnode)))
         self.assertTrue(isinstance(loaded_dirlight, collada.light.DirectionalLight))
-        self.assertTupleEqual(dirlight.color, (0.1, 0.2, 0.3))
-        self.assertEqual(dirlight.id, "yourdirlight")
+        self.assertTupleEqual(loaded_dirlight.color, (0.1, 0.2, 0.3))
+        self.assertEqual(loaded_dirlight.id, "yourdirlight")
         
     def test_ambient_light_saving(self):
         ambientlight = collada.light.AmbientLight("myambientlight", (1,1,1))
