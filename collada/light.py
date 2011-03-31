@@ -37,7 +37,7 @@ class Light(DaeObject):
             raise DaeIncompleteError('Missing common technique in light')
         lightnode = tecnode[0]
         if lightnode.tag == tag('directional'):
-            return SunLight.load( collada, localscope, node )
+            return DirectionalLight.load( collada, localscope, node )
         elif lightnode.tag == tag('point'):
             return PointLight.load( collada, localscope, node )
         elif lightnode.tag == tag('ambient'):
@@ -47,7 +47,7 @@ class Light(DaeObject):
         else:
             raise DaeUnsupportedError('Unrecognized light type: %s'%lightnode.tag)
 
-class SunLight(Light):
+class DirectionalLight(Light):
     """Directional light as defined in COLLADA tag <directional>."""
 
     def __init__(self, id, color, xmlnode = None):
@@ -64,8 +64,7 @@ class SunLight(Light):
         """
         self.id = id
         """Id in the light library."""
-        # TODO: check if this is actually the initial direction
-        self.direction = numpy.array( [0, 0, 1], dtype=numpy.float32 )
+        self.direction = numpy.array( [0, 0, -1], dtype=numpy.float32 )
         """Incoming direction of the light."""
         self.color = color
         """Light color."""
@@ -95,11 +94,11 @@ class SunLight(Light):
         try: color = tuple( [ float(v) for v in colornode.text.split() ] )
         except ValueError, ex: 
             raise DaeMalformedError('Corrupted color values in light definition')
-        return SunLight(node.get('id'), color, xmlnode = node)
+        return DirectionalLight(node.get('id'), color, xmlnode = node)
     
     def bind(self, matrix):
         """Create a bound light of itself based on a transform matrix."""
-        return BoundSunLight(self, matrix)
+        return BoundDirectionalLight(self, matrix)
 
 class AmbientLight(Light):
     """Ambient light as defined in COLLADA tag <ambient>."""
@@ -372,36 +371,36 @@ class BoundPointLight(object):
 class BoundSpotLight(object):
     """Spot light bount to a scene with transformation."""
 
-    def __init__(self, slight, matrix):
-        self.position = numpy.dot( matrix[:3,:3], slight.position ) + matrix[:3,3]
-        self.color = slight.color
-        self.constant_att = slight.constant_att
-        self.linear_att = slight.linear_att
-        self.quad_att = slight.quad_att
-        self.falloff_ang = slight.falloff_ang
-        self.falloff_exp = slight.falloff_exp
-        self.original = slight
+    def __init__(self, dlight, matrix):
+        self.position = numpy.dot( matrix[:3,:3], dlight.position ) + matrix[:3,3]
+        self.color = dlight.color
+        self.constant_att = dlight.constant_att
+        self.linear_att = dlight.linear_att
+        self.quad_att = dlight.quad_att
+        self.falloff_ang = dlight.falloff_ang
+        self.falloff_exp = dlight.falloff_exp
+        self.original = dlight
 
     def __str__(self): return 'BoundSpotLight(at %s)' % str(self.position)
     def __repr__(self): return str(self)
 
-class BoundSunLight(object):
+class BoundDirectionalLight(object):
     """Point light bount to a scene with transformation."""
 
-    def __init__(self, slight, matrix):
-        self.direction = numpy.dot( matrix[:3,:3], slight.direction )
-        self.color = slight.color
-        self.original = slight
+    def __init__(self, dlight, matrix):
+        self.direction = numpy.dot( matrix[:3,:3], dlight.direction )
+        self.color = dlight.color
+        self.original = dlight
 
-    def __str__(self): return 'BoundSunLight(from %s)' % str(self.direction)
+    def __str__(self): return 'BoundDirectionalLight(from %s)' % str(self.direction)
     def __repr__(self): return str(self)
 
 class BoundAmbientLight(object):
     """Ambient light bount to a scene with transformation."""
 
-    def __init__(self, slight, matrix):
-        self.color = slight.color
-        self.original = slight
+    def __init__(self, dlight, matrix):
+        self.color = dlight.color
+        self.original = dlight
 
     def __str__(self): return 'BoundAmbientLight'
     def __repr__(self): return str(self)

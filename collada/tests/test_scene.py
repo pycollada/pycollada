@@ -16,8 +16,8 @@ class TestScene(unittest2.TestCase):
         self.yourcam = collada.camera.Camera("yourcam", 45.0, 0.01, 1000.0)
         self.dummy.cameras.append(self.yourcam)
         
-        self.yoursunlight = collada.light.SunLight("yoursunlight", (1,1,1))
-        self.dummy.lights.append(self.yoursunlight)
+        self.yourdirlight = collada.light.DirectionalLight("yourdirlight", (1,1,1))
+        self.dummy.lights.append(self.yourdirlight)
         
         cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
         surface = collada.material.Surface("mysurface", cimage)
@@ -37,18 +37,18 @@ class TestScene(unittest2.TestCase):
         self.dummy.assetInfo['up_axis'] = 'Z_UP'
 
     def test_scene_light_node_saving(self):
-        sunlight = collada.light.SunLight("mysunlight", (1,1,1))
-        lightnode = collada.scene.LightNode(sunlight)
+        dirlight = collada.light.DirectionalLight("mydirlight", (1,1,1))
+        lightnode = collada.scene.LightNode(dirlight)
         bindtest = list(lightnode.objects('light'))
-        self.assertEqual(lightnode.light, sunlight)
+        self.assertEqual(lightnode.light, dirlight)
         self.assertEqual(len(bindtest), 1)
-        self.assertEqual(bindtest[0].original, sunlight)
+        self.assertEqual(bindtest[0].original, dirlight)
         
-        lightnode.light = self.yoursunlight
+        lightnode.light = self.yourdirlight
         lightnode.save()
         
         loadedlightnode = collada.scene.LightNode.load(self.dummy, fromstring(tostring(lightnode.xmlnode)))
-        self.assertEqual(loadedlightnode.light.id, 'yoursunlight')
+        self.assertEqual(loadedlightnode.light.id, 'yourdirlight')
         
     def test_scene_camera_node_saving(self):
         cam = collada.camera.Camera("mycam", 45.0, 0.01, 1000.0)
@@ -211,7 +211,7 @@ class TestScene(unittest2.TestCase):
         matnode = collada.scene.MaterialNode("mygeommatref", self.effect, [binding])
         geomnode = collada.scene.GeometryNode(self.geometry, [matnode])
         camnode = collada.scene.CameraNode(self.yourcam)
-        lightnode = collada.scene.LightNode(self.yoursunlight)
+        lightnode = collada.scene.LightNode(self.yourdirlight)
         myemptynode = collada.scene.Node('myemptynode')
         rotate = collada.scene.RotateTransform(0.1, 0.2, 0.3, 90)
         scale = collada.scene.ScaleTransform(0.1, 0.2, 0.3)
@@ -237,7 +237,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(len(yournode.transforms), 2)
         self.assertEqual(yournode.children[0].geometry.id, self.geometry.id)
         self.assertEqual(yournode.children[1].camera.id, self.yourcam.id)
-        self.assertEqual(yournode.children[2].light.id, self.yoursunlight.id)
+        self.assertEqual(yournode.children[2].light.id, self.yourdirlight.id)
         self.assertTrue(type(yournode.transforms[0]) is collada.scene.RotateTransform)
         self.assertTrue(type(yournode.transforms[1]) is collada.scene.ScaleTransform)
         
