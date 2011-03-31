@@ -1,16 +1,16 @@
 ####################################################################
 #                                                                  #
-# THIS FILE IS PART OF THE PyCollada LIBRARY SOURCE CODE.          #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
 # USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
 # GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
 # IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
 #                                                                  #
-# THE PyCollada SOURCE CODE IS (C) COPYRIGHT 2009                  #
-# by Scopia Visual Interfaces Systems http://www.scopia.es/        #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace and contributors                                 #
 #                                                                  #
 ####################################################################
 
-"""Camera module, class and tools."""
+"""Contains objects for representing cameras"""
 
 from lxml import etree as ElementTree
 import numpy
@@ -27,13 +27,13 @@ class Camera(DaeObject):
           id
             Id for the object
           fov
-            Y axis field of visiona in degrees
+            Y axis field of vision in degrees
           near
             Near plane distance
           far
             Far plane distance
           xmlnode
-            If load form xml, the xml node
+            If loaded from xml, the xml node
 
         """
         self.id = id
@@ -44,12 +44,6 @@ class Camera(DaeObject):
         """Near plane distance."""
         self.far = far
         """Far plane distance."""
-        self.position = numpy.array( [0, 0, 0], dtype=numpy.float32 )
-        """Position in space of the point of view."""
-        self.direction = numpy.array( [0, 0, -1], dtype=numpy.float32 )
-        """Look direction of the camera."""
-        self.up = numpy.array( [0, 1, 0], dtype=numpy.float32 )
-        """Up vector of the camera."""
         if xmlnode != None: self.xmlnode = xmlnode
         else:
             self.xmlnode = E.camera(
@@ -65,6 +59,7 @@ class Camera(DaeObject):
             , id=self.id, name=self.id)
 
     def save(self):
+        """Saves the camera's properties back to xmlnode"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         persnode = self.xmlnode.find( '%s/%s/%s'%(tag('optics'),tag('technique_common'), 
@@ -109,7 +104,6 @@ class Camera(DaeObject):
             else: far = None
         except ValueError, ex: 
             raise DaeMalformedError('Corrupted float values in camera definition')
-        # KISS
         for n in persnode: 
             if n.tag in ['xfov', 'aspect_ratio']: persnode.remove(n)
         if yfovnode is None:
@@ -119,32 +113,32 @@ class Camera(DaeObject):
         return Camera(node.get('id'), fov, near, far, xmlnode = node)
 
     def bind(self, matrix):
-        """Create a bound camera of itself based on a transform matrix."""
+        """Create a bound camera of itself based on a transform matrix.
+        
+            :Parameters:
+                matrix
+                  A numpy transformation matrix of size 4x4
+            :Returns:
+                A :class:`collada.camera.BoundCamera`
+        """
         return BoundCamera(self, matrix)
 
+    def __str__(self): return 'Camera id=%s' % self.id
+    def __repr__(self): return str(self)
+
 class BoundCamera(object):
-    """Camera bound to a scene with a transform."""
+    """Camera bound to a scene with a transform. This gets created when a
+        camera is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, cam, matrix):
-        """Create a bound camera based on a transform matrix."""
         self.fov = cam.fov
         """Field of vision in degrees."""
         self.near = cam.near
         """Near plane distance."""
         self.far = cam.far
         """Far plane distance."""
-        self.position = numpy.dot( matrix[:3,:3], cam.position ) + matrix[:3,3]
-        """Position in space of the point of view."""
-        self.direction = numpy.dot( matrix[:3,:3], cam.direction )
-        """Look direction of the camera."""
-        self.up = numpy.dot( matrix[:3,:3], cam.up )
-        """Up vector of the camera."""
         self.original = cam
-        """Original camera object from this object is a transformation."""
-        dlen = numpy.sqrt(numpy.dot(self.direction, self.direction))
-        ulen = numpy.sqrt(numpy.dot(self.up, self.up))
-        if dlen > 0: self.direction /= dlen
-        if ulen > 0: self.up /= ulen
+        """Original :class:`collada.camera.Camera` object this is bound to."""
 
-    def __str__(self): return 'Camera(at %s)' % str(self.position)
+    def __str__(self): return 'BoundCamera bound to %s' % self.original.id
     def __repr__(self): return str(self)

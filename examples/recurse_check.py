@@ -86,7 +86,6 @@ def main():
                         assert(len(prim) >= 0)
                 for cam in col.scene.objects('camera'):
                     assert(cam.original.id)
-                    assert(len(cam.position) == 3)
         except (KeyboardInterrupt, SystemExit):
             print
             sys.exit("Keyboard interrupt. Exiting.")

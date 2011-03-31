@@ -1,16 +1,16 @@
 ####################################################################
 #                                                                  #
-# THIS FILE IS PART OF THE PyCollada LIBRARY SOURCE CODE.          #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
 # USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
 # GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
 # IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
 #                                                                  #
-# THE PyCollada SOURCE CODE IS (C) COPYRIGHT 2009                  #
-# by Scopia Visual Interfaces Systems http://www.scopia.es/        #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace and contributors                                 #
 #                                                                  #
 ####################################################################
 
-"""Main module for collada (PyCollada) package.
+"""Main module for collada (pycollada) package.
 
 You will find here class `Collada` which is the one to use to access
 collada file, and some exceptions that are raised in case the input
@@ -35,13 +35,15 @@ def tag( text ):
     return str(ElementTree.QName( 'http://www.collada.org/2005/11/COLLADASchema', text ))
 
 class DaeObject(object):
-    """This class is the interface to all DAE objects loaded from a file.
+    """This class is the abstract interface to all collada objects.
 
     Every <tag> in a COLLADA that we recognize and load has mirror
-    class deriving from this one. It can be load() and save() according
-    to methods defined here. All instances will have at least an attribute
-    called "xmlnode" with the ElementTree representation of the data. Even if
-    it was created on the fly.
+    class deriving from this one. All instances will have at least
+    a :meth:`load` method which creates the object from an xml node and
+    an attribute called :attr:`xmlnode` with the ElementTree representation
+    of the data. Even if it was created on the fly. If the object is
+    not read-only, it will also have a :meth:`save` method which saves the
+    object's information back to the :attr:`xmlnode` attribute.
 
     """
 
@@ -104,85 +106,100 @@ import controller
 from util import IndexedList
 
 class Collada(object):
-    """Class used to access collada (dae,zae,kmz) files.
-
-    It is able to load scenes from a file and access the supported
-    data in an easy way. Supports plain xml DAE files or zip compressed
-    structures like zae or kmz.
-
-    """
+    """This is the main class used to create and load collada documents"""
 
     def __init__(self, filename, ignore = [], aux_file_loader = None):
+        """Load collada data from filename or file like object.
+        
+        :Parameters:
+          filename
+            String containing path to filename to open or file-like object.
+            Uncompressed .dae files are supported, as well as zip file archives.
+          ignore
+            A list of :class:`collada.DaeError` types that should be ignored
+            when loading the collada document. Instances of these types will
+            be added to :attr:`errors` after loading but won't be raised.
+          aux_file_loader
+            Referenced files (e.g. texture images) are loaded from disk when
+            reading from the local filesystem and from the zip archive when
+            loading from a zip file. If you these files are coming from another
+            source (e.g. database) and you're loading with StringIO, set this to
+            a function that given a filename, returns the binary data in the file.
+        """
+        
+        self.errors = []
+        """List of :class:`collada.DaeError` objects representing errors encounterd while loading collada file"""
+        self.assetInfo = {}
+        """A dictionary structure that stores asset information coming from <asset> tag"""
+        self.geometries = IndexedList([], ('id',))
+        """A list of :class:`collada.geometry.Geometry` objects. Can also be indexed by id"""
+        self.controllers = IndexedList([], ('id',))
+        """A list of :class:`collada.controller.Controller` objects. Can also be indexed by id"""
+        self.lights = IndexedList([], ('id',))
+        """A list of :class:`collada.light.Light` objects. Can also be indexed by id"""
+        self.cameras = IndexedList([], ('id',))
+        """A list of :class:`collada.camera.Camera` objects. Can also be indexed by id"""
+        self.images = IndexedList([], ('id',))
+        """A list of :class:`collada.material.CImage` objects. Can also be indexed by id"""
+        self.effects = IndexedList([], ('id',))
+        """A list of :class:`collada.material.Effect` objects. Can also be indexed by id"""
+        self.materials = IndexedList([], ('id',))
+        """A list of :class:`collada.material.Effect` objects. Can also be indexed by id"""
+        self.nodes = IndexedList([], ('id',))
+        """A list of :class:`collada.scene.Node` objects. Can also be indexed by id"""
+        self.scenes = IndexedList([], ('id',))
+        """A list of :class:`collada.scene.Scene` objects. Can also be indexed by id"""
+        
+        self.maskedErrors = []
+        self.ignoreErrors( *ignore )
+        
+        if type(filename) in [types.StringType, types.UnicodeType]:
+            fdata = open(filename, 'rb')
+        else:
+            fdata = filename # assume it is a file like object
+        strdata = fdata.read()
+        
         try:
-            """Load collada data from filename or file like object."""
-            if type(filename) in [types.StringType, types.UnicodeType]:
-                fdata = open(filename, 'rb')
-            else:
-                fdata = filename # assume it is a file like object
-            strdata = fdata.read()
-            
-            try:
-                self.zfile = zipfile.ZipFile(StringIO(strdata), 'r')
-            except:
-                self.zfile = None
-            
-            if self.zfile:
-                self.filename = ''
-                daefiles = []
-                for name in self.zfile.namelist():
-                    if name.upper().endswith('.DAE'):
-                        daefiles.append(name)
-                for name in daefiles:
-                    if not self.filename:
-                        self.filename = name
-                    elif "MACOSX" in self.filename:
-                        self.filename = name
-                if not self.filename: raise DaeIncompleteError('No DAE found inside zip compressed file')
-                data = self.zfile.read(self.filename)
-                self.getFileData = self.getFileFromZip
-            else:
-                data = strdata
-                self.filename = filename
-                self.getFileData = self.getFileFromDisk
-            
-            if aux_file_loader is not None:
-                self.getFileData = aux_file_loader
-            
-            self.errors = []
-            self.maskedErrors = []
-            self.ignoreErrors( *ignore )
-            self.root = ElementTree.ElementTree(element=None, file=StringIO(data),
-                                                parser=ElementTree.XMLParser(remove_comments=True))
-            
-            self.assetInfo = {}
-            self.geometries = IndexedList([], ('id',))
-            self.controllers = IndexedList([], ('id',))
-            self.lights = IndexedList([], ('id',))
-            self.cameras = IndexedList([], ('id',))
-            self.images = IndexedList([], ('id',))
-            self.effects = IndexedList([], ('id',))
-            self.materials = IndexedList([], ('id',))
-            self.nodes = IndexedList([], ('id',))
-            self.scenes = IndexedList([], ('id',))
-            
-            self.validate()
-            self.loadAssetInfo()
-            self.loadImages()
-            self.loadEffects()
-            self.loadMaterials()
-            self.loadGeometry()
-            self.loadControllers()
-            self.loadLights()
-            self.loadCameras()
-            self.loadNodes()
-            self.loadScenes()
-            self.loadDefaultScene()
+            self.zfile = zipfile.ZipFile(StringIO(strdata), 'r')
         except:
-            raise
-
-    def validate(self):
-        """TODO: Validate the xml tree."""
-        pass
+            self.zfile = None
+        
+        if self.zfile:
+            self.filename = ''
+            daefiles = []
+            for name in self.zfile.namelist():
+                if name.upper().endswith('.DAE'):
+                    daefiles.append(name)
+            for name in daefiles:
+                if not self.filename:
+                    self.filename = name
+                elif "MACOSX" in self.filename:
+                    self.filename = name
+            if not self.filename: raise DaeIncompleteError('No DAE found inside zip compressed file')
+            data = self.zfile.read(self.filename)
+            self.getFileData = self._getFileFromZip
+        else:
+            data = strdata
+            self.filename = filename
+            self.getFileData = self._getFileFromDisk
+        
+        if aux_file_loader is not None:
+            self.getFileData = aux_file_loader
+        
+        self.root = ElementTree.ElementTree(element=None, file=StringIO(data),
+                                            parser=ElementTree.XMLParser(remove_comments=True))
+        
+        self._loadAssetInfo()
+        self._loadImages()
+        self._loadEffects()
+        self._loadMaterials()
+        self._loadGeometry()
+        self._loadControllers()
+        self._loadLights()
+        self._loadCameras()
+        self._loadNodes()
+        self._loadScenes()
+        self._loadDefaultScene()
 
     def handleError(self, error):
         self.errors.append(error)
@@ -202,7 +219,7 @@ class Collada(object):
         else:
             for e in args: self.maskedErrors.append(e)
     
-    def getFileFromZip(self, fname):
+    def _getFileFromZip(self, fname):
         """Return the binary data of an auxiliary file from a zip archive as a string."""
         if not self.zfile:
             raise DaeBrokenRefError('Trying to load an auxiliar file %s but we are not reading from a zip'%fname)
@@ -212,7 +229,7 @@ class Collada(object):
             raise DaeBrokenRefError('Auxiliar file %s not found in archive'%fname)
         return self.zfile.read( aux_path )
 
-    def getFileFromDisk(self, fname):
+    def _getFileFromDisk(self, fname):
         """Return the binary data of an auxiliary file from the local disk relative to the file path loaded."""
         if self.zfile:
             raise DaeBrokenRefError('Trying to load an auxiliar file %s from disk but we are reading from a zip file'%fname)
@@ -223,7 +240,7 @@ class Collada(object):
         fdata = open(aux_path, 'rb')
         return fdata.read()
 
-    def loadAssetInfo(self):
+    def _loadAssetInfo(self):
         """Load information in <asset> tag"""
         assetnode = self.root.find( tag('asset') )
         if assetnode != None:
@@ -266,7 +283,7 @@ class Collada(object):
         if not 'up_axis' in self.assetInfo:
             self.assetInfo['up_axis'] = 'Y_UP'
                     
-    def loadGeometry(self):
+    def _loadGeometry(self):
         """Load geometry library."""
         libnode = self.root.find( tag('library_geometries') )
         if libnode != None:
@@ -277,7 +294,7 @@ class Collada(object):
                 else:
                     self.geometries.append( G )
     
-    def loadControllers(self):
+    def _loadControllers(self):
         """Load controller library."""
         libnode = self.root.find( tag('library_controllers') )
         if libnode != None:
@@ -289,7 +306,7 @@ class Collada(object):
                 else:
                     self.controllers.append( C )
     
-    def loadLights(self):
+    def _loadLights(self):
         """Load light library."""
         libnode = self.root.find( tag('library_lights') )
         if libnode != None:
@@ -299,7 +316,7 @@ class Collada(object):
                 else:
                     self.lights.append( lig )
 
-    def loadCameras(self):
+    def _loadCameras(self):
         """Load camera library."""
         libnode = self.root.find( tag('library_cameras') )
         if libnode != None:
@@ -309,7 +326,7 @@ class Collada(object):
                 else:
                     self.cameras.append( cam )
 
-    def loadImages(self):
+    def _loadImages(self):
         """Load image library."""
         libnode = self.root.find( tag('library_images') )
         if libnode != None:
@@ -319,7 +336,7 @@ class Collada(object):
                 else:
                     self.images.append( img )
 
-    def loadEffects(self):
+    def _loadEffects(self):
         """Load effect library."""
         libnode = self.root.find( tag('library_effects') )
         if libnode != None:
@@ -329,7 +346,7 @@ class Collada(object):
                 else:
                     self.effects.append( effect )
 
-    def loadMaterials(self):
+    def _loadMaterials(self):
         """Load material library.
         
         Materials are only treated as aliases for effects at the time.
@@ -365,7 +382,7 @@ class Collada(object):
                             self.materials.append( mateffect )
                 except DaeError, ex: self.handleError(ex)
 
-    def loadNodes(self):
+    def _loadNodes(self):
         libnode = self.root.find( tag('library_nodes') )
         if libnode != None:
             for node in libnode.findall(tag('node')):
@@ -375,7 +392,7 @@ class Collada(object):
                     if N is not None:
                         self.nodes.append( N )
 
-    def loadScenes(self):
+    def _loadScenes(self):
         """Load scene library."""
         libnode = self.root.find( tag('library_visual_scenes') )
         if libnode != None:
@@ -385,7 +402,7 @@ class Collada(object):
                 else:
                     self.scenes.append( S )
 
-    def loadDefaultScene(self):
+    def _loadDefaultScene(self):
         """Loads the default scene from <scene> tag in the root node."""
         node = self.root.find('%s/%s'%( tag('scene'), tag('instance_visual_scene') ) )
         self.scene = None

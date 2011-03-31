@@ -1,12 +1,12 @@
 ####################################################################
 #                                                                  #
-# THIS FILE IS PART OF THE PyCollada LIBRARY SOURCE CODE.          #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
 # USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
 # GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
 # IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
 #                                                                  #
-# THE PyCollada SOURCE CODE IS (C) COPYRIGHT 2009                  #
-# by Scopia Visual Interfaces Systems http://www.scopia.es/        #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace and contributors                                 #
 #                                                                  #
 ####################################################################
 
@@ -24,7 +24,7 @@ class InputList(DaeObject):
             self.source = src
             self.set = set
     
-    semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT", "COLOR"]
+    semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT", "COLOR", "TANGENT", "BINORMAL"]
     
     def __init__(self):
         self.inputs = {}
@@ -91,6 +91,8 @@ class Primitive(DaeObject):
         textangent_inputs = []
         texbinormal_inputs = []
         color_inputs = []
+        tangent_inputs = []
+        binormal_inputs = []
         
         for input in inputs:
             offset, semantic, source, set = input
@@ -111,6 +113,10 @@ class Primitive(DaeObject):
                 texbinormal_inputs.append(input)
             elif semantic == 'COLOR':
                 color_inputs.append(input)
+            elif semantic == 'TANGENT':
+                tangent_inputs.append(input)
+            elif semantic == 'BINORMAL':
+                binormal_inputs.append(input)
             else:  
                 raise DaeUnsupportedError('Unknown input semantic: %s' % semantic)
             
@@ -121,6 +127,8 @@ class Primitive(DaeObject):
         all_inputs['TEXBINORMAL'] = textangent_inputs
         all_inputs['TEXTANGENT'] = textangent_inputs
         all_inputs['COLOR'] = color_inputs
+        all_inputs['TANGENT'] = tangent_inputs
+        all_inputs['BINORMAL'] = binormal_inputs
         
         return all_inputs
 

@@ -9,8 +9,10 @@ Welcome to pycollada's documentation!
 Contents:
 ---------
 
-:doc:`api/index`
-  The **pycollada** API documentation.
+.. toctree::
+   :maxdepth: 2
+
+   api/index
 
 Indices and tables
 ==================

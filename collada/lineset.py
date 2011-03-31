@@ -1,12 +1,12 @@
 ####################################################################
 #                                                                  #
-# THIS FILE IS PART OF THE PyCollada LIBRARY SOURCE CODE.          #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
 # USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
 # GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
 # IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
 #                                                                  #
-# THE PyCollada SOURCE CODE IS (C) COPYRIGHT 2009                  #
-# by Scopia Visual Interfaces Systems http://www.scopia.es/        #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace and contributors                                 #
 #                                                                  #
 ####################################################################
 
