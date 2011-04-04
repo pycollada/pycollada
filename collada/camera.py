@@ -23,17 +23,16 @@ class Camera(DaeObject):
     def __init__(self, id, fov, near, far, xmlnode = None):
         """Create a new camera.
 
-        :Parameters:
-          id
-            Id for the object
-          fov
-            Y axis field of vision in degrees
-          near
-            Near plane distance
-          far
-            Far plane distance
-          xmlnode
-            If loaded from xml, the xml node
+        :param str id:
+          Id for the object
+        :param float fov:
+          Y axis field of vision in degrees
+        :param float near:
+          Near plane distance
+        :param float far:
+          Far plane distance
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.id = id
@@ -117,11 +116,11 @@ class Camera(DaeObject):
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.
         
-            :Parameters:
-                matrix
-                  A numpy transformation matrix of size 4x4
-            :Returns:
-                :class:`collada.camera.BoundCamera`
+        :param numpy.array matrix:
+          A numpy transformation matrix of size 4x4
+          
+        :rtype: :class:`collada.camera.BoundCamera`
+        
         """
         return BoundCamera(self, matrix)
 
@@ -139,6 +138,8 @@ class BoundCamera(object):
         """Near plane distance."""
         self.far = cam.far
         """Far plane distance."""
+        self.matrix = matrix
+        """The matrix bound to"""
         self.original = cam
         """Original :class:`collada.camera.Camera` object this is bound to."""
 

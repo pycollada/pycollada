@@ -17,6 +17,7 @@ import numpy
 import types
 
 class InputList(DaeObject):
+    """InputList"""
     class Input:
         def __init__(self, offset, semantic, src, set=None):
             self.offset = offset
@@ -46,19 +47,43 @@ class InputList(DaeObject):
 class Primitive(DaeObject):
     """Base class for all primitive sets like triangle sets."""
 
+    vertex = property( lambda s: s._vertex, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertex points in the
+    primitive's vertex source array.""" )
+    normal = property( lambda s: s._normal, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of normal values in the
+    primitive's normal source array.""" )
+    texcoordset = property( lambda s: s._texcoordset, doc=
+    """Read-only tuple of texture coordinate arrays. Each value is a numpy.array of size
+    Nx2 where N is the number of texture coordinates in the primitive's source array.""" )
+    vertex_index = property( lambda s: s._vertex_index, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
+    To get the actual vertex points, one can use this array to select into the vertex
+    array, e.g. ``vertex[vertex_index]``.""" )
+    normal_index = property( lambda s: s._normal_index, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
+    To get the actual normal values, one can use this array to select into the normals
+    array, e.g. ``normal[normal_index]``.""" )
+    texcoord_indexset = property( lambda s: s._texcoord_indexset, doc=
+    """Read-only tuple of texture coordinate index arrays. Each value is a numpy.array of size
+    Nx2 where N is the number of vertices in the primitive. To get the actual texture
+    coordinates, one can use the array to select into the texcoordset array, e.g.
+    ``texcoordset[0][texcoord_indexset[0]]`` would select the first set of texture
+    coordinates.""" )
+
     def bind(self, matrix, materialnodebysymbol):
-        """Create a copy of the primitive under the given transform.
+        """Binds this primitive to a transform matrix and material mapping.
+        The primitive's points get transformed by the given matrix and its
+        inputs get mapped to the given materials.
 
-        Creates a copy of the primitive with its points transformed
-        by the given matrix and with material symbols set according
-        to the given mapping
-
-        :Parameters:
-          matrix
-            A 4x4 numpy float matrix
-          materialnodebysymbol
-            a dictionary with the material symbols inside the object 
-            assigned to MaterialNodes defined in the scene
+        :param numpy.array matrix:
+          A 4x4 numpy float matrix
+        :param dict materialnodebysymbol:
+          A dictionary with the material symbols inside the primitive 
+          assigned to :class:`collada.scene.MaterialNode` defined in the
+          scene
+        
+        :rtype: :class:`collada.primitive.Primitive`
 
         """
         pass
@@ -140,3 +165,41 @@ class Primitive(DaeObject):
         except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
         
         return Primitive.getInputsFromList(localscope, inputs)
+
+class BoundPrimitive(DaeObject):
+    """A :class:`collada.primitive.Primitive` bound to a transform matrix
+    and material mapping."""
+
+    def shapes(self):
+        """Iterate through the items in this primitive. The shape returned
+        depends on the primitive type. Examples: Triangle, Polygon."""
+        pass
+    
+    vertex = property( lambda s: s._vertex, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertex points in the
+    primitive's vertex source array. The values will be transformed according to the 
+    bound transformation matrix.""" )
+    normal = property( lambda s: s._normal, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of normal values in the
+    primitive's normal source array. The values will be transformed according to the 
+    bound transformation matrix.""" )
+    texcoordset = property( lambda s: s._texcoordset, doc=
+    """Read-only tuple of texture coordinate arrays. Each value is a numpy.array of size
+    Nx2 where N is the number of texture coordinates in the primitive's source array. The
+    values will be transformed according to the bound transformation matrix.""" )
+    vertex_index = property( lambda s: s._vertex_index, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
+    To get the actual vertex points, one can use this array to select into the vertex
+    array, e.g. ``vertex[vertex_index]``. The values will be transformed according to the 
+    bound transformation matrix.""" )
+    normal_index = property( lambda s: s._normal_index, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
+    To get the actual normal values, one can use this array to select into the normals
+    array, e.g. ``normal[normal_index]``. The values will be transformed according to the 
+    bound transformation matrix.""" )
+    texcoord_indexset = property( lambda s: s._texcoord_indexset, doc=
+    """Read-only tuple of texture coordinate index arrays. Each value is a numpy.array of size
+    Nx2 where N is the number of vertices in the primitive. To get the actual texture
+    coordinates, one can use the array to select into the texcoordset array, e.g.
+    ``texcoordset[0][texcoord_indexset[0]]`` would select the first set of texture
+    coordinates. The values will be transformed according to the bound transformation matrix.""" )

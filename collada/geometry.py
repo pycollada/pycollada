@@ -10,7 +10,7 @@
 #                                                                  #
 ####################################################################
 
-"""Module for <geometry> data loading."""
+"""Contains objects for representing a geometry."""
 
 from lxml import etree as ElementTree
 import numpy
@@ -30,34 +30,35 @@ class Geometry( DaeObject ):
     def __init__(self, collada, id, name, sourcebyid, primitives=[], xmlnode=None):
         """Create a geometry instance
 
-        :Parameters:
-          collada
+          :param collada.Collada collada:
             The collada object this geometry belongs to
-          id
-            A unique identifier for the geometry
-          name
+          :param str id:
+            A unique string identifier for the geometry
+          :param str name:
             A text string naming the geometry
-          sourcebyid
-            A list of Source objects or
+          :param sourcebyid:
+            A list of :class:`collada.source.Source` objects or
             a dictionary mapping source ids to the actual objects
-          primitives
-            List of primitive objects contained
-          xmlnode
-            When loaded, the xmlnode it comes from
+          :param list primitives:
+            List of primitive objects contained within the geometry.
+            Do not set this argument manually. Instead, create a
+            :class:`collada.geometry.Geometry` first and then append
+            to :attr:`primitives` with the `create*` functions.
+          :param xmlnode:
+            When loaded, the xmlnode it comes from.
 
         """
-        
         self.collada = collada
-        """The collada object this geometry belongs to"""
+        """The :class:`collada.Collada` object this geometry belongs to"""
         
         self.id = id
-        """A unique identifier for the geometry"""
+        """The unique string identifier for the geometry"""
         
         self.name = name
-        """A text string naming the geometry"""
+        """The text string naming the geometry"""
 
         self.sourceById = sourcebyid
-        """Sources indexed by id."""
+        """A dictionary containing :class:`collada.source.Source` objects indexed by their id."""
 
         if type(sourcebyid) is types.ListType:
             self.sourceById = {}
@@ -65,10 +66,11 @@ class Geometry( DaeObject ):
                 self.sourceById[src.id] = src
         
         self.primitives = primitives
-        """Primitive object list inside this geometry."""
+        """List of primitives (base type :class:`collada.primitive.Primitive`) inside this geometry."""
         
         if xmlnode != None: 
             self.xmlnode = xmlnode
+            """ElementTree representation of the geometry."""
         else:
             sourcenodes = []
             verticesnode = None
@@ -85,80 +87,72 @@ class Geometry( DaeObject ):
             if len(self.name) > 0: self.xmlnode.set("name", self.name)
 
     def createLineSet(self, indices, inputlist, materialid):
-        """Add a set of lines to this geometry instance.
-        
-        :Parameters:
-          indices
-            unshaped numpy array that contains the indices for
-            the inputs referenced in inputlist
-          inputlist
-            InputList object that refers to the inputs for this primitive
-          materialid
-            A string containing a symbol that will get used to bind this lineset
-            to a material when instantiating into a scene
+        """Create a set of lines for use in this geometry instance.
+
+        :param numpy.array indices:
+          unshaped numpy array that contains the indices for
+          the inputs referenced in inputlist
+        :param collada.primitive.InputList inputlist:
+          The inputs for this primitive
+        :param str materialid:
+          A string containing a symbol that will get used to bind this lineset
+          to a material when instantiating into a scene
             
-        :Returns:
-          A LineSet object
+        :rtype: :class:`collada.lineset.LineSet`
         """
         inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
         return lineset.LineSet(inputdict, materialid, indices)
 
     def createTriangleSet(self, indices, inputlist, materialid):
-        """Add a set of triangles to this geometry instance.
+        """Create a set of triangles for use in this geometry instance.
         
-        :Parameters:
-          indices
-            unshaped numpy array that contains the indices for
-            the inputs referenced in inputlist
-          inputlist
-            InputList object that refers to the inputs for this primitive
-          materialid
-            A string containing a symbol that will get used to bind this triangleset
-            to a material when instantiating into a scene
+        :param numpy.array indices:
+          unshaped numpy array that contains the indices for
+          the inputs referenced in inputlist
+        :param collada.primitive.InputList inputlist:
+          The inputs for this primitive
+        :param str materialid:
+          A string containing a symbol that will get used to bind this triangleset
+          to a material when instantiating into a scene
             
-        :Returns:
-          A TriangleSet object
+        :rtype: :class:`collada.triangleset.TriangleSet`
         """
         inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
         return triangleset.TriangleSet(inputdict, materialid, indices)
 
     def createPolyList(self, indices, vcounts, inputlist, materialid):
-        """Add a list of polygons to this geometry instance.
+        """Create a polylist for use with this geometry instance.
         
-        :Parameters:
-          indices
-            unshaped numpy array that contains the indices for
-            the inputs referenced in inputlist
-          vcounts
-            unshaped numpy array that contains the vertex count
-            for each polygon in this polylist
-          inputlist
-            InputList object that refers to the inputs for this primitive
-          materialid
-            A string containing a symbol that will get used to bind this polylist
-            to a material when instantiating into a scene
+        :param numpy.array indices:
+          unshaped numpy array that contains the indices for
+          the inputs referenced in inputlist
+        :param numpy.array vcounts:
+          unshaped numpy array that contains the vertex count
+          for each polygon in this polylist
+        :param collada.primitive.InputList inputlist:
+          The inputs for this primitive
+        :param str materialid:
+          A string containing a symbol that will get used to bind this polylist
+          to a material when instantiating into a scene
             
-        :Returns:
-          A TriangleSet object
+        :rtype: :class:`collada.polylist.Polylist`
         """
         inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
         return polylist.Polylist(inputdict, materialid, indices, vcounts)
 
     def createPolygons(self, indices, inputlist, materialid):
-        """Add a list of polygons to this geometry instance.
-        
-        :Parameters:
-          indices
-            list of unshaped numpy arrays that each contain the indices for
-            a single polygon
-          inputlist
-            InputList object that refers to the inputs for this primitive
-          materialid
-            A string containing a symbol that will get used to bind this polylist
-            to a material when instantiating into a scene
+        """Create a polygons for use with this geometry instance.
+
+        :param numpy.array indices:
+          list of unshaped numpy arrays that each contain the indices for
+          a single polygon
+        :param collada.primitive.InputList inputlist:
+          The inputs for this primitive
+        :param str materialid:
+          A string containing a symbol that will get used to bind this polygons
+          to a material when instantiating into a scene
             
-        :Returns:
-          A Polygons object
+        :rtype: :class:`collada.polygons.Polygons`
         """
         inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
         return polygons.Polygons(inputdict, materialid, indices)
@@ -210,6 +204,7 @@ class Geometry( DaeObject ):
         return geom
 
     def save(self):
+        """Saves the geometry back to :attr:`xmlnode`"""
         meshnode = self.xmlnode.find(tag('mesh'))
         for src in self.sourceById.itervalues():
             if isinstance(src, source.Source):
@@ -248,23 +243,46 @@ class Geometry( DaeObject ):
             meshnode.remove(d)
 
     def bind(self, matrix, materialnodebysymbol):
-        """Create a bound geometry from this one, transform and material mapping"""
+        """Binds this geometry to a transform matrix and material mapping.
+        The geometry's points get transformed by the given matrix and its
+        inputs get mapped to the given materials.
+
+        :param numpy.array matrix:
+          A 4x4 numpy float matrix
+        :param dict materialnodebysymbol:
+          A dictionary with the material symbols inside the primitive 
+          assigned to :class:`collada.scene.MaterialNode` defined in the
+          scene
+        
+        :rtype: :class:`collada.primitive.Primitive`
+
+        """
         return BoundGeometry(self, matrix, materialnodebysymbol)
 
 class BoundGeometry( object ):
-    """A geometry bound to a transform matrix and materials mapping."""
+    """A geometry bound to a transform matrix and material mapping.
+        This gets created when a geometry is instantiated in a scene.
+        Do not create this manually."""
 
     def __init__(self, geom, matrix, materialnodebysymbol):
-        """Create a bound geometry from a geometry, transform and material mapping"""
         self.matrix = matrix
+        """The matrix bound to"""
         self.materialnodebysymbol = materialnodebysymbol
+        """Dictionary with the material symbols inside the primitive 
+          assigned to :class:`collada.scene.MaterialNode` defined in the
+          scene"""
         self._primitives = geom.primitives
         self.original = geom
+        """The original :class:`collada.geometry.Geometry` object this
+        is bound to"""
 
     def __len__(self): return len(self._primitives)
+    """Returns the number of primitives in the bound geometry"""
 
     def primitives(self):
-        """Iterate through all the primitives inside the geometry."""
+        """Returns an iterator that iterates through the primitives in
+        the bound geometry. Each value returned will be of base type
+        :class:`collada.primitive.BoundPrimitive`"""
         for p in self._primitives:
             boundp = p.bind( self.matrix, self.materialnodebysymbol )
             yield boundp

@@ -151,27 +151,6 @@ class TriangleSet(primitive.Primitive):
 
     def __len__(self): return len(self.index)
 
-    vertex = property( lambda s: s._vertex )
-    """Read only vertex array, shape=(nv,3)."""
-    normal = property( lambda s: s._normal )
-    """Read only normal array, shape=(nn,3)."""
-    texcoordset = property( lambda s: s._texcoordset )
-    """Read only tuple of texcoords arrays. shape=(nt,2)."""
-    
-    vertex_index = property( lambda s: s._vertex_index )
-    """Indices per triangle for vertex array, shape=(n, 3)."""
-    normal_index = property( lambda s: s._normal_index )
-    """Indices per triangle for normal array, shape=(n, 3)."""
-    texcoord_indexset = property( lambda s: s._texcoord_indexset )
-    """A tuple of arrays of indices for texcoord arrays, shape=(n,3)."""
-
-    vertex_source = property( lambda s: s._vertex_source )
-    """Channel id (string) inside the parent geometry node to use as vertex."""
-    normal_source = property( lambda s: s._normal_source )
-    """Channel id (string) inside the parent geometry node to use as normal."""
-    texcoord_sourceset = property( lambda s: s._texcoord_sourceset )
-    """Channel ids (tuple of strings) inside the parent geometry node to use as texcoords."""
-
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
         n = self._normal[ self._normal_index[i] ]
@@ -202,7 +181,7 @@ class TriangleSet(primitive.Primitive):
         """Create a bound triangle set from this triangle set, transform and material mapping"""
         return BoundTriangleSet( self, matrix, materialnodebysymbol)
 
-class BoundTriangleSet(object):
+class BoundTriangleSet(primitive.BoundPrimitive):
     """A triangle set bound to a transform matrix and materials mapping."""
 
     def __init__(self, ts, matrix, materialnodebysymbol):

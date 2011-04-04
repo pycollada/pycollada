@@ -57,14 +57,13 @@ class DaeObject(object):
         Inspect the data inside node, which must match
         this class tag and create an instance out of it.
 
-        :Parameters:
-          collada
-            The collada file object where this object lives
-          localscope
-            If there is a local scope where we should look for local ids 
-            (sid) this is the dictionary. Otherwise empty dict ({})
-          node
-            An Element from python's ElementTree API
+        :param collada.Collada collada:
+          The collada file object where this object lives
+        :param dict localscope:
+          If there is a local scope where we should look for local ids 
+          (sid) this is the dictionary. Otherwise empty dict ({})
+        :param node:
+          An Element from python's ElementTree API
 
         """
         raise Exception('Not implemented')
@@ -111,20 +110,19 @@ class Collada(object):
     def __init__(self, filename, ignore = [], aux_file_loader = None):
         """Load collada data from filename or file like object.
         
-        :Parameters:
-          filename
-            String containing path to filename to open or file-like object.
-            Uncompressed .dae files are supported, as well as zip file archives.
-          ignore
-            A list of :class:`collada.DaeError` types that should be ignored
-            when loading the collada document. Instances of these types will
-            be added to :attr:`errors` after loading but won't be raised.
-          aux_file_loader
-            Referenced files (e.g. texture images) are loaded from disk when
-            reading from the local filesystem and from the zip archive when
-            loading from a zip file. If you these files are coming from another
-            source (e.g. database) and you're loading with StringIO, set this to
-            a function that given a filename, returns the binary data in the file.
+        :param filename:
+          String containing path to filename to open or file-like object.
+          Uncompressed .dae files are supported, as well as zip file archives.
+        :param list ignore:
+          A list of :class:`collada.DaeError` types that should be ignored
+          when loading the collada document. Instances of these types will
+          be added to :attr:`errors` after loading but won't be raised.
+        :param function aux_file_loader:
+          Referenced files (e.g. texture images) are loaded from disk when
+          reading from the local filesystem and from the zip archive when
+          loading from a zip file. If you these files are coming from another
+          source (e.g. database) and you're loading with StringIO, set this to
+          a function that given a filename, returns the binary data in the file.
         """
         
         self.errors = []

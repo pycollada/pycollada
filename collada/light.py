@@ -10,7 +10,7 @@
 #                                                                  #
 ####################################################################
 
-"""Light module, classes and tools."""
+"""Contains objects for representing lights."""
 
 from lxml import etree as ElementTree
 import numpy
@@ -18,7 +18,7 @@ from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag, E
 
 class Light(DaeObject):
-    """Abstract light class holding data from <light> tags."""
+    """Base light class holding data from <light> tags."""
 
     @staticmethod
     def _correctValInNode(outernode, tagname, value):
@@ -48,27 +48,33 @@ class Light(DaeObject):
             raise DaeUnsupportedError('Unrecognized light type: %s'%lightnode.tag)
 
 class DirectionalLight(Light):
-    """Directional light as defined in COLLADA tag <directional>."""
+    """Directional light as defined in COLLADA tag <directional> tag."""
 
     def __init__(self, id, color, xmlnode = None):
-        """Create a new sun light.
+        """Create a new directional light.
 
-        :Parameters:
-          id
-            Id for the object
-          color
-            Light color
-          xmlnode
-            If loaded from xml, the xml node
+        :param str id:
+          A unique string identifier for the light
+        :param tuple color:
+          Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.id = id
-        """Id in the light library."""
+        """The unique string identifier for the light"""
         self.direction = numpy.array( [0, 0, -1], dtype=numpy.float32 )
-        """Incoming direction of the light."""
+        #Not documenting this because it doesn't make sense to set the direction
+        # of an unbound light. The direction isn't set until binding in a scene.
         self.color = color
-        """Light color."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the light."""
         else:
             self.xmlnode = E.light(
                 E.technique_common(
@@ -79,6 +85,7 @@ class DirectionalLight(Light):
             , id=self.id, name=self.id)
 
     def save(self):
+        """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         colornode = self.xmlnode.find( '%s/%s/%s'%(tag('technique_common'),tag('directional'), 
@@ -97,7 +104,14 @@ class DirectionalLight(Light):
         return DirectionalLight(node.get('id'), color, xmlnode = node)
     
     def bind(self, matrix):
-        """Create a bound light of itself based on a transform matrix."""
+        """Binds this light to a transform matrix.
+        
+        :param numpy.array matrix:
+          A 4x4 numpy float matrix
+        
+        :rtype: :class:`collada.light.BoundDirectionalLight`
+        
+        """
         return BoundDirectionalLight(self, matrix)
 
 class AmbientLight(Light):
@@ -106,20 +120,25 @@ class AmbientLight(Light):
     def __init__(self, id, color, xmlnode = None):
         """Create a new ambient light.
 
-        :Parameters:
-          id
-            Id for the object
-          color
-            Light color
-          xmlnode
-            If loaded from xml, the xml node
+        :param str id:
+          A unique string identifier for the light
+        :param tuple color:
+          Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.id = id
-        """Id in the light library."""
+        """The unique string identifier for the light"""
         self.color = color
-        """Light color."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the light."""
         else:
             self.xmlnode = E.light(
                 E.technique_common(
@@ -130,6 +149,7 @@ class AmbientLight(Light):
             , id=self.id, name=self.id)
 
     def save(self):
+        """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         colornode = self.xmlnode.find( '%s/%s/%s'%(tag('technique_common'),tag('ambient'), 
@@ -148,7 +168,14 @@ class AmbientLight(Light):
         return AmbientLight(node.get('id'), color, xmlnode = node)
     
     def bind(self, matrix):
-        """Create a bound light of itself based on a transform matrix."""
+        """Binds this light to a transform matrix.
+        
+        :param numpy.array matrix:
+          A 4x4 numpy float matrix
+        
+        :rtype: :class:`collada.light.BoundAmbientLight`
+        
+        """
         return BoundAmbientLight(self, matrix)
 
 class PointLight(Light):
@@ -157,29 +184,33 @@ class PointLight(Light):
     def __init__(self, id, color, quad_att, constant_att=None, linear_att=None, zfar=None, xmlnode = None):
         """Create a new sun light.
 
-        :Parameters:
-          id
-            Id for the object
-          color
-            Light color
-          quad_att
-            Quadratic attenuation factor
-          constant_att
-            Constant attenuation factor
-          linear_att
-            Linear attenuation factor
-          zfar
-            Distance to the far clipping plane
-          xmlnode
-            If loaded from xml, the xml node
+        :param str id:
+          A unique string identifier for the light
+        :param tuple color:
+          Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light
+        :param float quad_att:
+          Quadratic attenuation factor
+        :param float constant_att:
+          Constant attenuation factor
+        :param float linear_att:
+          Linear attenuation factor
+        :param float zfar:
+          Distance to the far clipping plane
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.id = id
-        """Id in the light library."""
+        """The unique string identifier for the light"""
         self.position = numpy.array( [0, 0, 0], dtype=numpy.float32 )
-        """Location of the light."""
+        #Not documenting this because it doesn't make sense to set the position
+        # of an unbound light. The position isn't set until binding in a scene.
         self.color = color
-        """Light color."""
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
         self.constant_att = constant_att
         """Constant attenuation factor."""
         self.linear_att = linear_att
@@ -189,7 +220,9 @@ class PointLight(Light):
         self.zfar = zfar
         """Distance to the far clipping plane"""
         
-        if xmlnode != None: self.xmlnode = xmlnode
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the light."""
         else:
             pnode = E.point(
                 E.color(' '.join( [ str(v) for v in self.color ] )),
@@ -207,6 +240,7 @@ class PointLight(Light):
             , id=self.id, name=self.id)
 
     def save(self):
+        """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('point')) )
@@ -244,7 +278,14 @@ class PointLight(Light):
                           zfar, xmlnode = node)
 
     def bind(self, matrix):
-        """Create a bound light of itself based on a transform matrix."""
+        """Binds this light to a transform matrix.
+        
+        :param numpy.array matrix:
+          A 4x4 numpy float matrix
+        
+        :rtype: :class:`collada.light.BoundPointLight`
+        
+        """
         return BoundPointLight(self, matrix)
     
 class SpotLight(Light):
@@ -254,31 +295,35 @@ class SpotLight(Light):
                     falloff_ang=None, falloff_exp=None, xmlnode = None):
         """Create a new spot light.
 
-        :Parameters:
-          id
-            Id for the object
-          color
-            Light color
-          constant_att
-            Constant attenuation factor
-          linear_att
-            Linear attenuation factor
-          quad_att
-            Quadratic attenuation factor
-          falloff_ang
-            Falloff angle
-          falloff_exp
-            Falloff exponent
-          xmlnode
-            If loaded from xml, the xml node
+        :param str id:
+          A unique string identifier for the light
+        :param tuple color:
+          Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light
+        :param float constant_att:
+          Constant attenuation factor
+        :param float linear_att:
+          Linear attenuation factor
+        :param float quad_att:
+          Quadratic attenuation factor
+        :param float falloff_ang:
+          Falloff angle
+        :param float falloff_exp:
+          Falloff exponent
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.id = id
-        """Id in the light library."""
+        """The unique string identifier for the light"""
         self.position = numpy.array( [0, 0, 0], dtype=numpy.float32 )
-        """Location of the light."""
+        #Not documenting this because it doesn't make sense to set the position
+        # of an unbound light. The position isn't set until binding in a scene.
         self.color = color
-        """Light color."""
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
         self.constant_att = constant_att
         """Constant attenuation factor."""
         self.linear_att = linear_att
@@ -290,7 +335,9 @@ class SpotLight(Light):
         self.falloff_exp = falloff_exp
         """Falloff exponent"""
         
-        if xmlnode != None: self.xmlnode = xmlnode
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the light."""
         else:
             pnode = E.spot(
                 E.color(' '.join( [ str(v) for v in self.color ] )),
@@ -311,6 +358,7 @@ class SpotLight(Light):
             , id=self.id, name=self.id)
 
     def save(self):
+        """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('spot')) )
@@ -348,59 +396,98 @@ class SpotLight(Light):
                           falloff_ang, falloff_exp, xmlnode = node)
 
     def bind(self, matrix):
-        """Create a bound light of itself based on a transform matrix."""
+        """Binds this light to a transform matrix.
+        
+        :param numpy.array matrix:
+          A 4x4 numpy float matrix
+        
+        :rtype: :class:`collada.light.BoundSpotLight`
+        
+        """
         return BoundSpotLight(self, matrix)
 
 class BoundLight(object): pass
 
 class BoundPointLight(object):
-    """Point light bount to a scene with transformation."""
+    """Point light bound to a scene with transformation. This gets created when a
+        light is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, plight, matrix):
         self.position = numpy.dot( matrix[:3,:3], plight.position ) + matrix[:3,3]
+        """Numpy array of length 3 representing the position of the light in the scene"""
         self.color = plight.color
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
         self.constant_att = plight.constant_att
+        """Constant attenuation factor."""
         self.linear_att = plight.linear_att
+        """Linear attenuation factor."""
         self.quad_att = plight.quad_att
+        """Quadratic attenuation factor."""
         self.zfar = plight.zfar
+        """Distance to the far clipping plane"""
         self.original = plight
+        """The original :class:`collada.light.PointLight` this is bound to"""
 
     def __str__(self): return 'BoundPointLight(at %s)' % str(self.position)
     def __repr__(self): return str(self)
     
 class BoundSpotLight(object):
-    """Spot light bount to a scene with transformation."""
+    """Spot light bound to a scene with transformation. This gets created when a
+        light is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, dlight, matrix):
         self.position = numpy.dot( matrix[:3,:3], dlight.position ) + matrix[:3,3]
+        """Numpy array of length 3 representing the position of the light in the scene"""
         self.color = dlight.color
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
         self.constant_att = dlight.constant_att
+        """Constant attenuation factor."""
         self.linear_att = dlight.linear_att
+        """Linear attenuation factor."""
         self.quad_att = dlight.quad_att
+        """Quadratic attenuation factor."""
         self.falloff_ang = dlight.falloff_ang
+        """Falloff angle"""
         self.falloff_exp = dlight.falloff_exp
+        """Falloff exponent"""
         self.original = dlight
+        """The original :class:`collada.light.SpotLight` this is bound to"""
 
     def __str__(self): return 'BoundSpotLight(at %s)' % str(self.position)
     def __repr__(self): return str(self)
 
 class BoundDirectionalLight(object):
-    """Point light bount to a scene with transformation."""
+    """Directional light bound to a scene with transformation. This gets created when a
+        light is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, dlight, matrix):
         self.direction = numpy.dot( matrix[:3,:3], dlight.direction )
+        """Numpy array of length 3 representing the direction of the light in the scene"""
         self.color = dlight.color
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
         self.original = dlight
+        """The original :class:`collada.light.DirectionalLight` this is bound to"""
 
     def __str__(self): return 'BoundDirectionalLight(from %s)' % str(self.direction)
     def __repr__(self): return str(self)
 
 class BoundAmbientLight(object):
-    """Ambient light bount to a scene with transformation."""
+    """Ambient light bound to a scene with transformation. This gets created when a
+        light is instantiated in a scene. Do not create this manually."""
 
-    def __init__(self, dlight, matrix):
-        self.color = dlight.color
-        self.original = dlight
+    def __init__(self, alight, matrix):
+        self.color = alight.color
+        """Either a tuple of size 3 containing the RGB color value
+          of the light or a tuple of size 4 containing the RGBA
+          color value of the light"""
+        self.original = alight
+        """The original :class:`collada.light.AmbientLight` this is bound to"""
 
     def __str__(self): return 'BoundAmbientLight'
     def __repr__(self): return str(self)

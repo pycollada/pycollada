@@ -21,33 +21,24 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
 
 class Line(object):
-    """Single line representation."""
+    """Single line representation. Represents the line between two points
+    ``(x0,y0,z0)`` and ``(x1,y1,z1)``. A Line is read-only."""
     def __init__(self, indices, vertices, normals, texcoords, material):
-        """Create a line from numpy arrays.
+        """A Line should not be created manually."""
 
-        :Parameters:
-          indices
-            A (2,) int array with vertex indexes in the vertex array
-          vertices
-            A (2, 3) float array for points a b c
-          normals
-            A (2, 3) float array with the normals for points a b c
-          texcoords
-            A tuple with (2, 2) float arrays with the texcoords for points 
-            a b c
-          material
-            If coming from a not bound set, a symbol (string),
-            otherwise, the material object itself
-
-        """
         self.vertices = vertices
-        """A (2, 3) float array for points a b c."""
+        """A (2, 3) numpy float array containing the endpoints of the line"""
         self.normals = normals
-        """A (2, 3) float array with the normals por points a b c."""
+        """A (2, 3) numpy float array with the normals for the endpoints of the line"""
         self.texcoords = texcoords
-        """A tuple with (2, 2) float arrays with the texcoords."""
+        """A tuple where entries are numpy float arrays of size (2, 2) containing
+        the texture coordinates for the endpoints of the line for each texture
+        coordinate set. """
         self.material = material
-        """Symbol (string) or the material object itself if bound."""
+        """If coming from an unbound :class:`collada.lineset.LineSet`, contains a
+        string with the material symbol. If coming from a bound
+        :class:`collada.lineset.BoundLineSet`, contains the actual
+        :class:`collada.material.Effect` the line is bound to."""
         self.indices = indices
 
         # Note: we can't generate normals for lines if there are none
@@ -57,24 +48,14 @@ class Line(object):
     def __str__(self): return repr(self)
 
 class LineSet(primitive.Primitive):
-    """Class containing the data COLLADA puts in a <lines> tag, a collection of faces."""
+    """Class containing the data COLLADA puts in a <lines> tag, a collection of
+    lines. The LineSet object is read-only. To modify a LineSet, create a new
+    instance using :meth:`collada.geometry.Geometry.createLineSet`."""
 
     def __init__(self, sources, material, index, xmlnode=None):
-        """Create a line set.
-
-        :Parameters:
-          sources
-            A dict mapping source types to an array of tuples in the form:
-            {input_type: (offset, semantic, sourceid, set, Source)}
-            Example:
-            {'VERTEX': [(0, 'VERTEX', '#vertex-inputs', '0', <collada.source.FloatSource>)]}
-          material
-            A string with the symbol of the material
-          index
-            An array with the indexes as they come from the collada file
-          xmlnode
-            An xml node in case this is loaded from there
-
+        """A LineSet should not be created manually. Instead, call the
+        :meth:`collada.geometry.Geometry.createLineSet` method after
+        creating a geometry instance.
         """
 
         if len(sources) == 0: raise DaeIncompleteError('A line set needs at least one input for vertex positions')
@@ -145,27 +126,7 @@ class LineSet(primitive.Primitive):
             self.xmlnode.append(E.p(txtindices))
 
     def __len__(self): return len(self.index)
-
-    vertex = property( lambda s: s._vertex )
-    """Read only vertex array, shape=(nv,3)."""
-    normal = property( lambda s: s._normal )
-    """Read only normal array, shape=(nn,3)."""
-    texcoordset = property( lambda s: s._texcoordset )
-    """Read only tuple of texcoords arrays. shape=(nt,2)."""
-    
-    vertex_index = property( lambda s: s._vertex_index )
-    """Indices per line for vertex array, shape=(n, 2)."""
-    normal_index = property( lambda s: s._normal_index )
-    """Indices per line for normal array, shape=(n, 2)."""
-    texcoord_indexset = property( lambda s: s._texcoord_indexset )
-    """A tuple of arrays of indices for texcoord arrays, shape=(n,2)."""
-
-    vertex_source = property( lambda s: s._vertex_source )
-    """Channel id (string) inside the parent geometry node to use as vertex."""
-    normal_source = property( lambda s: s._normal_source )
-    """Channel id (string) inside the parent geometry node to use as normal."""
-    texcoord_sourceset = property( lambda s: s._texcoord_sourceset )
-    """Channel ids (tuple of strings) inside the parent geometry node to use as texcoords."""
+    """The number of lines in this line set."""
 
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
@@ -197,7 +158,7 @@ class LineSet(primitive.Primitive):
         """Create a bound line set from this line set, transform and material mapping"""
         return BoundLineSet( self, matrix, materialnodebysymbol)
 
-class BoundLineSet(object):
+class BoundLineSet(primitive.BoundPrimitive):
     """A line set bound to a transform matrix and materials mapping."""
 
     def __init__(self, ls, matrix, materialnodebysymbol):
@@ -245,10 +206,4 @@ class BoundLineSet(object):
         sem, set = self.inputmap[input]
         assert sem == 'TEXCOORD' # we only support mapping to at the time
         return sel.setToTexcoord[set]
-    
-    vertex = property( lambda s: s._vertex )
-    normal = property( lambda s: s._normal )
-    texcoordset = property( lambda s: s._texcoordset )
-    vertex_index = property( lambda s: s._vertex_index )
-    normal_index = property( lambda s: s._normal_index )
-    texcoord_indexset = property( lambda s: s._texcoord_indexset )
+
