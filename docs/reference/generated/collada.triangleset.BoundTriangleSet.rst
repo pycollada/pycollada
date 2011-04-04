@@ -1,0 +1,39 @@
+collada.triangleset.BoundTriangleSet
+====================================
+
+.. currentmodule:: collada.triangleset
+
+.. autoclass:: BoundTriangleSet
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BoundTriangleSet.__init__
+      ~BoundTriangleSet.generateNormals
+      ~BoundTriangleSet.load
+      ~BoundTriangleSet.save
+      ~BoundTriangleSet.shapes
+      ~BoundTriangleSet.texsource
+      ~BoundTriangleSet.triangles
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BoundTriangleSet.normal
+      ~BoundTriangleSet.normal_index
+      ~BoundTriangleSet.texcoord_indexset
+      ~BoundTriangleSet.texcoordset
+      ~BoundTriangleSet.vertex
+      ~BoundTriangleSet.vertex_index
+   
+   
