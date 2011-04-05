@@ -15,10 +15,7 @@ collada.lineset.BoundLineSet
    
       ~BoundLineSet.__init__
       ~BoundLineSet.lines
-      ~BoundLineSet.load
-      ~BoundLineSet.save
       ~BoundLineSet.shapes
-      ~BoundLineSet.texsource
    
    
 

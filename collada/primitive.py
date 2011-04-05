@@ -165,8 +165,11 @@ class Primitive(DaeObject):
         except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
         
         return Primitive.getInputsFromList(localscope, inputs)
+    
+    def save(self):
+        return NotImplementedError("Primitives are read-only")
 
-class BoundPrimitive(DaeObject):
+class BoundPrimitive(object):
     """A :class:`collada.primitive.Primitive` bound to a transform matrix
     and material mapping."""
 

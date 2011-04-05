@@ -15,7 +15,6 @@ collada.material.Effect
    
       ~Effect.__init__
       ~Effect.load
-      ~Effect.loadShadingParam
       ~Effect.save
    
    

@@ -15,10 +15,7 @@ collada.triangleset.BoundTriangleSet
    
       ~BoundTriangleSet.__init__
       ~BoundTriangleSet.generateNormals
-      ~BoundTriangleSet.load
-      ~BoundTriangleSet.save
       ~BoundTriangleSet.shapes
-      ~BoundTriangleSet.texsource
       ~BoundTriangleSet.triangles
    
    

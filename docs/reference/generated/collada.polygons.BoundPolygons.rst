@@ -14,11 +14,8 @@ collada.polygons.BoundPolygons
    .. autosummary::
    
       ~BoundPolygons.__init__
-      ~BoundPolygons.load
       ~BoundPolygons.polygons
-      ~BoundPolygons.save
       ~BoundPolygons.shapes
-      ~BoundPolygons.texsource
       ~BoundPolygons.triangleset
    
    

@@ -13,8 +13,6 @@ collada.primitive.BoundPrimitive
 
    .. autosummary::
    
-      ~BoundPrimitive.load
-      ~BoundPrimitive.save
       ~BoundPrimitive.shapes
    
    

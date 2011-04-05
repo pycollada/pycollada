@@ -36,35 +36,39 @@ class DaeMissingSampler2D(Exception):
 class CImage(DaeObject):
     """Class containing data coming from a <image> tag.
 
-    Basicly is just the path to the file. but we give an extended
+    Basically is just the path to the file, but we give an extended
     functionality if PIL is available. You can in that case get the
     image object or numpy arrays in both int and float format. We
-    named it CImage to avoid confusion with pil's Image class.
+    named it CImage to avoid confusion with PIL's Image class.
 
     """
 
     def __init__(self, id, path, collada = None, xmlnode = None):
         """Create an image object.
         
-        :Parameters:
-          id
-            Id of the image node for later reference
-          path
-            Path in the [zae, kmz] file space
-          collada
-            The Collada class instance containing this for file access
-          xmlnode
-            If loaded from xml, the node this data comes from
+        :param str id:
+          A unique string identifier for the image
+        :param str path:
+          Path relative to the collada document where the image is located
+        :param collada.Collada collada:
+          The collada object this image belongs to
+        :param xmlnode:
+          If loaded from xml, the node this data comes from
 
         """
         self.id = id
+        """The unique string identifier for the image"""
         self.path = path
+        """Path relative to the collada document where the image is located"""
+        
         self.collada = collada
         self._data = None
         self._pilimage = None
         self._uintarray = None
         self._floatarray = None
-        if xmlnode != None: self.xmlnode = xmlnode
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the image."""
         else:
             self.xmlnode = E.image(
                 E.init_from(path)
@@ -118,7 +122,10 @@ class CImage(DaeObject):
         return self._floatarray
 
     data = property( getData )
-    """Image file data (any format) if the file is readable."""
+    """Raw binary image file data if the file is readable. If `aux_file_loader` was passed to
+    :func:`collada.Collada.__init__`, this function will be called to retrieve the data.
+    Otherwise, if the file came from the local disk, the path will be interpreted from
+    the local file system. If the file was a zip archive, the archive will be searched."""
     pilimage = property( getImage )
     """PIL Image object if PIL is available and the file is readable."""
     uintarray = property( getUintArray )
@@ -135,6 +142,8 @@ class CImage(DaeObject):
         return CImage(id, path, collada, xmlnode = node)
 
     def save(self):
+        """Saves the image back to :attr:`xmlnode`. Only the :attr:`id` attribute is saved.
+        The image itself will have to be saved to its original source to make modifications."""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         initnode = self.xmlnode.find( tag('init_from') )
@@ -143,21 +152,37 @@ class CImage(DaeObject):
 class Surface(DaeObject):
     """Class containing data coming from a <surface> tag.
 
-    Collada materials, for accessing image data create this
-    tag that I guess makes sense in sombody's head. The only
-    additional information is the format string.
+    Collada materials use this to access to the <image> tag.
+    The only extra information we store right now is the 
+    image format. In theory, this enables many more features
+    according to the collada spec, but no one seems to actually
+    use them in the wild, so for now, it's unimplemented.
 
     """
 
     def __init__(self, id, img, format=None, xmlnode=None):
-        """Create a surface from an id in the local scope, image and format."""
+        """Creates a surface.
+        
+        :param str id:
+          A string identifier for the surface within the local scope of the material
+        :param collada.material.CImage img:
+          The image object
+        :param str format:
+          The format of the image
+        :param xmlnode:
+          If loaded from xml, the xml node
+        
+        """
+
         self.id = id
-        """Id of the node in the local scope of the material."""
+        """The string identifier for the surface within the local scope of the material"""
         self.image = img
-        """CImage object from the image library."""
+        """:class:`collada.material.CImage` object from the image library."""
         self.format = format if format is not None else "A8R8G8B8"
         """Format string."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the surface."""
         else:
             self.xmlnode = E.newparam(
                 E.surface(
@@ -186,6 +211,7 @@ class Surface(DaeObject):
         return Surface(id, img, format, xmlnode=node)
 
     def save(self):
+        """Saves the surface data back to :attr:`xmlnode`"""
         surfacenode = self.xmlnode.find( tag('surface') )
         initnode = surfacenode.find( tag('init_from') )
         if self.format:
@@ -197,38 +223,40 @@ class Surface(DaeObject):
 class Sampler2D(DaeObject):
     """Class containing data coming from <sampler2D> tag in material.
 
-    If <surface> tag wasn't enough, you also need this in the material
-    in order to map an image. But as opposed to surface this has
-    magnification and minification filter information that might be
-    useful for some applications.
+    Collada uses the <sampler2D> tag to map to a <surface>. The only
+    information we store about the sampler right now is minfilter and
+    magfilter. Theoretically, the collada spec has many more parameters
+    here, but no one seems to be using them in the wild, so they are
+    currently unimplemented.
 
     """
 
     def __init__(self, id, surface, minfilter=None, magfilter=None, xmlnode=None):
-        """Create a sampler object.
+        """Create a Sampler2D object.
         
-        :Parameters:
-          id
-            Id of the node in the local scope of the material
-          surface
-            Surface instance that this object samples from
-          minfilter
-            Minification filter string id, see collada specs
-          magfilter
-            Maximization filter string id, see collada specs
-          xmlnode
-            If loaded from XML, the node data comes from
+        :param str id:
+          A string identifier for the sampler within the local scope of the material
+        :param collada.material.Surface surface:
+          Surface instance that this object samples from
+        :param str minfilter:
+          Minification filter string id, see collada spec for details
+        :param str magfilter:
+          Maximization filter string id, see collada spec for details
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.id = id
-        """Id in the local scope of the material."""
+        """The string identifier for the sampler within the local scope of the material"""
         self.surface = surface
-        """Surface class instance this object samples from."""
+        """Surface instance that this object samples from"""
         self.minfilter = minfilter
-        """Minification filter string id, see collada specs."""
+        """Minification filter string id, see collada spec for details"""
         self.magfilter = magfilter
-        """Maximization filter string id, see collada specs."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Maximization filter string id, see collada spec for details"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the sampler."""
         else:
             sampler_node = E.sampler2D(E.source(self.surface.id))
             if minfilter:
@@ -258,6 +286,7 @@ class Sampler2D(DaeObject):
         return Sampler2D(id, surface, minfilter, magfilter, xmlnode=node)
 
     def save(self):
+        """Saves the sampler data back to :attr:`xmlnode`"""
         samplernode = self.xmlnode.find( tag('sampler2D') )
         sourcenode = samplernode.find( tag('source') )
         if self.minfilter:
@@ -272,33 +301,32 @@ class Sampler2D(DaeObject):
 class Map(DaeObject):
     """Class containing data coming from <texture> tag inside material.
 
-    When a material defines its properties like "diffuse" it can give you
-    a color or a texture. In the latter you'll find something like
-    <texture texcoord="CHANNEL1" texture="primer_jpg-sampler"/>
-    That in addition to the sampler to use, specifies the texcoord channel
-    to use for the mapping. If a material defined a texture for one of its
-    properties, you'll find an object of this class in the corresponding
-    attribute.
+    When a material defines its properties like `diffuse`, it can give you
+    a color or a texture. In the latter, the texture is mapped with a 
+    sampler and a texture coordinate channel. If a material defined a texture
+    for one of its properties, you'll find an object of this class in the
+    corresponding attribute.
 
     """
 
     def __init__(self, sampler, texcoord, xmlnode=None):
-        """Create a Map instance to a sampler using a texcoord channel.
+        """Create a map instance to a sampler using a texcoord channel.
 
-        :Parameters:
-          sampler
-            A Sampler object to map.
-          texcoord
-            Texture coord channel symbol to use.
-          xmlnode
-            If loaded from XML, the node data comes from.
+        :param collada.material.Sampler2D sampler:
+          A sampler object to map
+        :param str texcoord:
+          Texture coordinate channel symbol to use
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.sampler = sampler
-        """Sampler object to map."""
+        """:class:`collada.material.Sampler2D` object to map"""
         self.texcoord = texcoord
-        """Texture coord channel symbol to use."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Texture coordinate channel symbol to use"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the map"""
         else:
             self.xmlnode = E.texture(texture=self.sampler.id, texcoord=self.texcoord)
     
@@ -320,11 +348,12 @@ class Map(DaeObject):
         return Map(sampler, texcoord, xmlnode = node)
 
     def save(self):
+        """Saves the map back to :attr:`xmlnode`"""
         self.xmlnode.set('texture', self.sampler.id)
         self.xmlnode.set('texcoord', self.texcoord)
 
 class Effect(DaeObject):
-    """Class containing data coming from a <effect> tag.
+    """Class containing data coming from an <effect> tag.
 
     Since we don't have a Material class (so far, material seems
     to be used only as an alias for an effect) this is what actually
@@ -351,55 +380,76 @@ class Effect(DaeObject):
                        xmlnode = None):
         """Create an effect instance out of properties.
 
-        :Parameters
-          id
-            Id in the effect library.
-          params
-            A dictionary with the 'sampler' and 'surface2D'
-            objects indexed by their sid's in case we are
-            using textures.
-          shadingtype
-            The tag of the node this properties are coming
-            from. At the moment we are only parsing shader types
-            listed in Effect.shaders. This could be refactored in
-            the future if a strong support for materials is needed.
-          emission : 3-float tuple (RGB)
-            property
-          ambient : 3-float tuple (RGB)
-            property
-          diffuse : 3-float tuple (RGB)
-            property
-          specular : 3-float tuple (RGB)
-            property
-          shininess : float
-            property
-          reflective : 3-float tuple (RGB)
-            property
-          reflectivity : float
-            property
-          transparent : 3-float tuple (RGB)
-            property
-          transparency : float
-            property
-          xmlnode:
-            If loaded from XML, the node data comes from.
+        :param str id:
+          A string identifier for the effect
+        :param list params:
+          A list containing elements of type :class:`collada.material.Sampler2D`
+          and :class:`collada.material.Surface`
+        :param str shadingtype:
+          The type of shader to be used for this effect. Right now, we
+          only supper the shaders listed in :attr:`shaders`
+        :param emission:
+          Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`
+        :param ambient:
+          Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`
+        :param diffuse:
+          Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`
+        :param specular:
+          Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`
+        :param shininess:
+          Either a single float or an instance of :class:`collada.material.Map`
+        :param reflective:
+          Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`
+        :param reflectivity:
+          Either a single float or an instance of :class:`collada.material.Map`
+        :param tuple transparent:
+          Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`
+        :param transparency:
+          Either a single float or an instance of :class:`collada.material.Map`
+        :param xmlnode:
+          If loaded from xml, the xml node
 
         """
         self.id = id
+        """The string identifier for the effect"""
         self.params = params
-        """Local ditionary of sampler2D and surface objects."""
+        """A list containing elements of type :class:`collada.material.Sampler2D`
+          and :class:`collada.material.Surface`"""
         self.shadingtype = shadingtype
         """String with the type of the shading."""
         self.emission = emission
+        """Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`"""
         self.ambient = ambient
+        """Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`"""
         self.diffuse = diffuse
+        """Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`"""
         self.specular = specular
+        """Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`"""
         self.shininess = shininess
+        """Either a single float or an instance of :class:`collada.material.Map`"""
         self.reflective = reflective
+        """Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`"""
         self.reflectivity = reflectivity
+        """Either a single float or an instance of :class:`collada.material.Map`"""
         self.transparent = transparent
+        """Either an RGB-format tuple of three floats or an instance
+          of :class:`collada.material.Map`"""
         self.transparency = transparency
-        if xmlnode is not None: self.xmlnode = xmlnode
+        """Either a single float or an instance of :class:`collada.material.Map`"""
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the effect"""
         else:
             shadnode = E(self.shadingtype)
             
@@ -464,7 +514,7 @@ class Effect(DaeObject):
             pnode = shadnode.find( tag(key) )
             if pnode is None: props[key] = None
             else:
-                try: props[key] = Effect.loadShadingParam(collada, localscope, pnode)
+                try: props[key] = Effect._loadShadingParam(collada, localscope, pnode)
                 except DaeMissingSampler2D, ex:
                     if ex.samplerid in collada.images:
                         #Whoever exported this collada file didn't include the proper references so we will create them
@@ -474,7 +524,7 @@ class Effect(DaeObject):
                         params.append(sampler)
                         localscope[surf.id] = surf
                         localscope[sampler.id] = sampler
-                        try: props[key] = Effect.loadShadingParam(collada, localscope, pnode)
+                        try: props[key] = Effect._loadShadingParam(collada, localscope, pnode)
                         except DaeUnsupportedError, ex:
                             props[key] = None
                             collada.handleError(ex)
@@ -485,7 +535,7 @@ class Effect(DaeObject):
         return Effect(id, params, shadingtype, **props)
 
     @staticmethod
-    def loadShadingParam( collada, localscope, node ):
+    def _loadShadingParam( collada, localscope, node ):
         """Load from the node a definition for a material property."""
         children = node.getchildren()
         if not children: raise DaeIncompleteError('Incorrect effect shading parameter '+key)
@@ -509,6 +559,7 @@ class Effect(DaeObject):
         return value
 
     def save(self):
+        """Saves the effect back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         profilenode = self.xmlnode.find( tag('profile_COMMON') )

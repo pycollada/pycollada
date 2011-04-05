@@ -406,7 +406,9 @@ class SpotLight(Light):
         """
         return BoundSpotLight(self, matrix)
 
-class BoundLight(object): pass
+class BoundLight(object):
+    """Base class for bound lights"""
+    pass
 
 class BoundPointLight(object):
     """Point light bound to a scene with transformation. This gets created when a
@@ -437,24 +439,24 @@ class BoundSpotLight(object):
     """Spot light bound to a scene with transformation. This gets created when a
         light is instantiated in a scene. Do not create this manually."""
 
-    def __init__(self, dlight, matrix):
-        self.position = numpy.dot( matrix[:3,:3], dlight.position ) + matrix[:3,3]
+    def __init__(self, slight, matrix):
+        self.position = numpy.dot( matrix[:3,:3], slight.position ) + matrix[:3,3]
         """Numpy array of length 3 representing the position of the light in the scene"""
-        self.color = dlight.color
+        self.color = slight.color
         """Either a tuple of size 3 containing the RGB color value
           of the light or a tuple of size 4 containing the RGBA
           color value of the light"""
-        self.constant_att = dlight.constant_att
+        self.constant_att = slight.constant_att
         """Constant attenuation factor."""
-        self.linear_att = dlight.linear_att
+        self.linear_att = slight.linear_att
         """Linear attenuation factor."""
-        self.quad_att = dlight.quad_att
+        self.quad_att = slight.quad_att
         """Quadratic attenuation factor."""
-        self.falloff_ang = dlight.falloff_ang
+        self.falloff_ang = slight.falloff_ang
         """Falloff angle"""
-        self.falloff_exp = dlight.falloff_exp
+        self.falloff_exp = slight.falloff_exp
         """Falloff exponent"""
-        self.original = dlight
+        self.original = slight
         """The original :class:`collada.light.SpotLight` this is bound to"""
 
     def __str__(self): return 'BoundSpotLight(at %s)' % str(self.position)

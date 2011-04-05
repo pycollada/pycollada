@@ -105,7 +105,9 @@ class LineSet(primitive.Primitive):
             self._texcoord_indexset = tuple()
             self.maxtexcoordsetindex = -1
             
-        if xmlnode is not None: self.xmlnode = xmlnode
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the line set."""
         else:
             self.index.shape = (-1)
             acclen = len(self.index)
@@ -159,10 +161,17 @@ class LineSet(primitive.Primitive):
         return BoundLineSet( self, matrix, materialnodebysymbol)
 
 class BoundLineSet(primitive.BoundPrimitive):
-    """A line set bound to a transform matrix and materials mapping."""
+    """A line set bound to a transform matrix and materials mapping.
+    
+    * If ``bs`` is an instance of :class:`collada.lineset.BoundLineSet`, ``len(bs)``
+      returns the number of lines in the set and ``bs[i]`` returns the i\ :superscript:`th`
+      line in the set.
+
+    """
 
     def __init__(self, ls, matrix, materialnodebysymbol):
-        """Create a bound line set from a line set, transform and material mapping"""
+        """Create a bound line set from a line set, transform and material mapping. This gets created when a
+        light is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if ls._vertex is None else numpy.asarray(ls._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if ls._normal is None else numpy.asarray(ls._normal * M[:3,:3])
@@ -199,11 +208,4 @@ class BoundLineSet(primitive.BoundPrimitive):
     def shapes(self):
         """Iterate through all the primitives contained in the set."""
         return self.lines()
-
-    def texsource(self, input):
-        """Return the UV source no. for the input symbol coming from a material"""
-        if self.inputmap is None or input not in self.inputmap: return None
-        sem, set = self.inputmap[input]
-        assert sem == 'TEXCOORD' # we only support mapping to at the time
-        return sel.setToTexcoord[set]
 

@@ -254,7 +254,7 @@ class Geometry( DaeObject ):
           assigned to :class:`collada.scene.MaterialNode` defined in the
           scene
         
-        :rtype: :class:`collada.primitive.Primitive`
+        :rtype: :class:`collada.geometry.BoundGeometry`
 
         """
         return BoundGeometry(self, matrix, materialnodebysymbol)

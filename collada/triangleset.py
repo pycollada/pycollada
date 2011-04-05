@@ -222,13 +222,6 @@ class BoundTriangleSet(primitive.BoundPrimitive):
     def shapes(self):
         """Iterate through all the primitives contained in the set."""
         return self.triangles()
-
-    def texsource(self, input):
-        """Return the UV source no. for the input symbol coming from a material"""
-        if self.inputmap is None or input not in self.inputmap: return None
-        sem, set = self.inputmap[input]
-        assert sem == 'TEXCOORD' # we only support mapping to at the time
-        return sel.setToTexcoord[set]
     
     def generateNormals(self):
         """ Generates normals from vertex data """

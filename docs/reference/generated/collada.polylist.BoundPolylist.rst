@@ -14,11 +14,8 @@ collada.polylist.BoundPolylist
    .. autosummary::
    
       ~BoundPolylist.__init__
-      ~BoundPolylist.load
       ~BoundPolylist.polygons
-      ~BoundPolylist.save
       ~BoundPolylist.shapes
-      ~BoundPolylist.texsource
       ~BoundPolylist.triangleset
    
    

@@ -12,6 +12,7 @@ API Summary
    material
    source
    scene
+   bound
    exceptions
    util
    modules
