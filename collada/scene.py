@@ -355,7 +355,7 @@ class MaterialNode(SceneNode):
           symbol
             The symbol string (inside the geometry object) we are defining
           target
-            The material.Effect object this refers to
+            The material.Material object this refers to
           inputs
             A list of tuples (semantic, input_semantic, set) mapping geometry
             texcoords or other inputs to material input channels (semantic)

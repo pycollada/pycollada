@@ -354,11 +354,6 @@ class Map(DaeObject):
 
 class Effect(DaeObject):
     """Class containing data coming from an <effect> tag.
-
-    Since we don't have a Material class (so far, material seems
-    to be used only as an alias for an effect) this is what actually
-    represents a material.
-
     """
     supported = [ 'emission', 'ambient', 'diffuse', 'specular',
                   'shininess', 'reflective', 'reflectivity',
@@ -538,7 +533,7 @@ class Effect(DaeObject):
     def _loadShadingParam( collada, localscope, node ):
         """Load from the node a definition for a material property."""
         children = node.getchildren()
-        if not children: raise DaeIncompleteError('Incorrect effect shading parameter '+key)
+        if not children: raise DaeIncompleteError('Incorrect effect shading parameter '+node.tag)
         vnode = children[0]
         if vnode.tag == tag('color'):
             try: value = tuple([ float(v) for v in vnode.text.split() ])[:3]
@@ -592,3 +587,67 @@ class Effect(DaeObject):
             else:
                 propnode.append(E.color(' '.join( [ str(v) for v in value] )))
         tecnode.append(shadnode)
+
+class Material(DaeObject):
+    """Class containing data coming from a <material> tag.
+
+    Right now, this just stores a reference to the effect
+    which is instantiated in the material. The effect instance
+    can have parameters, but this is rarely used in the wild,
+    so it is not yet implemented.
+
+    """
+
+    def __init__(self, id, name, effect, xmlnode=None):
+        """Creates a material.
+        
+        :param str id:
+          A unique string identifier for the material
+        :param str name:
+          A name for the material
+        :param :class:`collada.material.Effect` effect:
+          The effect instantiated in this material
+        :param xmlnode:
+          If loaded from xml, the xml node
+        
+        """
+
+        self.id = id
+        """The unique string identifier for the material"""
+        self.name = name
+        """The name for the material"""
+        self.effect = effect
+        """The :class:`collada.material.Effect` instantiated in this material"""
+        
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the surface."""
+        else:
+            self.xmlnode = E.material(
+                E.instance_effect(url="#%s" % self.effect.id)
+            , id=str(self.id), name=str(self.name))
+
+    @staticmethod
+    def load( collada, localscope, node ):
+        matid = node.get('id')
+        matname = node.get('name')
+        
+        effnode = node.find( tag('instance_effect'))
+        if effnode is None: raise DaeIncompleteError('No effect inside material')
+        effectid = effnode.get('url')
+        
+        if not effectid.startswith('#'): 
+            raise DaeMalformedError('Corrupted effect reference in material %s' % effectid)
+        
+        effect = collada.effects.get(effectid[1:])
+        if not effect: 
+            raise DaeBrokenRefError('Effect not found: '+effectid)
+
+        return Material(matid, matname, effect, xmlnode=node)
+
+    def save(self):
+        """Saves the material data back to :attr:`xmlnode`"""
+        self.xmlnode.set('id', str(self.id))
+        self.xmlnode.set('name', str(self.name))
+        effnode = self.xmlnode.find( tag('instance_effect') )
+        effnode.set('url', '#%s' % self.effect.id)

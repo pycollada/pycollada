@@ -19,6 +19,8 @@ class TestMaterial(unittest2.TestCase):
         self.cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
         self.dummy.images.append(self.dummy_cimage)
         self.dummy.images.append(self.cimage)
+        self.othereffect = collada.material.Effect("othereffect", [], "phong")
+        self.dummy.effects.append(self.othereffect)
 
     def test_effect_saving(self):
         effect = collada.material.Effect("myeffect", [], "phong",
@@ -204,6 +206,23 @@ class TestMaterial(unittest2.TestCase):
         self.assertEqual(loaded_effect.params[1].id, "yoursurface")
         self.assertTrue(type(loaded_effect.params[2]) is collada.material.Sampler2D)
         self.assertEqual(loaded_effect.params[2].id, "yoursampler2d")
+
+    def test_material_saving(self):
+        effect = collada.material.Effect("myeffect", [], "phong")
+        mat = collada.material.Material("mymaterial", "mymat", effect)
+        self.assertEqual(mat.id, "mymaterial")
+        self.assertEqual(mat.name, "mymat")
+        self.assertEqual(mat.effect, effect)
+        
+        mat.id = "yourmaterial"
+        mat.name = "yourmat"
+        mat.effect = self.othereffect
+        mat.save()
+        
+        loaded_mat = collada.material.Material.load(self.dummy, {}, fromstring(tostring(mat.xmlnode)))
+        self.assertEqual(loaded_mat.id, "yourmaterial")
+        self.assertEqual(loaded_mat.name, "yourmat")
+        self.assertEqual(loaded_mat.effect.id, self.othereffect.id)
 
 if __name__ == '__main__':
     unittest2.main()

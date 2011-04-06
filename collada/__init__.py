@@ -345,40 +345,14 @@ class Collada(object):
                     self.effects.append( effect )
 
     def _loadMaterials(self):
-        """Load material library.
-        
-        Materials are only treated as aliases for effects at the time.
-        But this might change in the future.
-
-        """
+        """Load material library."""
         libnode = self.root.find( tag('library_materials'))
         if libnode != None:
             for materialnode in libnode.findall(tag('material')):
-                inseffnode = materialnode.find( tag('instance_effect'))
-                if inseffnode is None: continue
-                effectid = inseffnode.get('url')
-                try:
-                    if not effectid.startswith('#'): 
-                        raise DaeMalformedError('Corrupted effect reference in material %s' % effectid)
-                    else:
-                        matid = materialnode.get('id')
-                        effect = self.effects.get(effectid[1:])
-                        if not effect: 
-                            raise DaeBrokenRefError('Effect not found: '+effectid)
-                        else:
-                            #TODO: Materials can have params
-                            mateffect = material.Effect(matid, effect.params, effect.shadingtype,
-                                                        effect.emission,
-                                                        effect.ambient,
-                                                        effect.diffuse,
-                                                        effect.specular,
-                                                        effect.shininess,
-                                                        effect.reflective,
-                                                        effect.reflectivity,
-                                                        effect.transparent,
-                                                        effect.transparency)
-                            self.materials.append( mateffect )
+                try: mat = material.Material.load( self, {}, materialnode )
                 except DaeError, ex: self.handleError(ex)
+                else:
+                    self.materials.append( mat )
 
     def _loadNodes(self):
         libnode = self.root.find( tag('library_nodes') )

@@ -25,9 +25,9 @@ def inspectGeometry(obj):
 
 def inspectMaterial(mat):
     """Display material contents."""
-    print '        Material %s: shading %s'%(mat.id, mat.shadingtype)
-    for prop in mat.supported:
-        value = getattr(mat, prop)
+    print '        Material %s: shading %s'%(mat.effect.id, mat.effect.shadingtype)
+    for prop in mat.effect.supported:
+        value = getattr(mat.effect, prop)
         # it can be a float, a color (tuple) or a Map ( a texture )
         if isinstance(value, collada.material.Map):
             colladaimage = value.sampler.surface.image
@@ -61,7 +61,7 @@ def inspectCollada(col):
         inspectController( controller )
     print '  Cameras:'
     for cam in col.scene.objects('camera'):
-        print '    Camera %s: position '%cam.original.id, cam.position
+        print '    Camera %s: '%cam.original.id
     print '  Lights:'
     for light in col.scene.objects('light'):
         print '    Light %s: color =' % light.original.id, light.color
