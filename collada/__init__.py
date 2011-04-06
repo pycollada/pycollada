@@ -153,8 +153,12 @@ class Collada(object):
         
         if type(filename) in [types.StringType, types.UnicodeType]:
             fdata = open(filename, 'rb')
+            self.filename = filename
+            self.getFileData = self._getFileFromDisk
         else:
             fdata = filename # assume it is a file like object
+            self.filename = None
+            self.getFileData = self._nullGetFile
         strdata = fdata.read()
         
         try:
@@ -178,8 +182,6 @@ class Collada(object):
             self.getFileData = self._getFileFromZip
         else:
             data = strdata
-            self.filename = filename
-            self.getFileData = self._getFileFromDisk
         
         if aux_file_loader is not None:
             self.getFileData = aux_file_loader
@@ -237,6 +239,9 @@ class Collada(object):
             raise DaeBrokenRefError('Auxiliar file %s not found on disk'%fname)
         fdata = open(aux_path, 'rb')
         return fdata.read()
+    
+    def _nullGetFile(self, fname):
+        raise DaeBrokenRefError('Trying to load auxiliary file but collada was not loaded from disk, zip, or with custom handler')
 
     def _loadAssetInfo(self):
         """Load information in <asset> tag"""
