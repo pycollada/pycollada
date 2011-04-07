@@ -18,7 +18,6 @@ import primitive
 import types
 import triangleset
 import polylist
-import itertools
 from util import toUnitVec, checkSource
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E

@@ -17,7 +17,6 @@ from lxml import etree as ElementTree
 import primitive
 import types
 import triangleset
-import itertools
 from util import toUnitVec, checkSource
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
