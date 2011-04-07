@@ -1,9 +1,14 @@
-from distutils.core import setup
-import os
+from setuptools import find_packages, setup
 
-setup (name = "PyCollada",
-            version = "0.1",
-            description = "Collada (DAE) file reading module",
-            author = "Alejandro Conty",
-            packages = ['collada']
-            )
+setup(
+    name = "pycollada",
+    version = "0.1",
+    description = "python library for reading and writing collada documents",
+    author = "Jeff Terrace and contributors",
+    platforms=["any"],
+    license="BSD",
+    install_requires=['lxml', 'numpy'],
+    url = "https://github.com/pycollada/pycollada",
+    test_suite = "collada.tests",
+    packages = find_packages()
+)
