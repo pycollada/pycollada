@@ -5,6 +5,7 @@ setup(
     version = "0.1",
     description = "python library for reading and writing collada documents",
     author = "Jeff Terrace and contributors",
+    author_email = 'jterrace@gmail.com',
     platforms=["any"],
     license="BSD",
     install_requires=['lxml', 'numpy'],
