@@ -260,15 +260,15 @@ class PointLight(Light):
         try: color = tuple( [ float(v) for v in colornode.text.split() ] )
         except ValueError, ex: 
             raise DaeMalformedError('Corrupted color values in light definition')
-        constant_att = linear_att = zfar = None
+        constant_att = linear_att = quad_att = zfar = None
         qattnode = pnode.find( tag('quadratic_attenuation') )
         cattnode = pnode.find( tag('constant_attenuation') )
         lattnode = pnode.find( tag('linear_attenuation') )
         zfarnode = pnode.find( tag('zfar') )
         try:
-            quad_att = float(qattnode.text)
             if cattnode is not None: constant_att = float(cattnode.text)
             if lattnode is not None: linear_att = float(lattnode.text)
+            if qattnode is not None: quad_att = float(qattnode.text)
             if zfarnode is not None: zfar = float(zfarnode.text)
         except ValueError, ex: 
             raise DaeMalformedError('Corrupted values in light definition')
