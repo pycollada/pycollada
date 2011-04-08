@@ -38,10 +38,10 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(ambientlight.id, "yourambientlight")
         
     def test_point_light_saving(self):
-        pointlight = collada.light.PointLight("mypointlight", (1,1,1), 0.4)
+        pointlight = collada.light.PointLight("mypointlight", (1,1,1))
         self.assertEqual(pointlight.id, "mypointlight")
         self.assertTupleEqual(pointlight.color, (1,1,1))
-        self.assertEqual(pointlight.quad_att, 0.4)
+        self.assertEqual(pointlight.quad_att, None)
         self.assertEqual(pointlight.constant_att, None)
         self.assertEqual(pointlight.linear_att, None)
         self.assertEqual(pointlight.zfar, None)

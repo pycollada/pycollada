@@ -181,7 +181,7 @@ class AmbientLight(Light):
 class PointLight(Light):
     """Point light as defined in COLLADA tag <point>."""
 
-    def __init__(self, id, color, quad_att, constant_att=None, linear_att=None, zfar=None, xmlnode = None):
+    def __init__(self, id, color, constant_att=None, linear_att=None, quad_att=None, zfar=None, xmlnode = None):
         """Create a new sun light.
 
         :param str id:
@@ -190,12 +190,12 @@ class PointLight(Light):
           Either a tuple of size 3 containing the RGB color value
           of the light or a tuple of size 4 containing the RGBA
           color value of the light
-        :param float quad_att:
-          Quadratic attenuation factor
         :param float constant_att:
           Constant attenuation factor
         :param float linear_att:
           Linear attenuation factor
+        :param float quad_att:
+          Quadratic attenuation factor
         :param float zfar:
           Distance to the far clipping plane
         :param xmlnode:
@@ -225,13 +225,14 @@ class PointLight(Light):
             """ElementTree representation of the light."""
         else:
             pnode = E.point(
-                E.color(' '.join( [ str(v) for v in self.color ] )),
-                E.quadratic_attenuation(str(self.quad_att))
+                E.color(' '.join( [ str(v) for v in self.color ] ))
             )
             if self.constant_att is not None:
                 pnode.append(E.constant_attenuation(str(self.constant_att)))
             if self.linear_att is not None:
                 pnode.append(E.linear_attenuation(str(self.linear_att)))
+            if self.quad_att is not None:
+                pnode.append(E.quadratic_attenuation(str(self.quad_att)))
             if self.zfar is not None:
                 pnode.append(E.zfar(str(self.zvar)))
             
@@ -246,10 +247,9 @@ class PointLight(Light):
         pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('point')) )
         colornode = pnode.find( tag('color') )
         colornode.text = ' '.join( [ str(v) for v in self.color ] )
-        attnode = pnode.find( tag('quadratic_attenuation') )
-        attnode.text = str(self.quad_att)
         Light._correctValInNode(pnode, 'constant_attenuation', self.constant_att)
         Light._correctValInNode(pnode, 'linear_attenuation', self.linear_att)
+        Light._correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
         Light._correctValInNode(pnode, 'zfar', self.zfar)
 
     @staticmethod
@@ -274,7 +274,7 @@ class PointLight(Light):
             if zfarnode is not None: zfar = float(zfarnode.text)
         except ValueError, ex: 
             raise DaeMalformedError('Corrupted values in light definition')
-        return PointLight(node.get('id'), color, quad_att, constant_att, linear_att, 
+        return PointLight(node.get('id'), color, constant_att, linear_att, quad_att, 
                           zfar, xmlnode = node)
 
     def bind(self, matrix):
