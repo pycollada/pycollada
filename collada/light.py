@@ -262,8 +262,6 @@ class PointLight(Light):
             raise DaeMalformedError('Corrupted color values in light definition')
         constant_att = linear_att = zfar = None
         qattnode = pnode.find( tag('quadratic_attenuation') )
-        if qattnode is None:
-            raise DaeMalformedError('Point light requires quadratic attenuation')
         cattnode = pnode.find( tag('constant_attenuation') )
         lattnode = pnode.find( tag('linear_attenuation') )
         zfarnode = pnode.find( tag('zfar') )
