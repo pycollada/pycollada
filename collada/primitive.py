@@ -16,35 +16,6 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
 import numpy
 import types
 
-class InputList(DaeObject):
-    """InputList that is something"""
-    class Input:
-        def __init__(self, offset, semantic, src, set=None):
-            self.offset = offset
-            self.semantic = semantic
-            self.source = src
-            self.set = set
-    
-    semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT", "COLOR", "TANGENT", "BINORMAL"]
-    
-    def __init__(self):
-        """this creates an inputlist"""
-        self.inputs = {}
-        for s in self.semantics:
-            self.inputs[s] = []
-            
-    def addInput(self, offset, semantic, src, set=None):
-        if semantic not in self.semantics:
-            raise DaeUnsupportedError("Unsupported semantic %s" % semantic)
-        self.inputs[semantic].append(self.Input(offset, semantic, src, set))
-        
-    def getList(self):
-        retlist = []
-        for inplist in self.inputs.itervalues():
-            for inp in inplist:
-                 retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
-        return retlist
-
 class Primitive(DaeObject):
     """Base class for all primitive sets like TriangleSet, LineSet, Polylist, etc."""
 

@@ -5,6 +5,7 @@ Material
    :toctree: generated
    :nosignatures:
 
+   collada.material.Material
    collada.material.Effect
    collada.material.CImage
    collada.material.Surface

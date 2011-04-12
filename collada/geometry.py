@@ -92,7 +92,7 @@ class Geometry( DaeObject ):
         :param numpy.array indices:
           unshaped numpy array that contains the indices for
           the inputs referenced in inputlist
-        :param collada.primitive.InputList inputlist:
+        :param collada.source.InputList inputlist:
           The inputs for this primitive
         :param str materialid:
           A string containing a symbol that will get used to bind this lineset
@@ -109,7 +109,7 @@ class Geometry( DaeObject ):
         :param numpy.array indices:
           unshaped numpy array that contains the indices for
           the inputs referenced in inputlist
-        :param collada.primitive.InputList inputlist:
+        :param collada.source.InputList inputlist:
           The inputs for this primitive
         :param str materialid:
           A string containing a symbol that will get used to bind this triangleset
@@ -129,7 +129,7 @@ class Geometry( DaeObject ):
         :param numpy.array vcounts:
           unshaped numpy array that contains the vertex count
           for each polygon in this polylist
-        :param collada.primitive.InputList inputlist:
+        :param collada.source.InputList inputlist:
           The inputs for this primitive
         :param str materialid:
           A string containing a symbol that will get used to bind this polylist
@@ -146,7 +146,7 @@ class Geometry( DaeObject ):
         :param numpy.array indices:
           list of unshaped numpy arrays that each contain the indices for
           a single polygon
-        :param collada.primitive.InputList inputlist:
+        :param collada.source.InputList inputlist:
           The inputs for this primitive
         :param str materialid:
           A string containing a symbol that will get used to bind this polygons

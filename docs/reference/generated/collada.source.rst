@@ -12,6 +12,7 @@ collada.source
 
 		collada.source.FloatSource
 		collada.source.IDRefSource
+		collada.source.InputList
 		collada.source.NameSource
 		collada.source.Source
    

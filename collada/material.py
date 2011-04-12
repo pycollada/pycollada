@@ -605,7 +605,7 @@ class Material(DaeObject):
           A unique string identifier for the material
         :param str name:
           A name for the material
-        :param :class:`collada.material.Effect` effect:
+        :param collada.material.Effect effect:
           The effect instantiated in this material
         :param xmlnode:
           If loaded from xml, the xml node

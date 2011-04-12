@@ -11,5 +11,4 @@ collada.primitive
 		:nosignatures:
 
 		collada.primitive.BoundPrimitive
-		collada.primitive.InputList
 		collada.primitive.Primitive

@@ -42,7 +42,7 @@ class TestGeometry(unittest2.TestCase):
         linefloats = [1,1,-1, 1,-1,-1, -1,-0.9999998,-1, -0.9999997,1,-1, 1,0.9999995,1, 0.9999994,-1.000001,1]
         linefloatsrc = collada.source.FloatSource("mylinevertsource", numpy.array(linefloats), ('X', 'Y', 'Z'))
         geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mygeometry", [linefloatsrc])
-        input_list = collada.primitive.InputList()
+        input_list = collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#mylinevertsource")
         indices = numpy.array([0,1, 1,2, 2,3, 3,4, 4,5])
         lineset1 = geometry.createLineSet(indices, input_list, "mymaterial")
@@ -80,7 +80,7 @@ class TestGeometry(unittest2.TestCase):
         
         geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mycube", [vert_src, normal_src], [])
         
-        input_list = collada.primitive.InputList()
+        input_list = collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#cubeverts-array")
         input_list.addInput(1, 'NORMAL', "#cubenormals-array")
         
@@ -106,7 +106,7 @@ class TestGeometry(unittest2.TestCase):
         
         geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mycube", [vert_src, normal_src], [])
         
-        input_list = collada.primitive.InputList()
+        input_list = collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#cubeverts-array")
         input_list.addInput(1, 'NORMAL', "#cubenormals-array")
         
@@ -135,7 +135,7 @@ class TestGeometry(unittest2.TestCase):
         
         geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mycube", [vert_src, normal_src], [])
         
-        input_list = collada.primitive.InputList()
+        input_list = collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#cubeverts-array")
         input_list.addInput(1, 'NORMAL', "#cubenormals-array")
         
