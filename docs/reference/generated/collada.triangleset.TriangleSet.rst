@@ -15,8 +15,6 @@ collada.triangleset.TriangleSet
    
       ~TriangleSet.__init__
       ~TriangleSet.bind
-      ~TriangleSet.getInputs
-      ~TriangleSet.getInputsFromList
       ~TriangleSet.load
       ~TriangleSet.save
    

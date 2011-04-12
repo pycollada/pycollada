@@ -14,8 +14,6 @@ collada.primitive.Primitive
    .. autosummary::
    
       ~Primitive.bind
-      ~Primitive.getInputs
-      ~Primitive.getInputsFromList
       ~Primitive.load
       ~Primitive.save
    

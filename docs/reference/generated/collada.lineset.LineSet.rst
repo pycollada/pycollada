@@ -15,8 +15,6 @@ collada.lineset.LineSet
    
       ~LineSet.__init__
       ~LineSet.bind
-      ~LineSet.getInputs
-      ~LineSet.getInputsFromList
       ~LineSet.load
       ~LineSet.save
    

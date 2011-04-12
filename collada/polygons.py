@@ -23,24 +23,21 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
 
 class Polygons(polylist.Polylist):
-    """Class containing the data COLLADA puts in a <polygons> tag, a collection of faces and holes."""
+    """Class containing the data COLLADA puts in a <polygons> tag, a collection of
+    polygons that can have holes.
+    
+    * The Polygons object is read-only. To modify a
+      Polygons, create a new instance using :meth:`collada.geometry.Geometry.createPolygons`.
+    
+    * Polygons with holes are not currently supported, so for right now, this class is
+      essentially the same as a :class:`collada.polylist.Polylist`. Use a polylist instead
+      if your polygons don't have holes. 
+    """
 
     def __init__(self, sources, material, polygons, xmlnode=None):
-        """Create a set of polygons.
-
-        :Parameters:
-          sources
-            A dict mapping source types to an array of tuples in the form:
-            {input_type: (offset, semantic, sourceid, set, Source)}
-            Example:
-            {'VERTEX': [(0, 'VERTEX', '#vertex-inputs', '0', <collada.source.FloatSource>)]}
-          material
-            A string with the symbol of the material
-          polygons
-            A list of numpy arrays, each containing a set of indices to make a polygon
-          xmlnode
-            An xml node in case this is loaded from there
-
+        """A Polygons should not be created manually. Instead, call the
+        :meth:`collada.geometry.Geometry.createPolygons` method after
+        creating a geometry instance.
         """
         
         max_offset = max([ max([input[0] for input in input_type_array])
@@ -81,13 +78,13 @@ class Polygons(polylist.Polylist):
         for indexnode in indexnodes:
             polygon_indices.append(numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' '))
         
-        all_inputs = primitive.Primitive.getInputs(localscope, node.findall(tag('input')))
+        all_inputs = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
 
         polygons = Polygons(all_inputs, node.get('material'), polygon_indices, node)
         return polygons
     
     def bind(self, matrix, materialnodebysymbol):
-        """Create a bound polygon list from this polygon list, transform and material mapping"""
+        """Create a bound polygons from this polygons, transform and material mapping"""
         return BoundPolygons( self, matrix, materialnodebysymbol )
 
 class BoundPolygons(polylist.BoundPolylist):

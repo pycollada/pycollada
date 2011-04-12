@@ -12,4 +12,5 @@ collada.polylist
 
 		collada.polylist.BoundPolylist
 		collada.polylist.Polylist
+		collada.polylist.Polygon
    

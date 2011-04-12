@@ -16,7 +16,7 @@ collada.geometry.Geometry
       ~Geometry.__init__
       ~Geometry.bind
       ~Geometry.createLineSet
-      ~Geometry.createPolyList
+      ~Geometry.createPolylist
       ~Geometry.createPolygons
       ~Geometry.createTriangleSet
       ~Geometry.load

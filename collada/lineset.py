@@ -29,11 +29,11 @@ class Line(object):
         self.vertices = vertices
         """A (2, 3) numpy float array containing the endpoints of the line"""
         self.normals = normals
-        """A (2, 3) numpy float array with the normals for the endpoints of the line"""
+        """A (2, 3) numpy float array with the normals for the endpoints of the line. Can be None."""
         self.texcoords = texcoords
         """A tuple where entries are numpy float arrays of size (2, 2) containing
         the texture coordinates for the endpoints of the line for each texture
-        coordinate set. """
+        coordinate set. Can be length 0 if there are no texture coordinates."""
         self.material = material
         """If coming from an unbound :class:`collada.lineset.LineSet`, contains a
         string with the material symbol. If coming from a bound
@@ -50,7 +50,11 @@ class Line(object):
 class LineSet(primitive.Primitive):
     """Class containing the data COLLADA puts in a <lines> tag, a collection of
     lines. The LineSet object is read-only. To modify a LineSet, create a new
-    instance using :meth:`collada.geometry.Geometry.createLineSet`."""
+    instance using :meth:`collada.geometry.Geometry.createLineSet`.
+    
+    * If ``L`` is an instance of :class:`collada.lineset.LineSet`, then ``len(L)``
+      returns the number of lines in the set. ``L[i]`` returns the i\ :sup:`th`
+      line in the set."""
 
     def __init__(self, sources, material, index, xmlnode=None):
         """A LineSet should not be created manually. Instead, call the
@@ -132,7 +136,10 @@ class LineSet(primitive.Primitive):
 
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
-        n = self._normal[ self._normal_index[i] ]
+        if self._normal is None:
+            n = None
+        else:
+            n = self._normal[ self._normal_index[i] ]
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
             uv.append( self._texcoordset[j][ uvindex[i] ] )
@@ -143,7 +150,7 @@ class LineSet(primitive.Primitive):
         indexnode = node.find(tag('p'))
         if indexnode is None: raise DaeIncompleteError('Missing index in line set')
         
-        source_array = primitive.Primitive.getInputs(localscope, node.findall(tag('input')))
+        source_array = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
             
         try:
             if indexnode.text is None:
@@ -171,7 +178,7 @@ class BoundLineSet(primitive.BoundPrimitive):
 
     def __init__(self, ls, matrix, materialnodebysymbol):
         """Create a bound line set from a line set, transform and material mapping. This gets created when a
-        light is instantiated in a scene. Do not create this manually."""
+        line set is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if ls._vertex is None else numpy.asarray(ls._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if ls._normal is None else numpy.asarray(ls._normal * M[:3,:3])
@@ -202,10 +209,16 @@ class BoundLineSet(primitive.BoundPrimitive):
         return Line(self._vertex_index[i], v, n, uv, self.material)
 
     def lines(self):
-        """Iterate through all the lines contained in the set."""
+        """Iterate through all the lines contained in the set.
+        
+        :rtype: generator of :class:`collada.lineset.Line`
+        """
         for i in xrange(self.nlines): yield self[i]
 
     def shapes(self):
-        """Iterate through all the primitives contained in the set."""
+        """Iterate through all the lines contained in the set.
+        
+        :rtype: generator of :class:`collada.lineset.Line`
+        """
         return self.lines()
 

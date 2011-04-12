@@ -113,7 +113,7 @@ class TestGeometry(unittest2.TestCase):
         vcounts = numpy.array([4,4,4,4,4,4])
         indices = numpy.array([0,0,2,1,3,2,1,3,0,4,1,5,5,6,4,7,6,8,7,9,3,10,2,11,0,12,4,13,6,14,2,
                                15,3,16,7,17,5,18,1,19,5,20,7,21,6,22,4,23])
-        polylist = geometry.createPolyList(indices, vcounts, input_list, "cubematerial")
+        polylist = geometry.createPolylist(indices, vcounts, input_list, "cubematerial")
         
         loaded_polylist = collada.polylist.Polylist.load(self.dummy, geometry.sourceById, fromstring(tostring(polylist.xmlnode)))
         self.assertEqual(len(loaded_polylist), 6)

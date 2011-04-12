@@ -39,37 +39,41 @@ class Source(DaeObject):
         
 
 class FloatSource(Source):
-    """Source with float_array as it appears in <source> tag
-
-    Instances of this class hold point and uv array data which are then
-    used by primitives inside <geometry> tags.
-
+    """Contains a source array of floats, as defined in the collada
+    <float_array> inside a <source>.
+    
+    If ``f`` is an instance of :class:`collada.source.FloatSource`, then
+    ``len(f)`` is the length of the shaped source. ``len(f)*len(f.components)``
+    would give you the number of values in the source. ``f[i]`` is the i\ :sup:`th`
+    item in the source array.
     """
 
     def __init__(self, id, data, components, xmlnode=None):
-        """Create a source instance.
+        """Create a float source instance.
 
-        :Parameters:
-          id
-            Id for later access
-          data
-            Numpy array with the flatten values (unshaped)
-          components
-            Tuple of strings describing the semantic of the data 
-            like ('X','Y','Z')
-          xmlnode
-            If loaded from XML, the corresponding node
+        :param str id:
+          A unique string identifier for the source
+        :param numpy.array data:
+          Numpy array (unshaped) with the source values
+        :param tuple components:
+          Tuple of strings describing the semantic of the data,
+          e.g. ``('X','Y','Z')`` would cause :attr:`data` to be
+          reshaped as ``(-1, 3)``
+        :param xmlnode:
+          When loaded, the xmlnode it comes from.
 
         """
           
         self.id = id
-        """Object id in the global scope."""
+        """The unique string identifier for the source"""
         self.data = data
-        """Numpy array with the values."""
+        """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data.shape = (-1, len(components) )
         self.components = components
-        """Tuple of strings describing the semantic of the data like ('X','Y','Z')."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Tuple of strings describing the semantic of the data, e.g. ``('X','Y','Z')``"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
             txtdata = ' '.join([ str(f) for f in self.data ])
@@ -93,6 +97,7 @@ class FloatSource(Source):
     def __getitem__(self, i): return self.data[i]
 
     def save(self):
+        """Saves the source back to :attr:`xmlnode`"""
         self.data.shape = (-1,)
         txtdata = ' '.join([ str(f) for f in self.data ])
         rawlen = len( self.data )
@@ -137,37 +142,42 @@ class FloatSource(Source):
         return FloatSource( sourceid, data, tuple(components), xmlnode=node )
 
 class IDRefSource(Source):
-    """Source with IDREF_array as it appears in <source> tag
-
-    Instances of this class hold strings that refer to other
-    nodes in the document
+    """Contains a source array of ID references, as defined in the collada
+    <IDREF_array> inside a <source>.
+    
+    If ``r`` is an instance of :class:`collada.source.IDRefSource`, then
+    ``len(r)`` is the length of the shaped source. ``len(r)*len(r.components)``
+    would give you the number of values in the source. ``r[i]`` is the i\ :sup:`th`
+    item in the source array.
 
     """
 
     def __init__(self, id, data, components, xmlnode=None):
-        """Create a source instance.
+        """Create an id ref source instance.
 
-        :Parameters:
-          id
-            Id for later access
-          data
-            Numpy array of strings, each a reference value (unshaped)
-          components
-            Tuple of strings describing the semantic of the data 
-            like ('MORPH_TARGET')
-          xmlnode
-            If loaded from XML, the corresponding node
+        :param str id:
+          A unique string identifier for the source
+        :param numpy.array data:
+          Numpy array (unshaped) with the source values
+        :param tuple components:
+          Tuple of strings describing the semantic of the data,
+          e.g. ``('MORPH_TARGET')`` would cause :attr:`data` to be
+          reshaped as ``(-1, 1)``
+        :param xmlnode:
+          When loaded, the xmlnode it comes from.
 
         """
           
         self.id = id
-        """Object id in the global scope."""
+        """The unique string identifier for the source"""
         self.data = data
-        """Numpy array of strings, each a reference value."""
+        """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data.shape = (-1, len(components) )
         self.components = components
-        """Tuple of strings describing the semantic of the data like ('MORPH_TARGET')."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Tuple of strings describing the semantic of the data, e.g. ``('MORPH_TARGET')``"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
             txtdata = ' '.join([ str(f) for f in self.data ])
@@ -191,6 +201,7 @@ class IDRefSource(Source):
     def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
 
     def save(self):
+        """Saves the source back to :attr:`xmlnode`"""
         self.data.shape = (-1,)
         txtdata = ' '.join([ str(f) for f in self.data ])
         rawlen = len( self.data )
@@ -227,36 +238,42 @@ class IDRefSource(Source):
         return IDRefSource( sourceid, data, tuple(components), xmlnode=node )
 
 class NameSource(Source):
-    """Source with Name_array as it appears in <source> tag
-
-    Instances of this class hold strings
+    """Contains a source array of strings, as defined in the collada
+    <Name_array> inside a <source>.
+    
+    If ``n`` is an instance of :class:`collada.source.NameSource`, then
+    ``len(n)`` is the length of the shaped source. ``len(n)*len(n.components)``
+    would give you the number of values in the source. ``n[i]`` is the i\ :sup:`th`
+    item in the source array.
 
     """
 
     def __init__(self, id, data, components, xmlnode=None):
-        """Create a source instance.
+        """Create a name source instance.
 
-        :Parameters:
-          id
-            Id for later access
-          data
-            Numpy array of strings (unshaped)
-          components
-            Tuple of strings describing the semantic of the data 
-            like ('JOINT')
-          xmlnode
-            If loaded from XML, the corresponding node
+        :param str id:
+          A unique string identifier for the source
+        :param numpy.array data:
+          Numpy array (unshaped) with the source values
+        :param tuple components:
+          Tuple of strings describing the semantic of the data,
+          e.g. ``('JOINT')`` would cause :attr:`data` to be
+          reshaped as ``(-1, 1)``
+        :param xmlnode:
+          When loaded, the xmlnode it comes from.
 
         """
           
         self.id = id
-        """Object id in the global scope."""
+        """The unique string identifier for the source"""
         self.data = data
-        """Numpy array of strings."""
+        """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data.shape = (-1, len(components) )
         self.components = components
-        """Tuple of strings describing the semantic of the data like ('JOINT')."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Tuple of strings describing the semantic of the data, e.g. ``('JOINT')``"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
             txtdata = ' '.join([ str(f) for f in self.data ])
@@ -280,6 +297,7 @@ class NameSource(Source):
     def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
 
     def save(self):
+        """Saves the source back to :attr:`xmlnode`"""
         self.data.shape = (-1,)
         txtdata = ' '.join([ str(f) for f in self.data ])
         rawlen = len( self.data )
