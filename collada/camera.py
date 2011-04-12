@@ -95,7 +95,7 @@ class Camera(DaeObject):
             correction = float(correction)
         except ValueError, ex: 
             raise DaeMalformedError('Corrupted float values in camera definition')
-        fov *= correction
+        fov /= correction
         znearnode = persnode.find( tag('znear') )
         zfarnode = persnode.find( tag('zfar') )
         try: 
@@ -143,5 +143,22 @@ class BoundCamera(object):
         self.original = cam
         """Original :class:`collada.camera.Camera` object this is bound to."""
 
+    def get_position(self):
+        return self.matrix[:3,3]
+
+    def get_direction(self):
+        # Note: If the 3x3 rotation submatrix is orthogonal, 
+        #       then this should return a vector of unit length 
+        return -self.matrix[:3,2]
+
+    def get_up(self):
+        # Note: If the 3x3 rotation submatrix is orthogonal, 
+        #       then this should return a vector of unit length 
+        return self.matrix[:3,1]
+    
+    position = property(get_position)
+    direction = property(get_direction)
+    up = property(get_up)
+    
     def __str__(self): return 'BoundCamera bound to %s' % self.original.id
     def __repr__(self): return str(self)
