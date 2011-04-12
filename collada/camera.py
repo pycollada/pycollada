@@ -95,7 +95,7 @@ class Camera(DaeObject):
             correction = float(correction)
         except ValueError, ex: 
             raise DaeMalformedError('Corrupted float values in camera definition')
-        fov *= correction
+        fov /= correction
         znearnode = persnode.find( tag('znear') )
         zfarnode = persnode.find( tag('zfar') )
         try: 
