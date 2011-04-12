@@ -100,7 +100,7 @@ class Geometry( DaeObject ):
             
         :rtype: :class:`collada.lineset.LineSet`
         """
-        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(self.sourceById, inputlist.getList())
         return lineset.LineSet(inputdict, materialid, indices)
 
     def createTriangleSet(self, indices, inputlist, materialid):
@@ -117,10 +117,10 @@ class Geometry( DaeObject ):
             
         :rtype: :class:`collada.triangleset.TriangleSet`
         """
-        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(self.sourceById, inputlist.getList())
         return triangleset.TriangleSet(inputdict, materialid, indices)
 
-    def createPolyList(self, indices, vcounts, inputlist, materialid):
+    def createPolylist(self, indices, vcounts, inputlist, materialid):
         """Create a polylist for use with this geometry instance.
         
         :param numpy.array indices:
@@ -137,7 +137,7 @@ class Geometry( DaeObject ):
             
         :rtype: :class:`collada.polylist.Polylist`
         """
-        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(self.sourceById, inputlist.getList())
         return polylist.Polylist(inputdict, materialid, indices, vcounts)
 
     def createPolygons(self, indices, inputlist, materialid):
@@ -154,7 +154,7 @@ class Geometry( DaeObject ):
             
         :rtype: :class:`collada.polygons.Polygons`
         """
-        inputdict = primitive.Primitive.getInputsFromList(self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(self.sourceById, inputlist.getList())
         return polygons.Polygons(inputdict, materialid, indices)
 
     @staticmethod

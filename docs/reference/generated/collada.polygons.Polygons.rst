@@ -15,8 +15,6 @@ collada.polygons.Polygons
    
       ~Polygons.__init__
       ~Polygons.bind
-      ~Polygons.getInputs
-      ~Polygons.getInputsFromList
       ~Polygons.load
       ~Polygons.save
       ~Polygons.triangleset

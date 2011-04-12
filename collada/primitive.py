@@ -17,7 +17,7 @@ import numpy
 import types
 
 class InputList(DaeObject):
-    """InputList"""
+    """InputList that is something"""
     class Input:
         def __init__(self, offset, semantic, src, set=None):
             self.offset = offset
@@ -28,6 +28,7 @@ class InputList(DaeObject):
     semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT", "COLOR", "TANGENT", "BINORMAL"]
     
     def __init__(self):
+        """this creates an inputlist"""
         self.inputs = {}
         for s in self.semantics:
             self.inputs[s] = []
@@ -45,7 +46,7 @@ class InputList(DaeObject):
         return retlist
 
 class Primitive(DaeObject):
-    """Base class for all primitive sets like triangle sets."""
+    """Base class for all primitive sets like TriangleSet, LineSet, Polylist, etc."""
 
     vertex = property( lambda s: s._vertex, doc=
     """Read-only numpy.array of size Nx3 where N is the number of vertex points in the
@@ -89,7 +90,7 @@ class Primitive(DaeObject):
         pass
 
     @staticmethod
-    def getInputsFromList(localscope, inputs):
+    def _getInputsFromList(localscope, inputs):
         #first let's save any of the source that are references to a dict
         to_append = []
         for input in inputs:
@@ -158,13 +159,13 @@ class Primitive(DaeObject):
         return all_inputs
 
     @staticmethod
-    def getInputs(localscope, inputnodes):
+    def _getInputs(localscope, inputnodes):
         try: 
             inputs = [ (int(i.get('offset')), i.get('semantic'), i.get('source'), i.get('set')) 
                            for i in inputnodes ]
         except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
         
-        return Primitive.getInputsFromList(localscope, inputs)
+        return Primitive._getInputsFromList(localscope, inputs)
     
     def save(self):
         return NotImplementedError("Primitives are read-only")

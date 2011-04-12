@@ -22,36 +22,30 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
 
 class Polygon(object):
-    """Single polygon representation."""
+    """Single polygon representation. Represents a polygon of N points."""
     def __init__(self, indices, vertices, normals, texcoords, material):
-        """Create a polygon from numpy arrays.
-
-        :Parameters:
-          indices
-            A (3,) int array with vertex indexes in the vertex array.
-          vertices
-            A (N, 3) float array for points in the polygon.
-          normals
-            A (N, 3) float array with the normals for points in the polygon. Can be None.
-          texcoords
-            A tuple with (N, 2) float arrays with the texcoords for points.
-          material
-            If coming from a not bound set, a symbol (string),
-            otherwise, the material object itself.
-
-        """
+        """A Polygon should not be created manually."""
+        
         self.vertices = vertices
-        """A (N, 3) float array for points in the polygon."""
+        """A (N, 3) float array containing the points in the polygon."""
         self.normals = normals
         """A (N, 3) float array with the normals for points in the polygon. Can be None."""
         self.texcoords = texcoords
-        """A tuple with (N, 2) float arrays with the texcoords for points.."""
+        """A tuple where entries are numpy float arrays of size (N, 2) containing
+        the texture coordinates for the points in the polygon for each texture
+        coordinate set. Can be length 0 if there are no texture coordinates."""
         self.material = material
-        """Symbol (string) or the material object itself if bound."""
+        """If coming from an unbound :class:`collada.polylist.Polylist`, contains a
+        string with the material symbol. If coming from a bound
+        :class:`collada.polylist.BoundPolylist`, contains the actual
+        :class:`collada.material.Effect` the line is bound to."""
         self.indices = indices
 
     def triangles(self):
-        """Generates triangle objects from this polygon"""
+        """This triangulates the polygon using a simple fanning method.
+        
+        :rtype: generator of :class:`collada.polylist.Polygon`
+        """
         
         npts = len(self.vertices)
 
@@ -85,26 +79,19 @@ class Polygon(object):
     def __str__(self): return repr(self)
 
 class Polylist(primitive.Primitive):
-    """Class containing the data COLLADA puts in a <polylist> tag, a collection of faces."""
+    """Class containing the data COLLADA puts in a <polylist> tag, a collection of
+    polygons. The Polylist object is read-only. To modify a Polylist, create a new
+    instance using :meth:`collada.geometry.Geometry.createPolylist`.
+    
+    * If ``P`` is an instance of :class:`collada.polylist.Polylist`, then ``len(P)``
+      returns the number of polygons in the set. ``P[i]`` returns the i\ :sup:`th`
+      polygon in the set.
+    """
 
     def __init__(self, sources, material, index, vcounts, xmlnode=None):
-        """Create a polygon list.
-
-        :Parameters:
-          sources
-            A dict mapping source types to an array of tuples in the form:
-            {input_type: (offset, semantic, sourceid, set, Source)}
-            Example:
-            {'VERTEX': [(0, 'VERTEX', '#vertex-inputs', '0', <collada.source.FloatSource>)]}
-          material
-            A string with the symbol of the material
-          index
-            An array with the indexes as they come from the collada file
-          vcounts
-            A list with the lengths of each individual polygon
-          xmlnode
-            An xml node in case this is loaded from there
-
+        """A Polylist should not be created manually. Instead, call the
+        :meth:`collada.geometry.Geometry.createPolylist` method after
+        creating a geometry instance.
         """
         
         if len(sources) == 0: raise DaeIncompleteError('A polylist set needs at least one input for vertex positions')
@@ -159,7 +146,9 @@ class Polylist(primitive.Primitive):
             self._texcoord_indexset = tuple()
             self.maxtexcoordsetindex = -1
             
-        if xmlnode is not None: self.xmlnode = xmlnode
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the line set."""
         else:
             txtindices = ' '.join(str(f) for f in self.indices.flat)
             acclen = len(self.indices) 
@@ -196,6 +185,11 @@ class Polylist(primitive.Primitive):
 
     _triangleset = None
     def triangleset(self):
+        """This performs a simple triangulation of the polylist using the fanning method.
+        
+        :rtype: :class:`collada.triangleset.TriangleSet`
+        """
+        
         if self._triangleset is None:
             indexselector = numpy.zeros(self.nvertices) == 0
             indexselector[self.polyindex[:,1]-1] = False
@@ -230,7 +224,7 @@ class Polylist(primitive.Primitive):
                 vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
         except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
 
-        all_inputs = primitive.Primitive.getInputs(localscope, node.findall(tag('input')))
+        all_inputs = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
 
         try:
             if indexnode.text is None:
@@ -243,14 +237,20 @@ class Polylist(primitive.Primitive):
         return polylist
     
     def bind(self, matrix, materialnodebysymbol):
-        """Create a bound polygon list from this polygon list, transform and material mapping"""
+        """Create a bound polylist from this polylist, transform and material mapping"""
         return BoundPolylist( self, matrix, materialnodebysymbol)
 
 class BoundPolylist(primitive.BoundPrimitive):
-    """A polygon set bound to a transform matrix and materials mapping."""
+    """A polylist bound to a transform matrix and materials mapping.
+    
+    * If ``P`` is an instance of :class:`collada.polylist.BoundPolylist`, then ``len(P)``
+      returns the number of polygons in the set. ``P[i]`` returns the i\ :sup:`th`
+      polygon in the set.
+    """
 
     def __init__(self, pl, matrix, materialnodebysymbol):
-        """Create a bound polygon list from a polygon list, transform and material mapping"""
+        """Create a bound polylist from a polylist, transform and material mapping.
+        This gets created when a polylist is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if pl._vertex is None else numpy.asarray(pl._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if pl._normal is None else numpy.asarray(pl._normal * M[:3,:3])
@@ -288,6 +288,10 @@ class BoundPolylist(primitive.BoundPrimitive):
 
     _triangleset = None
     def triangleset(self):
+        """This performs a simple triangulation of the polylist using the fanning method.
+        
+        :rtype: :class:`collada.triangleset.BoundTriangleSet`
+        """
         if self._triangleset is None:
             triset = self.original.triangleset()
             boundtriset = triset.bind(self.matrix, self.materialnodebysymbol)
@@ -295,16 +299,15 @@ class BoundPolylist(primitive.BoundPrimitive):
         return self._triangleset
 
     def polygons(self):
-        """Iterate through all the polygons contained in the set."""
+        """Iterate through all the polygons contained in the set.
+        
+        :rtype: generator of :class:`collada.polylist.Polygon`
+        """
         for i in xrange(self.npolygons): yield self[i]
 
     def shapes(self):
-        """Iterate through all the primitives contained in the set."""
+        """Iterate through all the polygons contained in the set.
+        
+        :rtype: generator of :class:`collada.polylist.Polygon`
+        """
         return self.polygons()
-    
-    vertex = property( lambda s: s._vertex )
-    normal = property( lambda s: s._normal )
-    texcoordset = property( lambda s: s._texcoordset )
-    vertex_index = property( lambda s: s._vertex_index )
-    normal_index = property( lambda s: s._normal_index )
-    texcoord_indexset = property( lambda s: s._texcoord_indexset )

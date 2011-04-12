@@ -15,8 +15,6 @@ collada.polylist.Polylist
    
       ~Polylist.__init__
       ~Polylist.bind
-      ~Polylist.getInputs
-      ~Polylist.getInputsFromList
       ~Polylist.load
       ~Polylist.save
       ~Polylist.triangleset
