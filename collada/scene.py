@@ -714,7 +714,7 @@ def loadNode( collada, node ):
 class Scene(DaeObject):
     """The root object for a scene, as defined in a collada <scene> tag"""
     
-    def __init__(self, id, nodes, xmlnode=None):
+    def __init__(self, id, nodes, xmlnode=None, collada=None):
         """Create a scene
         
         :param str id:
@@ -723,12 +723,16 @@ class Scene(DaeObject):
           A list of type :class:`collada.scene.Node` representing the nodes in the scene
         :param xmlnode:
           When loaded, the xmlnode it comes from
+        :param collada:
+          The collada instance this is part of
         
         """
         self.id = id
         """The unique string identifier for the scene"""
         self.nodes = nodes
         """A list of type :class:`collada.scene.Node` representing the nodes in the scene"""
+        self.collada = collada
+        """The collada instance this is part of"""
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the scene node."""
@@ -750,31 +754,28 @@ class Scene(DaeObject):
         :rtype: generator that yields the type specified
 
         """
+        
+        matrix = None
+        if self.collada is not None:
+            if self.collada.assetInfo['up_axis'] == 'X_UP':
+                r = RotateTransform(0,1,0,90)
+                matrix = r.matrix
+            elif self.collada.assetInfo['up_axis'] == 'Y_UP':
+                r = RotateTransform(1,0,0,90)
+                matrix = r.matrix
+        
         for node in self.nodes:
-            for obj in node.objects(tipo): yield obj
+            for obj in node.objects(tipo, matrix): yield obj
 
     @staticmethod
     def load( collada, node ):
         id = node.get('id')
         nodes = []
         
-        realnode = node
-        if collada.assetInfo['up_axis'] == 'X_UP' or collada.assetInfo['up_axis'] == 'Y_UP':
-            newscene = ElementTree.Element(tag('visual_scene'), {'id':'pycolladavisualscene', 'name':'pycolladavisualscene'})
-            extranode = ElementTree.SubElement(newscene, tag('node'), {'id':'pycolladarotate', 'name':'pycolladarotate'})
-            rotatenode = ElementTree.SubElement(extranode, tag('rotate'), {'sid':'rotateX'})
-            rotatenode.text = "1 0 0 90" if collada.assetInfo['up_axis'] == 'Y_UP' else "0 1 0 90"
-            
-            prev_elements = list(node)
-            for e in prev_elements:
-                extranode.append(copy.deepcopy(e))
-                
-            realnode = newscene
-        
-        for nodenode in realnode.findall( tag('node') ):
+        for nodenode in node.findall( tag('node') ):
             try: nodes.append( loadNode(collada, nodenode) )
             except DaeError, ex: collada.handleError(ex)
-        return Scene(id, nodes, xmlnode=node)
+        return Scene(id, nodes, xmlnode=node, collada=collada)
 
     def save(self):
         """Saves the scene back to :attr:`xmlnode`"""

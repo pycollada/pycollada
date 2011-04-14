@@ -178,6 +178,8 @@ class Collada(object):
                                version='1.4.1'))
             """ElementTree representation of the collada document"""
             
+            self.assetInfo['up_axis'] = 'Y_UP'
+            
             return
             
         
@@ -217,7 +219,7 @@ class Collada(object):
             self.getFileData = aux_file_loader
         
         self.xmlnode = ElementTree.ElementTree(element=None, file=StringIO(data),
-                                            parser=ElementTree.XMLParser(remove_comments=True))
+                                            parser=ElementTree.XMLParser(remove_comments=True, remove_blank_text=True))
         
         self._loadAssetInfo()
         self._loadImages()
