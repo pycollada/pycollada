@@ -28,11 +28,18 @@ class TestScene(unittest2.TestCase):
                        ambient = (0.4, 0.5, 0.6),
                        diffuse = mymap,
                        specular = (0.3, 0.2, 0.1))
+        self.effect2 = collada.material.Effect("youreffect", [], "phong",
+                       emission = (0.1, 0.2, 0.3),
+                       ambient = (0.4, 0.5, 0.6),
+                       specular = (0.3, 0.2, 0.1))
         self.dummy.materials.append(self.effect)
+        self.dummy.materials.append(self.effect2)
         
         self.floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'Z'))
         self.geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mygeometry", {"myfloatsource":self.floatsource})
+        self.geometry2 = collada.geometry.Geometry(self.dummy, "geometry1", "yourgeometry", {"myfloatsource":self.floatsource})
         self.dummy.geometries.append(self.geometry)
+        self.dummy.geometries.append(self.geometry2)
         
         self.dummy.assetInfo['up_axis'] = 'Z_UP'
 
@@ -178,32 +185,58 @@ class TestScene(unittest2.TestCase):
         self.assertTrue(type(yournode.transforms[1]) is collada.scene.TranslateTransform)
 
     def test_scene_material_node(self):
-        binding = ("TEX0", "TEXCOORD", "0")
-        matnode = collada.scene.MaterialNode("mygeommatref", self.effect, [binding])
+        binding1 = ("TEX0", "TEXCOORD", "0")
+        binding2 = ("TEX1", "TEXCOORD", "1")
+        binding3 = ("TEX2", "TEXCOORD", "2")
+        matnode = collada.scene.MaterialNode("mygeommatref", self.effect, [binding1, binding2])
         
         self.assertEqual(matnode.target, self.effect)
         self.assertEqual(matnode.symbol, "mygeommatref")
-        self.assertListEqual(matnode.inputs, [binding])
+        self.assertListEqual(matnode.inputs, [binding1, binding2])
+        matnode.save()
+        self.assertEqual(matnode.target, self.effect)
+        self.assertEqual(matnode.symbol, "mygeommatref")
+        self.assertListEqual(matnode.inputs, [binding1, binding2])
+        
+        matnode.symbol = 'yourgeommatref'
+        matnode.target = self.effect2
+        matnode.inputs.append(binding3)
+        matnode.inputs.pop(0)
+        matnode.save()
         
         loaded_matnode = collada.scene.MaterialNode.load(self.dummy, fromstring(tostring(matnode.xmlnode)))
-        self.assertEqual(loaded_matnode.target.id, self.effect.id)
-        self.assertEqual(loaded_matnode.symbol, "mygeommatref")
-        self.assertListEqual(loaded_matnode.inputs, [binding])
+        self.assertEqual(loaded_matnode.target.id, self.effect2.id)
+        self.assertEqual(loaded_matnode.symbol, "yourgeommatref")
+        self.assertListEqual(loaded_matnode.inputs, [binding2, binding3])
         
     def test_scene_geometry_node(self):
         binding = ("TEX0", "TEXCOORD", "0")
         matnode = collada.scene.MaterialNode("mygeommatref", self.effect, [binding])
         geomnode = collada.scene.GeometryNode(self.geometry, [matnode])
+        
         bindtest = list(geomnode.objects('geometry'))
         self.assertEqual(len(bindtest), 1)
         self.assertEqual(bindtest[0].original, self.geometry)
         self.assertEqual(geomnode.geometry, self.geometry)
         self.assertListEqual(geomnode.materials, [matnode])
+        geomnode.save()
+        bindtest = list(geomnode.objects('geometry'))
+        self.assertEqual(len(bindtest), 1)
+        self.assertEqual(bindtest[0].original, self.geometry)
+        self.assertEqual(geomnode.geometry, self.geometry)
+        self.assertListEqual(geomnode.materials, [matnode])
+        
+        matnode2 = collada.scene.MaterialNode("yourgeommatref", self.effect, [binding])
+        geomnode.materials.append(matnode2)
+        geomnode.materials.pop(0)
+        geomnode.geometry = self.geometry2
+        geomnode.save()
+        
         loaded_geomnode = collada.scene.loadNode(self.dummy, fromstring(tostring(geomnode.xmlnode)))
-        self.assertEqual(loaded_geomnode.geometry.id, self.geometry.id)
+        self.assertEqual(loaded_geomnode.geometry.id, self.geometry2.id)
         self.assertEqual(len(loaded_geomnode.materials), 1)
-        self.assertEqual(loaded_geomnode.materials[0].target, matnode.target)
-        self.assertEqual(loaded_geomnode.materials[0].symbol, "mygeommatref")
+        self.assertEqual(loaded_geomnode.materials[0].target, matnode2.target)
+        self.assertEqual(loaded_geomnode.materials[0].symbol, "yourgeommatref")
         self.assertListEqual(loaded_geomnode.materials[0].inputs, [binding])
     
     def test_scene_node_with_instances(self):
