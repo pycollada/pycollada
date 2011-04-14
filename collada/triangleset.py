@@ -23,32 +23,23 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
 class Triangle(object):
     """Single triangle representation."""
     def __init__(self, indices, vertices, normals, texcoords, material):
-        """Create a triangle from numpy arrays.
+        """A triangle should not be created manually."""
 
-        :Parameters:
-          indices
-            A (3,) int array with vertex indexes in the vertex array
-          vertices
-            A (3, 3) float array for points a b c
-          normals
-            A (3, 3) float array with the normals por points a b c
-          texcoords
-            A tuple with (3, 2) float arrays with the texcoords for points 
-            a b c
-          material
-            If coming from a not bound set, a symbol (string),
-            otherwise, the material object itself
-
-        """
         self.vertices = vertices
-        """A (3, 3) float array for points a b c."""
+        """A (3, 3) float array for points in the triangle"""
         self.normals = normals
-        """A (3, 3) float array with the normals for points a b c."""
+        """A (3, 3) float array with the normals for points in the triangle.
+        If the triangle didn't have normals, they will be computed."""
         self.texcoords = texcoords
-        """A tuple with (3, 2) float arrays with the texcoords."""
+        """A tuple with (3, 2) float arrays with the texture coordinates
+          for the points in the triangle"""
         self.material = material
-        """Symbol (string) or the material object itself if bound."""
+        """If coming from an unbound :class:`collada.triangleset.TriangleSet`, contains a
+          string with the material symbol. If coming from a bound
+          :class:`collada.triangleset.BoundTriangleSet`, contains the actual
+          :class:`collada.material.Effect` the triangle is bound to."""
         self.indices = indices
+        """A (3, 3) int array with vertex indexes in the vertex array"""
 
         if self.normals is None:
             #generate normals
@@ -63,24 +54,20 @@ class Triangle(object):
     def __str__(self): return repr(self)
 
 class TriangleSet(primitive.Primitive):
-    """Class containing the data COLLADA puts in a <triangles> tag, a collection of faces."""
+    """Class containing the data COLLADA puts in a <triangles> tag, a collection of
+    triangles.
+    
+    * The TriangleSet object is read-only. To modify a TriangleSet, create a new
+      instance using :meth:`collada.geometry.Geometry.createTriangleSet`.
+    * If ``T`` is an instance of :class:`collada.triangleset.TriangleSet`, then ``len(T)``
+      returns the number of triangles in the set. ``T[i]`` returns the i\ :sup:`th`
+      triangle in the set.
+    """
 
     def __init__(self, sources, material, index, xmlnode=None):
-        """Create a triangle set.
-
-        :Parameters:
-          sources
-            A dict mapping source types to an array of tuples in the form:
-            {input_type: [(offset, semantic, sourceid, set, Source)]}
-            Example:
-            {'VERTEX': (0, 'VERTEX', '#vertex-inputs', '0', <collada.source.FloatSource>)}
-          material
-            A string with the symbol of the material
-          index
-            An array with the indexes as they come from the collada file
-          xmlnode
-            An xml node in case this is loaded from there
-
+        """A TriangleSet should not be created manually. Instead, call the
+        :meth:`collada.geometry.Geometry.createTriangleSet` method after
+        creating a geometry instance.
         """
 
         if len(sources) == 0: raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
@@ -182,10 +169,16 @@ class TriangleSet(primitive.Primitive):
         return BoundTriangleSet( self, matrix, materialnodebysymbol)
 
 class BoundTriangleSet(primitive.BoundPrimitive):
-    """A triangle set bound to a transform matrix and materials mapping."""
+    """A triangle set bound to a transform matrix and materials mapping.
+    
+    * If ``T`` is an instance of :class:`collada.triangleset.BoundTriangleSet`, then ``len(T)``
+      returns the number of triangles in the set. ``T[i]`` returns the i\ :sup:`th`
+      triangle in the set.
+    """
 
     def __init__(self, ts, matrix, materialnodebysymbol):
-        """Create a bound triangle set from a triangle set, transform and material mapping"""
+        """Create a bound triangle set from a triangle set, transform and material mapping.
+        This gets created when a triangle set is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if ts.vertex is None else numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3,:3])
@@ -216,15 +209,22 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         return Triangle(self._vertex_index[i], v, n, uv, self.material)
 
     def triangles(self):
-        """Iterate through all the triangles contained in the set."""
+        """Iterate through all the triangles contained in the set.
+        
+        :rtype: generator of :class:`collada.triangleset.Triangle`
+        """
         for i in xrange(self.ntriangles): yield self[i]
 
     def shapes(self):
-        """Iterate through all the primitives contained in the set."""
+        """Iterate through all the triangles contained in the set.
+        
+        :rtype: generator of :class:`collada.triangleset.Triangle`
+        """
         return self.triangles()
     
     def generateNormals(self):
-        """ Generates normals from vertex data """
+        """If :attr:`normals` is `None` or you wish for normals to be
+        recomputed, call this method to recompute them."""
         norms = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
         tris = self._vertex[self._vertex_index]
         n = numpy.cross( tris[::,1] - tris[::,0], tris[::,2] - tris[::,0] )
@@ -236,10 +236,3 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         
         self._normal = norms
         self._normal_index = self._vertex_index
-    
-    vertex = property( lambda s: s._vertex )
-    normal = property( lambda s: s._normal )
-    texcoordset = property( lambda s: s._texcoordset )
-    vertex_index = property( lambda s: s._vertex_index )
-    normal_index = property( lambda s: s._normal_index )
-    texcoord_indexset = property( lambda s: s._texcoord_indexset )

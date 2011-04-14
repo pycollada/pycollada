@@ -10,14 +10,16 @@
 #                                                                  #
 ####################################################################
 
-"""This module contains several classes to load nodes under <scene> tag.
+"""This module contains several classes related to the scene graph.
 
 Supported scene nodes are:
-- <node> which is treated as a Node
-- <instance_camera> which is treated as CameraNode
-- <instance_material> which is treated as MaterialNode
-- <instance_geometry> which is treated as GeometryNode
-- <scene> created as Scene class instance containing all the rest
+  * <node> which is loaded as a Node
+  * <instance_camera> which is loaded as a CameraNode
+  * <instance_light> which is loaded as a LightNode
+  * <instance_material> which is loaded as a MaterialNode
+  * <instance_geometry> which is loaded as a GeometryNode
+  * <instance_controller> which is loaded as a ControllerNode
+  * <scene> which is loaded as a Scene
 
 """
 
@@ -29,18 +31,19 @@ from collada import DaeObject, DaeError, DaeIncompleteError, DaeBrokenRefError, 
 import copy
 
 class SceneNode(DaeObject):
-    """Base class for all <scene> stuff."""
+    """Abstract base class for all nodes within a scene."""
 
     def objects(self, tipo, matrix=None): 
-        """Iterate through all objects under this node that match `tipo`
+        """Iterate through all objects under this node that match `tipo`.
+        The objects will be bound and transformed via the scene transformations.
 
-        All objects are yielded transformed where they need to.
-
-        :Parameters:
-          tipo
-            A string for the desired object type ('geometry' or 'camera')
-          matrix
-            An optional transform matrix
+        :param str tipo:
+          A string for the desired object type. This can be one of 'geometry',
+          'camera', 'light', or 'controller'.
+        :param numpy.matrix matrix:
+          An optional transformation matrix
+          
+        :rtype: generator that yields the type specified
 
         """
         pass
@@ -59,34 +62,80 @@ def makeRotationMatrix(x, y, z, angle):
 
 class Transform(DaeObject):
     """Base class for all transformation types"""
+    
+    def save(self):
+        pass
 
 class TranslateTransform(Transform):
+    """Contains a translation transformation as defined in the collada <translate> tag."""
+    
     def __init__(self, x, y, z, xmlnode=None):
+        """Creates a translation transformation
+        
+        :param float x:
+          x coordinate
+        :param float y:
+          y coordinate
+        :param float z:
+          z coordinate
+        :param xmlnode:
+           When loaded, the xmlnode it comes from
+        
+        """
         self.x = x
+        """x coordinate"""
         self.y = y
+        """y coordinate"""
         self.z = z
+        """z coordinate"""
         self.matrix = numpy.identity(4, dtype=numpy.float32)
+        """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.matrix[:3,3] = [ x, y, z ]
         self.xmlnode = xmlnode
+        """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.translate(' '.join([str(x),str(y),str(z)]))
+
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         if len(floats) != 3:
-            raise DaeMalformedError("Transform node requires three float values")
+            raise DaeMalformedError("Translate node requires three float values")
         return TranslateTransform(floats[0], floats[1], floats[2], node)
     
 class RotateTransform(Transform):
+    """Contains a rotation transformation as defined in the collada <rotate> tag."""
+    
     def __init__(self, x, y, z, angle, xmlnode=None):
+        """Creates a rotation transformation
+        
+        :param float x:
+          x coordinate
+        :param float y:
+          y coordinate
+        :param float z:
+          z coordinate
+        :param float angle:
+          angle of rotation, in radians
+        :param xmlnode:
+           When loaded, the xmlnode it comes from
+        
+        """
         self.x = x
+        """x coordinate"""
         self.y = y
+        """y coordinate"""
         self.z = z
+        """z coordinate"""
         self.angle = angle
+        """angle of rotation, in radians"""
         self.matrix = makeRotationMatrix(x, y, z, angle*numpy.pi/180.0)
+        """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.xmlnode = xmlnode
+        """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.rotate(' '.join([str(x),str(y),str(z),str(angle)]))
+
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
@@ -95,17 +144,37 @@ class RotateTransform(Transform):
         return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
     
 class ScaleTransform(Transform):
+    """Contains a scale transformation as defined in the collada <scale> tag."""
+    
     def __init__(self, x, y, z, xmlnode=None):
+        """Creates a scale transformation
+        
+        :param float x:
+          x coordinate
+        :param float y:
+          y coordinate
+        :param float z:
+          z coordinate
+        :param xmlnode:
+           When loaded, the xmlnode it comes from
+        
+        """
         self.x = x
+        """x coordinate"""
         self.y = y
+        """y coordinate"""
         self.z = z
+        """z coordinate"""
         self.matrix = numpy.identity(4, dtype=numpy.float32)
+        """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.matrix[0,0] = x
         self.matrix[1,1] = y
         self.matrix[2,2] = z
         self.xmlnode = xmlnode
+        """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.scale(' '.join([str(x),str(y),str(z)]))
+
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
@@ -114,28 +183,59 @@ class ScaleTransform(Transform):
         return ScaleTransform(floats[0], floats[1], floats[2], node)
     
 class MatrixTransform(Transform):
+    """Contains a matrix transformation as defined in the collada <matrix> tag."""
+    
     def __init__(self, matrix, xmlnode=None):
+        """Creates a matrix transformation
+        
+        :param numpy.array matrix:
+          This should be an unshaped numpy array of floats of length 16
+        :param xmlnode:
+           When loaded, the xmlnode it comes from
+        
+        """
         self.matrix = matrix
+        """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         if len(self.matrix) != 16: raise DaeMalformedError('Corrupted matrix transformation node')
         self.matrix.shape = (4, 4)
         self.xmlnode = xmlnode
+        """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.matrix(' '.join([str(v) for v in self.matrix.flat]))
+
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         return MatrixTransform(floats, node)
 
 class LookAtTransform(Transform):
+    """Contains a transformation for aiming a camera as defined in the collada <lookat> tag."""
+    
     def __init__(self, eye, interest, upvector, xmlnode=None):
+        """Creates a lookat transformation
+        
+        :param numpy.array eye:
+          An unshaped numpy array of floats of length 3 containing the position of the eye
+        :param numpy.array interest:
+          An unshaped numpy array of floats of length 3 containing the point of interest
+        :param numpy.array upvector:
+          An unshaped numpy array of floats of length 3 containing the up-axis direction
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
+        
+        """
         self.eye = eye
+        """A numpy array of length 3 containing the position of the eye"""
         self.interest = interest
+        """A numpy array of length 3 containing the point of interest"""
         self.upvector = upvector
+        """A numpy array of length 3 containing the up-axis direction"""
 
         if len(eye) != 3 or len(interest) != 3 or len(upvector) != 3:
             raise DaeMalformedError('Corrupted lookat transformation node')
         
         self.matrix = numpy.identity(4, dtype=numpy.float32)
+        """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
 
         front = toUnitVec(numpy.subtract(eye,interest))
         side = numpy.multiply(-1, toUnitVec(numpy.cross(front, upvector)))
@@ -145,6 +245,7 @@ class LookAtTransform(Transform):
         self.matrix[3,0:3] = eye
 
         self.xmlnode = xmlnode
+        """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.lookat(' '.join([str(f) for f in 
                                         numpy.concatenate((self.eye, self.interest, self.upvector)) ]))
@@ -156,41 +257,45 @@ class LookAtTransform(Transform):
         return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], node)
 
 class Node(SceneNode):
-    """Class containing data from <node> tags
+    """Represents a node object, which is a point on the scene graph, as defined in the collada <node> tag.
 
-    Since all node tags can contain transform directives we treat
-    all of them as Node, even if the transform is the
-    identity.
-
+    Contains the list of transformations effecting the node as well as any children.
     """
 
     def __init__(self, id, children=[], transforms=[], xmlnode=None):
-        """Create a Node.
-
-        :Parameters:
-          id
-            Id inside scene
-          children
-            A list of child nodes of this node
-          transforms
-            A list of transformations of type Transform
-          xmlnode
-            If loaded from XML, the xml node it comes from
+        """Create a node in the scene graph.
+        
+        :param str id:
+          A unique string identifier for the node
+        :param list children:
+          A list of child nodes of this node. This can contain any
+          object that inherits from :class:`collada.scene.SceneNode`
+        :param list transforms:
+          A list of transformations effecting the node. This can
+          contain any object that inherits from :class:`collada.scene.Transform`
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
 
         """
         self.id = id
-        """Id inside scene."""
-        self.transforms = transforms
-        """A list of transformations of type Transform"""
+        """The unique string identifier for the node"""
         self.children = children
-        """A list of child nodes of this node"""
+        """A list of child nodes of this node. This can contain any
+          object that inherits from :class:`collada.scene.SceneNode`"""
+        self.transforms = transforms
+        """A list of transformations effecting the node. This can
+          contain any object that inherits from :class:`collada.scene.Transform`"""
         self.matrix = numpy.identity(4, dtype=numpy.float32)
-        """numpy transformation matrix that combines all transform matrices"""
+        """A numpy.array of size 4x4 containing a transformation matrix that
+        combines all the transformations in :attr:`transforms`. This will only
+        be updated after calling :meth:`save`."""
 
         for t in transforms:
             self.matrix = numpy.dot(self.matrix, t.matrix)
 
-        if xmlnode is not None: self.xmlnode = xmlnode
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the transform."""
         else:
             self.xmlnode = E.node(id=self.id, name=self.id)
             for t in self.transforms:
@@ -199,6 +304,18 @@ class Node(SceneNode):
                 self.xmlnode.append(c.xmlnode)
    
     def objects(self, tipo, matrix=None):
+        """Iterate through all objects under this node that match `tipo`.
+        The objects will be bound and transformed via the scene transformations.
+
+        :param str tipo:
+          A string for the desired object type. This can be one of 'geometry',
+          'camera', 'light', or 'controller'.
+        :param numpy.matrix matrix:
+          An optional transformation matrix
+          
+        :rtype: generator that yields the type specified
+
+        """
         if matrix != None: M = numpy.dot( matrix, self.matrix )
         else: M = self.matrix
         for node in self.children:
@@ -206,6 +323,8 @@ class Node(SceneNode):
                 yield obj
 
     def save(self):
+        """Saves the geometry back to :attr:`xmlnode`. Also updates
+        :attr:`matrix` if :attr:`transforms` has been modified."""
         self.matrix = numpy.identity(4, dtype=numpy.float32)
         for t in self.transforms:
             self.matrix = numpy.dot(self.matrix, t.matrix)
@@ -245,25 +364,30 @@ class Node(SceneNode):
         return Node(id, children, transforms, xmlnode=node)
 
 class GeometryNode(SceneNode):
-    """Data coming from <instance_geometry> inside the scene tree."""
+    """Represents a geometry instance in a scene, as defined in the collada <instance_geometry> tag."""
 
     def __init__(self, geometry, materials, xmlnode=None):
-        """Create a GeometryNode.
+        """Creates a geometry node
 
-        :Parameters:
-          geometry
-            A `Geometry` instance from geometry library
-          materials
-            A list of `MaterialNode` objects inside this node
-          xmlnode
-            If loaded from XML, the node it comes from
+        :param collada.geometry.Geometry geometry:
+          A geometry to instantiate in the scene
+        :param list materials:
+          A list containing items of type :class:`collada.scene.MaterialNode`.
+          Each of these represents a material that the geometry should be
+          bound to.
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
 
         """
         self.geometry = geometry
-        """A `Geometry` instance from geometry library."""
+        """An object of type :class:`collada.geometry.Geometry` representing the
+        geometry to bind in the scene"""
         self.materials = materials
-        """A list of `MaterialNode` objects inside this node."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """A list containing items of type :class:`collada.scene.MaterialNode`.
+          Each of these represents a material that the geometry is bound to."""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the geometry node."""
         else:
             self.xmlnode = E.instance_geometry(
                 E.bind_material(
@@ -274,6 +398,7 @@ class GeometryNode(SceneNode):
             , url="#%s" % self.geometry.id)
             
     def objects(self, tipo, matrix=None):
+        """Yields a :class:`collada.geometry.BoundGeometry` if ``tipo=='geometry'``"""
         if tipo == 'geometry':
             if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
@@ -292,27 +417,55 @@ class GeometryNode(SceneNode):
         for matnode in matnodes:
             materials.append( MaterialNode.load(collada, matnode) )
         return GeometryNode( geometry, materials, xmlnode=node)
+    
+    def save(self):
+        """Saves the geometry node back to :attr:`xmlnode`"""
+        self.xmlnode.set('url', "#%s" % self.geometry.id)
+        
+        for m in self.materials:
+            m.save()
+        
+        matparent = self.xmlnode.find('%s/%s'%( tag('bind_material'), tag('technique_common') ) )
+        if matparent is None and len(self.materials)==0:
+            return
+        elif matparent is None:
+            matparent = E.technique_common()
+            self.xmlnode.append(E.bind_material(matparent))
+
+        for m in self.materials:
+            if m.xmlnode not in matparent:
+                matparent.append(m.xmlnode)
+        xmlnodes = [m.xmlnode for m in self.materials]
+        for n in matparent:
+            if n not in xmlnodes:
+                matparent.remove(n)
 
 class ControllerNode(SceneNode):
-    """Data coming from <instance_controller> inside the scene tree."""
+    """Represents a controller instance in a scene, as defined in the collada <instance_controller> tag. **This class is highly
+    experimental. More support will be added in version 0.3.**"""
 
     def __init__(self, controller, materials, xmlnode=None):
-        """Create a ControllerNode.
+        """Creates a controller node
 
-        :Parameters:
-          controller
-            A `Controller` instance from controller library
-          materials
-            A list of `MaterialNode` objects inside this node
-          xmlnode
-            If loaded from XML, the node it comes from
+        :param collada.controller.Controller controller:
+          A controller to instantiate in the scene
+        :param list materials:
+          A list containing items of type :class:`collada.scene.MaterialNode`.
+          Each of these represents a material that the controller should be
+          bound to.
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
 
         """
         self.controller = controller
-        """A `Controller` instance from controller library."""
+        """ An object of type :class:`collada.controller.Controller` representing
+        the controller being instantiated in the scene"""
         self.materials = materials
-        """A list of `MaterialNode` objects inside this node."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """A list containing items of type :class:`collada.scene.MaterialNode`.
+          Each of these represents a material that the controller is bound to."""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the controller node."""
         else:
             self.xmlnode = ElementTree.Element( tag('instance_controller') )
             bindnode = ElementTree.Element( tag('bind_material') )
@@ -322,6 +475,7 @@ class ControllerNode(SceneNode):
             for mat in materials: technode.append( mat.xmlnode )
             
     def objects(self, tipo, matrix=None):
+        """Yields a :class:`collada.controller.BoundController` if ``tipo=='controller'``"""
         if tipo == 'controller':
             if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
@@ -342,34 +496,44 @@ class ControllerNode(SceneNode):
         return ControllerNode( controller, materials, xmlnode=node)
 
     def save(self):
+        """Saves the controller node back to :attr:`xmlnode`"""
         self.xmlnode.set('url', '#'+self.controller.id)
-        for mat in self.materials: mat.save()
+        for mat in self.materials:
+            mat.save()
         
 class MaterialNode(SceneNode):
-    """Data coming from <instance_material> inside <instance_geometry> in scene tree."""
+    """Represents a material being instantiated in a scene, as defined in the collada <instance_material> tag."""
 
     def __init__(self, symbol, target, inputs, xmlnode = None):
-        """Create a MaterialNode.
+        """Creates a material node
 
-        :Parameters:
-          symbol
-            The symbol string (inside the geometry object) we are defining
-          target
-            The material.Material object this refers to
-          inputs
-            A list of tuples (semantic, input_semantic, set) mapping geometry
-            texcoords or other inputs to material input channels (semantic)
-          xmlnode
-            If loaded from XML, the node it comes from
+        :param str symbol:
+          The symbol within a geometry this material should be bound to
+        :param collada.material.Material target:
+          The material object being bound to
+        :param list inputs:
+          A list of tuples of the form ``(semantic, input_semantic, set)`` mapping
+          texcoords or other inputs to material input channels, e.g.
+          ``('TEX0', 'TEXCOORD', '0')`` would map the effect parameter ``'TEX0'``
+          to the ``'TEXCOORD'`` semantic of the geometry, using texture coordinate
+          set ``0``.
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
 
         """
         self.symbol = symbol
-        """The symbol string (inside the geometry object) we are defining."""
+        """The symbol within a geometry this material should be bound to"""
         self.target = target
-        """The id of the material to assign to the symbol."""
+        """An object of type :class:`collada.material.Material` representing the material object being bound to"""
         self.inputs = inputs
-        """A list of tuples (semantic, input_semantic, set) mapping material inputs."""
-        if xmlnode is not None: self.xmlnode = xmlnode
+        """A list of tuples of the form ``(semantic, input_semantic, set)`` mapping
+          texcoords or other inputs to material input channels, e.g.
+          ``('TEX0', 'TEXCOORD', '0')`` would map the effect parameter ``'TEX0'``
+          to the ``'TEXCOORD'`` semantic of the geometry, using texture coordinate
+          set ``0``."""
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the material node."""
         else:
             self.xmlnode = E.instance_material(
                 *[E.bind_vertex_input(semantic=sem, input_semantic=input_sem, input_set=set)
@@ -386,19 +550,48 @@ class MaterialNode(SceneNode):
         target = collada.materials.get(targetid[1:])
         if not target: raise DaeBrokenRefError('Material %s not found'%targetid)
         return MaterialNode(node.get('symbol'), target, inputs, xmlnode = node)
+    
+    def objects(self):
+        pass
+    
+    def save(self):
+        """Saves the material node back to :attr:`xmlnode`"""
+        self.xmlnode.set('symbol', self.symbol)
+        self.xmlnode.set('target', "#%s"%self.target.id)
+
+        inputs_in = []
+        for i in self.xmlnode.findall( tag('bind_vertex_input') ):
+            input_tuple = ( i.get('semantic'), i.get('input_semantic'), i.get('input_set') )
+            if input_tuple not in self.inputs:
+                self.xmlnode.remove(i)
+            else:
+                inputs_in.append(input_tuple)
+        for i in self.inputs:
+            if i not in inputs_in:
+                self.xmlnode.append(E.bind_vertex_input(semantic=i[0], input_semantic=i[1], input_set=i[2]))
 
 class CameraNode(SceneNode):
-    """Camera binding inside of scene tree as <instance_camera> tag."""
+    """Represents a camera being instantiated in a scene, as defined in the collada <instance_camera> tag."""
 
     def __init__(self, camera, xmlnode=None):
-        """Create a CameraNode out of a `camera` from the library."""
+        """Create a camera instance
+        
+        :param collada.camera.Camera camera:
+          The camera being instantiated
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
+        
+        """
         self.camera = camera
-        """Original camera from the library."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """An object of type :class:`collada.camera.Camera` representing the instantiated camera"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the camera node."""
         else:
             self.xmlnode = E.instance_camera(url="#%s"%camera.id)
             
     def objects(self, tipo, matrix=None):
+        """Yields a :class:`collada.camera.BoundCamera` if ``tipo=='camera'``"""
         if tipo == 'camera':
             if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.camera.bind(matrix)
@@ -412,20 +605,31 @@ class CameraNode(SceneNode):
         return CameraNode( camera, xmlnode=node)
 
     def save(self):
+        """Saves the camera node back to :attr:`xmlnode`"""
         self.xmlnode.set('url', '#'+self.camera.id)
 
 class LightNode(SceneNode):
-    """Light binding inside of scene tree as <instance_light> tag."""
+    """Represents a light being instantiated in a scene, as defined in the collada <instance_light> tag."""
 
     def __init__(self, light, xmlnode=None):
-        """Create a LightNode out of a `light` from the library."""
+        """Create a light instance
+        
+        :param collada.light.Light light:
+          The light being instantiated
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
+        
+        """
         self.light = light
-        """Original camera from the library."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """An object of type :class:`collada.light.Light` representing the instantiated light"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the light node."""
         else:
             self.xmlnode = E.instance_light(url="#%s"%light.id)
             
     def objects(self, tipo, matrix=None):
+        """Yields a :class:`collada.light.BoundLight` if ``tipo=='light'``"""
         if tipo == 'light':
             if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.light.bind(matrix)
@@ -439,14 +643,22 @@ class LightNode(SceneNode):
         return LightNode( light, xmlnode=node)
 
     def save(self):
+        """Saves the light node back to :attr:`xmlnode`"""
         self.xmlnode.set('url', '#'+self.light.id)
 
 class ExtraNode(SceneNode):
-    """Stores an <extra> tag."""
+    """Represents extra information in a scene, as defined in a collada <extra> tag."""
 
     def __init__(self, xmlnode):
-        """Create an ExtraNode which stores arbitrary xml."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """Create an extra node which stores arbitrary xml
+        
+        :param xmlnode:
+          Should be an ElementTree instance of tag type <extra>
+        
+        """
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the extra node."""
         else:
             self.xmlnode = E.extra()
             
@@ -494,28 +706,42 @@ def loadNode( collada, node ):
     else: raise DaeUnsupportedError('Unknown scene node %s' % str(node.tag))
 
 class Scene(DaeObject):
-    """Scene data (a tree) for <scene> tag and children."""
+    """The root object for a scene, as defined in a collada <scene> tag"""
     
     def __init__(self, id, nodes, xmlnode=None):
-        """Create a Scene node from a children list (`nodes`) of `SceneNode`."""
+        """Create a scene
+        
+        :param str id:
+          A unique string identifier for the scene
+        :param list nodes:
+          A list of type :class:`collada.scene.Node` representing the nodes in the scene
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
+        
+        """
         self.id = id
-        """Id inside scene library."""
+        """The unique string identifier for the scene"""
         self.nodes = nodes
-        """Children node list."""
-        if xmlnode != None: self.xmlnode = xmlnode
+        """A list of type :class:`collada.scene.Node` representing the nodes in the scene"""
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the scene node."""
         else:
             self.xmlnode = E.visual_scene(id=self.id)
             for node in nodes:
                 self.xmlnode.append( node.xmlnode )
 
     def objects(self, tipo):
-        """Iterate through all objects under this node that match `tipo`
+        """Iterate through all objects in the scene that match `tipo`.
+        The objects will be bound and transformed via the scene transformations.
 
-        All objects are yielded transformed where they need to.
-
-        :Parameters:
-          tipo
-            A string for the desired object type ('geometry' or 'camera')
+        :param str tipo:
+          A string for the desired object type. This can be one of 'geometry',
+          'camera', 'light', or 'controller'.
+        :param numpy.matrix matrix:
+          An optional transformation matrix
+          
+        :rtype: generator that yields the type specified
 
         """
         for node in self.nodes:
@@ -545,6 +771,7 @@ class Scene(DaeObject):
         return Scene(id, nodes, xmlnode=node)
 
     def save(self):
+        """Saves the scene back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         for node in self.nodes:
             node.save()

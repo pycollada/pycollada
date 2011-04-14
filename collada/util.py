@@ -15,18 +15,25 @@ import numpy
 from collada import DaeMalformedError
 
 def toUnitVec(vec):
+    """Converts the given vector to a unit vector
+    
+    :param numpy.array vec:
+      The vector to transform to unit length
+      
+    :rtype: numpy.array
+    
+    """
     return vec / numpy.sqrt(numpy.vdot(vec, vec))
 
 def checkSource( source, components, maxindex):
     """Check if a source objects complies with the needed `components` and has the needed length
 
-    :Parameters:
-      source
-        A `Source` instance coming from the `Geometry` oject
-      components
-        A tuple describing the needed channels like ('X','Y','Z')
-      maxindex
-        The maximum index that refers to this source
+    :param collada.source.Source source:
+      A source instance to check
+    :param tuple components:
+      A tuple describing the needed channels, e.g. ``('X','Y','Z')``
+    :param int maxindex:
+      The maximum index that refers to this source
 
     """
     if len(source.data) <= maxindex:
@@ -46,7 +53,14 @@ def checkSource( source, components, maxindex):
     return source
 
 def normalize_v3(arr):
-    ''' Normalize a numpy array of 3 component vectors shape=(n,3) '''
+    """Normalize a numpy array of 3 component vectors with shape (N,3)
+    
+    :param numpy.array arr:
+      The numpy array to normalize
+    
+    :rtype: numpy.array
+    
+    """
     lens = numpy.sqrt( arr[:,0]**2 + arr[:,1]**2 + arr[:,2]**2 )
     arr[:,0] /= lens
     arr[:,1] /= lens
