@@ -1,6 +1,11 @@
 Geometry
 --------
 
+.. inheritance-diagram:: collada.geometry
+   :parts: 1
+.. inheritance-diagram:: collada.lineset.LineSet collada.triangleset.TriangleSet collada.polylist.Polylist collada.polygons.Polygons
+   :parts: 1
+
 .. autosummary::
    :toctree: generated
    :nosignatures:

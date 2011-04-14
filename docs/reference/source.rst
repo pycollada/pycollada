@@ -1,6 +1,9 @@
 Source
 ------
 
+.. inheritance-diagram:: collada.source
+   :parts: 1
+
 .. autosummary::
    :toctree: generated
    :nosignatures:

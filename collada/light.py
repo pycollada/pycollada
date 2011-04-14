@@ -408,7 +408,7 @@ class BoundLight(object):
     """Base class for bound lights"""
     pass
 
-class BoundPointLight(object):
+class BoundPointLight(BoundLight):
     """Point light bound to a scene with transformation. This gets created when a
         light is instantiated in a scene. Do not create this manually."""
 
@@ -433,7 +433,7 @@ class BoundPointLight(object):
     def __str__(self): return 'BoundPointLight(at %s)' % str(self.position)
     def __repr__(self): return str(self)
     
-class BoundSpotLight(object):
+class BoundSpotLight(BoundLight):
     """Spot light bound to a scene with transformation. This gets created when a
         light is instantiated in a scene. Do not create this manually."""
 
@@ -460,7 +460,7 @@ class BoundSpotLight(object):
     def __str__(self): return 'BoundSpotLight(at %s)' % str(self.position)
     def __repr__(self): return str(self)
 
-class BoundDirectionalLight(object):
+class BoundDirectionalLight(BoundLight):
     """Directional light bound to a scene with transformation. This gets created when a
         light is instantiated in a scene. Do not create this manually."""
 
@@ -477,7 +477,7 @@ class BoundDirectionalLight(object):
     def __str__(self): return 'BoundDirectionalLight(from %s)' % str(self.direction)
     def __repr__(self): return str(self)
 
-class BoundAmbientLight(object):
+class BoundAmbientLight(BoundLight):
     """Ambient light bound to a scene with transformation. This gets created when a
         light is instantiated in a scene. Do not create this manually."""
 

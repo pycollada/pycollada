@@ -5,7 +5,8 @@ collada.light.BoundDirectionalLight
 
 .. autoclass:: BoundDirectionalLight
 
-   
+   .. inheritance-diagram:: collada.light
+      :parts: 1
    .. automethod:: __init__
 
    

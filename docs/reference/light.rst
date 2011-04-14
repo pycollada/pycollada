@@ -1,6 +1,9 @@
 Light
 -----
 
+.. inheritance-diagram:: collada.light
+  :parts: 1
+
 .. autosummary::
    :toctree: generated
    :nosignatures:

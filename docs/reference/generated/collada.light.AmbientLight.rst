@@ -5,7 +5,8 @@ collada.light.AmbientLight
 
 .. autoclass:: AmbientLight
 
-   
+   .. inheritance-diagram:: collada.light
+      :parts: 1
    .. automethod:: __init__
 
    

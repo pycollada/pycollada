@@ -5,7 +5,8 @@ collada.source.Source
 
 .. autoclass:: Source
 
-   
+   .. inheritance-diagram:: collada.source
+      :parts: 1
    .. automethod:: __init__
 
    

@@ -5,7 +5,8 @@ collada.geometry.BoundGeometry
 
 .. autoclass:: BoundGeometry
 
-   
+   .. inheritance-diagram:: collada.geometry
+      :parts: 1
    .. automethod:: __init__
 
    

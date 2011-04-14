@@ -5,7 +5,8 @@ collada.source.IDRefSource
 
 .. autoclass:: IDRefSource
 
-   
+   .. inheritance-diagram:: collada.source
+      :parts: 1
    .. automethod:: __init__
 
    

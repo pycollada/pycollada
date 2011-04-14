@@ -1,6 +1,9 @@
 collada.light
 =============
 
+.. inheritance-diagram:: collada.light
+  :parts: 1
+
 .. automodule:: collada.light
 	:no-members:
 	:no-inherited-members:

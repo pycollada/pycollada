@@ -5,7 +5,8 @@ collada.triangleset.BoundTriangleSet
 
 .. autoclass:: BoundTriangleSet
 
-   
+   .. inheritance-diagram:: collada.lineset.BoundLineSet collada.triangleset.BoundTriangleSet collada.polylist.BoundPolylist collada.polygons.BoundPolygons
+      :parts: 1
    .. automethod:: __init__
 
    

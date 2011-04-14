@@ -5,7 +5,8 @@ collada.light.BoundSpotLight
 
 .. autoclass:: BoundSpotLight
 
-   
+   .. inheritance-diagram:: collada.light
+      :parts: 1
    .. automethod:: __init__
 
    

@@ -5,7 +5,8 @@ collada.source.FloatSource
 
 .. autoclass:: FloatSource
 
-   
+   .. inheritance-diagram:: collada.source
+      :parts: 1
    .. automethod:: __init__
 
    

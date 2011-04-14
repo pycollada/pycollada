@@ -5,7 +5,8 @@ collada.primitive.BoundPrimitive
 
 .. autoclass:: BoundPrimitive
 
-   
+   .. inheritance-diagram:: collada.lineset.BoundLineSet collada.triangleset.BoundTriangleSet collada.polylist.BoundPolylist collada.polygons.BoundPolygons
+      :parts: 1
    .. automethod:: __init__
 
    

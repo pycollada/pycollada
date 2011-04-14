@@ -2,3 +2,4 @@
 .project
 .pydevproject
 docs/_build
+.settings
