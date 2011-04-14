@@ -262,7 +262,7 @@ class Node(SceneNode):
     Contains the list of transformations effecting the node as well as any children.
     """
 
-    def __init__(self, id, children=[], transforms=[], xmlnode=None):
+    def __init__(self, id, children=None, transforms=None, xmlnode=None):
         """Create a node in the scene graph.
         
         :param str id:
@@ -279,10 +279,14 @@ class Node(SceneNode):
         """
         self.id = id
         """The unique string identifier for the node"""
-        self.children = children
+        self.children = []
         """A list of child nodes of this node. This can contain any
           object that inherits from :class:`collada.scene.SceneNode`"""
-        self.transforms = transforms
+        if children is not None:
+            self.children = children
+        self.transforms = []
+        if transforms is not None:
+            self.transforms = transforms
         """A list of transformations effecting the node. This can
           contain any object that inherits from :class:`collada.scene.Transform`"""
         self.matrix = numpy.identity(4, dtype=numpy.float32)
@@ -290,7 +294,7 @@ class Node(SceneNode):
         combines all the transformations in :attr:`transforms`. This will only
         be updated after calling :meth:`save`."""
 
-        for t in transforms:
+        for t in self.transforms:
             self.matrix = numpy.dot(self.matrix, t.matrix)
 
         if xmlnode is not None:
@@ -366,7 +370,7 @@ class Node(SceneNode):
 class GeometryNode(SceneNode):
     """Represents a geometry instance in a scene, as defined in the collada <instance_geometry> tag."""
 
-    def __init__(self, geometry, materials, xmlnode=None):
+    def __init__(self, geometry, materials=None, xmlnode=None):
         """Creates a geometry node
 
         :param collada.geometry.Geometry geometry:
@@ -382,9 +386,11 @@ class GeometryNode(SceneNode):
         self.geometry = geometry
         """An object of type :class:`collada.geometry.Geometry` representing the
         geometry to bind in the scene"""
-        self.materials = materials
+        self.materials = []
         """A list containing items of type :class:`collada.scene.MaterialNode`.
           Each of these represents a material that the geometry is bound to."""
+        if materials is not None:
+            self.materials = materials
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry node."""

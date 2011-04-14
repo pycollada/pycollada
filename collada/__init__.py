@@ -107,22 +107,26 @@ from util import IndexedList
 class Collada(object):
     """This is the main class used to create and load collada documents"""
 
-    def __init__(self, filename, ignore = [], aux_file_loader = None):
+    def __init__(self, filename=None, ignore=None, aux_file_loader = None):
         """Load collada data from filename or file like object.
         
         :param filename:
           String containing path to filename to open or file-like object.
           Uncompressed .dae files are supported, as well as zip file archives.
+          If this is set to ``None``, a new collada instance is created.
         :param list ignore:
           A list of :class:`collada.DaeError` types that should be ignored
           when loading the collada document. Instances of these types will
           be added to :attr:`errors` after loading but won't be raised.
+          Only used if `filename` is not ``None``.
         :param function aux_file_loader:
           Referenced files (e.g. texture images) are loaded from disk when
           reading from the local filesystem and from the zip archive when
-          loading from a zip file. If you these files are coming from another
-          source (e.g. database) and you're loading with StringIO, set this to
+          loading from a zip file. If these files are coming from another source
+          (e.g. database) and/or you're loading with StringIO, set this to
           a function that given a filename, returns the binary data in the file.
+          If `filename` is ``None``, you must set this parameter if you want to
+          load auxiliary files.
         """
         
         self.errors = []
@@ -147,9 +151,35 @@ class Collada(object):
         """A list of :class:`collada.scene.Node` objects. Can also be indexed by id"""
         self.scenes = IndexedList([], ('id',))
         """A list of :class:`collada.scene.Scene` objects. Can also be indexed by id"""
+        self.scene = None
+        """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
         
         self.maskedErrors = []
-        self.ignoreErrors( *ignore )
+        if ignore is not None:
+            self.ignoreErrors( *ignore )
+        
+        if filename is None:
+            self.filename = None
+            self.zfile = None
+            self.getFileData = aux_file_loader
+            
+            self.xmlnode = ElementTree.ElementTree(
+                               E.COLLADA(
+                                   E.library_cameras(),
+                                   E.library_controllers(),
+                                   E.library_effects(),
+                                   E.library_geometries(),
+                                   E.library_images(),
+                                   E.library_lights(),
+                                   E.library_materials(),
+                                   E.library_nodes(),
+                                   E.library_visual_scenes(),
+                                   E.scene(),
+                               version='1.4.1'))
+            """ElementTree representation of the collada document"""
+            
+            return
+            
         
         if type(filename) in [types.StringType, types.UnicodeType]:
             fdata = open(filename, 'rb')
@@ -186,7 +216,7 @@ class Collada(object):
         if aux_file_loader is not None:
             self.getFileData = aux_file_loader
         
-        self.root = ElementTree.ElementTree(element=None, file=StringIO(data),
+        self.xmlnode = ElementTree.ElementTree(element=None, file=StringIO(data),
                                             parser=ElementTree.XMLParser(remove_comments=True))
         
         self._loadAssetInfo()
@@ -245,7 +275,7 @@ class Collada(object):
 
     def _loadAssetInfo(self):
         """Load information in <asset> tag"""
-        assetnode = self.root.find( tag('asset') )
+        assetnode = self.xmlnode.find( tag('asset') )
         if assetnode != None:
             for subnode in list(assetnode):
                 if subnode.tag == tag('up_axis'):
@@ -288,7 +318,7 @@ class Collada(object):
                     
     def _loadGeometry(self):
         """Load geometry library."""
-        libnode = self.root.find( tag('library_geometries') )
+        libnode = self.xmlnode.find( tag('library_geometries') )
         if libnode != None:
             for geomnode in libnode.findall(tag('geometry')):
                 if geomnode.find(tag('mesh')) is None: continue
@@ -299,7 +329,7 @@ class Collada(object):
     
     def _loadControllers(self):
         """Load controller library."""
-        libnode = self.root.find( tag('library_controllers') )
+        libnode = self.xmlnode.find( tag('library_controllers') )
         if libnode != None:
             for controlnode in libnode.findall(tag('controller')):
                 if controlnode.find(tag('skin')) is None and controlnode.find(tag('morph')) is None:
@@ -311,7 +341,7 @@ class Collada(object):
     
     def _loadLights(self):
         """Load light library."""
-        libnode = self.root.find( tag('library_lights') )
+        libnode = self.xmlnode.find( tag('library_lights') )
         if libnode != None:
             for lightnode in libnode.findall(tag('light')):
                 try: lig = light.Light.load( self, {}, lightnode )
@@ -321,7 +351,7 @@ class Collada(object):
 
     def _loadCameras(self):
         """Load camera library."""
-        libnode = self.root.find( tag('library_cameras') )
+        libnode = self.xmlnode.find( tag('library_cameras') )
         if libnode != None:
             for cameranode in libnode.findall(tag('camera')):
                 try: cam = camera.Camera.load( self, {}, cameranode )
@@ -331,7 +361,7 @@ class Collada(object):
 
     def _loadImages(self):
         """Load image library."""
-        libnode = self.root.find( tag('library_images') )
+        libnode = self.xmlnode.find( tag('library_images') )
         if libnode != None:
             for imgnode in libnode.findall(tag('image')):
                 try: img = material.CImage.load( self, {}, imgnode )
@@ -341,7 +371,7 @@ class Collada(object):
 
     def _loadEffects(self):
         """Load effect library."""
-        libnode = self.root.find( tag('library_effects') )
+        libnode = self.xmlnode.find( tag('library_effects') )
         if libnode != None:
             for effectnode in libnode.findall(tag('effect')):
                 try: effect = material.Effect.load( self, {}, effectnode )
@@ -351,7 +381,7 @@ class Collada(object):
 
     def _loadMaterials(self):
         """Load material library."""
-        libnode = self.root.find( tag('library_materials'))
+        libnode = self.xmlnode.find( tag('library_materials'))
         if libnode != None:
             for materialnode in libnode.findall(tag('material')):
                 try: mat = material.Material.load( self, {}, materialnode )
@@ -360,7 +390,7 @@ class Collada(object):
                     self.materials.append( mat )
 
     def _loadNodes(self):
-        libnode = self.root.find( tag('library_nodes') )
+        libnode = self.xmlnode.find( tag('library_nodes') )
         if libnode != None:
             for node in libnode.findall(tag('node')):
                 try: N = scene.loadNode(self, node)
@@ -371,7 +401,7 @@ class Collada(object):
 
     def _loadScenes(self):
         """Load scene library."""
-        libnode = self.root.find( tag('library_visual_scenes') )
+        libnode = self.xmlnode.find( tag('library_visual_scenes') )
         if libnode != None:
             for scenenode in libnode.findall(tag('visual_scene')):
                 try: S = scene.Scene.load( self, scenenode )
@@ -381,8 +411,7 @@ class Collada(object):
 
     def _loadDefaultScene(self):
         """Loads the default scene from <scene> tag in the root node."""
-        node = self.root.find('%s/%s'%( tag('scene'), tag('instance_visual_scene') ) )
-        self.scene = None
+        node = self.xmlnode.find('%s/%s'%( tag('scene'), tag('instance_visual_scene') ) )
         try:
             if node != None:
                 sceneid = node.get('url')
@@ -394,14 +423,48 @@ class Collada(object):
         except DaeError, ex: self.handleError(ex)
 
     def save(self):
-        """Save back all the data to the xml tree."""
-        for img in self.images:
-            img.save()
-        for effect in self.effects:
-            effect.save()
-        for geom in self.geometries:
-            geom.save()
-        for scene in self.scenes:
-            scene.save()
+        """Saves the collada document back to :attr:`xmlnode`"""
+        libraries = [(self.geometries, 'library_geometries'),
+                     (self.controllers, 'library_controllers'),
+                     (self.lights, 'library_lights'),
+                     (self.cameras, 'library_cameras'),
+                     (self.images, 'library_images'),
+                     (self.effects, 'library_effects'),
+                     (self.materials, 'library_materials'),
+                     (self.nodes, 'library_nodes'),
+                     (self.scenes, 'library_visual_scenes')]
+        for arr, name in libraries:
+            node = self.xmlnode.find( tag(name) )
+            for o in arr:
+                o.save()
+                if o.xmlnode not in node:
+                    node.append(o.xmlnode)
+            xmlnodes = [o.xmlnode for o in arr]
+            for n in node:
+                if n not in xmlnodes:
+                    node.remove(n)
 
+        scenenode = self.xmlnode.find( tag('scene') )
+        scenenode.clear()
+        if self.scene is not None:
+            sceneid = self.scene.id
+            if sceneid not in self.scenes:
+                raise DaeBrokenRefError('Default scene %s not found'%sceneid)
+            scenenode.append(E.instance_visual_scene(url="#%s"%sceneid))
 
+    def write(self, file):
+        """Writes out the collada document to a file. Note that this also
+        calls :meth:`save` so avoid calling both methods to save performance.
+        
+        :param file:
+          Either the file name to write to or a file-like object
+        
+        """
+        
+        self.save()
+        if type(file) in [types.StringType, types.UnicodeType]:
+            f = open(file, 'w')
+        else:
+            f = file
+            
+        self.xmlnode.write(f, pretty_print=True)

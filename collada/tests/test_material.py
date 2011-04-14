@@ -1,19 +1,13 @@
 import unittest2
 import collada
 from lxml.etree import fromstring, tostring
-import StringIO
 import os
 import sys
 
 class TestMaterial(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy_collada_text = """
-        <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-        </COLLADA>
-        """
-        self.dummy = collada.Collada(StringIO.StringIO(self.dummy_collada_text),
-                        aux_file_loader = self.image_dummy_loader)
+        self.dummy = collada.Collada(aux_file_loader = self.image_dummy_loader)
         
         self.dummy_cimage = collada.material.CImage("yourcimage", "./whatever.tga", self.dummy)
         self.cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)

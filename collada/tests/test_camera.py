@@ -1,16 +1,11 @@
 import unittest2
 import collada
-import StringIO
 from lxml.etree import fromstring, tostring
 
 class TestCamera(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy_collada_text = """
-        <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-        </COLLADA>
-        """
-        self.dummy = collada.Collada(StringIO.StringIO(self.dummy_collada_text))
+        self.dummy = collada.Collada()
 
     def test_camera_saving(self):
         camera = collada.camera.Camera("mycam", 45.0, 0.01, 1000.0)

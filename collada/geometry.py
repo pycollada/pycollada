@@ -27,7 +27,7 @@ from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
 class Geometry( DaeObject ):
     """A class containing the data coming from a COLLADA <geometry> tag"""
 
-    def __init__(self, collada, id, name, sourcebyid, primitives=[], xmlnode=None):
+    def __init__(self, collada, id, name, sourcebyid, primitives=None, xmlnode=None):
         """Create a geometry instance
 
           :param collada.Collada collada:
@@ -65,8 +65,10 @@ class Geometry( DaeObject ):
             for src in sourcebyid:
                 self.sourceById[src.id] = src
         
-        self.primitives = primitives
+        self.primitives = []
         """List of primitives (base type :class:`collada.primitive.Primitive`) inside this geometry."""
+        if primitives is not None:
+            self.primitives = primitives
         
         if xmlnode != None: 
             self.xmlnode = xmlnode
