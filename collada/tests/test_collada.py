@@ -24,6 +24,10 @@ class TestCollada(unittest2.TestCase):
         self.assertEqual(len(mesh.nodes), 0)
         self.assertIn('VisualSceneNode', mesh.scenes)
         
+        self.assertIsNotNone(str(list(mesh.scene.objects('geometry'))))
+        self.assertIsNotNone(str(list(mesh.scene.objects('light'))))
+        self.assertIsNotNone(str(list(mesh.scene.objects('camera'))))
+                
     def test_collada_duck_poly(self):
         f = os.path.join(self.datadir, "duck_polylist.dae")
         mesh = collada.Collada(f)

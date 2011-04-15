@@ -470,3 +470,7 @@ class Collada(object):
             f = file
             
         self.xmlnode.write(f, pretty_print=True)
+
+    def __str__(self): return '<Collada geometries=%d>' % (len(self.geometries))
+    def __repr__(self): return str(self)
+    

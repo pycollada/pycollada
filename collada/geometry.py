@@ -292,6 +292,6 @@ class BoundGeometry( object ):
             boundp = p.bind( self.matrix, self.materialnodebysymbol )
             yield boundp
 
-    def __str__(self): return '<BoundGeometry id=%s, %d primitives>' % (self.id, len(self.primitives))
+    def __str__(self): return '<BoundGeometry id=%s, %d primitives>' % (self.original.id, len(self))
     def __repr__(self): return str(self)
     
