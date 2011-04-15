@@ -17,8 +17,6 @@ collada.source.InputList
       ~InputList.__init__
       ~InputList.addInput
       ~InputList.getList
-      ~InputList.load
-      ~InputList.save
    
    
 

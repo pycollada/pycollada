@@ -3,13 +3,22 @@
 Welcome to pycollada's documentation
 ====================================
 
-Contents
+Source Code
+-----------
+
+The source code for pycollada lives on `github <https://github.com/pycollada/pycollada>`_
+
+Tutorial
 --------
 
 .. toctree::
-	:maxdepth: 1
 
-	
+    intro.rst
+    features.rst
+    install.rst
+    loading.rst
+    structure.rst
+    creating.rst
 
 Reference
 ---------

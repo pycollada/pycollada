@@ -1,3 +1,5 @@
+.. _exception-summary:
+
 Exceptions
 ----------
 
