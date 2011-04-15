@@ -221,13 +221,15 @@ class Geometry( DaeObject ):
         for d in deletenodes:
             meshnode.remove(d)
         
+        #Look through primitives to find a vertex source
         vnode = self.xmlnode.find(tag('mesh')).find(tag('vertices'))
         input_vnode = vnode.find(tag('input'))
-        srcref = input_vnode.get('source')[1:]
-        if srcref not in self.sourceById:
-            newsrcref = list(self.sourceById.iterkeys())[0]
-            input_vnode.set('source', "#%s" % newsrcref)
-            vnode.set('id', "#%s-vertices" % newsrcref)
+        vert_src = None
+        for prim in self.primitives:
+            vert_src = prim.sources['VERTEX'][0][2]
+        if vert_src is not None:
+            input_vnode.set('source', vert_src)
+            vnode.set('id', vert_src + '-vertices')
 
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.name)
