@@ -103,6 +103,9 @@ class TranslateTransform(Transform):
             raise DaeMalformedError("Translate node requires three float values")
         return TranslateTransform(floats[0], floats[1], floats[2], node)
     
+    def __str__(self): return '<TranslateTransform (%s, %s, %s)>' % (self.x, self.y, self.z)
+    def __repr__(self): return str(self)
+    
 class RotateTransform(Transform):
     """Contains a rotation transformation as defined in the collada <rotate> tag."""
     
@@ -143,6 +146,9 @@ class RotateTransform(Transform):
             raise DaeMalformedError("Rotate node requires four float values")
         return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
     
+    def __str__(self): return '<RotateTransform (%s, %s, %s) angle=%s>' % (self.x, self.y, self.z, self.angle)
+    def __repr__(self): return str(self)
+    
 class ScaleTransform(Transform):
     """Contains a scale transformation as defined in the collada <scale> tag."""
     
@@ -182,6 +188,9 @@ class ScaleTransform(Transform):
             raise DaeMalformedError("Scale node requires three float values")
         return ScaleTransform(floats[0], floats[1], floats[2], node)
     
+    def __str__(self): return '<ScaleTransform (%s, %s, %s)>' % (self.x, self.y, self.z)
+    def __repr__(self): return str(self)
+    
 class MatrixTransform(Transform):
     """Contains a matrix transformation as defined in the collada <matrix> tag."""
     
@@ -207,6 +216,9 @@ class MatrixTransform(Transform):
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         return MatrixTransform(floats, node)
+
+    def __str__(self): return '<MatrixTransform>'
+    def __repr__(self): return str(self)
 
 class LookAtTransform(Transform):
     """Contains a transformation for aiming a camera as defined in the collada <lookat> tag."""
@@ -255,6 +267,9 @@ class LookAtTransform(Transform):
         if len(floats) != 9:
             raise DaeMalformedError("Lookat node requires 9 float values")
         return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], node)
+
+    def __str__(self): return '<LookAtTransform>'
+    def __repr__(self): return str(self)
 
 class Node(SceneNode):
     """Represents a node object, which is a point on the scene graph, as defined in the collada <node> tag.
@@ -367,6 +382,9 @@ class Node(SceneNode):
 
         return Node(id, children, transforms, xmlnode=node)
 
+    def __str__(self): return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
+    def __repr__(self): return str(self)
+
 class GeometryNode(SceneNode):
     """Represents a geometry instance in a scene, as defined in the collada <instance_geometry> tag."""
 
@@ -446,6 +464,9 @@ class GeometryNode(SceneNode):
             if n not in xmlnodes:
                 matparent.remove(n)
 
+    def __str__(self): return '<GeometryNode geometry=%s>' % (self.geometry.id,)
+    def __repr__(self): return str(self)
+
 class ControllerNode(SceneNode):
     """Represents a controller instance in a scene, as defined in the collada <instance_controller> tag. **This class is highly
     experimental. More support will be added in version 0.3.**"""
@@ -506,6 +527,9 @@ class ControllerNode(SceneNode):
         self.xmlnode.set('url', '#'+self.controller.id)
         for mat in self.materials:
             mat.save()
+        
+    def __str__(self): return '<ControllerNode controller=%s>' % (self.controller.id,)
+    def __repr__(self): return str(self)
         
 class MaterialNode(SceneNode):
     """Represents a material being instantiated in a scene, as defined in the collada <instance_material> tag."""
@@ -576,6 +600,9 @@ class MaterialNode(SceneNode):
             if i not in inputs_in:
                 self.xmlnode.append(E.bind_vertex_input(semantic=i[0], input_semantic=i[1], input_set=i[2]))
 
+    def __str__(self): return '<MaterialNode symbol=%s targetid=%s>' % (self.symbol, self.target.id)
+    def __repr__(self): return str(self)
+
 class CameraNode(SceneNode):
     """Represents a camera being instantiated in a scene, as defined in the collada <instance_camera> tag."""
 
@@ -614,6 +641,9 @@ class CameraNode(SceneNode):
         """Saves the camera node back to :attr:`xmlnode`"""
         self.xmlnode.set('url', '#'+self.camera.id)
 
+    def __str__(self): return '<CameraNode camera=%s>' % (self.camera.id,)
+    def __repr__(self): return str(self)
+
 class LightNode(SceneNode):
     """Represents a light being instantiated in a scene, as defined in the collada <instance_light> tag."""
 
@@ -651,6 +681,9 @@ class LightNode(SceneNode):
     def save(self):
         """Saves the light node back to :attr:`xmlnode`"""
         self.xmlnode.set('url', '#'+self.light.id)
+
+    def __str__(self): return '<LightNode light=%s>' % (self.light.id,)
+    def __repr__(self): return str(self)
 
 class ExtraNode(SceneNode):
     """Represents extra information in a scene, as defined in a collada <extra> tag."""
@@ -788,3 +821,6 @@ class Scene(DaeObject):
         for node in self.xmlnode:
             if node not in xmlnodes:
                 self.xmlnode.remove(node)
+
+    def __str__(self): return '<Scene id=%s nodes=%d>' % (self.id, len(self.nodes))
+    def __repr__(self): return str(self)

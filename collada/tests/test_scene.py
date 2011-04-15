@@ -45,6 +45,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(lightnode.light, dirlight)
         self.assertEqual(len(bindtest), 1)
         self.assertEqual(bindtest[0].original, dirlight)
+        self.assertIsNotNone(str(lightnode))
         
         lightnode.light = self.yourdirlight
         lightnode.save()
@@ -59,6 +60,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(camnode.camera, cam)
         self.assertEqual(len(bindtest), 1)
         self.assertEqual(bindtest[0].original, cam)
+        self.assertIsNotNone(str(camnode))
         
         camnode.camera = self.yourcam
         camnode.save()
@@ -71,6 +73,7 @@ class TestScene(unittest2.TestCase):
         self.assertAlmostEqual(translate.x, 0.1)
         self.assertAlmostEqual(translate.y, 0.2)
         self.assertAlmostEqual(translate.z, 0.3)
+        self.assertIsNotNone(str(translate))
         loaded_translate = collada.scene.TranslateTransform.load(self.dummy, fromstring(tostring(translate.xmlnode)))
         self.assertAlmostEqual(loaded_translate.x, 0.1)
         self.assertAlmostEqual(loaded_translate.y, 0.2)
@@ -82,6 +85,7 @@ class TestScene(unittest2.TestCase):
         self.assertAlmostEqual(rotate.y, 0.2)
         self.assertAlmostEqual(rotate.z, 0.3)
         self.assertAlmostEqual(rotate.angle, 90)
+        self.assertIsNotNone(str(rotate))
         loaded_rotate = collada.scene.RotateTransform.load(self.dummy, fromstring(tostring(rotate.xmlnode)))
         self.assertAlmostEqual(loaded_rotate.x, 0.1)
         self.assertAlmostEqual(loaded_rotate.y, 0.2)
@@ -93,6 +97,7 @@ class TestScene(unittest2.TestCase):
         self.assertAlmostEqual(scale.x, 0.1)
         self.assertAlmostEqual(scale.y, 0.2)
         self.assertAlmostEqual(scale.z, 0.3)
+        self.assertIsNotNone(str(scale))
         loaded_scale = collada.scene.ScaleTransform.load(self.dummy, fromstring(tostring(scale.xmlnode)))
         self.assertAlmostEqual(loaded_scale.x, 0.1)
         self.assertAlmostEqual(loaded_scale.y, 0.2)
@@ -101,6 +106,7 @@ class TestScene(unittest2.TestCase):
     def test_scene_matrix_node(self):
         matrix = collada.scene.MatrixTransform(numpy.array([1.0,0,0,2, 0,1,0,3, 0,0,1,4, 0,0,0,1]))
         self.assertAlmostEqual(matrix.matrix[0][0], 1.0)
+        self.assertIsNotNone(str(matrix))
         loaded_matrix = collada.scene.MatrixTransform.load(self.dummy, fromstring(tostring(matrix.xmlnode)))
         self.assertAlmostEqual(loaded_matrix.matrix[0][0], 1.0)
         
@@ -112,6 +118,7 @@ class TestScene(unittest2.TestCase):
         self.assertListEqual(list(lookat.eye), list(eye))
         self.assertListEqual(list(lookat.interest), list(interest))
         self.assertListEqual(list(lookat.upvector), list(upvector))
+        self.assertIsNotNone(str(lookat))
         loaded_lookat = collada.scene.LookAtTransform.load(self.dummy, fromstring(tostring(lookat.xmlnode)))
         self.assertListEqual(list(loaded_lookat.eye), list(eye))
         self.assertListEqual(list(loaded_lookat.interest), list(interest))
@@ -121,6 +128,7 @@ class TestScene(unittest2.TestCase):
         emptynode = collada.scene.Node('myemptynode')
         self.assertEqual(len(emptynode.children), 0)
         self.assertEqual(len(emptynode.transforms), 0)
+        self.assertIsNotNone(str(emptynode))
         loadedempty = collada.scene.Node.load(self.dummy, fromstring(tostring(emptynode.xmlnode)))
         self.assertEqual(len(loadedempty.children), 0)
         self.assertEqual(len(loadedempty.transforms), 0)
@@ -188,6 +196,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(matnode.target, self.effect)
         self.assertEqual(matnode.symbol, "mygeommatref")
         self.assertListEqual(matnode.inputs, [binding1, binding2])
+        self.assertIsNotNone(str(matnode))
         matnode.save()
         self.assertEqual(matnode.target, self.effect)
         self.assertEqual(matnode.symbol, "mygeommatref")
@@ -214,6 +223,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(bindtest[0].original, self.geometry)
         self.assertEqual(geomnode.geometry, self.geometry)
         self.assertListEqual(geomnode.materials, [matnode])
+        self.assertIsNotNone(str(geomnode))
         geomnode.save()
         bindtest = list(geomnode.objects('geometry'))
         self.assertEqual(len(bindtest), 1)

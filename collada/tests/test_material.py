@@ -38,6 +38,7 @@ class TestMaterial(unittest2.TestCase):
         self.assertTupleEqual(effect.specular, (0.3, 0.2, 0.1))
         self.assertTupleEqual(effect.reflective, (0.7, 0.6, 0.5))
         self.assertTupleEqual(effect.transparent, (0.2, 0.4, 0.6))
+        self.assertIsNotNone(str(effect))
         
         effect.id = "youreffect"
         effect.shininess = 7.0
@@ -84,6 +85,7 @@ class TestMaterial(unittest2.TestCase):
         self.assertEqual(loaded_cimage.pilimage, None)
         self.assertEqual(loaded_cimage.uintarray, None)
         self.assertEqual(loaded_cimage.floatarray, None)
+        self.assertIsNotNone(str(cimage))
         
     def test_cimage_data_loading(self):
         data_dir = os.path.join(os.path.dirname(os.path.realpath( __file__ )), "data")
@@ -113,6 +115,7 @@ class TestMaterial(unittest2.TestCase):
         self.assertEqual(surface.id, "mysurface")
         self.assertEqual(surface.image.id, "mycimage")
         self.assertEqual(surface.format, "A8R8G8B8")
+        self.assertIsNotNone(str(surface))
         surface.id = "yoursurface"
         surface.image = self.dummy_cimage
         surface.format = "OtherFormat"
@@ -133,6 +136,7 @@ class TestMaterial(unittest2.TestCase):
         sampler2d = collada.material.Sampler2D("mysampler2d", surface, "LINEAR_MIPMAP_LINEAR", "LINEAR")
         self.assertEqual(sampler2d.minfilter, "LINEAR_MIPMAP_LINEAR")
         self.assertEqual(sampler2d.magfilter, "LINEAR")
+        self.assertIsNotNone(str(sampler2d))
         
         other_surface = collada.material.Surface("yoursurface", cimage)
         sampler2d.id = "yoursampler2d"
@@ -155,6 +159,7 @@ class TestMaterial(unittest2.TestCase):
         map = collada.material.Map(sampler2d, "TEX0")
         self.assertEqual(map.sampler.id, "mysampler2d")
         self.assertEqual(map.texcoord, "TEX0")
+        self.assertIsNotNone(str(map))
         
         other_sampler2d = collada.material.Sampler2D("yoursampler2d", surface)
         map.sampler = other_sampler2d
@@ -207,6 +212,7 @@ class TestMaterial(unittest2.TestCase):
         self.assertEqual(mat.id, "mymaterial")
         self.assertEqual(mat.name, "mymat")
         self.assertEqual(mat.effect, effect)
+        self.assertIsNotNone(str(mat))
         
         mat.id = "yourmaterial"
         mat.name = "yourmat"

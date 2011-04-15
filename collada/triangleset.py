@@ -49,7 +49,7 @@ class Triangle(object):
             self.normals = numpy.array([vec3, vec3, vec3])
 
     def __repr__(self): 
-        return 'Triangle(%s, %s, %s, "%s")'%(str(self.vertices[0]), str(self.vertices[1]), 
+        return '<Triangle (%s, %s, %s, "%s")>'%(str(self.vertices[0]), str(self.vertices[1]), 
                                              str(self.vertices[2]), str(self.material))
     def __str__(self): return repr(self)
 
@@ -168,6 +168,9 @@ class TriangleSet(primitive.Primitive):
         """Create a bound triangle set from this triangle set, transform and material mapping"""
         return BoundTriangleSet( self, matrix, materialnodebysymbol)
 
+    def __str__(self): return '<TriangleSet length=%d>' % len(self)
+    def __repr__(self): return str(self)
+
 class BoundTriangleSet(primitive.BoundPrimitive):
     """A triangle set bound to a transform matrix and materials mapping.
     
@@ -236,3 +239,7 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         
         self._normal = norms
         self._normal_index = self._vertex_index
+
+    def __str__(self): return '<BoundTriangleSet length=%d>' % len(self)
+    def __repr__(self): return str(self)
+    

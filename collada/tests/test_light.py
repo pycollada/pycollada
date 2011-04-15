@@ -12,6 +12,7 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(dirlight.id, "mydirlight")
         self.assertTupleEqual(dirlight.color, (1,1,1))
         self.assertTupleEqual(tuple(dirlight.direction), (0,0,-1))
+        self.assertIsNotNone(str(dirlight))
         dirlight.color = (0.1, 0.2, 0.3)
         dirlight.id = "yourdirlight"
         dirlight.save()
@@ -24,6 +25,7 @@ class TestLight(unittest2.TestCase):
         ambientlight = collada.light.AmbientLight("myambientlight", (1,1,1))
         self.assertEqual(ambientlight.id, "myambientlight")
         self.assertTupleEqual(ambientlight.color, (1,1,1))
+        self.assertIsNotNone(str(ambientlight))
         ambientlight.color = (0.1, 0.2, 0.3)
         ambientlight.id = "yourambientlight"
         ambientlight.save()
@@ -40,6 +42,7 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(pointlight.constant_att, None)
         self.assertEqual(pointlight.linear_att, None)
         self.assertEqual(pointlight.zfar, None)
+        self.assertIsNotNone(str(pointlight))
 
         pointlight.color = (0.1, 0.2, 0.3)
         pointlight.constant_att = 0.7
@@ -70,6 +73,7 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(spotlight.quad_att, None)
         self.assertEqual(spotlight.falloff_ang, None)
         self.assertEqual(spotlight.falloff_exp, None)
+        self.assertIsNotNone(str(spotlight))
 
         spotlight.color = (0.1, 0.2, 0.3)
         spotlight.constant_att = 0.7

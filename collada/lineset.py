@@ -44,7 +44,7 @@ class Line(object):
         # Note: we can't generate normals for lines if there are none
 
     def __repr__(self): 
-        return 'Line(%s, %s, "%s")'%(str(self.vertices[0]), str(self.vertices[1]), str(self.material))
+        return '<Line (%s, %s, "%s")>'%(str(self.vertices[0]), str(self.vertices[1]), str(self.material))
     def __str__(self): return repr(self)
 
 class LineSet(primitive.Primitive):
@@ -167,6 +167,9 @@ class LineSet(primitive.Primitive):
         """Create a bound line set from this line set, transform and material mapping"""
         return BoundLineSet( self, matrix, materialnodebysymbol)
 
+    def __str__(self): return '<LineSet length=%d>' % len(self)
+    def __repr__(self): return str(self)
+
 class BoundLineSet(primitive.BoundPrimitive):
     """A line set bound to a transform matrix and materials mapping.
     
@@ -222,3 +225,5 @@ class BoundLineSet(primitive.BoundPrimitive):
         """
         return self.lines()
 
+    def __str__(self): return '<BoundLineSet length=%d>' % len(self)
+    def __repr__(self): return str(self)

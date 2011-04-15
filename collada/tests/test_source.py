@@ -13,6 +13,7 @@ class TestSource(unittest2.TestCase):
         self.assertEqual(floatsource.id, "myfloatsource")
         self.assertEqual(len(floatsource), 1)
         self.assertTupleEqual(floatsource.components, ('X', 'Y', 'X'))
+        self.assertIsNotNone(str(floatsource))
         floatsource.id = "yourfloatsource"
         floatsource.components = ('S', 'T')
         floatsource.data = numpy.array([0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
@@ -30,6 +31,7 @@ class TestSource(unittest2.TestCase):
         self.assertEqual(idrefsource.id, "myidrefsource")
         self.assertEqual(len(idrefsource), 2)
         self.assertTupleEqual(idrefsource.components, ('MORPH_TARGET',))
+        self.assertIsNotNone(str(idrefsource))
         idrefsource.id = "youridrefsource"
         idrefsource.components = ('JOINT_TARGET', 'WHATEVER_TARGET')
         idrefsource.data = numpy.array(['Ref5', 'Ref6', 'Ref7', 'Ref8', 'Ref9', 'Ref10'], dtype=numpy.string_)
@@ -47,6 +49,7 @@ class TestSource(unittest2.TestCase):
         self.assertEqual(namesource.id, "mynamesource")
         self.assertEqual(len(namesource), 2)
         self.assertTupleEqual(namesource.components, ('JOINT',))
+        self.assertIsNotNone(str(namesource))
         namesource.id = "yournamesource"
         namesource.components = ('WEIGHT', 'WHATEVER')
         namesource.data = numpy.array(['Name1', 'Name2', 'Name3', 'Name4', 'Name5', 'Name6'], dtype=numpy.string_)

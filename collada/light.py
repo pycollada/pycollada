@@ -114,6 +114,9 @@ class DirectionalLight(Light):
         """
         return BoundDirectionalLight(self, matrix)
 
+    def __str__(self): return '<DirectionalLight id=%s>' % (self.id,)
+    def __repr__(self): return str(self)
+
 class AmbientLight(Light):
     """Ambient light as defined in COLLADA tag <ambient>."""
 
@@ -177,6 +180,9 @@ class AmbientLight(Light):
         
         """
         return BoundAmbientLight(self, matrix)
+
+    def __str__(self): return '<AmbientLight id=%s>' % (self.id,)
+    def __repr__(self): return str(self)
 
 class PointLight(Light):
     """Point light as defined in COLLADA tag <point>."""
@@ -285,6 +291,9 @@ class PointLight(Light):
         
         """
         return BoundPointLight(self, matrix)
+    
+    def __str__(self): return '<PointLight id=%s>' % (self.id,)
+    def __repr__(self): return str(self)
     
 class SpotLight(Light):
     """Spot light as defined in COLLADA tag <spot>."""
@@ -404,6 +413,9 @@ class SpotLight(Light):
         """
         return BoundSpotLight(self, matrix)
 
+    def __str__(self): return '<SpotLight id=%s>' % (self.id,)
+    def __repr__(self): return str(self)
+
 class BoundLight(object):
     """Base class for bound lights"""
     pass
@@ -430,7 +442,7 @@ class BoundPointLight(BoundLight):
         self.original = plight
         """The original :class:`collada.light.PointLight` this is bound to"""
 
-    def __str__(self): return 'BoundPointLight(at %s)' % str(self.position)
+    def __str__(self): return '<BoundPointLight bound to id=%s>' % str(self.original.id)
     def __repr__(self): return str(self)
     
 class BoundSpotLight(BoundLight):
@@ -457,7 +469,7 @@ class BoundSpotLight(BoundLight):
         self.original = slight
         """The original :class:`collada.light.SpotLight` this is bound to"""
 
-    def __str__(self): return 'BoundSpotLight(at %s)' % str(self.position)
+    def __str__(self): return '<BoundSpotLight bound to id=%s>' % str(self.original.id)
     def __repr__(self): return str(self)
 
 class BoundDirectionalLight(BoundLight):
@@ -474,7 +486,7 @@ class BoundDirectionalLight(BoundLight):
         self.original = dlight
         """The original :class:`collada.light.DirectionalLight` this is bound to"""
 
-    def __str__(self): return 'BoundDirectionalLight(from %s)' % str(self.direction)
+    def __str__(self): return '<BoundDirectionalLight bound to id=%s>' % str(self.original.id)
     def __repr__(self): return str(self)
 
 class BoundAmbientLight(BoundLight):
@@ -489,6 +501,6 @@ class BoundAmbientLight(BoundLight):
         self.original = alight
         """The original :class:`collada.light.AmbientLight` this is bound to"""
 
-    def __str__(self): return 'BoundAmbientLight'
+    def __str__(self): return '<BoundAmbientLight bound to id=%s>' % str(self.original.id)
     def __repr__(self): return str(self)
     

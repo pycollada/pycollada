@@ -17,8 +17,9 @@ import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, tag, E
 
-class InputList(DaeObject):
-    """InputList that is something"""
+class InputList(object):
+    """Used for defining input sources to a geometry."""
+    
     class Input:
         def __init__(self, offset, semantic, src, set=None):
             self.offset = offset
@@ -29,22 +30,48 @@ class InputList(DaeObject):
     semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT", "COLOR", "TANGENT", "BINORMAL"]
     
     def __init__(self):
-        """this creates an inputlist"""
+        """Create an input list"""
         self.inputs = {}
         for s in self.semantics:
             self.inputs[s] = []
             
     def addInput(self, offset, semantic, src, set=None):
+        """Add an input source to this input list.
+        
+        :param int offset:
+          Offset for this source within the geometry's indices
+        :param str semantic:
+          The semantic for the input source. Currently supported options are:
+            * VERTEX
+            * NORMAL
+            * TEXCOORD
+            * TEXBINORMAL
+            * TEXTANGENT
+            * COLOR
+            * TANGENT
+            * BINORMAL
+        :param str src:
+          A string identifier of the form `#srcid` where `srcid` is a source
+          within the geometry's :attr:`~collada.geometry.Geometry.sourceById` array.
+        :param str set:
+          Indicates a set number for the source. This is used, for example,
+          when there are multiple texture coordinate sets.
+        
+        """ 
         if semantic not in self.semantics:
             raise DaeUnsupportedError("Unsupported semantic %s" % semantic)
         self.inputs[semantic].append(self.Input(offset, semantic, src, set))
         
     def getList(self):
+        """Returns a list of tuples of the source in the form (offset, semantic, source, set)"""
         retlist = []
         for inplist in self.inputs.itervalues():
             for inp in inplist:
                  retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
         return retlist
+    
+    def __str__(self): return '<InputList>'
+    def __repr__(self): return str(self)
 
 class Source(DaeObject):
     """Abstract class for loading source arrays"""
@@ -170,6 +197,9 @@ class FloatSource(Source):
             data.shape = (-1)
         return FloatSource( sourceid, data, tuple(components), xmlnode=node )
 
+    def __str__(self): return '<FloatSource size=%d>' % (len(self),)
+    def __repr__(self): return str(self)
+
 class IDRefSource(Source):
     """Contains a source array of ID references, as defined in the collada
     <IDREF_array> inside a <source>.
@@ -266,6 +296,9 @@ class IDRefSource(Source):
         components = [ param.get('name') for param in paramnodes ]
         return IDRefSource( sourceid, data, tuple(components), xmlnode=node )
 
+    def __str__(self): return '<IDRefSource size=%d>' % (len(self),)
+    def __repr__(self): return str(self)
+
 class NameSource(Source):
     """Contains a source array of strings, as defined in the collada
     <Name_array> inside a <source>.
@@ -361,3 +394,6 @@ class NameSource(Source):
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
         return NameSource( sourceid, data, tuple(components), xmlnode=node )
+
+    def __str__(self): return '<FloatSource size=%d>' % (len(self),)
+    def __repr__(self): return str(self)

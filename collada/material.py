@@ -149,6 +149,9 @@ class CImage(DaeObject):
         initnode = self.xmlnode.find( tag('init_from') )
         initnode.text = self.path
 
+    def __str__(self): return '<CImage id=%s path=%s>' % (self.id, self.path)
+    def __repr__(self): return str(self)
+
 class Surface(DaeObject):
     """Class containing data coming from a <surface> tag.
 
@@ -219,6 +222,9 @@ class Surface(DaeObject):
             formatnode.text = self.format
         initnode.text = self.image.id
         self.xmlnode.set('sid', self.id)
+
+    def __str__(self): return '<Surface id=%s>' % (self.id,)
+    def __repr__(self): return str(self)
 
 class Sampler2D(DaeObject):
     """Class containing data coming from <sampler2D> tag in material.
@@ -298,6 +304,9 @@ class Sampler2D(DaeObject):
         sourcenode.text = self.surface.id
         self.xmlnode.set('sid', self.id)
 
+    def __str__(self): return '<Sampler2D id=%s>' % (self.id,)
+    def __repr__(self): return str(self)
+
 class Map(DaeObject):
     """Class containing data coming from <texture> tag inside material.
 
@@ -351,6 +360,9 @@ class Map(DaeObject):
         """Saves the map back to :attr:`xmlnode`"""
         self.xmlnode.set('texture', self.sampler.id)
         self.xmlnode.set('texcoord', self.texcoord)
+
+    def __str__(self): return '<Map sampler=%s texcoord=%s>' % (self.sampler.id, self.texcoord)
+    def __repr__(self): return str(self)
 
 class Effect(DaeObject):
     """Class containing data coming from an <effect> tag.
@@ -588,6 +600,9 @@ class Effect(DaeObject):
                 propnode.append(E.color(' '.join( [ str(v) for v in value] )))
         tecnode.append(shadnode)
 
+    def __str__(self): return '<Effect id=%s type=%s>' % (self.id, self.shadingtype)
+    def __repr__(self): return str(self)
+
 class Material(DaeObject):
     """Class containing data coming from a <material> tag.
 
@@ -651,3 +666,6 @@ class Material(DaeObject):
         self.xmlnode.set('name', str(self.name))
         effnode = self.xmlnode.find( tag('instance_effect') )
         effnode.set('url', '#%s' % self.effect.id)
+
+    def __str__(self): return '<Material id=%s effect=%s>' % (self.id, self.effect.id)
+    def __repr__(self): return str(self)

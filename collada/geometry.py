@@ -261,6 +261,9 @@ class Geometry( DaeObject ):
         """
         return BoundGeometry(self, matrix, materialnodebysymbol)
 
+    def __str__(self): return '<Geometry id=%s, %d primitives>' % (self.id, len(self.primitives))
+    def __repr__(self): return str(self)
+
 class BoundGeometry( object ):
     """A geometry bound to a transform matrix and material mapping.
         This gets created when a geometry is instantiated in a scene.
@@ -288,3 +291,7 @@ class BoundGeometry( object ):
         for p in self._primitives:
             boundp = p.bind( self.matrix, self.materialnodebysymbol )
             yield boundp
+
+    def __str__(self): return '<BoundGeometry id=%s, %d primitives>' % (self.id, len(self.primitives))
+    def __repr__(self): return str(self)
+    

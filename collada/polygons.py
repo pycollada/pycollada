@@ -87,9 +87,15 @@ class Polygons(polylist.Polylist):
         """Create a bound polygons from this polygons, transform and material mapping"""
         return BoundPolygons( self, matrix, materialnodebysymbol )
 
+    def __str__(self): return '<Polygons length=%d>' % len(self)
+    def __repr__(self): return str(self)
+
 class BoundPolygons(polylist.BoundPolylist):
     """Polygons bound to a transform matrix and materials mapping."""
 
     def __init__(self, pl, matrix, materialnodebysymbol):
         """Create a BoundPolygons from a Polygons, transform and material mapping"""
         super(BoundPolygons, self).__init__(pl, matrix, materialnodebysymbol)
+
+    def __str__(self): return '<BoundPolygons length=%d>' % len(self)
+    def __repr__(self): return str(self)

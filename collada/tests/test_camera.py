@@ -13,6 +13,7 @@ class TestCamera(unittest2.TestCase):
         self.assertEqual(camera.fov, 45.0)
         self.assertEqual(camera.near, 0.01)
         self.assertEqual(camera.far, 1000.0)
+        self.assertIsNotNone(str(camera))
         camera.fov = 90.0
         camera.near = 0.02
         camera.far = 500.2

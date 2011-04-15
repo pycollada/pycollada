@@ -124,7 +124,7 @@ class Camera(DaeObject):
         """
         return BoundCamera(self, matrix)
 
-    def __str__(self): return 'Camera id=%s' % self.id
+    def __str__(self): return '<Camera id=%s>' % self.id
     def __repr__(self): return str(self)
 
 class BoundCamera(object):
@@ -160,5 +160,5 @@ class BoundCamera(object):
     direction = property(get_direction)
     up = property(get_up)
     
-    def __str__(self): return 'BoundCamera bound to %s' % self.original.id
+    def __str__(self): return '<BoundCamera bound to %s>' % self.original.id
     def __repr__(self): return str(self)

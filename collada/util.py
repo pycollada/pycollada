@@ -10,6 +10,8 @@
 #                                                                  #
 ####################################################################
 
+"""This module contains utility functions"""
+
 import numpy
 
 from collada import DaeMalformedError

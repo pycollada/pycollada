@@ -75,7 +75,7 @@ class Polygon(object):
             yield tri
 
     def __repr__(self): 
-        return 'Polygon (vertices=%d)' % len(self.vertices)
+        return '<Polygon vertices=%d>' % len(self.vertices)
     def __str__(self): return repr(self)
 
 class Polylist(primitive.Primitive):
@@ -240,6 +240,9 @@ class Polylist(primitive.Primitive):
         """Create a bound polylist from this polylist, transform and material mapping"""
         return BoundPolylist( self, matrix, materialnodebysymbol)
 
+    def __str__(self): return '<Polylist length=%d>' % len(self)
+    def __repr__(self): return str(self)
+
 class BoundPolylist(primitive.BoundPrimitive):
     """A polylist bound to a transform matrix and materials mapping.
     
@@ -311,3 +314,6 @@ class BoundPolylist(primitive.BoundPrimitive):
         :rtype: generator of :class:`collada.polylist.Polygon`
         """
         return self.polygons()
+
+    def __str__(self): return '<BoundPolylist length=%d>' % len(self)
+    def __repr__(self): return str(self)

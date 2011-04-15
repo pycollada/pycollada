@@ -15,6 +15,7 @@ class TestGeometry(unittest2.TestCase):
         self.assertEqual(geometry.name, "mygeometry")
         self.assertEqual(len(geometry.primitives), 0)
         self.assertDictEqual(geometry.sourceById, {"myfloatsource":floatsource})
+        self.assertIsNotNone(str(geometry))
         
         geometry.id = "geometry1"
         geometry.name = "yourgeometry"
@@ -45,6 +46,8 @@ class TestGeometry(unittest2.TestCase):
         geometry.primitives.append(lineset1)
         geometry.primitives.append(lineset2)
         self.assertEqual(len(geometry.primitives), 2)
+        self.assertIsNotNone(str(lineset1))
+        self.assertIsNotNone(str(input_list))
         geometry.save()
         
         loaded_geometry = collada.geometry.Geometry.load(self.dummy, {}, fromstring(tostring(geometry.xmlnode)))
@@ -82,6 +85,7 @@ class TestGeometry(unittest2.TestCase):
         indices = numpy.array([0,0,2,1,3,2,0,0,3,2,1,3,0,4,1,5,5,6,0,4,5,6,4,7,6,8,7,9,3,10,6,8,3,10,2,11,0,12,
                         4,13,6,14,0,12,6,14,2,15,3,16,7,17,5,18,3,16,5,18,1,19,5,20,7,21,6,22,5,20,6,22,4,23])
         triangleset = geometry.createTriangleSet(indices, input_list, "cubematerial")
+        self.assertIsNotNone(str(triangleset))
         geometry.primitives.append(triangleset)
         geometry.save()
 
@@ -109,6 +113,7 @@ class TestGeometry(unittest2.TestCase):
         indices = numpy.array([0,0,2,1,3,2,1,3,0,4,1,5,5,6,4,7,6,8,7,9,3,10,2,11,0,12,4,13,6,14,2,
                                15,3,16,7,17,5,18,1,19,5,20,7,21,6,22,4,23])
         polylist = geometry.createPolylist(indices, vcounts, input_list, "cubematerial")
+        self.assertIsNotNone(str(polylist))
         
         loaded_polylist = collada.polylist.Polylist.load(self.dummy, geometry.sourceById, fromstring(tostring(polylist.xmlnode)))
         self.assertEqual(len(loaded_polylist), 6)
@@ -143,6 +148,7 @@ class TestGeometry(unittest2.TestCase):
         indices.append(numpy.array([5,20,7,21,6,22,4,23], dtype=numpy.int32))
 
         polygons = geometry.createPolygons(indices, input_list, "cubematerial")
+        self.assertIsNotNone(str(polygons))
         
         loaded_polygons = collada.polygons.Polygons.load(self.dummy, geometry.sourceById, fromstring(tostring(polygons.xmlnode)))
         self.assertEqual(len(loaded_polygons), 6)

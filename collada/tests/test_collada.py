@@ -63,6 +63,7 @@ class TestCollada(unittest2.TestCase):
         self.assertEqual(len(mesh.nodes), 0)
         self.assertEqual(len(mesh.scenes), 0)
         self.assertEqual(mesh.scene, None)
+        self.assertIsNotNone(str(mesh))
 
         floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'Z'))
         geometry1 = collada.geometry.Geometry(mesh, "geometry1", "mygeometry1", {"myfloatsource":floatsource})
