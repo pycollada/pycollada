@@ -437,6 +437,9 @@ class Collada(object):
                      (self.scenes, 'library_visual_scenes')]
         for arr, name in libraries:
             node = self.xmlnode.find( tag(name) )
+            if node is None:
+                self.xmlnode.getroot().append(E(name))
+            node = self.xmlnode.find( tag(name) )
             for o in arr:
                 o.save()
                 if o.xmlnode not in node:

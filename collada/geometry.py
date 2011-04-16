@@ -224,12 +224,17 @@ class Geometry( DaeObject ):
         #Look through primitives to find a vertex source
         vnode = self.xmlnode.find(tag('mesh')).find(tag('vertices'))
         input_vnode = vnode.find(tag('input'))
-        vert_src = None
+        vert_sources = []
         for prim in self.primitives:
-            vert_src = prim.sources['VERTEX'][0][2]
-        if vert_src is not None:
-            input_vnode.set('source', vert_src)
-            vnode.set('id', vert_src + '-vertices')
+            for src in prim.sources['VERTEX']:
+                vert_sources.append(src[2][1:])
+
+        vert_src = vnode.get('id')
+        vert_ref = input_vnode.get('source')[1:]
+
+        if not(vert_src in vert_sources or vert_ref in vert_sources) and len(vert_sources) > 0:
+            input_vnode.set('source', '#' + vert_sources[0])
+            vnode.set('id', vert_sources[0] + '-vertices')
 
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.name)

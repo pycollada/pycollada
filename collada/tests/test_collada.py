@@ -41,6 +41,22 @@ class TestCollada(unittest2.TestCase):
         self.assertEqual(len(mesh.nodes), 0)
         self.assertIn('VisualSceneNode', mesh.scenes)
         
+        s = StringIO()
+        mesh.write(s)
+        out = s.getvalue()
+        t = StringIO(out)
+        mesh = collada.Collada(t)
+        
+        self.assertEqual(mesh.scene.id, 'VisualSceneNode')
+        self.assertIn('LOD3spShape-lib', mesh.geometries)
+        self.assertIn('directionalLightShape1-lib', mesh.lights)
+        self.assertIn('cameraShape1', mesh.cameras)
+        self.assertIn('file2', mesh.images)
+        self.assertIn('blinn3-fx', mesh.effects)
+        self.assertIn('blinn3', mesh.materials)
+        self.assertEqual(len(mesh.nodes), 0)
+        self.assertIn('VisualSceneNode', mesh.scenes)
+        
     def test_collada_duck_zip(self):
         f = os.path.join(self.datadir, "duck.zip")
         mesh = collada.Collada(f)
