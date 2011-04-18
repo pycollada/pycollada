@@ -99,6 +99,7 @@ class Skin(Controller):
         self.geometry = geometry
         self.controller_node = controller_node
         self.skin_node = skin_node
+        self.xmlnode = controller_node
         
         if not type(self.geometry) is Geometry:
             raise DaeMalformedError('Invalid reference geometry in skin')

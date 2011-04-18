@@ -439,7 +439,7 @@ class Collada(object):
             node = self.xmlnode.find( tag(name) )
             if node is None:
                 self.xmlnode.getroot().append(E(name))
-            node = self.xmlnode.find( tag(name) )
+                node = self.xmlnode.find( tag(name) )
             for o in arr:
                 o.save()
                 if o.xmlnode not in node:

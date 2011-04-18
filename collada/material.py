@@ -220,7 +220,10 @@ class Surface(DaeObject):
         initnode = surfacenode.find( tag('init_from') )
         if self.format:
             formatnode = surfacenode.find( tag('format') )
-            formatnode.text = self.format
+            if formatnode is None:
+                surfacenode.append(E.format(self.format))
+            else:
+                formatnode.text = self.format
         initnode.text = self.image.id
         self.xmlnode.set('sid', self.id)
 
