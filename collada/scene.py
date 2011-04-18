@@ -351,8 +351,9 @@ class Node(SceneNode):
         for child in self.children:
             child.save()
             
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.id)
+        if self.id is not None:
+            self.xmlnode.set('id', self.id)
+            self.xmlnode.set('name', self.id)
         for t in self.transforms:
             if t.xmlnode not in self.xmlnode:
                 self.xmlnode.append(t.xmlnode)
