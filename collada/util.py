@@ -13,8 +13,28 @@
 """This module contains utility functions"""
 
 import numpy
+import math
 
 from collada import DaeMalformedError
+
+def falmostEqual(a, b, rtol=1.0000000000000001e-05, atol=1e-08):
+    """Checks if the given floats are almost equal. Uses the algorithm
+    from numpy.allclose.
+    
+    :param float a:
+      First float to compare
+    :param float b:
+      Second float to compare
+    :param float rtol:
+      The relative tolerance parameter
+    :param float atol:
+      The absolute tolerance parameter
+      
+    :rtype: bool
+      
+    """
+    
+    return math.fabs(a - b) <= (atol + rtol * math.fabs(b))
 
 def toUnitVec(vec):
     """Converts the given vector to a unit vector

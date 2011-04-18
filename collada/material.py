@@ -23,6 +23,7 @@ from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag, E
+from util import falmostEqual
 from StringIO import StringIO
 try:
     import Image as pil
@@ -602,6 +603,37 @@ class Effect(DaeObject):
 
     def __str__(self): return '<Effect id=%s type=%s>' % (self.id, self.shadingtype)
     def __repr__(self): return str(self)
+    
+    def almostEqual(self, other):
+        """Checks if this effect is almost equal (within float precision)
+        to the given effect.
+        
+        :param collada.material.Effect other:
+          Effect to compare to
+          
+        :rtype: bool
+        
+        """
+        if self.shadingtype != other.shadingtype:
+            return False
+        for prop in self.supported:
+            thisprop = getattr(self, prop)
+            otherprop = getattr(other, prop)
+            if type(thisprop) != type(otherprop):
+                return False
+            elif type(thisprop) is float:
+                if not falmostEqual(thisprop, otherprop):
+                    return False
+            elif type(thisprop) is Map:
+                if thisprop.sampler.id != otherprop.sampler.id or thisprop.texcoord != otherprop.texcoord:
+                    return False
+            elif type(thisprop) is tuple:
+                if len(thisprop) != len(otherprop):
+                    return False
+                for valthis, valother in zip(thisprop, otherprop):
+                    if not falmostEqual(valthis, valother):
+                        return False
+        return True
 
 class Material(DaeObject):
     """Class containing data coming from a <material> tag.
