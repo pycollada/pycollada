@@ -19,6 +19,7 @@ import types
 from util import toUnitVec, checkSource, normalize_v3
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
+from source import InputList
 
 class Triangle(object):
     """Single triangle representation."""
@@ -167,6 +168,29 @@ class TriangleSet(primitive.Primitive):
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound triangle set from this triangle set, transform and material mapping"""
         return BoundTriangleSet( self, matrix, materialnodebysymbol)
+
+    def generateNormals(self):
+        """If :attr:`normals` is `None` or you wish for normals to be
+        recomputed, call this method to recompute them."""
+        norms = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
+        tris = self._vertex[self._vertex_index]
+        n = numpy.cross( tris[::,1] - tris[::,0], tris[::,2] - tris[::,0] )
+        normalize_v3(n)
+        norms[ self._vertex_index[:,0] ] += n
+        norms[ self._vertex_index[:,1] ] += n
+        norms[ self._vertex_index[:,2] ] += n
+        normalize_v3(norms)
+        
+        self._normal = norms
+        self._normal_index = self._vertex_index
+        
+    def getInputList(self):
+        """Gets a :class:`collada.source.InputList` representing the inputs for this triangle set"""
+        inpl = InputList()
+        for (key, tupes) in self.sources.iteritems():
+            for (offset, semantic, source, set, srcobj) in tupes:
+                inpl.addInput(offset, semantic, source, set)
+        return inpl
 
     def __str__(self): return '<TriangleSet length=%d>' % len(self)
     def __repr__(self): return str(self)
