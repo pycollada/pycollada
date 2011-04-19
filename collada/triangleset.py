@@ -19,7 +19,6 @@ import types
 from util import toUnitVec, checkSource, normalize_v3
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
-from source import InputList
 
 class Triangle(object):
     """Single triangle representation."""
@@ -183,14 +182,6 @@ class TriangleSet(primitive.Primitive):
         
         self._normal = norms
         self._normal_index = self._vertex_index
-        
-    def getInputList(self):
-        """Gets a :class:`collada.source.InputList` representing the inputs for this triangle set"""
-        inpl = InputList()
-        for (key, tupes) in self.sources.iteritems():
-            for (offset, semantic, source, set, srcobj) in tupes:
-                inpl.addInput(offset, semantic, source, set)
-        return inpl
 
     def __str__(self): return '<TriangleSet length=%d>' % len(self)
     def __repr__(self): return str(self)

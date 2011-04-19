@@ -15,6 +15,7 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, DaeObject
 import numpy
 import types
+from source import InputList
 
 class Primitive(DaeObject):
     """Base class for all primitive sets like TriangleSet, LineSet, Polylist, etc."""
@@ -137,6 +138,14 @@ class Primitive(DaeObject):
         except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
         
         return Primitive._getInputsFromList(localscope, inputs)
+    
+    def getInputList(self):
+        """Gets a :class:`collada.source.InputList` representing the inputs from a primitive"""
+        inpl = InputList()
+        for (key, tupes) in self.sources.iteritems():
+            for (offset, semantic, source, set, srcobj) in tupes:
+                inpl.addInput(offset, semantic, source, set)
+        return inpl
     
     def save(self):
         return NotImplementedError("Primitives are read-only")
