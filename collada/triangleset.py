@@ -120,7 +120,7 @@ class TriangleSet(primitive.Primitive):
         else:
             self.index.shape = (-1)
             acclen = len(self.index)
-            txtindices = ' '.join([str(i) for i in self.index])
+            txtindices = ' '.join(map(str, self.index.tolist()))
             self.index.shape = (-1, 3, self.nindices)
             
             self.xmlnode = E.triangles(count=str(self.ntriangles), material=self.material)

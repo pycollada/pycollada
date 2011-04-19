@@ -150,7 +150,7 @@ class Polylist(primitive.Primitive):
             self.xmlnode = xmlnode
             """ElementTree representation of the line set."""
         else:
-            txtindices = ' '.join(str(f) for f in self.indices.flat)
+            txtindices = ' '.join(map(str, self.indices.flatten().tolist()))
             acclen = len(self.indices) 
 
             self.xmlnode = E.polylist(count=str(self.npolygons), material=self.material)
@@ -164,7 +164,7 @@ class Polylist(primitive.Primitive):
                     inpnode.set('set', str(set))
                 self.xmlnode.append(inpnode)
             
-            vcountnode = E.vcount(' '.join(str(v) for v in self.vcounts))
+            vcountnode = E.vcount(' '.join(map(str, self.vcounts)))
             self.xmlnode.append(vcountnode)
             self.xmlnode.append(E.p(txtindices))
 

@@ -67,7 +67,7 @@ class Polygons(polylist.Polylist):
                 self.xmlnode.append(inpnode)
             
             for poly in polygons:
-                self.xmlnode.append(E.p(' '.join(str(f) for f in poly.flat)))
+                self.xmlnode.append(E.p(' '.join(map(str, poly.flatten().tolist()))))
 
     @staticmethod
     def load( collada, localscope, node ):

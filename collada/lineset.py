@@ -115,7 +115,7 @@ class LineSet(primitive.Primitive):
         else:
             self.index.shape = (-1)
             acclen = len(self.index)
-            txtindices = ' '.join([str(i) for i in self.index])
+            txtindices = ' '.join(map(str, self.index.tolist()))
             self.index.shape = (-1, 2, self.nindices)
             
             self.xmlnode = E.lines(count=str(self.nlines), material=self.material)

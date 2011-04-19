@@ -132,7 +132,7 @@ class FloatSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join([ str(f) for f in self.data ])
+            txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -155,7 +155,7 @@ class FloatSource(Source):
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
         self.data.shape = (-1,)
-        txtdata = ' '.join([ str(f) for f in self.data ])
+        txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )
@@ -239,7 +239,7 @@ class IDRefSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join([ str(f) for f in self.data ])
+            txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -262,7 +262,7 @@ class IDRefSource(Source):
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
         self.data.shape = (-1,)
-        txtdata = ' '.join([ str(f) for f in self.data ])
+        txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )
@@ -338,7 +338,7 @@ class NameSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join([ str(f) for f in self.data ])
+            txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -361,7 +361,7 @@ class NameSource(Source):
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
         self.data.shape = (-1,)
-        txtdata = ' '.join([ str(f) for f in self.data ])
+        txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )

@@ -210,7 +210,7 @@ class MatrixTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.matrix(' '.join([str(v) for v in self.matrix.flat]))
+            self.xmlnode = E.matrix(' '.join(map(str, self.matrix.flat)))
 
     @staticmethod
     def load(collada, node):
@@ -259,8 +259,8 @@ class LookAtTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.lookat(' '.join([str(f) for f in 
-                                        numpy.concatenate((self.eye, self.interest, self.upvector)) ]))
+            self.xmlnode = E.lookat(' '.join(map(str, 
+                                        numpy.concatenate((self.eye, self.interest, self.upvector)) )))
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')

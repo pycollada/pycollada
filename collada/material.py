@@ -474,7 +474,7 @@ class Effect(DaeObject):
                 elif type(value) is float:
                     propnode.append(E.float(str(value)))
                 else:
-                    propnode.append(E.color(' '.join( [ str(v) for v in value] )))
+                    propnode.append(E.color(' '.join(map(str, value) )))
             
             effect_nodes = [param.xmlnode for param in self.params]
             effect_nodes.append(E.technique(shadnode, sid='common'))
@@ -601,7 +601,7 @@ class Effect(DaeObject):
             elif type(value) is float:
                 propnode.append(E.float(str(value)))
             else:
-                propnode.append(E.color(' '.join( [ str(v) for v in value] )))
+                propnode.append(E.color(' '.join(map(str, value) )))
         tecnode.append(shadnode)
 
     def __str__(self): return '<Effect id=%s type=%s>' % (self.id, self.shadingtype)
