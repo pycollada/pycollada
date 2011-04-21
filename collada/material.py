@@ -552,7 +552,7 @@ class Effect(DaeObject):
         if not children: raise DaeIncompleteError('Incorrect effect shading parameter '+node.tag)
         vnode = children[0]
         if vnode.tag == tag('color'):
-            try: value = tuple([ float(v) for v in vnode.text.split() ])[:3]
+            try: value = tuple([ float(v) for v in vnode.text.split() ])
             except ValueError, ex: raise DaeMalformedError('Corrupted color definition in effect '+id)
             except IndexError, ex: raise DaeMalformedError('Corrupted color definition in effect '+id)
         elif vnode.tag == tag('float'):
