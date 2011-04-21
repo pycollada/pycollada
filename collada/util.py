@@ -84,6 +84,7 @@ def normalize_v3(arr):
     
     """
     lens = numpy.sqrt( arr[:,0]**2 + arr[:,1]**2 + arr[:,2]**2 )
+    lens[numpy.equal(lens, 0)] = 1
     arr[:,0] /= lens
     arr[:,1] /= lens
     arr[:,2] /= lens
