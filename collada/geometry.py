@@ -240,6 +240,8 @@ class Geometry( DaeObject ):
         self.xmlnode.set('name', self.name)
         
         for prim in self.primitives:
+            if type(prim) is triangleset.TriangleSet and prim.xmlnode.tag != tag('triangles'):
+                prim._recreateXmlNode()
             if prim.xmlnode not in meshnode.getchildren():
                 meshnode.append(prim.xmlnode)
                 

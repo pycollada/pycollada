@@ -118,25 +118,28 @@ class TriangleSet(primitive.Primitive):
             
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
-            self.index.shape = (-1)
-            acclen = len(self.index)
-            txtindices = ' '.join(map(str, self.index.tolist()))
-            self.index.shape = (-1, 3, self.nindices)
-            
-            self.xmlnode = E.triangles(count=str(self.ntriangles), material=self.material)
-            
-            all_inputs = []
-            for semantic_list in self.sources.itervalues():
-                all_inputs.extend(semantic_list)
-            for offset, semantic, sourceid, set, src in all_inputs:
-                inpnode = E.input(offset=str(offset), semantic=semantic, source=sourceid)
-                if set is not None:
-                    inpnode.set('set', str(set))
-                self.xmlnode.append(inpnode)
-            
-            self.xmlnode.append(E.p(txtindices))
+            self._recreateXmlNode()
 
     def __len__(self): return len(self.index)
+
+    def _recreateXmlNode(self):
+        self.index.shape = (-1)
+        acclen = len(self.index)
+        txtindices = ' '.join(map(str, self.index.tolist()))
+        self.index.shape = (-1, 3, self.nindices)
+        
+        self.xmlnode = E.triangles(count=str(self.ntriangles), material=self.material)
+        
+        all_inputs = []
+        for semantic_list in self.sources.itervalues():
+            all_inputs.extend(semantic_list)
+        for offset, semantic, sourceid, set, src in all_inputs:
+            inpnode = E.input(offset=str(offset), semantic=semantic, source=sourceid)
+            if set is not None:
+                inpnode.set('set', str(set))
+            self.xmlnode.append(inpnode)
+        
+        self.xmlnode.append(E.p(txtindices))
 
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
