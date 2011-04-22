@@ -155,7 +155,9 @@ class FloatSource(Source):
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
         self.data.shape = (-1,)
-        txtdata = ' '.join(map(str, self.data.tolist() ))
+
+        txtdata = ' '.join(map(lambda x: '%.7g'%x , self.data.tolist()))
+
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )
