@@ -233,9 +233,13 @@ class Geometry( DaeObject ):
         vert_ref = input_vnode.get('source')[1:]
 
         if not(vert_src in vert_sources or vert_ref in vert_sources) and len(vert_sources) > 0:
-            self.sourceById[vert_sources[0] + '-vertices'] = self.sourceById[vert_ref]
-            input_vnode.set('source', '#' + vert_sources[0])
-            vnode.set('id', vert_sources[0] + '-vertices')
+            if vert_ref in self.sourceById and vert_ref in vert_sources:
+                new_source = vert_ref
+            else:
+                new_source = vert_sources[0]
+            self.sourceById[new_source + '-vertices'] = self.sourceById[new_source]
+            input_vnode.set('source', '#' + new_source)
+            vnode.set('id', new_source + '-vertices')
             
         #any source references in primitives that are pointing to the
         # same source that the vertices tag is pointing to to instead
