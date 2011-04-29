@@ -122,7 +122,13 @@ class CImage(DaeObject):
         self._floatarray *= 1.0/255.0
         return self._floatarray
 
-    data = property( getData )
+    def setData(self, data):
+        self._data = data
+        self._floatarray = None
+        self._uintarray = None
+        self._pilimage = None
+
+    data = property( getData, setData )
     """Raw binary image file data if the file is readable. If `aux_file_loader` was passed to
     :func:`collada.Collada.__init__`, this function will be called to retrieve the data.
     Otherwise, if the file came from the local disk, the path will be interpreted from
@@ -628,7 +634,7 @@ class Effect(DaeObject):
                 if not falmostEqual(thisprop, otherprop):
                     return False
             elif type(thisprop) is Map:
-                if thisprop.sampler.id != otherprop.sampler.id or thisprop.texcoord != otherprop.texcoord:
+                if thisprop.sampler.surface.image.id != otherprop.sampler.surface.image.id or thisprop.texcoord != otherprop.texcoord:
                     return False
             elif type(thisprop) is tuple:
                 if len(thisprop) != len(otherprop):
