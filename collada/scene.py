@@ -386,6 +386,48 @@ class Node(SceneNode):
     def __str__(self): return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
     def __repr__(self): return str(self)
 
+class NodeNode(Node):
+    """Represents a node being instantiated in a scene, as defined in the collada <instande_node> tag."""
+
+    def __init__(self, node, xmlnode=None):
+        """Creates a node node
+
+        :param collada.scene.Node node:
+          A node to instantiate in the scene
+        :param xmlnode:
+          When loaded, the xmlnode it comes from
+
+        """
+        self.node = node
+        """An object of type :class:`collada.scene.Node` representing the node to bind in the scene"""
+
+        if xmlnode != None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the node node."""
+        else:
+            self.xmlnode = E.instance_node(url="#%s" % self.node.id)
+            
+    def objects(self, tipo, matrix=None):
+        for obj in self.node.objects(tipo, matrix):
+            yield obj
+
+    @staticmethod
+    def load( collada, node ):
+        url = node.get('url')
+        if not url.startswith('#'):
+            raise DaeMalformedError('Invalid url in node instance %s' % url)
+        referred_node = collada.nodes.get(url[1:])
+        if not referred_node:
+            raise DaeBrokenRefError('Node %s not found in library'%url)
+        return NodeNode(referred_node, xmlnode=node)
+    
+    def save(self):
+        """Saves the node node back to :attr:`xmlnode`"""
+        self.xmlnode.set('url', "#%s" % self.node.id)
+
+    def __str__(self): return '<NodeNode node=%s>' % (self.node.id,)
+    def __repr__(self): return str(self)
+
 class GeometryNode(SceneNode):
     """Represents a geometry instance in a scene, as defined in the collada <instance_geometry> tag."""
 
@@ -731,14 +773,7 @@ def loadNode( collada, node ):
     elif node.tag == tag('instance_camera'): return CameraNode.load(collada, node)
     elif node.tag == tag('instance_light'): return LightNode.load(collada, node)
     elif node.tag == tag('instance_controller'): return ControllerNode.load(collada, node)
-    elif node.tag == tag('instance_node'):
-        url = node.get('url')
-        if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in camera instance %s' % url)
-        referred_node = collada.nodes.get(url[1:])
-        if not referred_node:
-            raise DaeBrokenRefError('Node %s not found in library'%url)
-        return referred_node
+    elif node.tag == tag('instance_node'): return NodeNode.load(collada, node)
     elif node.tag == tag('extra'):
         return ExtraNode.load(collada, node)
     elif node.tag == tag('asset'):
