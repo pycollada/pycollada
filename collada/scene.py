@@ -411,6 +411,10 @@ class NodeNode(Node):
         for obj in self.node.objects(tipo, matrix):
             yield obj
 
+    id = property(lambda s: s.node.id)
+    children = property(lambda s: s.node.children)
+    matrix = property(lambda s: s.node.matrix)
+
     @staticmethod
     def load( collada, node ):
         url = node.get('url')
