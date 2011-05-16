@@ -156,8 +156,8 @@ class Skin(Controller):
         except:
             raise DaeMalformedError('Corrupted joint or weight index in skin')
         
-        self.max_joint_index = numpy.max( [numpy.max(joint) for joint in self.joint_index] )
-        self.max_weight_index = numpy.max( [numpy.max(weight) for weight in self.weight_index] )
+        self.max_joint_index = numpy.max( [numpy.max(joint) if len(joint) > 0 else 0 for joint in self.joint_index] )
+        self.max_weight_index = numpy.max( [numpy.max(weight) if len(weight) > 0 else 0 for weight in self.weight_index] )
         checkSource(self.weight_joints, ('JOINT',), self.max_joint_index)
         checkSource(self.weights, ('WEIGHT',), self.max_weight_index)
     
