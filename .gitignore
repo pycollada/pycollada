@@ -3,3 +3,6 @@
 .pydevproject
 docs/_build
 .settings
+build
+dist
+pycollada.egg-info
