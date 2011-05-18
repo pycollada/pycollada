@@ -128,7 +128,9 @@ class TriangleSet(primitive.Primitive):
         txtindices = ' '.join(map(str, self.index.tolist()))
         self.index.shape = (-1, 3, self.nindices)
         
-        self.xmlnode = E.triangles(count=str(self.ntriangles), material=self.material)
+        self.xmlnode = E.triangles(count=str(self.ntriangles))
+        if self.material is not None:
+            self.xmlnode.set('material', self.material)
         
         all_inputs = []
         for semantic_list in self.sources.itervalues():
