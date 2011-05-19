@@ -384,7 +384,7 @@ class Effect(DaeObject):
     shaders = [ 'phong', 'lambert', 'blinn', 'constant']
     """Supported shader list."""
     
-    def __init__(self, id, params, shadingtype,
+    def __init__(self, id, params, shadingtype, bumpmap,
                        emission = (0.0, 0.0, 0.0),
                        ambient = (0.0, 0.0, 0.0),
                        diffuse = (0.0, 0.0, 0.0),
@@ -405,6 +405,8 @@ class Effect(DaeObject):
         :param str shadingtype:
           The type of shader to be used for this effect. Right now, we
           only supper the shaders listed in :attr:`shaders`
+        :param :class:`collada.material.Map`:
+          The bump map for this effect, or None if there isn't one
         :param emission:
           Either an RGB-format tuple of three floats or an instance
           of :class:`collada.material.Map`
@@ -440,6 +442,9 @@ class Effect(DaeObject):
           and :class:`collada.material.Surface`"""
         self.shadingtype = shadingtype
         """String with the type of the shading."""
+        self.bumpmap = bumpmap
+        """Either the bump map of the effect of type :class:`collada.material.Map`
+        or None if there is none.""" 
         self.emission = emission
         """Either an RGB-format tuple of three floats or an instance
           of :class:`collada.material.Map`"""
@@ -549,7 +554,14 @@ class Effect(DaeObject):
                     props[key] = None
                     collada.handleError(ex) # Give the chance to ignore error and load the rest
         props['xmlnode'] = node
-        return Effect(id, params, shadingtype, **props)
+        
+        bumpnode = node.find('.//%s//%s' % (tag('extra'), tag('texture')))
+        if bumpnode is not None:
+            bumpmap =  Map.load(collada, localscope, bumpnode)
+        else:
+            bumpmap = None
+        
+        return Effect(id, params, shadingtype, bumpmap, **props)
 
     @staticmethod
     def _loadShadingParam( collada, localscope, node ):
