@@ -29,6 +29,13 @@ class Primitive(DaeObject):
     texcoordset = property( lambda s: s._texcoordset, doc=
     """Read-only tuple of texture coordinate arrays. Each value is a numpy.array of size
     Nx2 where N is the number of texture coordinates in the primitive's source array.""" )
+    textangentset = property( lambda s: s._textangentset, doc=
+    """Read-only tuple of texture tangent arrays. Each value is a numpy.array of size
+    Nx3 where N is the number of texture tangents in the primitive's source array.""" )
+    texbinormalset = property( lambda s: s._texbinormalset, doc=
+    """Read-only tuple of texture binormal arrays. Each value is a numpy.array of size
+    Nx3 where N is the number of texture binormals in the primitive's source array.""" )
+    
     vertex_index = property( lambda s: s._vertex_index, doc=
     """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
     To get the actual vertex points, one can use this array to select into the vertex
@@ -43,6 +50,18 @@ class Primitive(DaeObject):
     coordinates, one can use the array to select into the texcoordset array, e.g.
     ``texcoordset[0][texcoord_indexset[0]]`` would select the first set of texture
     coordinates.""" )
+    textangent_indexset = property( lambda s: s._textangent_indexset, doc=
+    """Read-only tuple of texture tangent index arrays. Each value is a numpy.array of size
+    Nx3 where N is the number of vertices in the primitive. To get the actual texture
+    tangents, one can use the array to select into the textangentset array, e.g.
+    ``textangentset[0][textangent_indexset[0]]`` would select the first set of texture
+    tangents.""" )
+    texbinormal_indexset = property( lambda s: s._texbinormal_indexset, doc=
+    """Read-only tuple of texture binormal index arrays. Each value is a numpy.array of size
+    Nx3 where N is the number of vertices in the primitive. To get the actual texture
+    binormals, one can use the array to select into the texbinormalset array, e.g.
+    ``texbinormalset[0][texbinormal_indexset[0]]`` would select the first set of texture
+    binormals.""" )
 
     def bind(self, matrix, materialnodebysymbol):
         """Binds this primitive to a transform matrix and material mapping.

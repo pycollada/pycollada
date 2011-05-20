@@ -116,6 +116,30 @@ class TriangleSet(primitive.Primitive):
             self._texcoord_indexset = tuple()
             self.maxtexcoordsetindex = -1
             
+        if 'TEXTANGENT' in sources and len(sources['TEXTANGENT']) > 0 and len(self.index) > 0:
+            self._textangentset = tuple([texinput[4].data for texinput in sources['TEXTANGENT']])
+            self._textangent_indexset = tuple([ self.index[:,:, sources['TEXTANGENT'][i][0]]
+                                             for i in xrange(len(sources['TEXTANGENT'])) ])
+            self.maxtextangentsetindex = [ numpy.max( tex_index ) for tex_index in self._textangent_indexset ]
+            for i, texinput in enumerate(sources['TEXTANGENT']):
+                checkSource(texinput[4], ('X', 'Y', 'Z'), self.maxtextangentsetindex[i])
+        else:
+            self._textangentset = tuple()
+            self._textangent_indexset = tuple()
+            self.maxtextangentsetindex = -1
+            
+        if 'TEXBINORMAL' in sources and len(sources['TEXBINORMAL']) > 0 and len(self.index) > 0:
+            self._texbinormalset = tuple([texinput[4].data for texinput in sources['TEXBINORMAL']])
+            self._texbinormal_indexset = tuple([ self.index[:,:, sources['TEXBINORMAL'][i][0]]
+                                             for i in xrange(len(sources['TEXBINORMAL'])) ])
+            self.maxtexbinormalsetindex = [ numpy.max( tex_index ) for tex_index in self._texbinormal_indexset ]
+            for i, texinput in enumerate(sources['TEXBINORMAL']):
+                checkSource(texinput[4], ('X', 'Y', 'Z'), self.maxtexbinormalsetindex[i])
+        else:
+            self._texbinormalset = tuple()
+            self._texbinormal_indexset = tuple()
+            self.maxtexbinormalsetindex = -1
+            
         if xmlnode is not None: self.xmlnode = xmlnode
         else:
             self._recreateXmlNode()
@@ -206,6 +230,8 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         self._vertex = None if ts.vertex is None else numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3,:3])
         self._texcoordset = ts._texcoordset
+        self._textangentset = ts._textangentset
+        self._texbinormalset = ts._texbinormalset
         matnode = materialnodebysymbol.get( ts.material )
         if matnode:
             self.material = matnode.target
@@ -215,6 +241,8 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         self._vertex_index = ts._vertex_index
         self._normal_index = ts._normal_index
         self._texcoord_indexset = ts._texcoord_indexset
+        self._textangent_indexset = ts._textangent_indexset
+        self._texbinormal_indexset = ts._texbinormal_indexset
         self.ntriangles = ts.ntriangles
         self.original = ts
     
