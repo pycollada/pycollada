@@ -384,7 +384,7 @@ class Effect(DaeObject):
     shaders = [ 'phong', 'lambert', 'blinn', 'constant']
     """Supported shader list."""
     
-    def __init__(self, id, params, shadingtype, bumpmap,
+    def __init__(self, id, params, shadingtype, bumpmap = None,
                        emission = (0.0, 0.0, 0.0),
                        ambient = (0.0, 0.0, 0.0),
                        diffuse = (0.0, 0.0, 0.0),
@@ -593,7 +593,6 @@ class Effect(DaeObject):
         self.xmlnode.set('name', self.id)
         profilenode = self.xmlnode.find( tag('profile_COMMON') )
         tecnode = profilenode.find( tag('technique') )
-        tecnode.clear()
         tecnode.set('sid', 'common')
         
         for param in self.params:
@@ -608,19 +607,37 @@ class Effect(DaeObject):
         for d in deletenodes:
             profilenode.remove(d)
         
-        shadnode = E(self.shadingtype)
-        for prop in self.supported:
-            value = getattr(self, prop)
-            if value is None: continue
+        for shader in self.shaders:
+            shadnode = tecnode.find(tag(shader))
+            if shadnode is not None and shader != self.shadingtype:
+                tecnode.remove(shadnode)
+        
+        def getPropNode(prop, value):
             propnode = E(prop)
-            shadnode.append( propnode )
             if type(value) is Map:
                 propnode.append(value.xmlnode)
             elif type(value) is float:
                 propnode.append(E.float(str(value)))
             else:
                 propnode.append(E.color(' '.join(map(str, value) )))
-        tecnode.append(shadnode)
+            return propnode
+        
+        shadnode = tecnode.find(tag(self.shadingtype))
+        if shadnode is None:
+            shadnode = E(self.shadingtype)
+            for prop in self.supported:
+                value = getattr(self, prop)
+                if value is None: continue
+                shadnode.append(getPropNode(prop, value))
+            tecnode.append(shadnode)
+        else:
+            for prop in self.supported:
+                value = getattr(self, prop)
+                propnode = shadnode.find(tag(prop))
+                if propnode is not None:
+                    shadnode.remove(propnode)
+                if value is not None:
+                    shadnode.append(getPropNode(prop, value))
 
     def __str__(self): return '<Effect id=%s type=%s>' % (self.id, self.shadingtype)
     def __repr__(self): return str(self)
