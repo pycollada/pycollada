@@ -102,6 +102,7 @@ import material
 import camera
 import light
 import controller
+import animation
 from util import IndexedList
 
 class Collada(object):
@@ -137,6 +138,8 @@ class Collada(object):
         """A list of :class:`collada.geometry.Geometry` objects. Can also be indexed by id"""
         self.controllers = IndexedList([], ('id',))
         """A list of :class:`collada.controller.Controller` objects. Can also be indexed by id"""
+        self.animations = IndexedList([], ('id',))
+        """A list of :class:`collada.animation.Animation` objects. Can also be indexed by id"""
         self.lights = IndexedList([], ('id',))
         """A list of :class:`collada.light.Light` objects. Can also be indexed by id"""
         self.cameras = IndexedList([], ('id',))
@@ -225,6 +228,7 @@ class Collada(object):
         self._loadImages()
         self._loadEffects()
         self._loadMaterials()
+        self._loadAnimations()
         self._loadGeometry()
         self._loadControllers()
         self._loadLights()
@@ -340,6 +344,16 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.controllers.append( C )
+    
+    def _loadAnimations(self):
+        """Load animation library."""
+        libnode = self.xmlnode.find( tag('library_animations') )
+        if libnode != None:
+            for animnode in libnode.findall(tag('animation')):
+                try: A = animation.Animation.load( self, {}, animnode )
+                except DaeError, ex: self.handleError(ex)
+                else:
+                    self.animations.append( A )
     
     def _loadLights(self):
         """Load light library."""
