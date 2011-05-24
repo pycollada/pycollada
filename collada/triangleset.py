@@ -16,7 +16,7 @@ import numpy
 from lxml import etree as ElementTree
 import primitive
 import types
-from util import toUnitVec, checkSource, normalize_v3
+from util import toUnitVec, checkSource, normalize_v3, dot_v3
 from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
                     DaeUnsupportedError, tag, E
 
@@ -211,6 +211,77 @@ class TriangleSet(primitive.Primitive):
         
         self._normal = norms
         self._normal_index = self._vertex_index
+        
+    def generateTexTangentsAndBinormals(self):
+        """If there are no texture tangents, this method will compute them.
+        Texture coordinates must exist and it uses the first texture coordinate set."""
+        
+        #The following is taken from:
+        # http://www.terathon.com/code/tangent.html
+        # It's pretty much a direct translation, using numpy arrays
+        
+        tris = self._vertex[self._vertex_index]
+        uvs = self._texcoordset[0][self._texcoord_indexset[0]]
+        
+        x1 = tris[:,1,0]-tris[:,0,0]
+        x2 = tris[:,2,0]-tris[:,1,0]
+        y1 = tris[:,1,1]-tris[:,0,1]
+        y2 = tris[:,2,1]-tris[:,1,1]
+        z1 = tris[:,1,2]-tris[:,0,2]
+        z2 = tris[:,2,2]-tris[:,1,2]
+        
+        s1 = uvs[:,1,0]-uvs[:,0,0]
+        s2 = uvs[:,2,0]-uvs[:,1,0]
+        t1 = uvs[:,1,1]-uvs[:,0,1]
+        t2 = uvs[:,2,1]-uvs[:,1,1]
+        
+        r = 1.0 / (s1 * t2 - s2 * t1)
+        
+        sdirx = (t2 * x1 - t1 * x2) * r
+        sdiry = (t2 * y1 - t1 * y2) * r
+        sdirz = (t2 * z1 - t1 * z2) * r
+        sdir = numpy.vstack((sdirx, sdiry, sdirz)).T
+                
+        tans1 = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
+        tans1[ self._vertex_index[:,0] ] += sdir
+        tans1[ self._vertex_index[:,1] ] += sdir
+        tans1[ self._vertex_index[:,2] ] += sdir
+              
+        norm = self._normal[self._normal_index]
+        norm.shape = (-1, 3)
+        tan1 = tans1[self._vertex_index]
+        tan1.shape = (-1, 3)
+        
+        tangent = normalize_v3(tan1 - norm * dot_v3(norm, tan1)[:,numpy.newaxis])
+        
+        self._textangentset = (tangent,)
+        self._textangent_indexset = (numpy.arange(len(self._vertex_index)*3, dtype=self._vertex_index.dtype),)
+        self._textangent_indexset[0].shape = (len(self._vertex_index), 3)
+        
+        tdirx = (s1 * x2 - s2 * x1) * r
+        tdiry = (s1 * y2 - s2 * y1) * r
+        tdirz = (s1 * z2 - s2 * z1) * r
+        tdir = numpy.vstack((tdirx, tdiry, tdirz)).T
+        
+        tans2 = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
+        tans2[ self._vertex_index[:,0] ] += tdir
+        tans2[ self._vertex_index[:,1] ] += tdir
+        tans2[ self._vertex_index[:,2] ] += tdir
+        
+        tan2 = tans2[self._vertex_index]
+        tan2.shape = (-1, 3)
+
+        tanw = dot_v3(numpy.cross(norm, tan1), tan2)
+        tanw = numpy.sign(tanw)
+
+        binorm = numpy.cross(norm, tangent).flatten()
+        binorm.shape = (-1, 3)
+        binorm = binorm * tanw[:,numpy.newaxis]
+        
+        self._texbinormalset = (binorm,)
+        self._texbinormal_indexset = (numpy.arange(len(self._vertex_index)*3, dtype=self._vertex_index.dtype),)
+        self._texbinormal_indexset[0].shape = (len(self._vertex_index), 3)
+
 
     def __str__(self): return '<TriangleSet length=%d>' % len(self)
     def __repr__(self): return str(self)

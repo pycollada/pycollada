@@ -88,6 +88,20 @@ def normalize_v3(arr):
     arr[:,0] /= lens
     arr[:,1] /= lens
     arr[:,2] /= lens
+    return arr
+
+def dot_v3(arr1, arr2):
+    """Calculates the dot product for each vector in two arrays
+    
+    :param numpy.array arr1:
+      The first array, shape Nx3
+    :param numpy.array arr2:
+      The second array, shape Nx3
+    
+    :rtype: numpy.array
+    
+    """
+    return arr1[:,0]*arr2[:,0] + arr1[:,1]*arr2[:,1] + arr2[:,2]*arr1[:,2]
 
 class IndexedList(list):
     """
