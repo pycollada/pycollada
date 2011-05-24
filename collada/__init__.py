@@ -408,12 +408,33 @@ class Collada(object):
     def _loadNodes(self):
         libnode = self.xmlnode.find( tag('library_nodes') )
         if libnode != None:
+            tried_loading = []
+            succeeded = False
             for node in libnode.findall(tag('node')):
                 try: N = scene.loadNode(self, node)
+                except scene.DaeInstanceNotLoadedError, ex:
+                    tried_loading.append((node, ex))
                 except DaeError, ex: self.handleError(ex)
                 else:
                     if N is not None:
                         self.nodes.append( N )
+                        succeeded = True
+            while len(tried_loading) > 0 and succeeded:
+                succeeded = False
+                next_tried = []
+                for node, ex in tried_loading:
+                    try: N = scene.loadNode(self, node)
+                    except scene.DaeInstanceNotLoadedError, ex:
+                        next_tried.append((node, ex))
+                    except DaeError, ex: self.handleError(ex)
+                    else:
+                        if N is not None:
+                            self.nodes.append( N )
+                            succeeded = True
+                tried_loading = next_tried
+            if len(tried_loading) > 0:
+                for node, ex in tried_loading:
+                    raise DaeBrokenRefError(ex.msg)
 
     def _loadScenes(self):
         """Load scene library."""

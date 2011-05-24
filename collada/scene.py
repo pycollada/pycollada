@@ -30,6 +30,12 @@ from collada import DaeObject, DaeError, DaeIncompleteError, DaeBrokenRefError, 
                     DaeMalformedError, DaeUnsupportedError, tag, E
 import copy
 
+class DaeInstanceNotLoadedError(Exception):
+    """Raised when an instance_node refers to a node that isn't loaded yet. Will always be caught"""
+    def __init__(self, msg):
+        super(DaeInstanceNotLoadedError,self).__init__()
+        self.msg = msg
+
 class SceneNode(DaeObject):
     """Abstract base class for all nodes within a scene."""
 
@@ -422,7 +428,7 @@ class NodeNode(Node):
             raise DaeMalformedError('Invalid url in node instance %s' % url)
         referred_node = collada.nodes.get(url[1:])
         if not referred_node:
-            raise DaeBrokenRefError('Node %s not found in library'%url)
+            raise DaeInstanceNotLoadedError('Node %s not found in library'%url)
         return NodeNode(referred_node, xmlnode=node)
     
     def save(self):
