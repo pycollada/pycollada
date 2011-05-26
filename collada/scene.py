@@ -850,10 +850,34 @@ class Scene(DaeObject):
     def load( collada, node ):
         id = node.get('id')
         nodes = []
-        
-        for nodenode in node.findall( tag('node') ):
-            try: nodes.append( loadNode(collada, nodenode) )
+        tried_loading = []
+        succeeded = False
+        for nodenode in node.findall(tag('node')):
+            try: N = loadNode(collada, nodenode)
+            except DaeInstanceNotLoadedError, ex:
+                tried_loading.append((nodenode, ex))
             except DaeError, ex: collada.handleError(ex)
+            else:
+                if N is not None:
+                    nodes.append( N )
+                    succeeded = True
+        while len(tried_loading) > 0 and succeeded:
+            succeeded = False
+            next_tried = []
+            for nodenode, ex in tried_loading:
+                try: N = loadNode(collada, nodenode)
+                except DaeInstanceNotLoadedError, ex:
+                    next_tried.append((nodenode, ex))
+                except DaeError, ex: collada.handleError(ex)
+                else:
+                    if N is not None:
+                        nodes.append( N )
+                        succeeded = True
+            tried_loading = next_tried
+        if len(tried_loading) > 0:
+            for nodenode, ex in tried_loading:
+                raise DaeBrokenRefError(ex.msg)
+            
         return Scene(id, nodes, xmlnode=node, collada=collada)
 
     def save(self):

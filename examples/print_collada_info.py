@@ -54,17 +54,21 @@ def inspectCollada(col):
         if 'authoring_tool' in contribDict:
             print '    Authoring Tool: ', contribDict['authoring_tool']
     print '  Geometry:'
-    for geom in col.scene.objects('geometry'):
-        inspectGeometry( geom )
+    if col.scene is not None:
+        for geom in col.scene.objects('geometry'):
+            inspectGeometry( geom )
     print '  Controllers:'
-    for controller in col.scene.objects('controller'):
-        inspectController( controller )
+    if col.scene is not None:
+        for controller in col.scene.objects('controller'):
+            inspectController( controller )
     print '  Cameras:'
-    for cam in col.scene.objects('camera'):
-        print '    Camera %s: '%cam.original.id
+    if col.scene is not None:
+        for cam in col.scene.objects('camera'):
+            print '    Camera %s: '%cam.original.id
     print '  Lights:'
-    for light in col.scene.objects('light'):
-        print '    Light %s: color =' % light.original.id, light.color
+    if col.scene is not None:
+        for light in col.scene.objects('light'):
+            print '    Light %s: color =' % light.original.id, light.color
 
     if not col.errors: print 'File read without errors'
     else:
