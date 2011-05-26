@@ -27,7 +27,7 @@ from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
 class Geometry( DaeObject ):
     """A class containing the data coming from a COLLADA <geometry> tag"""
 
-    def __init__(self, collada, id, name, sourcebyid, primitives=None, xmlnode=None):
+    def __init__(self, collada, id, name, sourcebyid, primitives=None, xmlnode=None, double_sided=False):
         """Create a geometry instance
 
           :param collada.Collada collada:
@@ -46,6 +46,8 @@ class Geometry( DaeObject ):
             to :attr:`primitives` with the `create*` functions.
           :param xmlnode:
             When loaded, the xmlnode it comes from.
+          :param bool double_sided:
+            Whether or not the geometry should be rendered double sided
 
         """
         self.collada = collada
@@ -56,6 +58,9 @@ class Geometry( DaeObject ):
         
         self.name = name
         """The text string naming the geometry"""
+
+        self.double_sided = double_sided
+        """A boolean indicating whether or not the geometry should be rendered double sided"""
 
         self.sourceById = sourcebyid
         """A dictionary containing :class:`collada.source.Source` objects indexed by their id."""
@@ -189,6 +194,15 @@ class Geometry( DaeObject ):
                 raise DaeIncompleteError('Bad vertices definition in mesh')
             sourcebyid[verticesnode.get('id')] = inputnodes
             vertexsource = verticesnode.get('id')
+        
+        double_sided_node = node.find('.//%s//%s' % (tag('extra'), tag('double_sided')))
+        double_sided = False
+        if double_sided_node is not None and double_sided_node.text is not None:
+            try:
+                val = int(double_sided_node.text)
+                if val == 1:
+                    double_sided = True
+            except ValueError: pass
             
         _primitives = []
         for subnode in meshnode:
@@ -202,7 +216,7 @@ class Geometry( DaeObject ):
                 _primitives.append( polygons.Polygons.load( collada, sourcebyid, subnode ) )
             elif subnode.tag != tag('source') and subnode.tag != tag('vertices') and subnode.tag != tag('extra'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
-        geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node )
+        geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node, double_sided=double_sided )
         return geom
 
     def save(self):

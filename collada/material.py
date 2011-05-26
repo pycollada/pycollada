@@ -566,15 +566,13 @@ class Effect(DaeObject):
             bumpmap = None
             
         double_sided_node = node.find('.//%s//%s' % (tag('extra'), tag('double_sided')))
+        double_sided = False
         if double_sided_node is not None and double_sided_node.text is not None:
             try:
                 val = int(double_sided_node.text)
                 if val == 1:
                     double_sided = True
-            except ValueError:
-                double_sided = False
-        else:
-            double_sided = False
+            except ValueError: pass
         
         return Effect(id, params, shadingtype, bumpmap, double_sided, **props)
 
