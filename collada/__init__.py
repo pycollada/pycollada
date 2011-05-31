@@ -470,10 +470,18 @@ class Collada(object):
                      (self.materials, 'library_materials'),
                      (self.nodes, 'library_nodes'),
                      (self.scenes, 'library_visual_scenes')]
+        
+        library_loc = 0
+        for i, node in enumerate(self.xmlnode.getroot()):
+            if node.tag == tag('asset'):
+                library_loc = i+1
+        
         for arr, name in libraries:
             node = self.xmlnode.find( tag(name) )
             if node is None:
-                self.xmlnode.getroot().append(E(name))
+                if len(arr) == 0:
+                    continue
+                self.xmlnode.getroot().insert(library_loc, E(name))
                 node = self.xmlnode.find( tag(name) )
             for o in arr:
                 o.save()
