@@ -237,7 +237,20 @@ class Geometry( DaeObject ):
         
         #Look through primitives to find a vertex source
         vnode = self.xmlnode.find(tag('mesh')).find(tag('vertices'))
-        input_vnode = vnode.find(tag('input'))
+        
+        #delete any inputs in vertices tag that no longer exist and find the vertex input
+        delete_inputs = []
+        for input_node in vnode.findall(tag('input')):
+            if input_node.get('semantic') == 'POSITION':
+                input_vnode = input_node
+            else:
+                srcid = input_node.get('source')[1:]
+                if srcid not in self.sourceById:
+                    delete_inputs.append(input_node)
+                    
+        for node in delete_inputs:
+            vnode.remove(node)
+        
         vert_sources = []
         for prim in self.primitives:
             for src in prim.sources['VERTEX']:
