@@ -653,6 +653,29 @@ class Effect(DaeObject):
                 if value is not None:
                     shadnode.append(getPropNode(prop, value))
 
+        double_sided_node = profilenode.find('.//%s//%s' % (tag('extra'), tag('double_sided')))
+        if double_sided_node is None or double_sided_node.text is None:
+            extranode = profilenode.find(tag('extra'))
+            if extranode is None:
+                extranode = E.extra()
+                profilenode.append(extranode)
+                
+            teqnodes = extranode.findall(tag('technique'))
+            goognode = None
+            for teqnode in teqnodes:
+                if teqnode.get('profile') == 'GOOGLEEARTH':
+                    goognode = teqnode
+                    break
+            if goognode is None:
+                goognode = E.technique(profile='GOOGLEEARTH')
+                extranode.append(goognode)
+            double_sided_node = goognode.find(tag('double_sided'))
+            if double_sided_node is None:
+                double_sided_node = E.double_sided()
+                goognode.append(double_sided_node)
+            
+        double_sided_node.text = "1" if self.double_sided else "0"
+
     def __str__(self): return '<Effect id=%s type=%s>' % (self.id, self.shadingtype)
     def __repr__(self): return str(self)
     

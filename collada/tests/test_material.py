@@ -38,6 +38,7 @@ class TestMaterial(unittest2.TestCase):
         self.assertTupleEqual(effect.specular, (0.3, 0.2, 0.1))
         self.assertTupleEqual(effect.reflective, (0.7, 0.6, 0.5))
         self.assertTupleEqual(effect.transparent, (0.2, 0.4, 0.6))
+        self.assertEqual(effect.double_sided, False)
         self.assertIsNotNone(str(effect))
         
         effect.id = "youreffect"
@@ -50,21 +51,23 @@ class TestMaterial(unittest2.TestCase):
         effect.specular = (1.3, 1.2, 1.1)
         effect.reflective = (1.7, 1.6, 1.5)
         effect.transparent = (1.2, 1.4, 1.6)
+        effect.double_sided = True
         effect.save()
         
         loaded_effect = collada.material.Effect.load(self.dummy, {},
                                     fromstring(tostring(effect.xmlnode)))
         
-        self.assertEqual(effect.id, "youreffect")
-        self.assertEqual(effect.shininess, 7.0)
-        self.assertEqual(effect.reflectivity, 2.0)
-        self.assertEqual(effect.transparency, 3.0)
-        self.assertTupleEqual(effect.emission, (1.1, 1.2, 1.3))
-        self.assertTupleEqual(effect.ambient, (1.4, 1.5, 1.6))
-        self.assertTupleEqual(effect.diffuse, (1.7, 1.8, 1.9))
-        self.assertTupleEqual(effect.specular, (1.3, 1.2, 1.1))
-        self.assertTupleEqual(effect.reflective, (1.7, 1.6, 1.5))
-        self.assertTupleEqual(effect.transparent, (1.2, 1.4, 1.6))
+        self.assertEqual(loaded_effect.id, "youreffect")
+        self.assertEqual(loaded_effect.shininess, 7.0)
+        self.assertEqual(loaded_effect.reflectivity, 2.0)
+        self.assertEqual(loaded_effect.transparency, 3.0)
+        self.assertTupleEqual(loaded_effect.emission, (1.1, 1.2, 1.3))
+        self.assertTupleEqual(loaded_effect.ambient, (1.4, 1.5, 1.6))
+        self.assertTupleEqual(loaded_effect.diffuse, (1.7, 1.8, 1.9))
+        self.assertTupleEqual(loaded_effect.specular, (1.3, 1.2, 1.1))
+        self.assertTupleEqual(loaded_effect.reflective, (1.7, 1.6, 1.5))
+        self.assertTupleEqual(loaded_effect.transparent, (1.2, 1.4, 1.6))
+        self.assertEqual(loaded_effect.double_sided, True)
         
     def image_dummy_loader(self, fname):
         return self.image_return
