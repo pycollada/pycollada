@@ -193,11 +193,13 @@ class TestMaterial(unittest2.TestCase):
         effect.params.append(other_surface)
         effect.params.append(other_sampler2d)
         effect.diffuse = other_map
+        effect.transparent = other_map
         effect.save()
         
         self.dummy.images.append(self.dummy_cimage)
         loaded_effect = collada.material.Effect.load(self.dummy, {}, fromstring(tostring(effect.xmlnode)))
         self.assertEqual(type(loaded_effect.diffuse), collada.material.Map)
+        self.assertEqual(type(loaded_effect.transparent), collada.material.Map)
         self.assertEqual(len(loaded_effect.params), 3)
         self.assertTrue(type(loaded_effect.params[0]) is collada.material.Surface)
         self.assertEqual(loaded_effect.params[0].id, "mysurface")

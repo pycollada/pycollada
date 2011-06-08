@@ -24,6 +24,7 @@ import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag, E
 from util import falmostEqual
+import copy
 from StringIO import StringIO
 try:
     import Image as pil
@@ -628,7 +629,7 @@ class Effect(DaeObject):
         def getPropNode(prop, value):
             propnode = E(prop)
             if type(value) is Map:
-                propnode.append(value.xmlnode)
+                propnode.append(copy.deepcopy(value.xmlnode))
             elif type(value) is float:
                 propnode.append(E.float(str(value)))
             else:
