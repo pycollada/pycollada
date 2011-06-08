@@ -691,6 +691,8 @@ class Effect(DaeObject):
         """
         if self.shadingtype != other.shadingtype:
             return False
+        if self.double_sided != other.double_sided:
+            return False
         for prop in self.supported:
             thisprop = getattr(self, prop)
             otherprop = getattr(other, prop)
