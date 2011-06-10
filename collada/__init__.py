@@ -108,7 +108,7 @@ from util import IndexedList
 class Collada(object):
     """This is the main class used to create and load collada documents"""
 
-    def __init__(self, filename=None, ignore=None, aux_file_loader = None):
+    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None):
         """Load collada data from filename or file like object.
         
         :param filename:
@@ -128,6 +128,10 @@ class Collada(object):
           a function that given a filename, returns the binary data in the file.
           If `filename` is ``None``, you must set this parameter if you want to
           load auxiliary files.
+        :param str zip_filename:
+          If the file being loaded is a zip archive, you can set this parameter
+          to indicate the file within the archive that should be loaded. If not
+          set, a file that ends with .dae will be searched.
         """
         
         self.errors = []
@@ -204,15 +208,19 @@ class Collada(object):
         if self.zfile:
             self.filename = ''
             daefiles = []
-            for name in self.zfile.namelist():
-                if name.upper().endswith('.DAE'):
-                    daefiles.append(name)
-            for name in daefiles:
-                if not self.filename:
-                    self.filename = name
-                elif "MACOSX" in self.filename:
-                    self.filename = name
-            if not self.filename: raise DaeIncompleteError('No DAE found inside zip compressed file')
+            if zip_filename is not None:
+                self.filename = zip_filename
+            else:
+                for name in self.zfile.namelist():
+                    if name.upper().endswith('.DAE'):
+                        daefiles.append(name)
+                for name in daefiles:
+                    if not self.filename:
+                        self.filename = name
+                    elif "MACOSX" in self.filename:
+                        self.filename = name
+            if not self.filename or self.filename not in self.zfile.namelist():
+                raise DaeIncompleteError('COLLADA file not found inside zip compressed file')
             data = self.zfile.read(self.filename)
             self.getFileData = self._getFileFromZip
         else:
