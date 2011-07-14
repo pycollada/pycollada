@@ -28,7 +28,6 @@ from datetime import datetime
 import posixpath
 import os.path
 
-
 E = ElementMaker(namespace='http://www.collada.org/2005/11/COLLADASchema',
                  nsmap={None: 'http://www.collada.org/2005/11/COLLADASchema'})
 def tag( text ):
@@ -362,6 +361,7 @@ class Collada(object):
                 except DaeError, ex: self.handleError(ex)
                 else:
                     self.animations.append( A )
+        print 'animations', self.animations
     
     def _loadLights(self):
         """Load light library."""
