@@ -20,3 +20,12 @@ You can also use easy_install::
 
    easy_install pycollada
 
+On Mac OS X, try this if you get an error installing lxml::
+
+   export ARCHFLAGS="arch i386 -arch x86_64"
+   easy_install pycollada
+
+On Ubuntu, install these dependencies first::
+
+   apt-get install python-lxml python-numpy
+   easy_install pycollada

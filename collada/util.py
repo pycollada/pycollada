@@ -150,8 +150,7 @@ class IndexedList(list):
         return list.__delitem__(self, ind)
 
     def __delslice__(self, i, j):
-        for ind in xrange(i, j):
-            self.__delitem__(ind)
+        return list.__delslice__(self, i, j)
 
     def __getitem__(self, ind):
         try:
@@ -172,8 +171,8 @@ class IndexedList(list):
             return True
         return list.__contains__(self, item)
 
-    def __getslice__(self, i, j):            
-        return IndexedList(list.__getslice__(self, i, j))
+    def __getslice__(self, i, j):
+        return IndexedList(list.__getslice__(self, i, j), self._attrs)
 
     def __setitem__(self, ind, new_obj):
         try:
