@@ -200,10 +200,13 @@ class Polylist(primitive.Primitive):
             firstpolyindex = firstpolyindex - numpy.repeat(self.polyends - self.vcounts, self.vcounts)
             firstpolyindex = firstpolyindex[indexselector]
             
-            triindex = numpy.dstack( (self.index[indexselector-firstpolyindex],
-                                      self.index[indexselector+1],
-                                      self.index[indexselector+2]) )
-            triindex = numpy.swapaxes(triindex, 1,2).flatten()
+            if len(self.index) > 0:
+                triindex = numpy.dstack( (self.index[indexselector-firstpolyindex],
+                                          self.index[indexselector+1],
+                                          self.index[indexselector+2]) )
+                triindex = numpy.swapaxes(triindex, 1,2).flatten()
+            else:
+                triindex = numpy.array([], dtype=self.index.dtype)
             
             triset = triangleset.TriangleSet(self.sources, self.material, triindex, self.xmlnode)
             
