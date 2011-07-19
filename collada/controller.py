@@ -324,8 +324,8 @@ class Morph(Controller):
         method = morphnode.get('method')
         if method is None:
             method = 'NORMALIZED'
-        if not method == 'NORMALIZED' or method == 'RELATIVE':
-            raise DaeMalformedError('Morph method must be either NORMALIZED or RELATIVE')
+        if not (method == 'NORMALIZED' or method == 'RELATIVE'):
+            raise DaeMalformedError("Morph method must be either NORMALIZED or RELATIVE. Found '%s'" % method)
         
         inputnodes = morphnode.findall('%s/%s'%(tag('targets'), tag('input')))
         if inputnodes is None or len(inputnodes) < 2:
