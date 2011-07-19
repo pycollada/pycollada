@@ -141,7 +141,7 @@ class Primitive(DaeObject):
         all_inputs['VERTEX'] = vertex_inputs
         all_inputs['NORMAL'] = normal_inputs
         all_inputs['TEXCOORD'] = texcoord_inputs
-        all_inputs['TEXBINORMAL'] = textangent_inputs
+        all_inputs['TEXBINORMAL'] = texbinormal_inputs
         all_inputs['TEXTANGENT'] = textangent_inputs
         all_inputs['COLOR'] = color_inputs
         all_inputs['TANGENT'] = tangent_inputs
