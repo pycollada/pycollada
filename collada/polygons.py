@@ -47,7 +47,10 @@ class Polygons(polylist.Polylist):
         for i, poly in enumerate(polygons):
             vcounts[i] = len(poly) / (max_offset + 1)
 
-        indices = numpy.concatenate(polygons)
+        if len(polygons) > 0:
+            indices = numpy.concatenate(polygons)
+        else:
+            indices = numpy.array([], dtype=numpy.int32)
 
         super(Polygons, self).__init__(sources, material, indices, vcounts, xmlnode)
         
