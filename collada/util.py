@@ -66,8 +66,7 @@ def checkSource( source, components, maxindex):
     #some files will write sources with no named parameters
     #by spec, these params should just be skipped, but we need to
     #adapt to the failed output of others...
-    if len(source.components) == len(components) and \
-            source.components == (None,)*len(components):
+    if len(source.components) == len(components):
         source.components = components
     
     if source.components != components:
