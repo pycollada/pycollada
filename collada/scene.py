@@ -373,14 +373,14 @@ class Node(SceneNode):
                 self.xmlnode.remove(n)
 
     @staticmethod
-    def load( collada, node ):
+    def load( collada, node, localscope ):
         id = node.get('id')
         children = []
         transforms = []
 
         for subnode in node:
             try:
-                n = loadNode(collada, subnode)
+                n = loadNode(collada, subnode, localscope)
                 if isinstance(n, Transform):
                     transforms.append(n)
                 elif n is not None:
@@ -422,11 +422,13 @@ class NodeNode(Node):
     matrix = property(lambda s: s.node.matrix)
 
     @staticmethod
-    def load( collada, node ):
+    def load( collada, node, localscope ):
         url = node.get('url')
         if not url.startswith('#'):
             raise DaeMalformedError('Invalid url in node instance %s' % url)
-        referred_node = collada.nodes.get(url[1:])
+        referred_node = localscope.get(url[1:])
+        if not referred_node:
+            referred_node = collada.nodes.get(url[1:])
         if not referred_node:
             raise DaeInstanceNotLoadedError('Node %s not found in library'%url)
         return NodeNode(referred_node, xmlnode=node)
@@ -766,14 +768,14 @@ class ExtraNode(SceneNode):
     def save(self):
         pass
 
-def loadNode( collada, node ):
+def loadNode( collada, node, localscope ):
     """Generic scene node loading from a xml `node` and a `collada` object.
 
     Knowing the supported nodes, create the appropiate class for the given node
     and return it.
 
     """
-    if node.tag == tag('node'): return Node.load(collada, node)
+    if node.tag == tag('node'): return Node.load(collada, node, localscope)
     elif node.tag == tag('translate'): return TranslateTransform.load(collada, node)
     elif node.tag == tag('rotate'): return RotateTransform.load(collada, node)
     elif node.tag == tag('scale'): return ScaleTransform.load(collada, node)
@@ -783,7 +785,7 @@ def loadNode( collada, node ):
     elif node.tag == tag('instance_camera'): return CameraNode.load(collada, node)
     elif node.tag == tag('instance_light'): return LightNode.load(collada, node)
     elif node.tag == tag('instance_controller'): return ControllerNode.load(collada, node)
-    elif node.tag == tag('instance_node'): return NodeNode.load(collada, node)
+    elif node.tag == tag('instance_node'): return NodeNode.load(collada, node, localscope)
     elif node.tag == tag('extra'):
         return ExtraNode.load(collada, node)
     elif node.tag == tag('asset'):
@@ -852,20 +854,24 @@ class Scene(DaeObject):
         nodes = []
         tried_loading = []
         succeeded = False
+        localscope = {}
         for nodenode in node.findall(tag('node')):
-            try: N = loadNode(collada, nodenode)
+            try: N = loadNode(collada, nodenode, localscope)
             except DaeInstanceNotLoadedError, ex:
+                print 'not loaded'
                 tried_loading.append((nodenode, ex))
             except DaeError, ex: collada.handleError(ex)
             else:
                 if N is not None:
                     nodes.append( N )
+                    if N.id and N.id not in localscope:
+                        localscope[N.id] = N
                     succeeded = True
         while len(tried_loading) > 0 and succeeded:
             succeeded = False
             next_tried = []
             for nodenode, ex in tried_loading:
-                try: N = loadNode(collada, nodenode)
+                try: N = loadNode(collada, nodenode, localscope)
                 except DaeInstanceNotLoadedError, ex:
                     next_tried.append((nodenode, ex))
                 except DaeError, ex: collada.handleError(ex)

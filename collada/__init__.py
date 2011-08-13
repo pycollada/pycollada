@@ -422,7 +422,7 @@ class Collada(object):
             tried_loading = []
             succeeded = False
             for node in libnode.findall(tag('node')):
-                try: N = scene.loadNode(self, node)
+                try: N = scene.loadNode(self, node, {})
                 except scene.DaeInstanceNotLoadedError, ex:
                     tried_loading.append((node, ex))
                 except DaeError, ex: self.handleError(ex)
@@ -434,7 +434,7 @@ class Collada(object):
                 succeeded = False
                 next_tried = []
                 for node, ex in tried_loading:
-                    try: N = scene.loadNode(self, node)
+                    try: N = scene.loadNode(self, node, {})
                     except scene.DaeInstanceNotLoadedError, ex:
                         next_tried.append((node, ex))
                     except DaeError, ex: self.handleError(ex)

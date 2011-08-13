@@ -129,7 +129,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(len(emptynode.children), 0)
         self.assertEqual(len(emptynode.transforms), 0)
         self.assertIsNotNone(str(emptynode))
-        loadedempty = collada.scene.Node.load(self.dummy, fromstring(tostring(emptynode.xmlnode)))
+        loadedempty = collada.scene.Node.load(self.dummy, fromstring(tostring(emptynode.xmlnode)), {})
         self.assertEqual(len(loadedempty.children), 0)
         self.assertEqual(len(loadedempty.transforms), 0)
         
@@ -137,7 +137,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(len(justchildren.children), 1)
         self.assertEqual(len(justchildren.transforms), 0)
         self.assertEqual(justchildren.children[0], emptynode)
-        loadedjustchildren = collada.scene.Node.load(self.dummy, fromstring(tostring(justchildren.xmlnode)))
+        loadedjustchildren = collada.scene.Node.load(self.dummy, fromstring(tostring(justchildren.xmlnode)), {})
         self.assertEqual(len(loadedjustchildren.children), 1)
         self.assertEqual(len(loadedjustchildren.transforms), 0)
         
@@ -146,7 +146,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(len(justtransform.children), 0)
         self.assertEqual(len(justtransform.transforms), 1)
         self.assertEqual(justtransform.transforms[0], scale)
-        loadedjusttransform = collada.scene.Node.load(self.dummy, fromstring(tostring(justtransform.xmlnode)))
+        loadedjusttransform = collada.scene.Node.load(self.dummy, fromstring(tostring(justtransform.xmlnode)), {})
         self.assertEqual(len(loadedjusttransform.children), 0)
         self.assertEqual(len(loadedjusttransform.transforms), 1)
         
@@ -156,7 +156,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(both.transforms[0], scale)
         self.assertEqual(both.children[0], justchildren)
         self.assertEqual(both.children[1], justtransform)
-        loadedboth = collada.scene.Node.load(self.dummy, fromstring(tostring(both.xmlnode)))
+        loadedboth = collada.scene.Node.load(self.dummy, fromstring(tostring(both.xmlnode)), {})
         self.assertEqual(len(both.children), 2)
         self.assertEqual(len(both.transforms), 1)
         
@@ -178,7 +178,7 @@ class TestScene(unittest2.TestCase):
         mynode.id = 'yournode'
         mynode.save()
 
-        yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)))
+        yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)), {})
         self.assertEqual(yournode.id, 'yournode')
         self.assertEqual(len(yournode.children), 2)
         self.assertEqual(len(yournode.transforms), 2)
@@ -237,7 +237,7 @@ class TestScene(unittest2.TestCase):
         geomnode.geometry = self.geometry2
         geomnode.save()
         
-        loaded_geomnode = collada.scene.loadNode(self.dummy, fromstring(tostring(geomnode.xmlnode)))
+        loaded_geomnode = collada.scene.loadNode(self.dummy, fromstring(tostring(geomnode.xmlnode)), {})
         self.assertEqual(loaded_geomnode.geometry.id, self.geometry2.id)
         self.assertEqual(len(loaded_geomnode.materials), 1)
         self.assertEqual(loaded_geomnode.materials[0].target, matnode2.target)
@@ -269,7 +269,7 @@ class TestScene(unittest2.TestCase):
         mynode.children.pop(0)
         mynode.save()
         
-        yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)))
+        yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)), {})
         self.assertEqual(yournode.id, 'yournode')
         self.assertEqual(len(yournode.children), 3)
         self.assertEqual(len(yournode.transforms), 2)
