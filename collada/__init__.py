@@ -229,8 +229,11 @@ class Collada(object):
         if aux_file_loader is not None:
             self.getFileData = aux_file_loader
         
-        self.xmlnode = ElementTree.ElementTree(element=None, file=StringIO(data),
-                                            parser=ElementTree.XMLParser(remove_comments=True, remove_blank_text=True))
+        etree_parser = ElementTree.XMLParser(remove_comments=True, remove_blank_text=True)
+        try:
+            self.xmlnode = ElementTree.ElementTree(element=None, file=StringIO(data), parser=etree_parser)
+        except ElementTree.XMLSyntaxError, e:
+            raise DaeMalformedError("XML Syntax Parsing Error: %s" % e)
         
         self._loadAssetInfo()
         self._loadImages()
