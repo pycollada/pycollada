@@ -19,6 +19,7 @@ Tutorial
     loading.rst
     structure.rst
     creating.rst
+    changelog.rst
 
 Reference
 ---------

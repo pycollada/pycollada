@@ -8,6 +8,7 @@ Scene
    collada.scene.Scene
    collada.scene.SceneNode
    collada.scene.Node
+   collada.scene.NodeNode
    collada.scene.GeometryNode
    collada.scene.ControllerNode
    collada.scene.MaterialNode

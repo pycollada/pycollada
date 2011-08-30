@@ -14,10 +14,6 @@ collada.material.CImage
    .. autosummary::
    
       ~CImage.__init__
-      ~CImage.getData
-      ~CImage.getFloatArray
-      ~CImage.getImage
-      ~CImage.getUintArray
       ~CImage.load
       ~CImage.save
    

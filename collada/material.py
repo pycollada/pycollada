@@ -406,7 +406,7 @@ class Effect(DaeObject):
         :param str shadingtype:
           The type of shader to be used for this effect. Right now, we
           only supper the shaders listed in :attr:`shaders`
-        :param :class:`collada.material.Map` bumpmap:
+        :param `collada.material.Map` bumpmap:
           The bump map for this effect, or None if there isn't one
         :param bool double_sided:
           Whether or not the material should be rendered double sided
