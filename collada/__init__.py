@@ -351,127 +351,147 @@ class Collada(object):
                     
     def _loadGeometry(self):
         """Load geometry library."""
-        libnode = self.xmlnode.find( tag('library_geometries') )
-        if libnode != None:
-            for geomnode in libnode.findall(tag('geometry')):
-                if geomnode.find(tag('mesh')) is None: continue
-                try: G = geometry.Geometry.load( self, {}, geomnode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.geometries.append( G )
+        libnodes = self.xmlnode.findall( tag('library_geometries') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for geomnode in libnode.findall(tag('geometry')):
+                        if geomnode.find(tag('mesh')) is None: continue
+                        try: G = geometry.Geometry.load( self, {}, geomnode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.geometries.append( G )
     
     def _loadControllers(self):
         """Load controller library."""
-        libnode = self.xmlnode.find( tag('library_controllers') )
-        if libnode != None:
-            for controlnode in libnode.findall(tag('controller')):
-                if controlnode.find(tag('skin')) is None and controlnode.find(tag('morph')) is None:
-                    continue
-                try: C = controller.Controller.load( self, {}, controlnode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.controllers.append( C )
+        libnodes = self.xmlnode.findall( tag('library_controllers') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for controlnode in libnode.findall(tag('controller')):
+                        if controlnode.find(tag('skin')) is None and controlnode.find(tag('morph')) is None:
+                            continue
+                        try: C = controller.Controller.load( self, {}, controlnode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.controllers.append( C )
     
     def _loadAnimations(self):
         """Load animation library."""
-        libnode = self.xmlnode.find( tag('library_animations') )
-        if libnode != None:
-            for animnode in libnode.findall(tag('animation')):
-                try: A = animation.Animation.load( self, {}, animnode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.animations.append( A )
+        libnodes = self.xmlnode.findall( tag('library_animations') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for animnode in libnode.findall(tag('animation')):
+                        try: A = animation.Animation.load( self, {}, animnode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.animations.append( A )
     
     def _loadLights(self):
         """Load light library."""
-        libnode = self.xmlnode.find( tag('library_lights') )
-        if libnode != None:
-            for lightnode in libnode.findall(tag('light')):
-                try: lig = light.Light.load( self, {}, lightnode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.lights.append( lig )
+        libnodes = self.xmlnode.findall( tag('library_lights') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for lightnode in libnode.findall(tag('light')):
+                        try: lig = light.Light.load( self, {}, lightnode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.lights.append( lig )
 
     def _loadCameras(self):
         """Load camera library."""
-        libnode = self.xmlnode.find( tag('library_cameras') )
-        if libnode != None:
-            for cameranode in libnode.findall(tag('camera')):
-                try: cam = camera.Camera.load( self, {}, cameranode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.cameras.append( cam )
+        libnodes = self.xmlnode.findall( tag('library_cameras') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for cameranode in libnode.findall(tag('camera')):
+                        try: cam = camera.Camera.load( self, {}, cameranode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.cameras.append( cam )
 
     def _loadImages(self):
         """Load image library."""
-        libnode = self.xmlnode.find( tag('library_images') )
-        if libnode != None:
-            for imgnode in libnode.findall(tag('image')):
-                try: img = material.CImage.load( self, {}, imgnode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.images.append( img )
+        libnodes = self.xmlnode.findall( tag('library_images') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for imgnode in libnode.findall(tag('image')):
+                        try: img = material.CImage.load( self, {}, imgnode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.images.append( img )
 
     def _loadEffects(self):
         """Load effect library."""
-        libnode = self.xmlnode.find( tag('library_effects') )
-        if libnode != None:
-            for effectnode in libnode.findall(tag('effect')):
-                try: effect = material.Effect.load( self, {}, effectnode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.effects.append( effect )
+        libnodes = self.xmlnode.findall( tag('library_effects') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for effectnode in libnode.findall(tag('effect')):
+                        try: effect = material.Effect.load( self, {}, effectnode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.effects.append( effect )
 
     def _loadMaterials(self):
         """Load material library."""
-        libnode = self.xmlnode.find( tag('library_materials'))
-        if libnode != None:
-            for materialnode in libnode.findall(tag('material')):
-                try: mat = material.Material.load( self, {}, materialnode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.materials.append( mat )
+        libnodes = self.xmlnode.findall( tag('library_materials'))
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for materialnode in libnode.findall(tag('material')):
+                        try: mat = material.Material.load( self, {}, materialnode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.materials.append( mat )
 
     def _loadNodes(self):
-        libnode = self.xmlnode.find( tag('library_nodes') )
-        if libnode != None:
-            tried_loading = []
-            succeeded = False
-            for node in libnode.findall(tag('node')):
-                try: N = scene.loadNode(self, node, {})
-                except scene.DaeInstanceNotLoadedError, ex:
-                    tried_loading.append((node, ex))
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    if N is not None:
-                        self.nodes.append( N )
-                        succeeded = True
-            while len(tried_loading) > 0 and succeeded:
-                succeeded = False
-                next_tried = []
-                for node, ex in tried_loading:
-                    try: N = scene.loadNode(self, node, {})
-                    except scene.DaeInstanceNotLoadedError, ex:
-                        next_tried.append((node, ex))
-                    except DaeError, ex: self.handleError(ex)
-                    else:
-                        if N is not None:
-                            self.nodes.append( N )
-                            succeeded = True
-                tried_loading = next_tried
-            if len(tried_loading) > 0:
-                for node, ex in tried_loading:
-                    raise DaeBrokenRefError(ex.msg)
+        libnodes = self.xmlnode.findall( tag('library_nodes') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    tried_loading = []
+                    succeeded = False
+                    for node in libnode.findall(tag('node')):
+                        try: N = scene.loadNode(self, node, {})
+                        except scene.DaeInstanceNotLoadedError, ex:
+                            tried_loading.append((node, ex))
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            if N is not None:
+                                self.nodes.append( N )
+                                succeeded = True
+                    while len(tried_loading) > 0 and succeeded:
+                        succeeded = False
+                        next_tried = []
+                        for node, ex in tried_loading:
+                            try: N = scene.loadNode(self, node, {})
+                            except scene.DaeInstanceNotLoadedError, ex:
+                                next_tried.append((node, ex))
+                            except DaeError, ex: self.handleError(ex)
+                            else:
+                                if N is not None:
+                                    self.nodes.append( N )
+                                    succeeded = True
+                        tried_loading = next_tried
+                    if len(tried_loading) > 0:
+                        for node, ex in tried_loading:
+                            raise DaeBrokenRefError(ex.msg)
 
     def _loadScenes(self):
         """Load scene library."""
-        libnode = self.xmlnode.find( tag('library_visual_scenes') )
-        if libnode != None:
-            for scenenode in libnode.findall(tag('visual_scene')):
-                try: S = scene.Scene.load( self, scenenode )
-                except DaeError, ex: self.handleError(ex)
-                else:
-                    self.scenes.append( S )
+        libnodes = self.xmlnode.findall( tag('library_visual_scenes') )
+        if libnodes is not None:
+            for libnode in libnodes:
+                if libnode is not None:
+                    for scenenode in libnode.findall(tag('visual_scene')):
+                        try: S = scene.Scene.load( self, scenenode )
+                        except DaeError, ex: self.handleError(ex)
+                        else:
+                            self.scenes.append( S )
 
     def _loadDefaultScene(self):
         """Loads the default scene from <scene> tag in the root node."""
