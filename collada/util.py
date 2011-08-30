@@ -15,7 +15,7 @@
 import numpy
 import math
 
-from collada import DaeMalformedError
+from collada import DaeMalformedError, tag, E
 
 def falmostEqual(a, b, rtol=1.0000000000000001e-05, atol=1e-08):
     """Checks if the given floats are almost equal. Uses the algorithm
@@ -244,3 +244,11 @@ class IndexedList(list):
         self._delindex(obj)
         return list.remove(self, ind)
 
+def _correctValInNode(outernode, tagname, value):
+    innernode = outernode.find( tag(tagname) )
+    if value is None and innernode is not None:
+        outernode.remove(innernode)
+    elif innernode is not None:
+        innernode.text = str(value)
+    elif value is not None:
+        outernode.append(E(tagname, str(value)))

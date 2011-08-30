@@ -103,6 +103,7 @@ import camera
 import light
 import controller
 import animation
+import asset
 from util import IndexedList
 
 class Collada(object):
@@ -157,8 +158,8 @@ class Collada(object):
         
         self.errors = []
         """List of :class:`collada.DaeError` objects representing errors encounterd while loading collada file"""
-        self.assetInfo = {}
-        """A dictionary structure that stores asset information coming from <asset> tag"""
+        self.assetInfo = None
+        """Instance of :class:`collada.asset.Asset` containing asset information"""
         
         self._geometries = IndexedList([], ('id',))
         self._controllers = IndexedList([], ('id',))
@@ -198,7 +199,7 @@ class Collada(object):
                                version='1.4.1'))
             """ElementTree representation of the collada document"""
             
-            self.assetInfo['up_axis'] = 'Y_UP'
+            self.assetInfo = asset.Asset()
             
             return
             
@@ -309,45 +310,10 @@ class Collada(object):
     def _loadAssetInfo(self):
         """Load information in <asset> tag"""
         assetnode = self.xmlnode.find( tag('asset') )
-        if assetnode != None:
-            for subnode in list(assetnode):
-                if subnode.tag == tag('up_axis'):
-                    self.assetInfo['up_axis'] = subnode.text
-                    if subnode.text is None:
-                       self.assetInfo['up_axis'] = 'Y_UP'
-                    if not( self.assetInfo['up_axis'] == 'X_UP' or self.assetInfo['up_axis'] == 'Y_UP' or self.assetInfo['up_axis'] == 'Z_UP' ):
-                        raise DaeMalformedError('up_axis was unknown value of %s' % subnode.text)
-                elif subnode.tag == tag('contributor'):
-                    contributor_info = {}
-                    for subsubnode in list(subnode):
-                        if subsubnode.tag == tag('author'):
-                            contributor_info['author'] = subsubnode.text
-                        elif subsubnode.tag == tag('authoring_tool'):
-                            contributor_info['authoring_tool'] = subsubnode.text
-                        elif subsubnode.tag == tag('comments'):
-                            contributor_info['comments'] = subsubnode.text
-                        elif subsubnode.tag == tag('copyright'):
-                            contributor_info['copyright'] = subsubnode.text
-                        elif subsubnode.tag == tag('source_data'):
-                            contributor_info['source_data'] = subsubnode.text
-                    self.assetInfo['contributor'] = contributor_info
-                elif subnode.tag == tag('unit'):
-                    name = subnode.get('name')
-                    meter = subnode.get('meter')
-                    try:
-                        if not meter is None: meter = float(meter)
-                    except ValueError, ex: raise DaeMalformedError('Corrupted meter value in unit tag')
-                    self.assetInfo['unit'] = {'name':name, 'meter':meter}
-                elif subnode.tag == tag('created'):
-                    try: self.assetInfo['created'] = datetime.strptime(subnode.text, "%Y-%m-%dT%H:%M:%SZ" )
-                    except: pass
-                elif subnode.tag == tag('modified'):
-                    try: self.assetInfo['modified'] = datetime.strptime(subnode.text, "%Y-%m-%dT%H:%M:%SZ" )
-                    except: pass
-                elif subnode.tag == tag('revision'):
-                    self.assetInfo['revision'] = subnode.text
-        if not 'up_axis' in self.assetInfo:
-            self.assetInfo['up_axis'] = 'Y_UP'
+        if assetnode is not None:
+            self.assetInfo = asset.Asset.load(self, {}, assetnode)
+        else:
+            self.assetInfo = asset.Asset()
                     
     def _loadGeometry(self):
         """Load geometry library."""
@@ -517,6 +483,13 @@ class Collada(object):
                      (self.materials, 'library_materials'),
                      (self.nodes, 'library_nodes'),
                      (self.scenes, 'library_visual_scenes')]
+        
+        self.assetInfo.save()
+        assetnode = self.xmlnode.getroot().find( tag('asset') )
+        if assetnode is not None:
+            self.xmlnode.getroot().replace(assetnode, self.assetInfo.xmlnode)
+        else:
+            self.xmlnode.getroot().insert(0, self.assetInfo.xmlnode)
         
         library_loc = 0
         for i, node in enumerate(self.xmlnode.getroot()):

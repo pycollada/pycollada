@@ -829,22 +829,11 @@ class Scene(DaeObject):
         :param str tipo:
           A string for the desired object type. This can be one of 'geometry',
           'camera', 'light', or 'controller'.
-        :param numpy.matrix matrix:
-          An optional transformation matrix
           
         :rtype: generator that yields the type specified
 
         """
-        
         matrix = None
-        if self.collada is not None:
-            if self.collada.assetInfo['up_axis'] == 'X_UP':
-                r = RotateTransform(0,1,0,90)
-                matrix = r.matrix
-            elif self.collada.assetInfo['up_axis'] == 'Y_UP':
-                r = RotateTransform(1,0,0,90)
-                matrix = r.matrix
-        
         for node in self.nodes:
             for obj in node.objects(tipo, matrix): yield obj
 

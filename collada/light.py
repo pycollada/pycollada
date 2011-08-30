@@ -16,19 +16,10 @@ from lxml import etree as ElementTree
 import numpy
 from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, DaeUnsupportedError, tag, E
+from collada.util import _correctValInNode
 
 class Light(DaeObject):
     """Base light class holding data from <light> tags."""
-
-    @staticmethod
-    def _correctValInNode(outernode, tagname, value):
-        innernode = outernode.find( tag(tagname) )
-        if value is None and innernode is not None:
-            outernode.remove(innernode)
-        elif innernode is not None:
-            innernode.text = str(value)
-        elif value is not None:
-            outernode.append(E(tagname, str(value)))
 
     @staticmethod
     def load(collada, localscope, node):
@@ -253,10 +244,10 @@ class PointLight(Light):
         pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('point')) )
         colornode = pnode.find( tag('color') )
         colornode.text = ' '.join(map(str, self.color ) )
-        Light._correctValInNode(pnode, 'constant_attenuation', self.constant_att)
-        Light._correctValInNode(pnode, 'linear_attenuation', self.linear_att)
-        Light._correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
-        Light._correctValInNode(pnode, 'zfar', self.zfar)
+        _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
+        _correctValInNode(pnode, 'linear_attenuation', self.linear_att)
+        _correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
+        _correctValInNode(pnode, 'zfar', self.zfar)
 
     @staticmethod
     def load(collada, localscope, node):
@@ -371,11 +362,11 @@ class SpotLight(Light):
         pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('spot')) )
         colornode = pnode.find( tag('color') )
         colornode.text = ' '.join(map(str, self.color ) )
-        Light._correctValInNode(pnode, 'constant_attenuation', self.constant_att)
-        Light._correctValInNode(pnode, 'linear_attenuation', self.linear_att)
-        Light._correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
-        Light._correctValInNode(pnode, 'falloff_angle', self.falloff_ang)
-        Light._correctValInNode(pnode, 'falloff_exponent', self.falloff_exp)
+        _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
+        _correctValInNode(pnode, 'linear_attenuation', self.linear_att)
+        _correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
+        _correctValInNode(pnode, 'falloff_angle', self.falloff_ang)
+        _correctValInNode(pnode, 'falloff_exponent', self.falloff_exp)
 
     @staticmethod
     def load(collada, localscope, node):

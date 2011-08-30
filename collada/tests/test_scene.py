@@ -35,8 +35,6 @@ class TestScene(unittest2.TestCase):
         self.geometry2 = collada.geometry.Geometry(self.dummy, "geometry1", "yourgeometry", {"myfloatsource":self.floatsource})
         self.dummy.geometries.append(self.geometry)
         self.dummy.geometries.append(self.geometry2)
-        
-        self.dummy.assetInfo['up_axis'] = 'Z_UP'
 
     def test_scene_light_node_saving(self):
         dirlight = collada.light.DirectionalLight("mydirlight", (1,1,1))

@@ -4,6 +4,7 @@ API Summary
 .. toctree::
 
    main
+   asset
    geometry
    shapes
    controller

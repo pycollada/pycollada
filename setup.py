@@ -8,6 +8,9 @@ except ImportError: install_requires.append('lxml')
 try: import numpy
 except ImportError: install_requires.append('numpy')
 
+try: import dateutil
+except ImportError: install_requires.append('python-dateutil')
+
 setup(
     name = "pycollada",
     version = "0.2.2",

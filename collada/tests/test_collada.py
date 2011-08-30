@@ -4,6 +4,7 @@ from lxml.etree import fromstring, tostring
 from StringIO import StringIO
 import numpy
 import os
+import dateutil.parser
 
 class TestCollada(unittest2.TestCase):
 
@@ -14,6 +15,59 @@ class TestCollada(unittest2.TestCase):
     def test_collada_duck_tris(self):
         f = os.path.join(self.datadir, "duck_triangles.dae")
         mesh = collada.Collada(f)
+        
+        self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
+        self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
+        self.assertEqual(mesh.assetInfo.contributors[0].source_data, 'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
+        self.assertEqual(len(mesh.assetInfo.contributors[0].copyright), 595)
+        self.assertEqual(len(mesh.assetInfo.contributors[0].comments), 449)
+        
+        self.assertEqual(mesh.assetInfo.unitmeter, 0.01)
+        self.assertEqual(mesh.assetInfo.unitname, 'centimeter')
+        self.assertEqual(mesh.assetInfo.upaxis, collada.asset.UP_AXIS.Y_UP)
+        self.assertIsNone(mesh.assetInfo.title)
+        self.assertIsNone(mesh.assetInfo.subject)
+        self.assertIsNone(mesh.assetInfo.revision)
+        self.assertIsNone(mesh.assetInfo.keywords)
+        self.assertEqual(mesh.assetInfo.created, dateutil.parser.parse('2006-08-23T22:29:59Z'))
+        self.assertEqual(mesh.assetInfo.modified, dateutil.parser.parse('2007-02-21T22:52:44Z'))
+        
+        self.assertEqual(mesh.scene.id, 'VisualSceneNode')
+        self.assertIn('LOD3spShape-lib', mesh.geometries)
+        self.assertIn('directionalLightShape1-lib', mesh.lights)
+        self.assertIn('cameraShape1', mesh.cameras)
+        self.assertIn('file2', mesh.images)
+        self.assertIn('blinn3-fx', mesh.effects)
+        self.assertIn('blinn3', mesh.materials)
+        self.assertEqual(len(mesh.nodes), 0)
+        self.assertIn('VisualSceneNode', mesh.scenes)
+        
+        self.assertIsNotNone(str(list(mesh.scene.objects('geometry'))))
+        self.assertIsNotNone(str(list(mesh.scene.objects('light'))))
+        self.assertIsNotNone(str(list(mesh.scene.objects('camera'))))
+        
+        s = StringIO()
+        mesh.write(s)
+        out = s.getvalue()
+        t = StringIO(out)
+        mesh = collada.Collada(t)
+                
+        self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
+        self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
+        self.assertEqual(mesh.assetInfo.contributors[0].source_data, 'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
+        self.assertEqual(len(mesh.assetInfo.contributors[0].copyright), 595)
+        self.assertEqual(len(mesh.assetInfo.contributors[0].comments), 449)
+        
+        self.assertEqual(mesh.assetInfo.unitmeter, 0.01)
+        self.assertEqual(mesh.assetInfo.unitname, 'centimeter')
+        self.assertEqual(mesh.assetInfo.upaxis, collada.asset.UP_AXIS.Y_UP)
+        self.assertIsNone(mesh.assetInfo.title)
+        self.assertIsNone(mesh.assetInfo.subject)
+        self.assertIsNone(mesh.assetInfo.revision)
+        self.assertIsNone(mesh.assetInfo.keywords)
+        self.assertEqual(mesh.assetInfo.created, dateutil.parser.parse('2006-08-23T22:29:59Z'))
+        self.assertEqual(mesh.assetInfo.modified, dateutil.parser.parse('2007-02-21T22:52:44Z'))
+        
         self.assertEqual(mesh.scene.id, 'VisualSceneNode')
         self.assertIn('LOD3spShape-lib', mesh.geometries)
         self.assertIn('directionalLightShape1-lib', mesh.lights)

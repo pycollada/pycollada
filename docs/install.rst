@@ -27,5 +27,5 @@ On Mac OS X, try this if you get an error installing lxml::
 
 On Ubuntu, install these dependencies first::
 
-   apt-get install python-lxml python-numpy
+   apt-get install python-lxml python-numpy python-dateutil
    easy_install pycollada

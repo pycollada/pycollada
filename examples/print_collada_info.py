@@ -46,13 +46,6 @@ def inspectMaterial(mat):
 def inspectCollada(col):
     # Display the file contents
     print 'File Contents:'
-    print '  Asset Info:'
-    if 'contributor' in col.assetInfo:
-        contribDict = col.assetInfo['contributor']
-        if 'author' in contribDict:
-            print '    Author: ', contribDict['author']
-        if 'authoring_tool' in contribDict:
-            print '    Authoring Tool: ', contribDict['authoring_tool']
     print '  Geometry:'
     if col.scene is not None:
         for geom in col.scene.objects('geometry'):
