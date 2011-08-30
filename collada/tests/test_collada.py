@@ -233,6 +233,41 @@ class TestCollada(unittest2.TestCase):
         self.assertIn('mynode2', loaded_mesh2.nodes)
         self.assertIn('myscene3', loaded_mesh2.scenes)
         self.assertIn('myscene2', loaded_mesh2.scenes)
+        
+    def test_collada_attribute_replace(self):
+        mesh = collada.Collada()
+        self.assertIsInstance(mesh.geometries, collada.util.IndexedList)
+        self.assertIsInstance(mesh.controllers, collada.util.IndexedList)
+        self.assertIsInstance(mesh.animations, collada.util.IndexedList)
+        self.assertIsInstance(mesh.lights, collada.util.IndexedList)
+        self.assertIsInstance(mesh.cameras, collada.util.IndexedList)
+        self.assertIsInstance(mesh.images, collada.util.IndexedList)
+        self.assertIsInstance(mesh.effects, collada.util.IndexedList)
+        self.assertIsInstance(mesh.materials, collada.util.IndexedList)
+        self.assertIsInstance(mesh.nodes, collada.util.IndexedList)
+        self.assertIsInstance(mesh.scenes, collada.util.IndexedList)
+        
+        mesh.geometries = []
+        mesh.controllers = []
+        mesh.animations = []
+        mesh.lights = []
+        mesh.cameras = []
+        mesh.images = []
+        mesh.effects = []
+        mesh.materials = []
+        mesh.nodes = []
+        mesh.scenes = []
+        
+        self.assertIsInstance(mesh.geometries, collada.util.IndexedList)
+        self.assertIsInstance(mesh.controllers, collada.util.IndexedList)
+        self.assertIsInstance(mesh.animations, collada.util.IndexedList)
+        self.assertIsInstance(mesh.lights, collada.util.IndexedList)
+        self.assertIsInstance(mesh.cameras, collada.util.IndexedList)
+        self.assertIsInstance(mesh.images, collada.util.IndexedList)
+        self.assertIsInstance(mesh.effects, collada.util.IndexedList)
+        self.assertIsInstance(mesh.materials, collada.util.IndexedList)
+        self.assertIsInstance(mesh.nodes, collada.util.IndexedList)
+        self.assertIsInstance(mesh.scenes, collada.util.IndexedList)
 
 if __name__ == '__main__':
     unittest2.main()

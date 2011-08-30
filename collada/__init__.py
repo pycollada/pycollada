@@ -108,6 +108,27 @@ from util import IndexedList
 class Collada(object):
     """This is the main class used to create and load collada documents"""
 
+    geometries = property( lambda s: s._geometries, lambda s,v: s._setIndexedList('_geometries', v), doc="""
+    A list of :class:`collada.geometry.Geometry` objects. Can also be indexed by id""" )
+    controllers = property( lambda s: s._controllers, lambda s,v: s._setIndexedList('_controllers', v), doc="""
+    A list of :class:`collada.controller.Controller` objects. Can also be indexed by id""" )
+    animations = property( lambda s: s._animations, lambda s,v: s._setIndexedList('_animations', v), doc="""
+    A list of :class:`collada.animation.Animation` objects. Can also be indexed by id""" )
+    lights = property( lambda s: s._lights, lambda s,v: s._setIndexedList('_lights', v), doc="""
+    A list of :class:`collada.light.Light` objects. Can also be indexed by id""" )
+    cameras = property( lambda s: s._cameras, lambda s,v: s._setIndexedList('_cameras', v), doc="""
+    A list of :class:`collada.camera.Camera` objects. Can also be indexed by id""" )
+    images = property( lambda s: s._images, lambda s,v: s._setIndexedList('_images', v), doc="""
+    A list of :class:`collada.material.CImage` objects. Can also be indexed by id""" )
+    effects = property( lambda s: s._effects, lambda s,v: s._setIndexedList('_effects', v), doc="""
+    A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
+    materials = property( lambda s: s._materials, lambda s,v: s._setIndexedList('_materials', v), doc="""
+    A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
+    nodes = property( lambda s: s._nodes, lambda s,v: s._setIndexedList('_nodes', v), doc="""
+    A list of :class:`collada.scene.Node` objects. Can also be indexed by id""" )
+    scenes = property( lambda s: s._scenes, lambda s,v: s._setIndexedList('_scenes', v), doc="""
+    A list of :class:`collada.scene.Scene` objects. Can also be indexed by id""" )
+
     def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None):
         """Load collada data from filename or file like object.
         
@@ -138,26 +159,18 @@ class Collada(object):
         """List of :class:`collada.DaeError` objects representing errors encounterd while loading collada file"""
         self.assetInfo = {}
         """A dictionary structure that stores asset information coming from <asset> tag"""
-        self.geometries = IndexedList([], ('id',))
-        """A list of :class:`collada.geometry.Geometry` objects. Can also be indexed by id"""
-        self.controllers = IndexedList([], ('id',))
-        """A list of :class:`collada.controller.Controller` objects. Can also be indexed by id"""
-        self.animations = IndexedList([], ('id',))
-        """A list of :class:`collada.animation.Animation` objects. Can also be indexed by id"""
-        self.lights = IndexedList([], ('id',))
-        """A list of :class:`collada.light.Light` objects. Can also be indexed by id"""
-        self.cameras = IndexedList([], ('id',))
-        """A list of :class:`collada.camera.Camera` objects. Can also be indexed by id"""
-        self.images = IndexedList([], ('id',))
-        """A list of :class:`collada.material.CImage` objects. Can also be indexed by id"""
-        self.effects = IndexedList([], ('id',))
-        """A list of :class:`collada.material.Effect` objects. Can also be indexed by id"""
-        self.materials = IndexedList([], ('id',))
-        """A list of :class:`collada.material.Effect` objects. Can also be indexed by id"""
-        self.nodes = IndexedList([], ('id',))
-        """A list of :class:`collada.scene.Node` objects. Can also be indexed by id"""
-        self.scenes = IndexedList([], ('id',))
-        """A list of :class:`collada.scene.Scene` objects. Can also be indexed by id"""
+        
+        self._geometries = IndexedList([], ('id',))
+        self._controllers = IndexedList([], ('id',))
+        self._animations = IndexedList([], ('id',))
+        self._lights = IndexedList([], ('id',))
+        self._cameras = IndexedList([], ('id',))
+        self._images = IndexedList([], ('id',))
+        self._effects = IndexedList([], ('id',))
+        self._materials = IndexedList([], ('id',))
+        self._nodes = IndexedList([], ('id',))
+        self._scenes = IndexedList([], ('id',))
+        
         self.scene = None
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
         
@@ -247,6 +260,9 @@ class Collada(object):
         self._loadNodes()
         self._loadScenes()
         self._loadDefaultScene()
+
+    def _setIndexedList(self, propname, data):
+        setattr(self, propname, IndexedList(data, ('id',)))
 
     def handleError(self, error):
         self.errors.append(error)
