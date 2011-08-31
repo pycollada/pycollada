@@ -130,7 +130,7 @@ class PerspectiveCamera(Camera):
         persnode = node.find( '%s/%s/%s'%(tag('optics'),tag('technique_common'), 
                                           tag('perspective') ))
         
-        if persnode is None: raise DaeIncompleteError('Missing perspetive for camera definition')
+        if persnode is None: raise DaeIncompleteError('Missing perspective for camera definition')
         
         xfov = persnode.find( tag('xfov') )
         yfov = persnode.find( tag('yfov') )
@@ -162,6 +162,137 @@ class PerspectiveCamera(Camera):
         return BoundPerspectiveCamera(self, matrix)
 
     def __str__(self): return '<PerspectiveCamera id=%s>' % self.id
+    def __repr__(self): return str(self)
+
+class OrthographicCamera(Camera):
+    """Orthographic camera as defined in COLLADA tag <orthographic>."""
+
+    def __init__(self, id, znear, zfar, xmag=None, ymag=None, aspect_ratio=None, xmlnode = None):
+        """Create a new orthographic camera.
+
+        Note: ``aspect_ratio = xmag / ymag``
+        
+        You can specify one of:
+         * :attr:`xmag` alone
+         * :attr:`ymag` alone
+         * :attr:`xmag` and :attr:`ymag`
+         * :attr:`xmag` and :attr:`aspect_ratio`
+         * :attr:`ymag` and :attr:`aspect_ratio`
+         
+        Any other combination will raise :class:`collada.DaeMalformedError`
+
+        :param str id:
+          Identifier for the camera
+        :param float znear:
+          Distance to the near clipping plane
+        :param float zfar:
+          Distance to the far clipping plane
+        :param float xmag:
+          Horizontal magnification of the view
+        :param float ymag:
+          Vertical magnification of the view
+        :param float aspect_ratio:
+          Aspect ratio of the field of view
+        :param xmlnode:
+          If loaded from xml, the xml node
+
+        """
+        
+        self.id = id
+        """Identifier for the camera"""
+        self.xmag = xmag
+        """Horizontal magnification of the view"""
+        self.ymag = ymag
+        """Vertical magnification of the view"""
+        self.aspect_ratio = aspect_ratio
+        """Aspect ratio of the field of view"""
+        self.znear = znear
+        """Distance to the near clipping plane"""
+        self.zfar = zfar
+        """Distance to the far clipping plane"""
+        
+        self._checkValidParams()
+        
+        if xmlnode is not  None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the data."""
+        else:
+            self._recreateXmlNode()
+
+    def _recreateXmlNode(self):
+        orthographic_node = E.orthographic()
+        if self.xmag is not None:
+            orthographic_node.append(E.xmag(str(self.xmag)))
+        if self.ymag is not None:
+            orthographic_node.append(E.ymag(str(self.ymag)))
+        if self.aspect_ratio is not None:
+            orthographic_node.append(E.aspect_ratio(str(self.aspect_ratio)))
+        orthographic_node.append(E.znear(str(self.znear)))
+        orthographic_node.append(E.zfar(str(self.zfar)))
+        self.xmlnode = E.camera(
+            E.optics(
+                E.technique_common(orthographic_node)
+            )
+        , id=self.id, name=self.id)
+
+    def _checkValidParams(self):
+        if self.xmag is not None and self.ymag is None and self.aspect_ratio is None:
+            pass
+        elif self.xmag is None and self.ymag is not None and self.aspect_ratio is None:
+            pass
+        elif self.xmag is not None and self.ymag is None and self.aspect_ratio is not None:
+            pass
+        elif self.xmag is None and self.ymag is not None and self.aspect_ratio is not None:
+            pass
+        elif self.xmag is not None and self.ymag is not None and self.aspect_ratio is None:
+            pass
+        else:
+            raise DaeMalformedError("Received invalid combination of xmag (%s), ymag (%s), and aspect_ratio (%s)" % 
+                                       (str(self.xmag), str(self.ymag), str(self.aspect_ratio)))
+
+    def save(self):
+        """Saves the orthographic camera's properties back to xmlnode"""
+        self._checkValidParams()
+        self._recreateXmlNode()
+
+        
+    @staticmethod
+    def load(collada, localscope, node):
+        orthonode = node.find( '%s/%s/%s'%(tag('optics'),tag('technique_common'), 
+                                          tag('orthographic') ))
+        
+        if orthonode is None: raise DaeIncompleteError('Missing orthographic for camera definition')
+        
+        xmag = orthonode.find( tag('xmag') )
+        ymag = orthonode.find( tag('ymag') )
+        aspect_ratio = orthonode.find( tag('aspect_ratio') )
+        znearnode = orthonode.find( tag('znear') )
+        zfarnode = orthonode.find( tag('zfar') )
+        id = node.get('id', '')
+        
+        try:
+            if xmag is not None: xmag = float(xmag.text)
+            if ymag is not None: ymag = float(ymag.text)
+            if aspect_ratio is not None: aspect_ratio = float(aspect_ratio.text)
+            znear = float(znearnode.text)
+            zfar = float(zfarnode.text)
+        except (TypeError, ValueError), ex: 
+            raise DaeMalformedError('Corrupted float values in camera definition')
+        
+        return OrthographicCamera(id, znear, zfar, xmag=xmag, ymag=ymag, aspect_ratio=aspect_ratio, xmlnode=node)
+
+    def bind(self, matrix):
+        """Create a bound camera of itself based on a transform matrix.
+        
+        :param numpy.array matrix:
+          A numpy transformation matrix of size 4x4
+          
+        :rtype: :class:`collada.camera.BoundOrthographicCamera`
+        
+        """
+        return BoundOrthographicCamera(self, matrix)
+
+    def __str__(self): return '<OrthographicCamera id=%s>' % self.id
     def __repr__(self): return str(self)
 
 class BoundCamera(object):
@@ -197,3 +328,31 @@ class BoundPerspectiveCamera(BoundCamera):
     def __str__(self): return '<BoundPerspectiveCamera bound to %s>' % self.original.id
     def __repr__(self): return str(self)
 
+class BoundOrthographicCamera(BoundCamera):
+    """Orthographic camera bound to a scene with a transform. This gets created when a
+        camera is instantiated in a scene. Do not create this manually."""
+
+    def __init__(self, cam, matrix):
+        self.xmag = cam.xmag
+        """Horizontal magnification of the view"""
+        self.ymag = cam.ymag
+        """Vertical magnification of the view"""
+        self.aspect_ratio = cam.aspect_ratio
+        """Aspect ratio of the field of view"""
+        self.znear = cam.znear
+        """Distance to the near clipping plane"""
+        self.zfar = cam.zfar
+        """Distance to the far clipping plane"""
+        self.matrix = matrix
+        """The matrix bound to"""
+        self.position = matrix[:3,3]
+        """The position of the camera"""
+        self.direction = -matrix[:3,2]
+        """The direction the camera is facing"""
+        self.up = matrix[:3,1]
+        """The up vector of the camera"""
+        self.original = cam
+        """Original :class:`collada.camera.OrthographicCamera` object this is bound to."""
+    
+    def __str__(self): return '<BoundOrthographicCamera bound to %s>' % self.original.id
+    def __repr__(self): return str(self)
