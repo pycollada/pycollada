@@ -3,7 +3,7 @@ import collada
 from lxml.etree import fromstring, tostring
 import datetime
 
-class TestLight(unittest2.TestCase):
+class TestAsset(unittest2.TestCase):
 
     def setUp(self):
         self.dummy = collada.Collada()
