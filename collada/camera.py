@@ -18,100 +18,137 @@ from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
                     DaeMalformedError, tag, E
 
 class Camera(DaeObject):
-    """Camera data as defined in COLLADA tag <camera>."""
+    """Base camera class holding data from <camera> tags."""
 
-    def __init__(self, id, fov, near, far, xmlnode = None):
-        """Create a new camera.
+    @staticmethod
+    def load(collada, localscope, node):
+        tecnode = node.find( '%s/%s' % (tag('optics'),tag('technique_common')) )
+        if tecnode is None or len(tecnode) == 0: 
+            raise DaeIncompleteError('Missing common technique in camera')
+        camnode = tecnode[0]
+        if camnode.tag == tag('perspective'):
+            return PerspectiveCamera.load( collada, localscope, node )
+        elif camnode.tag == tag('orthographic'):
+            return OrthographicCamera.load( collada, localscope, node )
+        else:
+            raise DaeUnsupportedError('Unrecognized camera type: %s'%camnode.tag)
+
+class PerspectiveCamera(Camera):
+    """Perspective camera as defined in COLLADA tag <perspective>."""
+
+    def __init__(self, id, znear, zfar, xfov=None, yfov=None, aspect_ratio=None, xmlnode = None):
+        """Create a new perspective camera.
+
+        Note: ``aspect_ratio = tan(0.5*xfov) / tan(0.5*yfov)``
+        
+        You can specify one of:
+         * :attr:`xfov` alone
+         * :attr:`yfov` alone
+         * :attr:`xfov` and :attr:`yfov`
+         * :attr:`xfov` and :attr:`aspect_ratio`
+         * :attr:`yfov` and :attr:`aspect_ratio`
+         
+        Any other combination will raise :class:`collada.DaeMalformedError`
 
         :param str id:
-          Id for the object
-        :param float fov:
-          Y axis field of vision in degrees
-        :param float near:
-          Near plane distance
-        :param float far:
-          Far plane distance
+          Identifier for the camera
+        :param float znear:
+          Distance to the near clipping plane
+        :param float zfar:
+          Distance to the far clipping plane
+        :param float xfov:
+          Horizontal field of view, in degrees
+        :param float yfov:
+          Vertical field of view, in degrees
+        :param float aspect_ratio:
+          Aspect ratio of the field of view
         :param xmlnode:
           If loaded from xml, the xml node
 
         """
+        
         self.id = id
-        """Id in the camera library."""
-        self.fov = fov
-        """Field of vision in degrees."""
-        self.near = near
-        """Near plane distance."""
-        self.far = far
-        """Far plane distance."""
-        if xmlnode != None:
+        """Identifier for the camera"""
+        self.xfov = xfov
+        """Horizontal field of view, in degrees"""
+        self.yfov = yfov
+        """Vertical field of view, in degrees"""
+        self.aspect_ratio = aspect_ratio
+        """Aspect ratio of the field of view"""
+        self.znear = znear
+        """Distance to the near clipping plane"""
+        self.zfar = zfar
+        """Distance to the far clipping plane"""
+        
+        self._checkValidParams()
+        
+        if xmlnode is not  None:
             self.xmlnode = xmlnode
             """ElementTree representation of the data."""
         else:
-            self.xmlnode = E.camera(
-                E.optics(
-                    E.technique_common(
-                        E.perspective(
-                            E.yfov(str(self.fov)),
-                            E.znear(str(self.near)),
-                            E.zfar(str(self.far))
-                        )
-                    )
-                )
-            , id=self.id, name=self.id)
+            self._recreateXmlNode()
+
+    def _recreateXmlNode(self):
+        perspective_node = E.perspective()
+        if self.xfov is not None:
+            perspective_node.append(E.xfov(str(self.xfov)))
+        if self.yfov is not None:
+            perspective_node.append(E.yfov(str(self.yfov)))
+        if self.aspect_ratio is not None:
+            perspective_node.append(E.aspect_ratio(str(self.aspect_ratio)))
+        perspective_node.append(E.znear(str(self.znear)))
+        perspective_node.append(E.zfar(str(self.zfar)))
+        self.xmlnode = E.camera(
+            E.optics(
+                E.technique_common(perspective_node)
+            )
+        , id=self.id, name=self.id)
+
+    def _checkValidParams(self):
+        if self.xfov is not None and self.yfov is None and self.aspect_ratio is None:
+            pass
+        elif self.xfov is None and self.yfov is not None and self.aspect_ratio is None:
+            pass
+        elif self.xfov is not None and self.yfov is None and self.aspect_ratio is not None:
+            pass
+        elif self.xfov is None and self.yfov is not None and self.aspect_ratio is not None:
+            pass
+        elif self.xfov is not None and self.yfov is not None and self.aspect_ratio is None:
+            pass
+        else:
+            raise DaeMalformedError("Received invalid combination of xfov (%s), yfov (%s), and aspect_ratio (%s)" % 
+                                       (str(self.xfov), str(self.yfov), str(self.aspect_ratio)))
 
     def save(self):
-        """Saves the camera's properties back to xmlnode"""
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.id)
-        persnode = self.xmlnode.find( '%s/%s/%s'%(tag('optics'),tag('technique_common'), 
-                                                  tag('perspective') ) )
-        yfovnode = persnode.find( tag('yfov') )
-        yfovnode.text = str(self.fov)
-        if self.near:
-            znearnode = persnode.find( tag('znear') )
-            znearnode.text = str(self.near)
-        if self.far:
-            zfarnode = persnode.find( tag('zfar') )
-            zfarnode.text = str(self.far)
+        """Saves the perspective camera's properties back to xmlnode"""
+        self._checkValidParams()
+        self._recreateXmlNode()
 
         
     @staticmethod
     def load(collada, localscope, node):
         persnode = node.find( '%s/%s/%s'%(tag('optics'),tag('technique_common'), 
                                           tag('perspective') ))
+        
         if persnode is None: raise DaeIncompleteError('Missing perspetive for camera definition')
-        yfovnode = persnode.find( tag('yfov') )
-        correction = 1.0
-        if yfovnode != None: fov = yfovnode.text
-        else:
-            xfovnode = persnode.find( tag('xfov') )
-            if xfovnode != None: 
-                fov = xfovnode.text
-                rationode = persnode.find( tag('aspect_ratio') )
-                if rationode != None: correction = rationode.text
-            else: fov = 45.0
-        try:
-            fov = float(fov)
-            correction = float(correction)
-        except ValueError, ex: 
-            raise DaeMalformedError('Corrupted float values in camera definition')
-        fov /= correction
+        
+        xfov = persnode.find( tag('xfov') )
+        yfov = persnode.find( tag('yfov') )
+        aspect_ratio = persnode.find( tag('aspect_ratio') )
         znearnode = persnode.find( tag('znear') )
         zfarnode = persnode.find( tag('zfar') )
-        try: 
-            if znearnode != None: near = float(znearnode.text)
-            else: near = None
-            if zfarnode != None: far = float(zfarnode.text)
-            else: far = None
-        except ValueError, ex: 
+        id = node.get('id', '')
+        
+        try:
+            if xfov is not None: xfov = float(xfov.text)
+            if yfov is not None: yfov = float(yfov.text)
+            if aspect_ratio is not None: aspect_ratio = float(aspect_ratio.text)
+            znear = float(znearnode.text)
+            zfar = float(zfarnode.text)
+        except (TypeError, ValueError), ex: 
             raise DaeMalformedError('Corrupted float values in camera definition')
-        for n in persnode: 
-            if n.tag in ['xfov', 'aspect_ratio']: persnode.remove(n)
-        if yfovnode is None:
-            yfovnode = ElementTree.Element(tag('yfov'))
-            yfovnode.text = str(fov)
-            persnode.append(yfovnode)
-        return Camera(node.get('id'), fov, near, far, xmlnode = node)
+        
+        return PerspectiveCamera(id, znear, zfar, xfov=xfov, yfov=yfov, aspect_ratio=aspect_ratio, xmlnode=node)
 
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.
@@ -119,46 +156,44 @@ class Camera(DaeObject):
         :param numpy.array matrix:
           A numpy transformation matrix of size 4x4
           
-        :rtype: :class:`collada.camera.BoundCamera`
+        :rtype: :class:`collada.camera.BoundPerspectiveCamera`
         
         """
-        return BoundCamera(self, matrix)
+        return BoundPerspectiveCamera(self, matrix)
 
-    def __str__(self): return '<Camera id=%s>' % self.id
+    def __str__(self): return '<PerspectiveCamera id=%s>' % self.id
     def __repr__(self): return str(self)
 
 class BoundCamera(object):
-    """Camera bound to a scene with a transform. This gets created when a
+    """Base class for bound cameras"""
+    pass
+
+class BoundPerspectiveCamera(BoundCamera):
+    """Perspective camera bound to a scene with a transform. This gets created when a
         camera is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, cam, matrix):
-        self.fov = cam.fov
-        """Field of vision in degrees."""
-        self.near = cam.near
-        """Near plane distance."""
-        self.far = cam.far
-        """Far plane distance."""
+        self.xfov = cam.xfov
+        """Horizontal field of view, in degrees"""
+        self.yfov = cam.yfov
+        """Vertical field of view, in degrees"""
+        self.aspect_ratio = cam.aspect_ratio
+        """Aspect ratio of the field of view"""
+        self.znear = cam.znear
+        """Distance to the near clipping plane"""
+        self.zfar = cam.zfar
+        """Distance to the far clipping plane"""
         self.matrix = matrix
         """The matrix bound to"""
+        self.position = matrix[:3,3]
+        """The position of the camera"""
+        self.direction = -matrix[:3,2]
+        """The direction the camera is facing"""
+        self.up = matrix[:3,1]
+        """The up vector of the camera"""
         self.original = cam
-        """Original :class:`collada.camera.Camera` object this is bound to."""
-
-    def get_position(self):
-        return self.matrix[:3,3]
-
-    def get_direction(self):
-        # Note: If the 3x3 rotation submatrix is orthogonal, 
-        #       then this should return a vector of unit length 
-        return -self.matrix[:3,2]
-
-    def get_up(self):
-        # Note: If the 3x3 rotation submatrix is orthogonal, 
-        #       then this should return a vector of unit length 
-        return self.matrix[:3,1]
+        """Original :class:`collada.camera.PerspectiveCamera` object this is bound to."""
     
-    position = property(get_position)
-    direction = property(get_direction)
-    up = property(get_up)
-    
-    def __str__(self): return '<BoundCamera bound to %s>' % self.original.id
+    def __str__(self): return '<BoundPerspectiveCamera bound to %s>' % self.original.id
     def __repr__(self): return str(self)
+

@@ -9,3 +9,4 @@ Camera
    :nosignatures:
 
    collada.camera.Camera
+   collada.camera.PerspectiveCamera

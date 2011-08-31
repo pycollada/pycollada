@@ -1,9 +1,9 @@
-collada.camera.Camera
-=====================
+collada.camera.BoundPerspectiveCamera
+=====================================
 
 .. currentmodule:: collada.camera
 
-.. autoclass:: Camera
+.. autoclass:: BoundPerspectiveCamera
 
    
    .. inheritance-diagram:: collada.camera
@@ -15,5 +15,10 @@ collada.camera.Camera
 
    .. autosummary::
    
-      ~Camera.load
-      ~Camera.save
+      ~BoundPerspectiveCamera.__init__
+   
+   
+
+   
+   
+   

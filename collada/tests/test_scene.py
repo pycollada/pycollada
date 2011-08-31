@@ -8,7 +8,7 @@ class TestScene(unittest2.TestCase):
     def setUp(self):
         self.dummy = collada.Collada()
         
-        self.yourcam = collada.camera.Camera("yourcam", 45.0, 0.01, 1000.0)
+        self.yourcam = collada.camera.PerspectiveCamera("yourcam", 45.0, 0.01, 1000.0)
         self.dummy.cameras.append(self.yourcam)
         
         self.yourdirlight = collada.light.DirectionalLight("yourdirlight", (1,1,1))
@@ -52,7 +52,7 @@ class TestScene(unittest2.TestCase):
         self.assertEqual(loadedlightnode.light.id, 'yourdirlight')
         
     def test_scene_camera_node_saving(self):
-        cam = collada.camera.Camera("mycam", 45.0, 0.01, 1000.0)
+        cam = collada.camera.PerspectiveCamera("mycam", 45.0, 0.01, 1000.0)
         camnode = collada.scene.CameraNode(cam)
         bindtest = list(camnode.objects('camera'))
         self.assertEqual(camnode.camera, cam)

@@ -12,6 +12,7 @@ Bound
    collada.polylist.BoundPolylist
    collada.polygons.BoundPolygons
    collada.camera.BoundCamera
+   collada.camera.BoundPerspectiveCamera
    collada.controller.BoundController
    collada.controller.BoundMorph
    collada.controller.BoundSkin

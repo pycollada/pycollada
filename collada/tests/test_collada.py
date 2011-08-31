@@ -158,8 +158,8 @@ class TestCollada(unittest2.TestCase):
         mesh.lights.append(ambientlight)
         mesh.lights.append(pointlight)
         
-        camera1 = collada.camera.Camera("mycam1", 45.0, 0.01, 1000.0)
-        camera2 = collada.camera.Camera("mycam2", 45.0, 0.01, 1000.0)
+        camera1 = collada.camera.PerspectiveCamera("mycam1", 45.0, 0.01, 1000.0)
+        camera2 = collada.camera.PerspectiveCamera("mycam2", 45.0, 0.01, 1000.0)
         mesh.cameras.append(camera1)
         mesh.cameras.append(camera2)
         
@@ -237,7 +237,7 @@ class TestCollada(unittest2.TestCase):
         loaded_mesh.lights.pop(0)
         loaded_mesh.lights.append(dirlight)
         
-        camera3 = collada.camera.Camera("mycam3", 45.0, 0.01, 1000.0)
+        camera3 = collada.camera.PerspectiveCamera("mycam3", 45.0, 0.01, 1000.0)
         loaded_mesh.cameras.pop(0)
         loaded_mesh.cameras.append(camera3)
         
