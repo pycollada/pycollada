@@ -315,9 +315,6 @@ class SpotLight(Light):
         """
         self.id = id
         """The unique string identifier for the light"""
-        self.position = numpy.array( [0, 0, 0], dtype=numpy.float32 )
-        #Not documenting this because it doesn't make sense to set the position
-        # of an unbound light. The position isn't set until binding in a scene.
         self.color = color
         """Either a tuple of size 3 containing the RGB color value
           of the light or a tuple of size 4 containing the RGBA
@@ -423,10 +420,13 @@ class BoundPointLight(BoundLight):
           of the light or a tuple of size 4 containing the RGBA
           color value of the light"""
         self.constant_att = plight.constant_att
+        if self.constant_att is None: self.constant_att = 1.0
         """Constant attenuation factor."""
         self.linear_att = plight.linear_att
+        if self.linear_att is None: self.linear_att = 0.0
         """Linear attenuation factor."""
         self.quad_att = plight.quad_att
+        if self.quad_att is None: self.quad_att = 0.0
         """Quadratic attenuation factor."""
         self.zfar = plight.zfar
         """Distance to the far clipping plane"""
@@ -441,21 +441,32 @@ class BoundSpotLight(BoundLight):
         light is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, slight, matrix):
-        self.position = numpy.dot( matrix[:3,:3], slight.position ) + matrix[:3,3]
+        self.position = matrix[:3,3]
         """Numpy array of length 3 representing the position of the light in the scene"""
+        self.direction = -matrix[:3,2]
+        """Direction of the spot light"""
+        self.up = matrix[:3,1]
+        """Up vector of the spot light"""
+        self.matrix = matrix
+        """Transform matrix for the bound light"""
         self.color = slight.color
         """Either a tuple of size 3 containing the RGB color value
           of the light or a tuple of size 4 containing the RGBA
           color value of the light"""
         self.constant_att = slight.constant_att
+        if self.constant_att is None: self.constant_att = 1.0
         """Constant attenuation factor."""
         self.linear_att = slight.linear_att
+        if self.linear_att is None: self.linear_att = 0.0
         """Linear attenuation factor."""
         self.quad_att = slight.quad_att
+        if self.quad_att is None: self.quad_att = 0.0
         """Quadratic attenuation factor."""
         self.falloff_ang = slight.falloff_ang
+        if self.falloff_ang is None: self.falloff_ang = 180.0
         """Falloff angle"""
         self.falloff_exp = slight.falloff_exp
+        if self.falloff_exp is None: self.falloff_exp = 0.0
         """Falloff exponent"""
         self.original = slight
         """The original :class:`collada.light.SpotLight` this is bound to"""
