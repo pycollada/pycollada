@@ -1,6 +1,46 @@
 Changelog
 =========
 
+0.3 (2011-08-31)
+----------------
+
+Backwards Compatibility Notes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* If using the old Camera object, this has been changed to an abstract class
+  with types for PerspectiveCamera and OrthographicCamera
+* If using the old Collada.assetInfo dictionary to read asset information, this
+  has been changed to an object. See documentation for more information.
+
+New Features
+^^^^^^^^^^^^
+* Added support for bump maps inside the extra tag of an effect
+* Added texbinormal and textangent to triangle sets
+* Added a method to generate texture tangents and binormals
+* Added detection for double_sided
+* Added an optional parameter to specify what filename inside an archive to use when loading from zip
+* Added support for loading multiple sets of library_* nodes
+* Refactored asset information into a separate module. Fixed #12
+* Refactored Camera into PerspectiveCamera and OrthographicCamera, inheriting from Camera
+
+Bug Fixes
+^^^^^^^^^
+* Changed Collada IndexedLists attributes to be properties. Fixed Issue #14
+* Updated scene to use a local scope when nodes are instantiated inside a scene
+* Changed parsing to raise DaeMalformedError when an lxml parser exception is thrown
+* Fixed bug when loading an <image> tag local to an <effect> not showing up in Collada.images
+* Fixed bug when loading an empty <polygons>
+* Fixed bug in if statement when loading morph controllers
+* Fixed bug when triangulating a length-0 polylist
+* Updated install instructions for OS X and Ubuntu problems
+* Fixed bugs in IndexedList from Issue #13
+* Fixed a bug where using the same map twice in an effect would cause incorrrect output
+* Changed geometry export to delete any sources in the vertices tag that no longer exist
+* Changed library output to not output emtpy library nodes so validator doesn't complain
+* Add same checks in scene loading that was done in library_nodes loading so that if nodes are not found yet while loading, it will keep trying
+* Changed the way library_nodes is loaded so that if a referenced node from instance_node is not loaded yet, it will keep trying
+* Fixed bug where a triangles xml node would try to set an attribute to None
+* Fixed bug in handling joints that influence 0 vertices
+
 0.2.2 (2011-05-03)
 ------------------
 * Changed the way instance_node is handled to actually maintain the mapping so it's not lost when saving

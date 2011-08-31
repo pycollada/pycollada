@@ -524,7 +524,7 @@ class GeometryNode(SceneNode):
 
 class ControllerNode(SceneNode):
     """Represents a controller instance in a scene, as defined in the collada <instance_controller> tag. **This class is highly
-    experimental. More support will be added in version 0.3.**"""
+    experimental. More support will be added in version 0.4.**"""
 
     def __init__(self, controller, materials, xmlnode=None):
         """Creates a controller node

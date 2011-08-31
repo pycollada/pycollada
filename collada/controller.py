@@ -12,7 +12,7 @@
 
 """Contains objects representing controllers. Currently has partial 
     support for loading Skin and Morph. **This module is highly
-    experimental. More support will be added in version 0.3.**"""
+    experimental. More support will be added in version 0.4.**"""
 
 from lxml import etree as ElementTree
 import numpy
