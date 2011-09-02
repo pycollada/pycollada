@@ -148,6 +148,12 @@ class PerspectiveCamera(Camera):
         except (TypeError, ValueError), ex: 
             raise DaeMalformedError('Corrupted float values in camera definition')
         
+        #There are some exporters that incorrectly output all three of these.
+        # Worse, they actually got the caculation of aspect_ratio wrong!
+        # So instead of failing to load, let's just add one more hack because of terrible exporters
+        if xfov is not None and yfov is not None and aspect_ratio is not None:
+            aspect_ratio = None
+        
         return PerspectiveCamera(id, znear, zfar, xfov=xfov, yfov=yfov, aspect_ratio=aspect_ratio, xmlnode=node)
 
     def bind(self, matrix):
@@ -278,6 +284,12 @@ class OrthographicCamera(Camera):
             zfar = float(zfarnode.text)
         except (TypeError, ValueError), ex: 
             raise DaeMalformedError('Corrupted float values in camera definition')
+        
+        #There are some exporters that incorrectly output all three of these.
+        # Worse, they actually got the caculation of aspect_ratio wrong!
+        # So instead of failing to load, let's just add one more hack because of terrible exporters
+        if xmag is not None and ymag is not None and aspect_ratio is not None:
+            aspect_ratio = None
         
         return OrthographicCamera(id, znear, zfar, xmag=xmag, ymag=ymag, aspect_ratio=aspect_ratio, xmlnode=node)
 
