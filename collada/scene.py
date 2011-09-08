@@ -847,7 +847,6 @@ class Scene(DaeObject):
         for nodenode in node.findall(tag('node')):
             try: N = loadNode(collada, nodenode, localscope)
             except DaeInstanceNotLoadedError, ex:
-                print 'not loaded'
                 tried_loading.append((nodenode, ex))
             except DaeError, ex: collada.handleError(ex)
             else:
