@@ -170,7 +170,6 @@ class TestCamera(unittest2.TestCase):
         self.assertEqual(cam.xmag, None)
         self.assertEqual(cam.ymag, 50)
         self.assertEqual(cam.aspect_ratio, 1.3)
-        print tostring(cam.xmlnode)
         
         cam.xmag = 20
         with self.assertRaises(collada.DaeMalformedError):
