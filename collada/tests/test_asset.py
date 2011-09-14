@@ -6,7 +6,7 @@ import datetime
 class TestAsset(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy = collada.Collada()
+        self.dummy = collada.Collada(validate_output=True)
         
     def test_asset_contributor(self):
         contributor = collada.asset.Contributor()

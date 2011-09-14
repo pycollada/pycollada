@@ -9,12 +9,12 @@ import dateutil.parser
 class TestCollada(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy = collada.Collada()
+        self.dummy = collada.Collada(validate_output=True)
         self.datadir = os.path.join(os.path.dirname(os.path.realpath( __file__ )), "data")
 
     def test_collada_duck_tris(self):
         f = os.path.join(self.datadir, "duck_triangles.dae")
-        mesh = collada.Collada(f)
+        mesh = collada.Collada(f, validate_output=True)
         
         self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
         self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
@@ -50,7 +50,7 @@ class TestCollada(unittest2.TestCase):
         mesh.write(s)
         out = s.getvalue()
         t = StringIO(out)
-        mesh = collada.Collada(t)
+        mesh = collada.Collada(t, validate_output=True)
                 
         self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
         self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
@@ -84,7 +84,7 @@ class TestCollada(unittest2.TestCase):
                 
     def test_collada_duck_poly(self):
         f = os.path.join(self.datadir, "duck_polylist.dae")
-        mesh = collada.Collada(f)
+        mesh = collada.Collada(f, validate_output=True)
         self.assertEqual(mesh.scene.id, 'VisualSceneNode')
         self.assertIn('LOD3spShape-lib', mesh.geometries)
         self.assertIn('directionalLightShape1-lib', mesh.lights)
@@ -99,7 +99,7 @@ class TestCollada(unittest2.TestCase):
         mesh.write(s)
         out = s.getvalue()
         t = StringIO(out)
-        mesh = collada.Collada(t)
+        mesh = collada.Collada(t, validate_output=True)
         
         self.assertEqual(mesh.scene.id, 'VisualSceneNode')
         self.assertIn('LOD3spShape-lib', mesh.geometries)
@@ -113,7 +113,7 @@ class TestCollada(unittest2.TestCase):
         
     def test_collada_duck_zip(self):
         f = os.path.join(self.datadir, "duck.zip")
-        mesh = collada.Collada(f)
+        mesh = collada.Collada(f, validate_output=True)
         self.assertEqual(mesh.scene.id, 'VisualSceneNode')
         self.assertIn('LOD3spShape-lib', mesh.geometries)
         self.assertIn('directionalLightShape1-lib', mesh.lights)
@@ -125,7 +125,7 @@ class TestCollada(unittest2.TestCase):
         self.assertIn('VisualSceneNode', mesh.scenes)
 
     def test_collada_saving(self):       
-        mesh = collada.Collada()
+        mesh = collada.Collada(validate_output=True)
 
         self.assertEqual(len(mesh.geometries), 0)
         self.assertEqual(len(mesh.controllers), 0)
@@ -200,7 +200,7 @@ class TestCollada(unittest2.TestCase):
         
         toload = StringIO(out.getvalue())
         
-        loaded_mesh = collada.Collada(toload)
+        loaded_mesh = collada.Collada(toload, validate_output=True)
         self.assertEqual(len(loaded_mesh.geometries), 2)
         self.assertEqual(len(loaded_mesh.controllers), 0)
         self.assertEqual(len(loaded_mesh.lights), 2)
@@ -268,7 +268,7 @@ class TestCollada(unittest2.TestCase):
         
         strdata = tostring(loaded_mesh.xmlnode)
         indata = StringIO(strdata)
-        loaded_mesh2 = collada.Collada(indata)
+        loaded_mesh2 = collada.Collada(indata, validate_output=True)
         
         self.assertEqual(loaded_mesh2.scene.id, scene3.id)
         self.assertIn('geometry3', loaded_mesh2.geometries)
@@ -289,7 +289,7 @@ class TestCollada(unittest2.TestCase):
         self.assertIn('myscene2', loaded_mesh2.scenes)
         
     def test_collada_attribute_replace(self):
-        mesh = collada.Collada()
+        mesh = collada.Collada(validate_output=True)
         self.assertIsInstance(mesh.geometries, collada.util.IndexedList)
         self.assertIsInstance(mesh.controllers, collada.util.IndexedList)
         self.assertIsInstance(mesh.animations, collada.util.IndexedList)

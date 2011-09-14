@@ -6,7 +6,7 @@ import numpy
 class TestGeometry(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy = collada.Collada()
+        self.dummy = collada.Collada(validate_output=True)
         
     def test_empty_geometry_saving(self):
         floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'Z'))

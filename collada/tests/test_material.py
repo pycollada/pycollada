@@ -7,7 +7,7 @@ import sys
 class TestMaterial(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy = collada.Collada(aux_file_loader = self.image_dummy_loader)
+        self.dummy = collada.Collada(aux_file_loader = self.image_dummy_loader, validate_output=True)
         
         self.dummy_cimage = collada.material.CImage("yourcimage", "./whatever.tga", self.dummy)
         self.cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)

@@ -96,6 +96,10 @@ class DaeUnsupportedError(DaeError):
     """Raised when some unexpectedly unsupported feature is found."""
     pass
 
+class DaeSaveValidationError(DaeError):
+    """Raised when XML validation fails when saving."""
+    pass
+
 import geometry
 import scene
 import material
@@ -104,6 +108,7 @@ import light
 import controller
 import animation
 import asset
+import schema
 from util import IndexedList
 
 class Collada(object):
@@ -130,7 +135,7 @@ class Collada(object):
     scenes = property( lambda s: s._scenes, lambda s,v: s._setIndexedList('_scenes', v), doc="""
     A list of :class:`collada.scene.Scene` objects. Can also be indexed by id""" )
 
-    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None):
+    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None, validate_output=False):
         """Load collada data from filename or file like object.
         
         :param filename:
@@ -154,6 +159,10 @@ class Collada(object):
           If the file being loaded is a zip archive, you can set this parameter
           to indicate the file within the archive that should be loaded. If not
           set, a file that ends with .dae will be searched.
+        :param bool validate_output:
+          If set to True, the XML written when calling :meth:`save` will be
+          validated against the COLLADA 1.4.1 schema. If validation fails, the
+          :class:`collada.DaeSaveValidationError` exception will be thrown.
         """
         
         self.errors = []
@@ -175,6 +184,7 @@ class Collada(object):
         self.scene = None
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
         
+        self._validate_output = validate_output
         self.maskedErrors = []
         if ignore is not None:
             self.ignoreErrors( *ignore )
@@ -519,6 +529,11 @@ class Collada(object):
             if sceneid not in self.scenes:
                 raise DaeBrokenRefError('Default scene %s not found'%sceneid)
             scenenode.append(E.instance_visual_scene(url="#%s"%sceneid))
+            
+        if self._validate_output:
+            if not schema.COLLADA_SCHEMA_1_4_1_INSTANCE.validate(self.xmlnode):
+                raise DaeSaveValidationError("Validation error when saving: " + 
+                                             schema.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
 
     def write(self, file):
         """Writes out the collada document to a file. Note that this also

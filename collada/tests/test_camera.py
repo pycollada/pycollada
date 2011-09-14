@@ -5,7 +5,7 @@ from lxml.etree import fromstring, tostring
 class TestCamera(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy = collada.Collada()
+        self.dummy = collada.Collada(validate_output=True)
 
     def test_perspective_camera_xfov_yfov_aspect_ratio(self):
         #test invalid xfov,yfov,aspect_ratio combinations

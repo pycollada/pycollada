@@ -5,7 +5,7 @@ from lxml.etree import fromstring, tostring
 class TestLight(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy = collada.Collada()
+        self.dummy = collada.Collada(validate_output=True)
 
     def test_directional_light_saving(self):
         dirlight = collada.light.DirectionalLight("mydirlight", (1,1,1))

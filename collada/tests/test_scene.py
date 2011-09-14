@@ -6,7 +6,7 @@ from lxml.etree import fromstring, tostring
 class TestScene(unittest2.TestCase):
 
     def setUp(self):
-        self.dummy = collada.Collada()
+        self.dummy = collada.Collada(validate_output=True)
         
         self.yourcam = collada.camera.PerspectiveCamera("yourcam", 45.0, 0.01, 1000.0)
         self.dummy.cameras.append(self.yourcam)
