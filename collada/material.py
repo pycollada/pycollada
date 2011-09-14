@@ -386,14 +386,14 @@ class Effect(DaeObject):
     """Supported shader list."""
     
     def __init__(self, id, params, shadingtype, bumpmap = None, double_sided = False,
-                       emission = (0.0, 0.0, 0.0),
-                       ambient = (0.0, 0.0, 0.0),
-                       diffuse = (0.0, 0.0, 0.0),
-                       specular = (0.0, 0.0, 0.0),
+                       emission = (0.0, 0.0, 0.0, 1.0),
+                       ambient = (0.0, 0.0, 0.0, 1.0),
+                       diffuse = (0.0, 0.0, 0.0, 1.0),
+                       specular = (0.0, 0.0, 0.0, 1.0),
                        shininess = 0.0,
-                       reflective = (0.0, 0.0, 0.0),
+                       reflective = (0.0, 0.0, 0.0, 1.0),
                        reflectivity = 0.0,
-                       transparent = (0.0, 0.0, 0.0),
+                       transparent = (0.0, 0.0, 0.0, 1.0),
                        transparency = 0.0,
                        index_of_refraction = None,
                        xmlnode = None):
@@ -412,26 +412,26 @@ class Effect(DaeObject):
         :param bool double_sided:
           Whether or not the material should be rendered double sided
         :param emission:
-          Either an RGB-format tuple of three floats or an instance
+          Either an RGBA-format tuple of four floats or an instance
           of :class:`collada.material.Map`
         :param ambient:
-          Either an RGB-format tuple of three floats or an instance
+          Either an RGBA-format tuple of four floats or an instance
           of :class:`collada.material.Map`
         :param diffuse:
-          Either an RGB-format tuple of three floats or an instance
+          Either an RGBA-format tuple of four floats or an instance
           of :class:`collada.material.Map`
         :param specular:
-          Either an RGB-format tuple of three floats or an instance
+          Either an RGBA-format tuple of four floats or an instance
           of :class:`collada.material.Map`
         :param shininess:
           Either a single float or an instance of :class:`collada.material.Map`
         :param reflective:
-          Either an RGB-format tuple of three floats or an instance
+          Either an RGBA-format tuple of four floats or an instance
           of :class:`collada.material.Map`
         :param reflectivity:
           Either a single float or an instance of :class:`collada.material.Map`
         :param tuple transparent:
-          Either an RGB-format tuple of three floats or an instance
+          Either an RGBA-format tuple of four floats or an instance
           of :class:`collada.material.Map`
         :param transparency:
           Either a single float or an instance of :class:`collada.material.Map`
@@ -481,6 +481,8 @@ class Effect(DaeObject):
         self.index_of_refraction = index_of_refraction
         """A single float indicating the index of refraction for perfectly
           refracted light"""
+        
+        self._fixColorValues()
         
         if xmlnode is not None:
             self.xmlnode = xmlnode
@@ -618,6 +620,18 @@ class Effect(DaeObject):
         else: raise DaeUnsupportedError('Unknown shading param definition ' + vnode.tag)
         return value
 
+    def _fixColorValues(self):
+        for prop in self.supported:
+            propval = getattr(self, prop)
+            if isinstance(propval, tuple):
+                if len(propval) < 4:
+                    propval = list(propval)
+                    while len(propval) < 3:
+                        propval.append(0.0)
+                    while len(propval) < 4:
+                        propval.append(1.0)
+                    setattr(self, prop, tuple(propval))
+
     def save(self):
         """Saves the effect back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
@@ -625,6 +639,8 @@ class Effect(DaeObject):
         profilenode = self.xmlnode.find( tag('profile_COMMON') )
         tecnode = profilenode.find( tag('technique') )
         tecnode.set('sid', 'common')
+        
+        self._fixColorValues()
         
         for param in self.params:
             param.save()

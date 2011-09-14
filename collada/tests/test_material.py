@@ -18,26 +18,26 @@ class TestMaterial(unittest2.TestCase):
 
     def test_effect_saving(self):
         effect = collada.material.Effect("myeffect", [], "phong",
-                       emission = (0.1, 0.2, 0.3),
-                       ambient = (0.4, 0.5, 0.6),
-                       diffuse = (0.7, 0.8, 0.9),
-                       specular = (0.3, 0.2, 0.1),
+                       emission = (0.1, 0.2, 0.3, 1.0),
+                       ambient = (0.4, 0.5, 0.6, 1.0),
+                       diffuse = (0.7, 0.8, 0.9, 0.5),
+                       specular = (0.3, 0.2, 0.1, 1.0),
                        shininess = 0.4,
-                       reflective = (0.7, 0.6, 0.5),
+                       reflective = (0.7, 0.6, 0.5, 1.0),
                        reflectivity = 0.8,
-                       transparent = (0.2, 0.4, 0.6),
+                       transparent = (0.2, 0.4, 0.6, 1.0),
                        transparency = 0.9)
         
         self.assertEqual(effect.id, "myeffect")
         self.assertEqual(effect.shininess, 0.4)
         self.assertEqual(effect.reflectivity, 0.8)
         self.assertEqual(effect.transparency, 0.9)
-        self.assertTupleEqual(effect.emission, (0.1, 0.2, 0.3))
-        self.assertTupleEqual(effect.ambient, (0.4, 0.5, 0.6))
-        self.assertTupleEqual(effect.diffuse, (0.7, 0.8, 0.9))
-        self.assertTupleEqual(effect.specular, (0.3, 0.2, 0.1))
-        self.assertTupleEqual(effect.reflective, (0.7, 0.6, 0.5))
-        self.assertTupleEqual(effect.transparent, (0.2, 0.4, 0.6))
+        self.assertTupleEqual(effect.emission, (0.1, 0.2, 0.3, 1.0))
+        self.assertTupleEqual(effect.ambient, (0.4, 0.5, 0.6, 1.0))
+        self.assertTupleEqual(effect.diffuse, (0.7, 0.8, 0.9, 0.5))
+        self.assertTupleEqual(effect.specular, (0.3, 0.2, 0.1, 1.0))
+        self.assertTupleEqual(effect.reflective, (0.7, 0.6, 0.5, 1.0))
+        self.assertTupleEqual(effect.transparent, (0.2, 0.4, 0.6, 1.0))
         self.assertEqual(effect.double_sided, False)
         self.assertIsNotNone(str(effect))
         
@@ -45,12 +45,12 @@ class TestMaterial(unittest2.TestCase):
         effect.shininess = 7.0
         effect.reflectivity = 2.0
         effect.transparency = 3.0
-        effect.emission = (1.1, 1.2, 1.3)
-        effect.ambient = (1.4, 1.5, 1.6)
-        effect.diffuse = (1.7, 1.8, 1.9)
-        effect.specular = (1.3, 1.2, 1.1)
-        effect.reflective = (1.7, 1.6, 1.5)
-        effect.transparent = (1.2, 1.4, 1.6)
+        effect.emission = (1.1, 1.2, 1.3, 1.0)
+        effect.ambient = (1.4, 1.5, 1.6, 1.0)
+        effect.diffuse = (1.7, 1.8, 1.9, 1.0)
+        effect.specular = (1.3, 1.2, 1.1, 1.0)
+        effect.reflective = (1.7, 1.6, 1.5, 0.3)
+        effect.transparent = (1.2, 1.4, 1.6, 1.0)
         effect.double_sided = True
         effect.save()
         
@@ -61,12 +61,12 @@ class TestMaterial(unittest2.TestCase):
         self.assertEqual(loaded_effect.shininess, 7.0)
         self.assertEqual(loaded_effect.reflectivity, 2.0)
         self.assertEqual(loaded_effect.transparency, 3.0)
-        self.assertTupleEqual(loaded_effect.emission, (1.1, 1.2, 1.3))
-        self.assertTupleEqual(loaded_effect.ambient, (1.4, 1.5, 1.6))
-        self.assertTupleEqual(loaded_effect.diffuse, (1.7, 1.8, 1.9))
-        self.assertTupleEqual(loaded_effect.specular, (1.3, 1.2, 1.1))
-        self.assertTupleEqual(loaded_effect.reflective, (1.7, 1.6, 1.5))
-        self.assertTupleEqual(loaded_effect.transparent, (1.2, 1.4, 1.6))
+        self.assertTupleEqual(loaded_effect.emission, (1.1, 1.2, 1.3, 1.0))
+        self.assertTupleEqual(loaded_effect.ambient, (1.4, 1.5, 1.6, 1.0))
+        self.assertTupleEqual(loaded_effect.diffuse, (1.7, 1.8, 1.9, 1.0))
+        self.assertTupleEqual(loaded_effect.specular, (1.3, 1.2, 1.1, 1.0))
+        self.assertTupleEqual(loaded_effect.reflective, (1.7, 1.6, 1.5, 0.3))
+        self.assertTupleEqual(loaded_effect.transparent, (1.2, 1.4, 1.6, 1.0))
         self.assertEqual(loaded_effect.double_sided, True)
         
     def image_dummy_loader(self, fname):
@@ -178,14 +178,14 @@ class TestMaterial(unittest2.TestCase):
         surface = collada.material.Surface("mysurface", self.cimage)
         sampler2d = collada.material.Sampler2D("mysampler2d", surface)
         effect = collada.material.Effect("myeffect", [surface, sampler2d], "phong",
-                       emission = (0.1, 0.2, 0.3),
-                       ambient = (0.4, 0.5, 0.6),
-                       diffuse = (0.7, 0.8, 0.9),
-                       specular = (0.3, 0.2, 0.1),
+                       emission = (0.1, 0.2, 0.3, 1.0),
+                       ambient = (0.4, 0.5, 0.6, 1.0),
+                       diffuse = (0.7, 0.8, 0.9, 1.0),
+                       specular = (0.3, 0.2, 0.1, 1.0),
                        shininess = 0.4,
-                       reflective = (0.7, 0.6, 0.5),
+                       reflective = (0.7, 0.6, 0.5, 1.0),
                        reflectivity = 0.8,
-                       transparent = (0.2, 0.4, 0.6),
+                       transparent = (0.2, 0.4, 0.6, 1.0),
                        transparency = 0.9)
         
         other_cimage = collada.material.CImage("yourcimage", "./whatever.tga", self.dummy)
