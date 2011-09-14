@@ -229,7 +229,8 @@ class TestCollada(unittest2.TestCase):
         self.assertIn('myscene1', loaded_mesh.scenes)
         self.assertIn('myscene2', loaded_mesh.scenes)
         
-        geometry3 = collada.geometry.Geometry(mesh, "geometry3", "mygeometry3", [linefloatsrc])
+        linefloatsrc2 = collada.source.FloatSource("mylinevertsource2", numpy.array(linefloats), ('X', 'Y', 'Z'))
+        geometry3 = collada.geometry.Geometry(mesh, "geometry3", "mygeometry3", [linefloatsrc2])
         loaded_mesh.geometries.pop(0)
         loaded_mesh.geometries.append(geometry3)
         
