@@ -513,6 +513,10 @@ class Collada(object):
                     continue
                 self.xmlnode.getroot().insert(library_loc, E(name))
                 node = self.xmlnode.find( tag(name) )
+            elif node is not None and len(arr) == 0:
+                self.xmlnode.getroot().remove(node)
+                continue
+            
             for o in arr:
                 o.save()
                 if o.xmlnode not in node:
