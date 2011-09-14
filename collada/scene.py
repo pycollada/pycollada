@@ -468,13 +468,13 @@ class GeometryNode(SceneNode):
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry node."""
         else:
-            self.xmlnode = E.instance_geometry(
-                E.bind_material(
+            self.xmlnode = E.instance_geometry(url="#%s" % self.geometry.id)
+            if len(self.materials) > 0:
+                self.xmlnode.append(E.bind_material(
                     E.technique_common(
                         *[mat.xmlnode for mat in self.materials]
                     )
-                )
-            , url="#%s" % self.geometry.id)
+                ))
             
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.geometry.BoundGeometry` if ``tipo=='geometry'``"""
@@ -510,6 +510,10 @@ class GeometryNode(SceneNode):
         elif matparent is None:
             matparent = E.technique_common()
             self.xmlnode.append(E.bind_material(matparent))
+        elif len(self.materials) == 0 and matparent is not None:
+            bindnode = self.xmlnode.find('%s' % tag('bind_material'))
+            self.xmlnode.remove(bindnode)
+            return
 
         for m in self.materials:
             if m.xmlnode not in matparent:
