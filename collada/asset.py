@@ -68,7 +68,7 @@ class Contributor(DaeObject):
             if author is not None:
                 self.xmlnode.append(E.author(str(author)))
             if authoring_tool is not None:
-                self.xmlnode.append(E.authoring_tools(str(authoring_tool)))
+                self.xmlnode.append(E.authoring_tool(str(authoring_tool)))
             if comments is not None:
                 self.xmlnode.append(E.comments(str(comments)))
             if copyright is not None:
