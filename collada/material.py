@@ -380,7 +380,7 @@ class Effect(DaeObject):
     """
     supported = [ 'emission', 'ambient', 'diffuse', 'specular',
                   'shininess', 'reflective', 'reflectivity',
-                  'transparent', 'transparency' ]
+                  'transparent', 'transparency', 'index_of_refraction' ]
     """Supported material properties list."""
     shaders = [ 'phong', 'lambert', 'blinn', 'constant']
     """Supported shader list."""
@@ -395,6 +395,7 @@ class Effect(DaeObject):
                        reflectivity = 0.0,
                        transparent = (0.0, 0.0, 0.0),
                        transparency = 0.0,
+                       index_of_refraction = None,
                        xmlnode = None):
         """Create an effect instance out of properties.
 
@@ -434,6 +435,9 @@ class Effect(DaeObject):
           of :class:`collada.material.Map`
         :param transparency:
           Either a single float or an instance of :class:`collada.material.Map`
+        :param float index_of_refraction:
+          A single float indicating the index of refraction for perfectly
+          refracted light
         :param xmlnode:
           If loaded from xml, the xml node
 
@@ -474,6 +478,10 @@ class Effect(DaeObject):
           of :class:`collada.material.Map`"""
         self.transparency = transparency
         """Either a single float or an instance of :class:`collada.material.Map`"""
+        self.index_of_refraction = index_of_refraction
+        """A single float indicating the index of refraction for perfectly
+          refracted light"""
+        
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the effect"""
