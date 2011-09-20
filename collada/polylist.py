@@ -225,6 +225,7 @@ class Polylist(primitive.Primitive):
                 vcounts = numpy.array([], dtype=numpy.int32)
             else:
                 vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
+            vcounts[numpy.isnan(vcounts)] = 0
         except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
 
         all_inputs = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
@@ -234,6 +235,7 @@ class Polylist(primitive.Primitive):
                 index = numpy.array([], dtype=numpy.int32)
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+            index[numpy.isnan(index)] = 0
         except: raise DaeMalformedError('Corrupted index in polylist')
 
         polylist = Polylist(all_inputs, node.get('material'), index, vcounts, node)

@@ -79,7 +79,9 @@ class Polygons(polylist.Polylist):
 
         polygon_indices = []
         for indexnode in indexnodes:
-            polygon_indices.append(numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' '))
+            index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+            index[numpy.isnan(index)] = 0
+            polygon_indices.append(index)
         
         all_inputs = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
 

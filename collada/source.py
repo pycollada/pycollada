@@ -184,6 +184,8 @@ class FloatSource(Source):
         else:
             try: data = numpy.fromstring(arraynode.text, dtype=numpy.float32, sep=' ')
             except ValueError: raise DaeMalformedError('Corrupted float array')
+        data[numpy.isnan(data)] = 0
+            
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]

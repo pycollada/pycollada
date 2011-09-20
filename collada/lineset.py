@@ -157,6 +157,7 @@ class LineSet(primitive.Primitive):
                 index = numpy.array([],  dtype=numpy.int32)
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+            index[numpy.isnan(index)] = 0
         except: raise DaeMalformedError('Corrupted index in line set')
         
         lineset = LineSet(source_array, node.get('material'), index, node)

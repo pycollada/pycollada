@@ -187,6 +187,7 @@ class TriangleSet(primitive.Primitive):
                 index = numpy.array([], dtype=numpy.int32)
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+            index[numpy.isnan(index)] = 0
         except: raise DaeMalformedError('Corrupted index in triangleset')
         
         triset = TriangleSet(source_array, node.get('material'), index, node)
