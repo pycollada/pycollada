@@ -399,5 +399,5 @@ class NameSource(Source):
         components = [ param.get('name') for param in paramnodes ]
         return NameSource( sourceid, data, tuple(components), xmlnode=node )
 
-    def __str__(self): return '<FloatSource size=%d>' % (len(self),)
+    def __str__(self): return '<NameSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
