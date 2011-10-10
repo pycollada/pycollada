@@ -1,4 +1,18 @@
 #encoding:UTF-8
+####################################################################
+#                                                                  #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
+# USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
+# GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
+# IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
+#                                                                  #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace and contributors                                 #
+#                                                                  #
+####################################################################
+
+"""This module contains helper classes and functions for working
+with the COLLADA 1.4.1 schema."""
 
 import lxml
 import StringIO
@@ -11050,5 +11064,23 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     </xs:simpleType>
 </xs:schema>"""
 
-COLLADA_SCHEMA_1_4_1_DOC = lxml.etree.parse(StringIO.StringIO(COLLADA_SCHEMA_1_4_1))
-COLLADA_SCHEMA_1_4_1_INSTANCE = lxml.etree.XMLSchema(COLLADA_SCHEMA_1_4_1_DOC)
+class ColladaValidator(object):
+    """Validates a collada lxml document"""
+    
+    def __init__(self):
+        """Initializes the validator"""
+        self.COLLADA_SCHEMA_1_4_1_DOC = None
+        self._COLLADA_SCHEMA_1_4_1_INSTANCE = None
+    
+    def _getColladaSchemaInstance(self):
+        if self._COLLADA_SCHEMA_1_4_1_INSTANCE is None:
+            self.COLLADA_SCHEMA_1_4_1_DOC = lxml.etree.parse(StringIO.StringIO(COLLADA_SCHEMA_1_4_1))
+            self._COLLADA_SCHEMA_1_4_1_INSTANCE = lxml.etree.XMLSchema(self.COLLADA_SCHEMA_1_4_1_DOC)
+        return self._COLLADA_SCHEMA_1_4_1_INSTANCE
+
+    COLLADA_SCHEMA_1_4_1_INSTANCE = property(_getColladaSchemaInstance)
+    """An instance of lxml.XMLSchema that can be used to validate"""
+
+    def validate(self, *args, **kwargs):
+        """A wrapper for lxml.XMLSchema.validate"""
+        return self.COLLADA_SCHEMA_1_4_1_INSTANCE.validate(*args, **kwargs)

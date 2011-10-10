@@ -184,7 +184,11 @@ class Collada(object):
         self.scene = None
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
         
-        self._validate_output = validate_output
+        if validate_output:
+            self.validator = schema.ColladaValidator()
+        else:
+            self.validator = None
+            
         self.maskedErrors = []
         if ignore is not None:
             self.ignoreErrors( *ignore )
@@ -534,8 +538,8 @@ class Collada(object):
                 raise DaeBrokenRefError('Default scene %s not found'%sceneid)
             scenenode.append(E.instance_visual_scene(url="#%s"%sceneid))
             
-        if self._validate_output:
-            if not schema.COLLADA_SCHEMA_1_4_1_INSTANCE.validate(self.xmlnode):
+        if self.validator is not None:
+            if not self.validator.validate(self.xmlnode):
                 raise DaeSaveValidationError("Validation error when saving: " + 
                                              schema.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
 
