@@ -228,7 +228,7 @@ class Polylist(primitive.Primitive):
             vcounts[numpy.isnan(vcounts)] = 0
         except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
 
-        all_inputs = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
+        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
 
         try:
             if indexnode.text is None:

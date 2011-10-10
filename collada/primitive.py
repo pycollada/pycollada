@@ -81,7 +81,7 @@ class Primitive(DaeObject):
         pass
 
     @staticmethod
-    def _getInputsFromList(localscope, inputs):
+    def _getInputsFromList(collada, localscope, inputs):
         #first let's save any of the source that are references to a dict
         to_append = []
         for input in inputs:
@@ -111,6 +111,8 @@ class Primitive(DaeObject):
         tangent_inputs = []
         binormal_inputs = []
         
+        all_inputs = {}
+        
         for input in inputs:
             offset, semantic, source, set = input
             if len(source) < 2 or source[0] != '#':
@@ -134,10 +136,15 @@ class Primitive(DaeObject):
                 tangent_inputs.append(input)
             elif semantic == 'BINORMAL':
                 binormal_inputs.append(input)
-            else:  
-                raise DaeUnsupportedError('Unknown input semantic: %s' % semantic)
+            else:
+                try:
+                    raise DaeUnsupportedError('Unknown input semantic: %s' % semantic)
+                except DaeUnsupportedError, ex:
+                    collada.handleError(ex)
+                unknown_input = all_inputs.get(semantic, [])
+                unknown_input.append(input)
+                all_inputs[semantic] = unknown_input
             
-        all_inputs = {}
         all_inputs['VERTEX'] = vertex_inputs
         all_inputs['NORMAL'] = normal_inputs
         all_inputs['TEXCOORD'] = texcoord_inputs
@@ -150,13 +157,13 @@ class Primitive(DaeObject):
         return all_inputs
 
     @staticmethod
-    def _getInputs(localscope, inputnodes):
+    def _getInputs(collada, localscope, inputnodes):
         try: 
             inputs = [ (int(i.get('offset')), i.get('semantic'), i.get('source'), i.get('set')) 
                            for i in inputnodes ]
         except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
         
-        return Primitive._getInputsFromList(localscope, inputs)
+        return Primitive._getInputsFromList(collada, localscope, inputs)
     
     def getInputList(self):
         """Gets a :class:`collada.source.InputList` representing the inputs from a primitive"""

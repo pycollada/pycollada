@@ -83,7 +83,7 @@ class Polygons(polylist.Polylist):
             index[numpy.isnan(index)] = 0
             polygon_indices.append(index)
         
-        all_inputs = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
+        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
 
         polygons = Polygons(all_inputs, node.get('material'), polygon_indices, node)
         return polygons

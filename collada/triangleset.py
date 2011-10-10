@@ -180,7 +180,7 @@ class TriangleSet(primitive.Primitive):
         indexnode = node.find(tag('p'))
         if indexnode is None: raise DaeIncompleteError('Missing index in triangle set')
         
-        source_array = primitive.Primitive._getInputs(localscope, node.findall(tag('input')))
+        source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
             
         try:
             if indexnode.text is None:
