@@ -1,8 +1,10 @@
-import unittest2
-import collada
 from lxml.etree import fromstring, tostring
 
-class TestLight(unittest2.TestCase):
+import collada
+from collada.util import unittest
+
+
+class TestLight(unittest.TestCase):
 
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
@@ -20,7 +22,7 @@ class TestLight(unittest2.TestCase):
         self.assertTrue(isinstance(loaded_dirlight, collada.light.DirectionalLight))
         self.assertTupleEqual(loaded_dirlight.color, (0.1, 0.2, 0.3))
         self.assertEqual(loaded_dirlight.id, "yourdirlight")
-        
+
     def test_ambient_light_saving(self):
         ambientlight = collada.light.AmbientLight("myambientlight", (1,1,1))
         self.assertEqual(ambientlight.id, "myambientlight")
@@ -33,7 +35,7 @@ class TestLight(unittest2.TestCase):
         self.assertTrue(isinstance(loaded_ambientlight, collada.light.AmbientLight))
         self.assertTupleEqual(ambientlight.color, (0.1, 0.2, 0.3))
         self.assertEqual(ambientlight.id, "yourambientlight")
-        
+
     def test_point_light_saving(self):
         pointlight = collada.light.PointLight("mypointlight", (1,1,1))
         self.assertEqual(pointlight.id, "mypointlight")
@@ -58,12 +60,12 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(loaded_pointlight.quad_att, 0.9)
         self.assertEqual(loaded_pointlight.zfar, None)
         self.assertEqual(loaded_pointlight.id, "yourpointlight")
-        
+
         loaded_pointlight.zfar = 0.2
         loaded_pointlight.save()
         loaded_pointlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(loaded_pointlight.xmlnode)))
         self.assertEqual(loaded_pointlight.zfar, 0.2)
-        
+
     def test_spot_light_saving(self):
         spotlight = collada.light.SpotLight("myspotlight", (1,1,1))
         self.assertEqual(spotlight.id, "myspotlight")
@@ -90,14 +92,14 @@ class TestLight(unittest2.TestCase):
         self.assertEqual(loaded_spotlight.falloff_ang, None)
         self.assertEqual(loaded_spotlight.falloff_exp, None)
         self.assertEqual(loaded_spotlight.id, "yourspotlight")
-        
+
         loaded_spotlight.falloff_ang = 180
         loaded_spotlight.falloff_exp = 2
         loaded_spotlight.save()
         loaded_spotlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(loaded_spotlight.xmlnode)))
         self.assertEqual(loaded_spotlight.falloff_ang, 180)
         self.assertEqual(loaded_spotlight.falloff_exp, 2)
-        
+
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

@@ -12,9 +12,10 @@
 
 """Contains objects representing animations."""
 
-from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, DaeUnsupportedError, tag
-import source
+from collada import source
+from collada.common import DaeObject, tag
+from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+        DaeMalformedError, DaeUnsupportedError
 
 class Animation(DaeObject):
     """Class for holding animation data coming from <animation> tags."""
@@ -32,7 +33,7 @@ class Animation(DaeObject):
     def load( collada, localscope, node ):
         id = node.get('id') or ''
         name = node.get('name') or ''
-        
+
         sourcebyid = localscope
         sources = []
         sourcenodes = node.findall(tag('source'))
@@ -40,15 +41,16 @@ class Animation(DaeObject):
             ch = source.Source.load(collada, {}, sourcenode)
             sources.append(ch)
             sourcebyid[ch.id] = ch
-        
+
         child_nodes = node.findall(tag('animation'))
         children = []
         for child in child_nodes:
             try:
                 child = Animation.load(collada, sourcebyid, child)
                 children.append(child)
-            except DaeError, ex: collada.handleError(ex)
-        
+            except DaeError as ex:
+                collada.handleError(ex)
+
         anim = Animation(id, name, sourcebyid, children, node)
         return anim
 

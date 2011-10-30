@@ -14,18 +14,20 @@
 
 import numpy
 from lxml import etree as ElementTree
-import primitive
-import types
-import triangleset
-from util import toUnitVec, checkSource
-from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
-                    DaeUnsupportedError, tag, E
+
+from collada import primitive
+from collada import triangleset
+from collada.common import E, tag
+from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+        DaeMalformedError, DaeUnsupportedError
+from collada.util import toUnitVec, checkSource, xrange
+
 
 class Polygon(object):
     """Single polygon representation. Represents a polygon of N points."""
     def __init__(self, indices, vertices, normals, texcoords, material):
         """A Polygon should not be created manually."""
-        
+
         self.vertices = vertices
         """A (N, 3) float array containing the points in the polygon."""
         self.normals = normals
@@ -43,46 +45,49 @@ class Polygon(object):
 
     def triangles(self):
         """This triangulates the polygon using a simple fanning method.
-        
+
         :rtype: generator of :class:`collada.polylist.Polygon`
         """
-        
+
         npts = len(self.vertices)
 
         for i in range(npts-2):
-            
+
             tri_indices = numpy.array([
                 self.indices[0], self.indices[i+1], self.indices[i+2]
                 ])
-            
+
             tri_vertices = numpy.array([
                 self.vertices[0], self.vertices[i+1], self.vertices[i+2]
                 ])
-            
+
             if self.normals is None:
                 tri_normals = None
             else:
                 tri_normals = numpy.array([
                     self.normals[0], self.normals[i+1], self.normals[i+2]
                     ])
-            
+
             tri_texcoords = []
             for texcoord in self.texcoords:
                 tri_texcoords.append([texcoord[0], texcoord[i+1], texcoord[i+2]])
             tri_texcoords = numpy.array(tri_texcoords)
-            
+
             tri = triangleset.Triangle(tri_indices, tri_vertices, tri_normals, tri_texcoords, self.material)
             yield tri
 
-    def __repr__(self): 
+    def __repr__(self):
         return '<Polygon vertices=%d>' % len(self.vertices)
-    def __str__(self): return repr(self)
+
+    def __str__(self):
+        return repr(self)
+
 
 class Polylist(primitive.Primitive):
     """Class containing the data COLLADA puts in a <polylist> tag, a collection of
     polygons. The Polylist object is read-only. To modify a Polylist, create a new
     instance using :meth:`collada.geometry.Geometry.createPolylist`.
-    
+
     * If ``P`` is an instance of :class:`collada.polylist.Polylist`, then ``len(P)``
       returns the number of polygons in the set. ``P[i]`` returns the i\ :sup:`th`
       polygon in the set.
@@ -93,13 +98,13 @@ class Polylist(primitive.Primitive):
         :meth:`collada.geometry.Geometry.createPolylist` method after
         creating a geometry instance.
         """
-        
+
         if len(sources) == 0: raise DaeIncompleteError('A polylist set needs at least one input for vertex positions')
         if not 'VERTEX' in sources: raise DaeIncompleteError('Polylist requires vertex input')
 
         #find max offset
         max_offset = max([ max([input[0] for input in input_type_array])
-                          for input_type_array in sources.itervalues() if len(input_type_array) > 0])
+                          for input_type_array in sources.values() if len(input_type_array) > 0])
 
         self.material = material
         self.index = index
@@ -133,42 +138,48 @@ class Polylist(primitive.Primitive):
             self._normal = None
             self._normal_index = None
             self.maxnormalindex = -1
-            
-        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 and len(self.index) > 0:
-            self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
+
+        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 \
+                and len(self.index) > 0:
+            self._texcoordset = tuple([texinput[4].data
+                for texinput in sources['TEXCOORD']])
             self._texcoord_indexset = tuple([ self.index[:,sources['TEXCOORD'][i][0]]
-                                             for i in xrange(len(sources['TEXCOORD'])) ])
-            self.maxtexcoordsetindex = [ numpy.max(each) for each in self._texcoord_indexset ]
+                for i in xrange(len(sources['TEXCOORD'])) ])
+            self.maxtexcoordsetindex = [numpy.max(each)
+                for each in self._texcoord_indexset]
             for i, texinput in enumerate(sources['TEXCOORD']):
                 checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
         else:
             self._texcoordset = tuple()
             self._texcoord_indexset = tuple()
             self.maxtexcoordsetindex = -1
-            
+
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the line set."""
         else:
             txtindices = ' '.join(map(str, self.indices.flatten().tolist()))
-            acclen = len(self.indices) 
+            acclen = len(self.indices)
 
-            self.xmlnode = E.polylist(count=str(self.npolygons), material=self.material)
-            
+            self.xmlnode = E.polylist(count=str(self.npolygons),
+                    material=self.material)
+
             all_inputs = []
-            for semantic_list in self.sources.itervalues():
+            for semantic_list in self.sources.values():
                 all_inputs.extend(semantic_list)
             for offset, semantic, sourceid, set, src in all_inputs:
-                inpnode = E.input(offset=str(offset), semantic=semantic, source=sourceid)
+                inpnode = E.input(offset=str(offset), semantic=semantic,
+                        source=sourceid)
                 if set is not None:
                     inpnode.set('set', str(set))
                 self.xmlnode.append(inpnode)
-            
+
             vcountnode = E.vcount(' '.join(map(str, self.vcounts)))
             self.xmlnode.append(vcountnode)
             self.xmlnode.append(E.p(txtindices))
 
-    def __len__(self): return self.npolygons
+    def __len__(self):
+        return self.npolygons
 
     def __getitem__(self, i):
         polyrange = self.polyindex[i]
@@ -186,20 +197,20 @@ class Polylist(primitive.Primitive):
     _triangleset = None
     def triangleset(self):
         """This performs a simple triangulation of the polylist using the fanning method.
-        
+
         :rtype: :class:`collada.triangleset.TriangleSet`
         """
-        
+
         if self._triangleset is None:
             indexselector = numpy.zeros(self.nvertices) == 0
             indexselector[self.polyindex[:,1]-1] = False
             indexselector[self.polyindex[:,1]-2] = False
             indexselector = numpy.arange(self.nvertices)[indexselector]
-            
+
             firstpolyindex = numpy.arange(self.nvertices)
             firstpolyindex = firstpolyindex - numpy.repeat(self.polyends - self.vcounts, self.vcounts)
             firstpolyindex = firstpolyindex[indexselector]
-            
+
             if len(self.index) > 0:
                 triindex = numpy.dstack( (self.index[indexselector-firstpolyindex],
                                           self.index[indexselector+1],
@@ -207,9 +218,9 @@ class Polylist(primitive.Primitive):
                 triindex = numpy.swapaxes(triindex, 1,2).flatten()
             else:
                 triindex = numpy.array([], dtype=self.index.dtype)
-            
+
             triset = triangleset.TriangleSet(self.sources, self.material, triindex, self.xmlnode)
-            
+
             self._triangleset = triset
         return self._triangleset
 
@@ -226,7 +237,8 @@ class Polylist(primitive.Primitive):
             else:
                 vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
             vcounts[numpy.isnan(vcounts)] = 0
-        except ValueError, ex: raise DaeMalformedError('Corrupted vcounts in polylist')
+        except ValueError as ex:
+            raise DaeMalformedError('Corrupted vcounts in polylist')
 
         all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
 
@@ -240,17 +252,21 @@ class Polylist(primitive.Primitive):
 
         polylist = Polylist(all_inputs, node.get('material'), index, vcounts, node)
         return polylist
-    
+
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound polylist from this polylist, transform and material mapping"""
         return BoundPolylist( self, matrix, materialnodebysymbol)
 
-    def __str__(self): return '<Polylist length=%d>' % len(self)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<Polylist length=%d>' % len(self)
+
+    def __repr__(self):
+        return str(self)
+
 
 class BoundPolylist(primitive.BoundPrimitive):
     """A polylist bound to a transform matrix and materials mapping.
-    
+
     * If ``P`` is an instance of :class:`collada.polylist.BoundPolylist`, then ``len(P)``
       returns the number of polygons in the set. ``P[i]`` returns the i\ :sup:`th`
       polygon in the set.
@@ -278,7 +294,7 @@ class BoundPolylist(primitive.BoundPrimitive):
         self.matrix = matrix
         self.materialnodebysymbol = materialnodebysymbol
         self.original = pl
-    
+
     def __len__(self): return len(self.index)
 
     def __getitem__(self, i):
@@ -297,7 +313,7 @@ class BoundPolylist(primitive.BoundPrimitive):
     _triangleset = None
     def triangleset(self):
         """This performs a simple triangulation of the polylist using the fanning method.
-        
+
         :rtype: :class:`collada.triangleset.BoundTriangleSet`
         """
         if self._triangleset is None:
@@ -308,17 +324,21 @@ class BoundPolylist(primitive.BoundPrimitive):
 
     def polygons(self):
         """Iterate through all the polygons contained in the set.
-        
+
         :rtype: generator of :class:`collada.polylist.Polygon`
         """
         for i in xrange(self.npolygons): yield self[i]
 
     def shapes(self):
         """Iterate through all the polygons contained in the set.
-        
+
         :rtype: generator of :class:`collada.polylist.Polygon`
         """
         return self.polygons()
 
-    def __str__(self): return '<BoundPolylist length=%d>' % len(self)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<BoundPolylist length=%d>' % len(self)
+
+    def __repr__(self):
+        return str(self)
+

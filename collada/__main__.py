@@ -10,8 +10,12 @@
 #                                                                  #
 ####################################################################
 
-import unittest2
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from collada.util import unittest
 
 if __name__ == '__main__':
-    suite = unittest2.TestLoader().discover("tests")
-    unittest2.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().discover("tests")
+    unittest.TextTestRunner(verbosity=2).run(suite)

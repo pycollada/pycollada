@@ -1,13 +1,15 @@
-import unittest2
-import collada
-from lxml.etree import fromstring, tostring
 import numpy
+from lxml.etree import fromstring, tostring
 
-class TestSource(unittest2.TestCase):
+import collada
+from collada.util import unittest
+
+
+class TestSource(unittest.TestCase):
 
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
-        
+
     def test_float_source_saving(self):
         floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'X'))
         self.assertEqual(floatsource.id, "myfloatsource")
@@ -23,7 +25,7 @@ class TestSource(unittest2.TestCase):
         self.assertEqual(floatsource.id, "yourfloatsource")
         self.assertEqual(len(floatsource), 3)
         self.assertTupleEqual(floatsource.components, ('S', 'T'))
-        
+
     def test_idref_source_saving(self):
         idrefsource = collada.source.IDRefSource("myidrefsource",
                                 numpy.array(['Ref1', 'Ref2'], dtype=numpy.string_),
@@ -41,7 +43,7 @@ class TestSource(unittest2.TestCase):
         self.assertEqual(loaded_idrefsource.id, "youridrefsource")
         self.assertEqual(len(loaded_idrefsource), 3)
         self.assertTupleEqual(loaded_idrefsource.components, ('JOINT_TARGET', 'WHATEVER_TARGET'))
-        
+
     def test_name_source_saving(self):
         namesource = collada.source.NameSource("mynamesource",
                                 numpy.array(['Name1', 'Name2'], dtype=numpy.string_),
@@ -59,6 +61,6 @@ class TestSource(unittest2.TestCase):
         self.assertEqual(loaded_namesource.id, "yournamesource")
         self.assertEqual(len(loaded_namesource), 3)
         self.assertTupleEqual(loaded_namesource.components, ('WEIGHT', 'WHATEVER'))
-        
+
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

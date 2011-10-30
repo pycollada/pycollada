@@ -12,11 +12,13 @@
 
 """Contains objects for representing lights."""
 
-from lxml import etree as ElementTree
 import numpy
-from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, DaeUnsupportedError, tag, E
+from lxml import etree as ElementTree
+from collada.common import DaeObject, E, tag
+from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+        DaeMalformedError, DaeUnsupportedError
 from collada.util import _correctValInNode
+
 
 class Light(DaeObject):
     """Base light class holding data from <light> tags."""
@@ -24,7 +26,7 @@ class Light(DaeObject):
     @staticmethod
     def load(collada, localscope, node):
         tecnode = node.find( tag('technique_common') )
-        if tecnode is None or len(tecnode) == 0: 
+        if tecnode is None or len(tecnode) == 0:
             raise DaeIncompleteError('Missing common technique in light')
         lightnode = tecnode[0]
         if lightnode.tag == tag('directional'):
@@ -37,6 +39,7 @@ class Light(DaeObject):
             return SpotLight.load( collada, localscope, node )
         else:
             raise DaeUnsupportedError('Unrecognized light type: %s'%lightnode.tag)
+
 
 class DirectionalLight(Light):
     """Directional light as defined in COLLADA tag <directional> tag."""
@@ -79,34 +82,40 @@ class DirectionalLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        colornode = self.xmlnode.find( '%s/%s/%s'%(tag('technique_common'),tag('directional'), 
-                                                  tag('color') ) )
+        colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
+            tag('directional'), tag('color')))
         colornode.text = ' '.join(map(str, self.color))
 
-        
+
     @staticmethod
     def load(collada, localscope, node):
-        colornode = node.find( '%s/%s/%s'%(tag('technique_common'),tag('directional'), 
+        colornode = node.find( '%s/%s/%s'%(tag('technique_common'),tag('directional'),
                                            tag('color') ) )
-        if colornode is None: raise DaeIncompleteError('Missing color for directional light')
-        try: color = tuple( [ float(v) for v in colornode.text.split() ] )
-        except ValueError, ex: 
+        if colornode is None:
+            raise DaeIncompleteError('Missing color for directional light')
+        try:
+            color = tuple([float(v) for v in colornode.text.split()])
+        except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
         return DirectionalLight(node.get('id'), color, xmlnode = node)
-    
+
     def bind(self, matrix):
         """Binds this light to a transform matrix.
-        
+
         :param numpy.array matrix:
           A 4x4 numpy float matrix
-        
+
         :rtype: :class:`collada.light.BoundDirectionalLight`
-        
+
         """
         return BoundDirectionalLight(self, matrix)
 
-    def __str__(self): return '<DirectionalLight id=%s>' % (self.id,)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<DirectionalLight id=%s>' % (self.id,)
+
+    def __repr__(self):
+        return str(self)
+
 
 class AmbientLight(Light):
     """Ambient light as defined in COLLADA tag <ambient>."""
@@ -137,7 +146,7 @@ class AmbientLight(Light):
             self.xmlnode = E.light(
                 E.technique_common(
                     E.ambient(
-                        E.color(' '.join(map(str, self.color ) ))
+                        E.color(' '.join(map(str, self.color)))
                     )
                 )
             , id=self.id, name=self.id)
@@ -146,39 +155,46 @@ class AmbientLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        colornode = self.xmlnode.find( '%s/%s/%s'%(tag('technique_common'),tag('ambient'), 
-                                                  tag('color') ) )
-        colornode.text = ' '.join(map(str, self.color ) )
+        colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
+            tag('ambient'), tag('color')))
+        colornode.text = ' '.join(map(str, self.color))
 
-        
+
     @staticmethod
     def load(collada, localscope, node):
-        colornode = node.find( '%s/%s/%s'%(tag('technique_common'),tag('ambient'), 
-                                           tag('color') ) )
-        if colornode is None: raise DaeIncompleteError('Missing color for ambient light')
-        try: color = tuple( [ float(v) for v in colornode.text.split() ] )
-        except ValueError, ex: 
+        colornode = node.find('%s/%s/%s' % (tag('technique_common'),
+            tag('ambient'), tag('color')))
+        if colornode is None:
+            raise DaeIncompleteError('Missing color for ambient light')
+        try:
+            color = tuple( [ float(v) for v in colornode.text.split() ] )
+        except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
         return AmbientLight(node.get('id'), color, xmlnode = node)
-    
+
     def bind(self, matrix):
         """Binds this light to a transform matrix.
-        
+
         :param numpy.array matrix:
           A 4x4 numpy float matrix
-        
+
         :rtype: :class:`collada.light.BoundAmbientLight`
-        
+
         """
         return BoundAmbientLight(self, matrix)
 
-    def __str__(self): return '<AmbientLight id=%s>' % (self.id,)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<AmbientLight id=%s>' % (self.id,)
+
+    def __repr__(self):
+        return str(self)
+
 
 class PointLight(Light):
     """Point light as defined in COLLADA tag <point>."""
 
-    def __init__(self, id, color, constant_att=None, linear_att=None, quad_att=None, zfar=None, xmlnode = None):
+    def __init__(self, id, color, constant_att=None, linear_att=None,
+            quad_att=None, zfar=None, xmlnode = None):
         """Create a new sun light.
 
         :param str id:
@@ -216,7 +232,7 @@ class PointLight(Light):
         """Quadratic attenuation factor."""
         self.zfar = zfar
         """Distance to the far clipping plane"""
-        
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
@@ -232,7 +248,7 @@ class PointLight(Light):
                 pnode.append(E.quadratic_attenuation(str(self.quad_att)))
             if self.zfar is not None:
                 pnode.append(E.zfar(str(self.zvar)))
-            
+
             self.xmlnode = E.light(
                 E.technique_common(pnode)
             , id=self.id, name=self.id)
@@ -251,11 +267,13 @@ class PointLight(Light):
 
     @staticmethod
     def load(collada, localscope, node):
-        pnode = node.find( '%s/%s'%(tag('technique_common'),tag('point')) )
+        pnode = node.find('%s/%s' % (tag('technique_common'), tag('point')))
         colornode = pnode.find( tag('color') )
-        if colornode is None: raise DaeIncompleteError('Missing color for point light')
-        try: color = tuple( [ float(v) for v in colornode.text.split() ] )
-        except ValueError, ex: 
+        if colornode is None:
+            raise DaeIncompleteError('Missing color for point light')
+        try:
+            color = tuple([float(v) for v in colornode.text.split()])
+        except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
         constant_att = linear_att = quad_att = zfar = None
         qattnode = pnode.find( tag('quadratic_attenuation') )
@@ -263,34 +281,42 @@ class PointLight(Light):
         lattnode = pnode.find( tag('linear_attenuation') )
         zfarnode = pnode.find( tag('zfar') )
         try:
-            if cattnode is not None: constant_att = float(cattnode.text)
-            if lattnode is not None: linear_att = float(lattnode.text)
-            if qattnode is not None: quad_att = float(qattnode.text)
-            if zfarnode is not None: zfar = float(zfarnode.text)
-        except ValueError, ex: 
+            if cattnode is not None:
+                constant_att = float(cattnode.text)
+            if lattnode is not None:
+                linear_att = float(lattnode.text)
+            if qattnode is not None:
+                quad_att = float(qattnode.text)
+            if zfarnode is not None:
+                zfar = float(zfarnode.text)
+        except ValueError as ex:
             raise DaeMalformedError('Corrupted values in light definition')
-        return PointLight(node.get('id'), color, constant_att, linear_att, quad_att, 
-                          zfar, xmlnode = node)
+        return PointLight(node.get('id'), color, constant_att, linear_att,
+                quad_att, zfar, xmlnode = node)
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
-        
+
         :param numpy.array matrix:
           A 4x4 numpy float matrix
-        
+
         :rtype: :class:`collada.light.BoundPointLight`
-        
+
         """
         return BoundPointLight(self, matrix)
-    
-    def __str__(self): return '<PointLight id=%s>' % (self.id,)
-    def __repr__(self): return str(self)
-    
+
+    def __str__(self):
+        return '<PointLight id=%s>' % (self.id,)
+
+    def __repr__(self):
+        return str(self)
+
+
 class SpotLight(Light):
     """Spot light as defined in COLLADA tag <spot>."""
 
-    def __init__(self, id, color, constant_att=None, linear_att=None, quad_att=None,
-                    falloff_ang=None, falloff_exp=None, xmlnode = None):
+    def __init__(self, id, color, constant_att=None, linear_att=None,
+            quad_att=None, falloff_ang=None, falloff_exp=None, xmlnode = None):
         """Create a new spot light.
 
         :param str id:
@@ -329,7 +355,7 @@ class SpotLight(Light):
         """Falloff angle"""
         self.falloff_exp = falloff_exp
         """Falloff exponent"""
-        
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
@@ -347,7 +373,7 @@ class SpotLight(Light):
                 pnode.append(E.falloff_angle(str(self.falloff_ang)))
             if self.falloff_exp is not None:
                 pnode.append(E.falloff_exponent(str(self.falloff_exp)))
-            
+
             self.xmlnode = E.light(
                 E.technique_common(pnode)
             , id=self.id, name=self.id)
@@ -356,8 +382,8 @@ class SpotLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('spot')) )
-        colornode = pnode.find( tag('color') )
+        pnode = self.xmlnode.find('%s/%s' % (tag('technique_common'), tag('spot')))
+        colornode = pnode.find(tag('color'))
         colornode.text = ' '.join(map(str, self.color ) )
         _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
         _correctValInNode(pnode, 'linear_attenuation', self.linear_att)
@@ -369,9 +395,11 @@ class SpotLight(Light):
     def load(collada, localscope, node):
         pnode = node.find( '%s/%s'%(tag('technique_common'),tag('spot')) )
         colornode = pnode.find( tag('color') )
-        if colornode is None: raise DaeIncompleteError('Missing color for spot light')
-        try: color = tuple( [ float(v) for v in colornode.text.split() ] )
-        except ValueError, ex: 
+        if colornode is None:
+            raise DaeIncompleteError('Missing color for spot light')
+        try:
+            color = tuple([float(v) for v in colornode.text.split()])
+        except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in spot light definition')
         constant_att = linear_att = quad_att = falloff_ang = falloff_exp = None
         cattnode = pnode.find( tag('constant_attenuation') )
@@ -380,33 +408,43 @@ class SpotLight(Light):
         fangnode = pnode.find( tag('falloff_angle') )
         fexpnode = pnode.find( tag('falloff_exponent') )
         try:
-            if cattnode is not None: constant_att = float(cattnode.text)
-            if lattnode is not None: linear_att = float(lattnode.text)
-            if qattnode is not None: quad_att = float(qattnode.text)
-            if fangnode is not None: falloff_ang = float(fangnode.text)
-            if fexpnode is not None: falloff_exp = float(fexpnode.text)
-        except ValueError, ex: 
+            if cattnode is not None:
+                constant_att = float(cattnode.text)
+            if lattnode is not None:
+                linear_att = float(lattnode.text)
+            if qattnode is not None:
+                quad_att = float(qattnode.text)
+            if fangnode is not None:
+                falloff_ang = float(fangnode.text)
+            if fexpnode is not None:
+                falloff_exp = float(fexpnode.text)
+        except ValueError as ex:
             raise DaeMalformedError('Corrupted values in spot light definition')
-        return SpotLight(node.get('id'), color, constant_att, linear_att, quad_att,
-                          falloff_ang, falloff_exp, xmlnode = node)
+        return SpotLight(node.get('id'), color, constant_att, linear_att,
+                quad_att, falloff_ang, falloff_exp, xmlnode = node)
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
-        
+
         :param numpy.array matrix:
           A 4x4 numpy float matrix
-        
+
         :rtype: :class:`collada.light.BoundSpotLight`
-        
+
         """
         return BoundSpotLight(self, matrix)
 
-    def __str__(self): return '<SpotLight id=%s>' % (self.id,)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<SpotLight id=%s>' % (self.id,)
+
+    def __repr__(self):
+        return str(self)
+
 
 class BoundLight(object):
     """Base class for bound lights"""
     pass
+
 
 class BoundPointLight(BoundLight):
     """Point light bound to a scene with transformation. This gets created when a
@@ -420,22 +458,29 @@ class BoundPointLight(BoundLight):
           of the light or a tuple of size 4 containing the RGBA
           color value of the light"""
         self.constant_att = plight.constant_att
-        if self.constant_att is None: self.constant_att = 1.0
+        if self.constant_att is None:
+            self.constant_att = 1.0
         """Constant attenuation factor."""
         self.linear_att = plight.linear_att
-        if self.linear_att is None: self.linear_att = 0.0
+        if self.linear_att is None:
+            self.linear_att = 0.0
         """Linear attenuation factor."""
         self.quad_att = plight.quad_att
-        if self.quad_att is None: self.quad_att = 0.0
+        if self.quad_att is None:
+            self.quad_att = 0.0
         """Quadratic attenuation factor."""
         self.zfar = plight.zfar
         """Distance to the far clipping plane"""
         self.original = plight
         """The original :class:`collada.light.PointLight` this is bound to"""
 
-    def __str__(self): return '<BoundPointLight bound to id=%s>' % str(self.original.id)
-    def __repr__(self): return str(self)
-    
+    def __str__(self):
+        return '<BoundPointLight bound to id=%s>' % str(self.original.id)
+
+    def __repr__(self):
+        return str(self)
+
+
 class BoundSpotLight(BoundLight):
     """Spot light bound to a scene with transformation. This gets created when a
         light is instantiated in a scene. Do not create this manually."""
@@ -454,25 +499,33 @@ class BoundSpotLight(BoundLight):
           of the light or a tuple of size 4 containing the RGBA
           color value of the light"""
         self.constant_att = slight.constant_att
-        if self.constant_att is None: self.constant_att = 1.0
+        if self.constant_att is None:
+            self.constant_att = 1.0
         """Constant attenuation factor."""
         self.linear_att = slight.linear_att
-        if self.linear_att is None: self.linear_att = 0.0
+        if self.linear_att is None:
+            self.linear_att = 0.0
         """Linear attenuation factor."""
         self.quad_att = slight.quad_att
-        if self.quad_att is None: self.quad_att = 0.0
+        if self.quad_att is None:
+            self.quad_att = 0.0
         """Quadratic attenuation factor."""
         self.falloff_ang = slight.falloff_ang
-        if self.falloff_ang is None: self.falloff_ang = 180.0
+        if self.falloff_ang is None:
+            self.falloff_ang = 180.0
         """Falloff angle"""
         self.falloff_exp = slight.falloff_exp
-        if self.falloff_exp is None: self.falloff_exp = 0.0
+        if self.falloff_exp is None:
+            self.falloff_exp = 0.0
         """Falloff exponent"""
         self.original = slight
         """The original :class:`collada.light.SpotLight` this is bound to"""
 
-    def __str__(self): return '<BoundSpotLight bound to id=%s>' % str(self.original.id)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<BoundSpotLight bound to id=%s>' % str(self.original.id)
+
+    def __repr__(self):
+        return str(self)
 
 class BoundDirectionalLight(BoundLight):
     """Directional light bound to a scene with transformation. This gets created when a
@@ -488,8 +541,11 @@ class BoundDirectionalLight(BoundLight):
         self.original = dlight
         """The original :class:`collada.light.DirectionalLight` this is bound to"""
 
-    def __str__(self): return '<BoundDirectionalLight bound to id=%s>' % str(self.original.id)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<BoundDirectionalLight bound to id=%s>' % str(self.original.id)
+
+    def __repr__(self):
+        return str(self)
 
 class BoundAmbientLight(BoundLight):
     """Ambient light bound to a scene with transformation. This gets created when a
@@ -503,6 +559,9 @@ class BoundAmbientLight(BoundLight):
         self.original = alight
         """The original :class:`collada.light.AmbientLight` this is bound to"""
 
-    def __str__(self): return '<BoundAmbientLight bound to id=%s>' % str(self.original.id)
-    def __repr__(self): return str(self)
-    
+    def __str__(self):
+        return '<BoundAmbientLight bound to id=%s>' % str(self.original.id)
+
+    def __repr__(self):
+        return str(self)
+
