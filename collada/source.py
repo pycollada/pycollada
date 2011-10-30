@@ -12,32 +12,33 @@
 
 """Module for managing data sources defined in geometry tags."""
 
-from lxml import etree as ElementTree
 import numpy
-from collada import DaeObject, DaeIncompleteError, DaeBrokenRefError, \
-                    DaeMalformedError, tag, E
+from lxml import etree as ElementTree
+
+from collada.common import DaeObject, E, tag
+from collada.common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError
 
 class InputList(object):
     """Used for defining input sources to a geometry."""
-    
+
     class Input:
         def __init__(self, offset, semantic, src, set=None):
             self.offset = offset
             self.semantic = semantic
             self.source = src
             self.set = set
-    
+
     semantics = ["VERTEX", "NORMAL", "TEXCOORD", "TEXBINORMAL", "TEXTANGENT", "COLOR", "TANGENT", "BINORMAL"]
-    
+
     def __init__(self):
         """Create an input list"""
         self.inputs = {}
         for s in self.semantics:
             self.inputs[s] = []
-            
+
     def addInput(self, offset, semantic, src, set=None):
         """Add an input source to this input list.
-        
+
         :param int offset:
           Offset for this source within the geometry's indices
         :param str semantic:
@@ -56,48 +57,48 @@ class InputList(object):
         :param str set:
           Indicates a set number for the source. This is used, for example,
           when there are multiple texture coordinate sets.
-        
-        """ 
+
+        """
         if semantic not in self.semantics:
             raise DaeUnsupportedError("Unsupported semantic %s" % semantic)
         self.inputs[semantic].append(self.Input(offset, semantic, src, set))
-        
+
     def getList(self):
         """Returns a list of tuples of the source in the form (offset, semantic, source, set)"""
         retlist = []
-        for inplist in self.inputs.itervalues():
+        for inplist in self.inputs.values():
             for inp in inplist:
                  retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
         return retlist
-    
+
     def __str__(self): return '<InputList>'
     def __repr__(self): return str(self)
 
 class Source(DaeObject):
     """Abstract class for loading source arrays"""
-    
+
     @staticmethod
     def load(collada, localscope, node):
         sourceid = node.get('id')
         arraynode = node.find(tag('float_array'))
         if not arraynode is None:
             return FloatSource.load(collada, localscope, node)
-        
+
         arraynode = node.find(tag('IDREF_array'))
         if not arraynode is None:
             return IDRefSource.load(collada, localscope, node)
-        
+
         arraynode = node.find(tag('Name_array'))
         if not arraynode is None:
             return NameSource.load(collada, localscope, node)
-        
+
         if arraynode is None: raise DaeIncompleteError('No array found in source %s' % sourceid)
-        
+
 
 class FloatSource(Source):
     """Contains a source array of floats, as defined in the collada
     <float_array> inside a <source>.
-    
+
     If ``f`` is an instance of :class:`collada.source.FloatSource`, then
     ``len(f)`` is the length of the shaped source. ``len(f)*len(f.components)``
     would give you the number of values in the source. ``f[i]`` is the i\ :sup:`th`
@@ -119,7 +120,7 @@ class FloatSource(Source):
           When loaded, the xmlnode it comes from.
 
         """
-          
+
         self.id = id
         """The unique string identifier for the source"""
         self.data = data
@@ -138,7 +139,7 @@ class FloatSource(Source):
             acclen = len( self.data )
             stridelen = len(self.components)
             sourcename = "%s-array"%self.id
-            
+
             self.xmlnode = E.source(
                 E.float_array(txtdata, count=str(rawlen), id=sourcename),
                 E.technique_common(
@@ -173,7 +174,7 @@ class FloatSource(Source):
         for c in self.components:
             node.append(E.param(type='float', name=c))
         self.xmlnode.set('id', self.id )
-    
+
     @staticmethod
     def load( collada, localscope, node ):
         sourceid = node.get('id')
@@ -185,7 +186,7 @@ class FloatSource(Source):
             try: data = numpy.fromstring(arraynode.text, dtype=numpy.float32, sep=' ')
             except ValueError: raise DaeMalformedError('Corrupted float array')
         data[numpy.isnan(data)] = 0
-            
+
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
@@ -207,7 +208,7 @@ class FloatSource(Source):
 class IDRefSource(Source):
     """Contains a source array of ID references, as defined in the collada
     <IDREF_array> inside a <source>.
-    
+
     If ``r`` is an instance of :class:`collada.source.IDRefSource`, then
     ``len(r)`` is the length of the shaped source. ``len(r)*len(r.components)``
     would give you the number of values in the source. ``r[i]`` is the i\ :sup:`th`
@@ -230,7 +231,7 @@ class IDRefSource(Source):
           When loaded, the xmlnode it comes from.
 
         """
-          
+
         self.id = id
         """The unique string identifier for the source"""
         self.data = data
@@ -249,7 +250,7 @@ class IDRefSource(Source):
             acclen = len( self.data )
             stridelen = len(self.components)
             sourcename = "%s-array"%self.id
-            
+
             self.xmlnode = E.source(
                 E.IDREF_array(txtdata, count=str(rawlen), id=sourcename),
                 E.technique_common(
@@ -270,7 +271,7 @@ class IDRefSource(Source):
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )
-        
+
         node = self.xmlnode.find(tag('IDREF_array'))
         node.text = txtdata
         node.set('count', str(rawlen))
@@ -283,7 +284,7 @@ class IDRefSource(Source):
         for c in self.components:
             node.append(E.param(type='IDREF', name=c))
         self.xmlnode.set('id', self.id )
-    
+
     @staticmethod
     def load( collada, localscope, node ):
         sourceid = node.get('id')
@@ -306,7 +307,7 @@ class IDRefSource(Source):
 class NameSource(Source):
     """Contains a source array of strings, as defined in the collada
     <Name_array> inside a <source>.
-    
+
     If ``n`` is an instance of :class:`collada.source.NameSource`, then
     ``len(n)`` is the length of the shaped source. ``len(n)*len(n.components)``
     would give you the number of values in the source. ``n[i]`` is the i\ :sup:`th`
@@ -329,7 +330,7 @@ class NameSource(Source):
           When loaded, the xmlnode it comes from.
 
         """
-          
+
         self.id = id
         """The unique string identifier for the source"""
         self.data = data
@@ -348,7 +349,7 @@ class NameSource(Source):
             acclen = len( self.data )
             stridelen = len(self.components)
             sourcename = "%s-array"%self.id
-            
+
             self.xmlnode = E.source(
                 E.Name_array(txtdata, count=str(rawlen), id=sourcename),
                 E.technique_common(
@@ -357,7 +358,7 @@ class NameSource(Source):
                     , **{'count':str(acclen), 'stride':str(stridelen), 'source':sourcename})
                 )
             , id=self.id )
-            
+
     def __len__(self): return len(self.data)
 
     def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
@@ -382,7 +383,7 @@ class NameSource(Source):
         for c in self.components:
             node.append(E.param(type='IDREF', name=c))
         self.xmlnode.set('id', self.id )
-    
+
     @staticmethod
     def load( collada, localscope, node ):
         sourceid = node.get('id')

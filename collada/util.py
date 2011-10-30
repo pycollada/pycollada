@@ -14,13 +14,30 @@
 
 import numpy
 import math
+import sys
 
-from collada import DaeMalformedError, tag, E
+if sys.version_info[0] > 2:
+    import unittest
+    from io import StringIO, BytesIO
+    bytes = bytes
+    basestring = (str,bytes)
+    xrange = range
+else:
+    import unittest2 as unittest
+    from StringIO import StringIO
+    BytesIO = StringIO
+    def bytes(s, encoding='utf-8'):
+        return s
+    basestring = basestring
+    xrange = xrange
+
+from collada.common import DaeMalformedError, E, tag
+
 
 def falmostEqual(a, b, rtol=1.0000000000000001e-05, atol=1e-08):
     """Checks if the given floats are almost equal. Uses the algorithm
     from numpy.allclose.
-    
+
     :param float a:
       First float to compare
     :param float b:
@@ -29,21 +46,21 @@ def falmostEqual(a, b, rtol=1.0000000000000001e-05, atol=1e-08):
       The relative tolerance parameter
     :param float atol:
       The absolute tolerance parameter
-      
+
     :rtype: bool
-      
+
     """
-    
+
     return math.fabs(a - b) <= (atol + rtol * math.fabs(b))
 
 def toUnitVec(vec):
     """Converts the given vector to a unit vector
-    
+
     :param numpy.array vec:
       The vector to transform to unit length
-      
+
     :rtype: numpy.array
-    
+
     """
     return vec / numpy.sqrt(numpy.vdot(vec, vec))
 
@@ -68,19 +85,19 @@ def checkSource( source, components, maxindex):
     #adapt to the failed output of others...
     if len(source.components) == len(components):
         source.components = components
-    
+
     if source.components != components:
         raise DaeMalformedError('Wrong format in source %s'%source.id)
     return source
 
 def normalize_v3(arr):
     """Normalize a numpy array of 3 component vectors with shape (N,3)
-    
+
     :param numpy.array arr:
       The numpy array to normalize
-    
+
     :rtype: numpy.array
-    
+
     """
     lens = numpy.sqrt( arr[:,0]**2 + arr[:,1]**2 + arr[:,2]**2 )
     lens[numpy.equal(lens, 0)] = 1
@@ -91,14 +108,14 @@ def normalize_v3(arr):
 
 def dot_v3(arr1, arr2):
     """Calculates the dot product for each vector in two arrays
-    
+
     :param numpy.array arr1:
       The first array, shape Nx3
     :param numpy.array arr2:
       The second array, shape Nx3
-    
+
     :rtype: numpy.array
-    
+
     """
     return arr1[:,0]*arr2[:,0] + arr1[:,1]*arr2[:,1] + arr2[:,2]*arr1[:,2]
 

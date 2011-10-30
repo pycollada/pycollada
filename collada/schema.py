@@ -15,7 +15,7 @@
 with the COLLADA 1.4.1 schema."""
 
 import lxml
-import StringIO
+from collada.util import bytes, BytesIO
 
 COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns="http://www.collada.org/2005/11/COLLADASchema" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.collada.org/2005/11/COLLADASchema" elementFormDefault="qualified" version="1.4.1" xml:lang="EN" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
@@ -31,9 +31,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
              Khronos is a trademark of The Khronos Group Inc.
              COLLADA is a trademark of Sony Computer Entertainment Inc. used by permission by Khronos.
 
-             Note that this software document is distributed on an "AS IS" basis, with ALL EXPRESS AND 
+             Note that this software document is distributed on an "AS IS" basis, with ALL EXPRESS AND
              IMPLIED WARRANTIES AND CONDITIONS DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED
-             WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR 
+             WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR
              PURPOSE, AND NON-INFRINGEMENT.
         </xs:documentation>
     </xs:annotation>
@@ -44,7 +44,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:annotation>
             <xs:appinfo>enable-xmlns</xs:appinfo>
             <xs:documentation>
-            The COLLADA element declares the root of the document that comprises some of the content 
+            The COLLADA element declares the root of the document that comprises some of the content
             in the COLLADA schema.
             </xs:documentation>
         </xs:annotation>
@@ -167,9 +167,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="scene" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The scene embodies the entire set of information that can be visualized from the 
-                        contents of a COLLADA resource. The scene element declares the base of the scene 
-                        hierarchy or scene graph. The scene contains elements that comprise much of the 
+                        The scene embodies the entire set of information that can be visualized from the
+                        contents of a COLLADA resource. The scene element declares the base of the scene
+                        hierarchy or scene graph. The scene contains elements that comprise much of the
                         visual and transformational information content as created by the authoring tools.
                         </xs:documentation>
                     </xs:annotation>
@@ -212,7 +212,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="version" type="VersionType" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                        The version attribute is the COLLADA schema revision with which the instance document 
+                        The version attribute is the COLLADA schema revision with which the instance document
                         conforms. Required Attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -516,8 +516,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="offset" type="uint" use="required">
             <xs:annotation>
                 <xs:documentation>
-                The offset attribute represents the offset into the list of indices.  If two input elements share 
-                the same offset, they will be indexed the same.  This works as a simple form of compression for the 
+                The offset attribute represents the offset into the list of indices.  If two input elements share
+                the same offset, they will be indexed the same.  This works as a simple form of compression for the
                 list of indices as well as defining the order the inputs should be used in.  Required attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -539,8 +539,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="set" type="uint">
             <xs:annotation>
                 <xs:documentation>
-                The set attribute indicates which inputs should be grouped together as a single set. This is helpful 
-                when multiple inputs share the same semantics. 
+                The set attribute indicates which inputs should be grouped together as a single set. This is helpful
+                when multiple inputs share the same semantics.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
@@ -548,7 +548,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:complexType name="InstanceWithExtra">
         <xs:annotation>
             <xs:documentation>
-            The InstanceWithExtra type is used for all generic instance elements. A generic instance element 
+            The InstanceWithExtra type is used for all generic instance elements. A generic instance element
             is one which does not have any specific child elements declared.
             </xs:documentation>
         </xs:annotation>
@@ -564,8 +564,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="url" type="xs:anyURI" use="required">
             <xs:annotation>
                 <xs:documentation>
-                The url attribute refers to resource to instantiate. This may refer to a local resource using a 
-                relative URL fragment identifier that begins with the “#” character. The url attribute may refer 
+                The url attribute refers to resource to instantiate. This may refer to a local resource using a
+                relative URL fragment identifier that begins with the “#” character. The url attribute may refer
                 to an external resource using an absolute or relative URL.
                 </xs:documentation>
             </xs:annotation>
@@ -573,7 +573,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName">
             <xs:annotation>
                 <xs:documentation>
-                The sid attribute is a text string value containing the sub-identifier of this element. This 
+                The sid attribute is a text string value containing the sub-identifier of this element. This
                 value must be unique within the scope of the parent element. Optional attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -589,7 +589,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:complexType name="TargetableFloat">
         <xs:annotation>
             <xs:documentation>
-            The TargetableFloat type is used to represent elements which contain a single float value which can 
+            The TargetableFloat type is used to represent elements which contain a single float value which can
             be targeted for animation.
             </xs:documentation>
         </xs:annotation>
@@ -598,7 +598,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:attribute name="sid" type="xs:NCName">
                     <xs:annotation>
                         <xs:documentation>
-                        The sid attribute is a text string value containing the sub-identifier of this element. This 
+                        The sid attribute is a text string value containing the sub-identifier of this element. This
                         value must be unique within the scope of the parent element. Optional attribute.
                         </xs:documentation>
                     </xs:annotation>
@@ -609,7 +609,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:complexType name="TargetableFloat3">
         <xs:annotation>
             <xs:documentation>
-            The TargetableFloat3 type is used to represent elements which contain a float3 value which can 
+            The TargetableFloat3 type is used to represent elements which contain a float3 value which can
             be targeted for animation.
             </xs:documentation>
         </xs:annotation>
@@ -618,7 +618,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:attribute name="sid" type="xs:NCName">
                     <xs:annotation>
                         <xs:documentation>
-                        The sid attribute is a text string value containing the sub-identifier of this element. 
+                        The sid attribute is a text string value containing the sub-identifier of this element.
                         This value must be unique within the scope of the parent element. Optional attribute.
                         </xs:documentation>
                     </xs:annotation>
@@ -639,7 +639,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="id" type="xs:ID">
                         <xs:annotation>
                             <xs:documentation>
-                            The id attribute is a text string containing the unique identifier of this element. This value 
+                            The id attribute is a text string containing the unique identifier of this element. This value
                             must be unique within the instance document. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -674,7 +674,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="id" type="xs:ID">
                         <xs:annotation>
                             <xs:documentation>
-                            The id attribute is a text string containing the unique identifier of this element. 
+                            The id attribute is a text string containing the unique identifier of this element.
                             This value must be unique within the instance document. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -709,7 +709,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="id" type="xs:ID">
                         <xs:annotation>
                             <xs:documentation>
-                            The id attribute is a text string containing the unique identifier of this element. 
+                            The id attribute is a text string containing the unique identifier of this element.
                             This value must be unique within the instance document. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -744,7 +744,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="id" type="xs:ID">
                         <xs:annotation>
                             <xs:documentation>
-                            The id attribute is a text string containing the unique identifier of this element. This value 
+                            The id attribute is a text string containing the unique identifier of this element. This value
                             must be unique within the instance document. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -766,7 +766,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="digits" type="xs:short" default="6">
                         <xs:annotation>
                             <xs:documentation>
-                            The digits attribute indicates the number of significant decimal digits of the float values that 
+                            The digits attribute indicates the number of significant decimal digits of the float values that
                             can be contained in the array. The default value is 6. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -774,7 +774,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="magnitude" type="xs:short" default="38">
                         <xs:annotation>
                             <xs:documentation>
-                            The magnitude attribute indicates the largest exponent of the float values that can be contained 
+                            The magnitude attribute indicates the largest exponent of the float values that can be contained
                             in the array. The default value is 38. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -795,7 +795,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="id" type="xs:ID">
                         <xs:annotation>
                             <xs:documentation>
-                            The id attribute is a text string containing the unique identifier of this element. 
+                            The id attribute is a text string containing the unique identifier of this element.
                             This value must be unique within the instance document. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -817,7 +817,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="minInclusive" type="xs:integer" default="-2147483648">
                         <xs:annotation>
                             <xs:documentation>
-                            The minInclusive attribute indicates the smallest integer value that can be contained in 
+                            The minInclusive attribute indicates the smallest integer value that can be contained in
                             the array. The default value is –2147483648. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -825,7 +825,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="maxInclusive" type="xs:integer" default="2147483647">
                         <xs:annotation>
                             <xs:documentation>
-                            The maxInclusive attribute indicates the largest integer value that can be contained in 
+                            The maxInclusive attribute indicates the largest integer value that can be contained in
                             the array. The default value is 2147483647. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -838,9 +838,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="accessor">
         <xs:annotation>
             <xs:documentation>
-            The accessor element declares an access pattern to one of the array elements: float_array, 
-            int_array, Name_array, bool_array, and IDREF_array. The accessor element describes access 
-            to arrays that are organized in either an interleaved or non-interleaved manner, depending 
+            The accessor element declares an access pattern to one of the array elements: float_array,
+            int_array, Name_array, bool_array, and IDREF_array. The accessor element describes access
+            to arrays that are organized in either an interleaved or non-interleaved manner, depending
             on the offset and stride attributes.
             </xs:documentation>
         </xs:annotation>
@@ -864,7 +864,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="offset" type="uint" default="0">
                 <xs:annotation>
                     <xs:documentation>
-                    The offset attribute indicates the index of the first value to be read from the array. 
+                    The offset attribute indicates the index of the first value to be read from the array.
                     The default value is 0. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -879,7 +879,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="stride" type="uint" default="1">
                 <xs:annotation>
                     <xs:documentation>
-                    The stride attribute indicates number of values to be considered a unit during each access to 
+                    The stride attribute indicates number of values to be considered a unit during each access to
                     the array. The default value is 1, indicating that a single value is accessed. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -905,7 +905,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="sid" type="xs:NCName">
                         <xs:annotation>
                             <xs:documentation>
-                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                            The sid attribute is a text string value containing the sub-identifier of this element.
                             This value must be unique within the scope of the parent element. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -920,7 +920,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="type" type="xs:NMTOKEN" use="required">
                         <xs:annotation>
                             <xs:documentation>
-                            The type attribute indicates the type of the value data. This text string must be understood 
+                            The type attribute indicates the type of the value data. This text string must be understood
                             by the application. Required attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -932,7 +932,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="source">
         <xs:annotation>
             <xs:documentation>
-            The source element declares a data repository that provides values according to the semantics of an 
+            The source element declares a data repository that provides values according to the semantics of an
             input element that refers to it.
             </xs:documentation>
         </xs:annotation>
@@ -1011,7 +1011,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Required attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1030,8 +1030,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:annotation>
             <xs:documentation>
             Geometry describes the visual shape and appearance of an object in the scene.
-            The geometry element categorizes the declaration of geometric information. Geometry is a 
-            branch of mathematics that deals with the measurement, properties, and relationships of 
+            The geometry element categorizes the declaration of geometric information. Geometry is a
+            branch of mathematics that deals with the measurement, properties, and relationships of
             points, lines, angles, surfaces, and solids.
             </xs:documentation>
         </xs:annotation>
@@ -1072,7 +1072,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1222,8 +1222,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="p" type="ListOfUInts">
         <xs:annotation>
             <xs:documentation>
-            The p element represents primitive data for the primitive types (lines, linestrips, polygons, 
-            polylist, triangles, trifans, tristrips). The p element contains indices that reference into 
+            The p element represents primitive data for the primitive types (lines, linestrips, polygons,
+            polylist, triangles, trifans, tristrips). The p element contains indices that reference into
             the parent's source elements referenced by the input elements.
             </xs:documentation>
         </xs:annotation>
@@ -1231,9 +1231,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="lines">
         <xs:annotation>
             <xs:documentation>
-            The lines element provides the information needed to bind vertex attributes together and then 
-            organize those vertices into individual lines. Each line described by the mesh has two vertices. 
-            The first line is formed from first and second vertices. The second line is formed from the 
+            The lines element provides the information needed to bind vertex attributes together and then
+            organize those vertices into individual lines. Each line described by the mesh has two vertices.
+            The first line is formed from first and second vertices. The second line is formed from the
             third and fourth vertices and so on.
             </xs:documentation>
         </xs:annotation>
@@ -1242,7 +1242,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="input" type="InputLocalOffset" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The input element may occur any number of times. This input is a local input with the offset 
+                        The input element may occur any number of times. This input is a local input with the offset
                         and set attributes.
                         </xs:documentation>
                     </xs:annotation>
@@ -1279,8 +1279,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="material" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The material attribute declares a symbol for a material. This symbol is bound to a material at 
-                    the time of instantiation. If the material attribute is not specified then the lighting and 
+                    The material attribute declares a symbol for a material. This symbol is bound to a material at
+                    the time of instantiation. If the material attribute is not specified then the lighting and
                     shading results are application defined. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1290,9 +1290,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="linestrips">
         <xs:annotation>
             <xs:documentation>
-            The linestrips element provides the information needed to bind vertex attributes together and 
-            then organize those vertices into connected line-strips. Each line-strip described by the mesh 
-            has an arbitrary number of vertices. Each line segment within the line-strip is formed from the 
+            The linestrips element provides the information needed to bind vertex attributes together and
+            then organize those vertices into connected line-strips. Each line-strip described by the mesh
+            has an arbitrary number of vertices. Each line segment within the line-strip is formed from the
             current vertex and the preceding vertex.
             </xs:documentation>
         </xs:annotation>
@@ -1301,7 +1301,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="input" type="InputLocalOffset" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The input element may occur any number of times. This input is a local input with the offset 
+                        The input element may occur any number of times. This input is a local input with the offset
                         and set attributes.
                         </xs:documentation>
                     </xs:annotation>
@@ -1338,8 +1338,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="material" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The material attribute declares a symbol for a material. This symbol is bound to a material 
-                    at the time of instantiation. If the material attribute is not specified then the lighting 
+                    The material attribute declares a symbol for a material. This symbol is bound to a material
+                    at the time of instantiation. If the material attribute is not specified then the lighting
                     and shading results are application defined. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1349,8 +1349,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="polygons">
         <xs:annotation>
             <xs:documentation>
-            The polygons element provides the information needed to bind vertex attributes together and 
-            then organize those vertices into individual polygons. The polygons described can contain 
+            The polygons element provides the information needed to bind vertex attributes together and
+            then organize those vertices into individual polygons. The polygons described can contain
             arbitrary numbers of vertices. These polygons may be self intersecting and may also contain holes.
             </xs:documentation>
         </xs:annotation>
@@ -1359,7 +1359,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="input" type="InputLocalOffset" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The input element may occur any number of times. This input is a local input with the 
+                        The input element may occur any number of times. This input is a local input with the
                         offset and set attributes.
                         </xs:documentation>
                     </xs:annotation>
@@ -1423,9 +1423,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="material" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The material attribute declares a symbol for a material. This symbol is bound to a material 
-                    at the time of instantiation. If the material attribute is not specified then the lighting 
-                    and shading results are application defined. Optional attribute. 
+                    The material attribute declares a symbol for a material. This symbol is bound to a material
+                    at the time of instantiation. If the material attribute is not specified then the lighting
+                    and shading results are application defined. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
@@ -1434,9 +1434,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="polylist">
         <xs:annotation>
             <xs:documentation>
-            The polylist element provides the information needed to bind vertex attributes together and 
-            then organize those vertices into individual polygons. The polygons described in polylist can 
-            contain arbitrary numbers of vertices. Unlike the polygons element, the polylist element cannot 
+            The polylist element provides the information needed to bind vertex attributes together and
+            then organize those vertices into individual polygons. The polygons described in polylist can
+            contain arbitrary numbers of vertices. Unlike the polygons element, the polylist element cannot
             contain polygons with holes.
             </xs:documentation>
         </xs:annotation>
@@ -1445,7 +1445,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="input" type="InputLocalOffset" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The input element may occur any number of times. This input is a local input with the 
+                        The input element may occur any number of times. This input is a local input with the
                         offset and set attributes.
                         </xs:documentation>
                     </xs:annotation>
@@ -1453,7 +1453,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="vcount" type="ListOfUInts" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The vcount element contains a list of integers describing the number of sides for each polygon 
+                        The vcount element contains a list of integers describing the number of sides for each polygon
                         described by the polylist element. The vcount element may occur once.
                         </xs:documentation>
                     </xs:annotation>
@@ -1490,8 +1490,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="material" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The material attribute declares a symbol for a material. This symbol is bound to a material at 
-                    the time of instantiation. If the material attribute is not specified then the lighting and 
+                    The material attribute declares a symbol for a material. This symbol is bound to a material at
+                    the time of instantiation. If the material attribute is not specified then the lighting and
                     shading results are application defined. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1501,9 +1501,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="triangles">
         <xs:annotation>
             <xs:documentation>
-            The triangles element provides the information needed to bind vertex attributes together and 
-            then organize those vertices into individual triangles.    Each triangle described by the mesh has 
-            three vertices. The first triangle is formed from the first, second, and third vertices. The 
+            The triangles element provides the information needed to bind vertex attributes together and
+            then organize those vertices into individual triangles.    Each triangle described by the mesh has
+            three vertices. The first triangle is formed from the first, second, and third vertices. The
             second triangle is formed from the fourth, fifth, and sixth vertices, and so on.
             </xs:documentation>
         </xs:annotation>
@@ -1512,7 +1512,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="input" type="InputLocalOffset" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The input element may occur any number of times. This input is a local input with the 
+                        The input element may occur any number of times. This input is a local input with the
                         offset and set attributes.
                         </xs:documentation>
                     </xs:annotation>
@@ -1549,8 +1549,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="material" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The material attribute declares a symbol for a material. This symbol is bound to a material at 
-                    the time of instantiation. Optional attribute. If the material attribute is not specified then 
+                    The material attribute declares a symbol for a material. This symbol is bound to a material at
+                    the time of instantiation. Optional attribute. If the material attribute is not specified then
                     the lighting and shading results are application defined.
                     </xs:documentation>
                 </xs:annotation>
@@ -1560,9 +1560,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="trifans">
         <xs:annotation>
             <xs:documentation>
-            The trifans element provides the information needed to bind vertex attributes together and then 
-            organize those vertices into connected triangles. Each triangle described by the mesh has three 
-            vertices. The first triangle is formed from first, second, and third vertices. Each subsequent 
+            The trifans element provides the information needed to bind vertex attributes together and then
+            organize those vertices into connected triangles. Each triangle described by the mesh has three
+            vertices. The first triangle is formed from first, second, and third vertices. Each subsequent
             triangle is formed from the current vertex, reusing the first and the previous vertices.
             </xs:documentation>
         </xs:annotation>
@@ -1571,7 +1571,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="input" type="InputLocalOffset" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The input element may occur any number of times. This input is a local input with the 
+                        The input element may occur any number of times. This input is a local input with the
                         offset and set attributes.
                         </xs:documentation>
                     </xs:annotation>
@@ -1608,8 +1608,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="material" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The material attribute declares a symbol for a material. This symbol is bound to a material 
-                    at the time of instantiation. If the material attribute is not specified then the lighting 
+                    The material attribute declares a symbol for a material. This symbol is bound to a material
+                    at the time of instantiation. If the material attribute is not specified then the lighting
                     and shading results are application defined. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1619,9 +1619,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="tristrips">
         <xs:annotation>
             <xs:documentation>
-            The tristrips element provides the information needed to bind vertex attributes together and then 
-            organize those vertices into connected triangles. Each triangle described by the mesh has three 
-            vertices. The first triangle is formed from first, second, and third vertices. Each subsequent 
+            The tristrips element provides the information needed to bind vertex attributes together and then
+            organize those vertices into connected triangles. Each triangle described by the mesh has three
+            vertices. The first triangle is formed from first, second, and third vertices. Each subsequent
             triangle is formed from the current vertex, reusing the previous two vertices.
             </xs:documentation>
         </xs:annotation>
@@ -1630,7 +1630,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="input" type="InputLocalOffset" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The input element may occur any number of times. This input is a local input with the offset 
+                        The input element may occur any number of times. This input is a local input with the offset
                         and set attributes.
                         </xs:documentation>
                     </xs:annotation>
@@ -1667,8 +1667,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="material" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The material attribute declares a symbol for a material. This symbol is bound to a material 
-                    at the time of instantiation. If the material attribute is not specified then the lighting 
+                    The material attribute declares a symbol for a material. This symbol is bound to a material
+                    at the time of instantiation. If the material attribute is not specified then the lighting
                     and shading results are application defined. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1679,7 +1679,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:annotation>
             <xs:documentation>
             The vertices element declares the attributes and identity of mesh-vertices. The vertices element
-            describes mesh-vertices in a mesh geometry. The mesh-vertices represent the position (identity) 
+            describes mesh-vertices in a mesh geometry. The mesh-vertices represent the position (identity)
             of the vertices comprising the mesh and other vertex attributes that are invariant to tessellation.
             </xs:documentation>
         </xs:annotation>
@@ -1703,7 +1703,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This 
+                    The id attribute is a text string containing the unique identifier of this element. This
                     value must be unique within the instance document. Required attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1722,7 +1722,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:annotation>
             <xs:documentation>
             The lookat element contains a position and orientation transformation suitable for aiming a camera.
-            The lookat element contains three mathematical vectors within it that describe: 
+            The lookat element contains three mathematical vectors within it that describe:
             1.    The position of the object;
             2.    The position of the interest point;
             3.    The direction that points up.
@@ -1734,7 +1734,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="sid" type="xs:NCName">
                         <xs:annotation>
                             <xs:documentation>
-                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                            The sid attribute is a text string value containing the sub-identifier of this element.
                             This value must be unique within the scope of the parent element. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -1746,7 +1746,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="matrix">
         <xs:annotation>
             <xs:documentation>
-            Matrix transformations embody mathematical changes to points within a coordinate systems or the 
+            Matrix transformations embody mathematical changes to points within a coordinate systems or the
             coordinate system itself. The matrix element contains a 4-by-4 matrix of floating-point values.
             </xs:documentation>
         </xs:annotation>
@@ -1756,7 +1756,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="sid" type="xs:NCName">
                         <xs:annotation>
                             <xs:documentation>
-                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                            The sid attribute is a text string value containing the sub-identifier of this element.
                             This value must be unique within the scope of the parent element. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -1777,7 +1777,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="sid" type="xs:NCName">
                         <xs:annotation>
                             <xs:documentation>
-                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                            The sid attribute is a text string value containing the sub-identifier of this element.
                             This value must be unique within the scope of the parent element. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -1789,7 +1789,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="scale" type="TargetableFloat3">
         <xs:annotation>
             <xs:documentation>
-            The scale element contains a mathematical vector that represents the relative proportions of the 
+            The scale element contains a mathematical vector that represents the relative proportions of the
             X, Y and Z axes of a coordinated system.
             </xs:documentation>
         </xs:annotation>
@@ -1797,7 +1797,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="skew">
         <xs:annotation>
             <xs:documentation>
-            The skew element contains an angle and two mathematical vectors that represent the axis of 
+            The skew element contains an angle and two mathematical vectors that represent the axis of
             rotation and the axis of translation.
             </xs:documentation>
         </xs:annotation>
@@ -1807,7 +1807,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:attribute name="sid" type="xs:NCName">
                         <xs:annotation>
                             <xs:documentation>
-                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                            The sid attribute is a text string value containing the sub-identifier of this element.
                             This value must be unique within the scope of the parent element. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
@@ -1819,7 +1819,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="translate" type="TargetableFloat3">
         <xs:annotation>
             <xs:documentation>
-            The translate element contains a mathematical vector that represents the distance along the 
+            The translate element contains a mathematical vector that represents the distance along the
             X, Y and Z-axes.
             </xs:documentation>
         </xs:annotation>
@@ -1828,9 +1828,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="image">
         <xs:annotation>
             <xs:documentation>
-            The image element declares the storage for the graphical representation of an object. 
-            The image element best describes raster image data, but can conceivably handle other 
-            forms of imagery. The image elements allows for specifying an external image file with 
+            The image element declares the storage for the graphical representation of an object.
+            The image element best describes raster image data, but can conceivably handle other
+            forms of imagery. The image elements allows for specifying an external image file with
             the init_from element or embed image data with the data element.
             </xs:documentation>
         </xs:annotation>
@@ -1847,7 +1847,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                     <xs:element name="data" type="ListOfHexBinary">
                         <xs:annotation>
                             <xs:documentation>
-                            The data child element contains a sequence of hexadecimal encoded  binary octets representing 
+                            The data child element contains a sequence of hexadecimal encoded  binary octets representing
                             the embedded image data.
                             </xs:documentation>
                         </xs:annotation>
@@ -1871,7 +1871,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1893,7 +1893,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="height" type="uint">
                 <xs:annotation>
                     <xs:documentation>
-                    The height attribute is an integer value that indicates the height of the image in pixel 
+                    The height attribute is an integer value that indicates the height of the image in pixel
                     units. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1901,7 +1901,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="width" type="uint">
                 <xs:annotation>
                     <xs:documentation>
-                    The width attribute is an integer value that indicates the width of the image in pixel units. 
+                    The width attribute is an integer value that indicates the width of the image in pixel units.
                     Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1909,7 +1909,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="depth" type="uint" default="1">
                 <xs:annotation>
                     <xs:documentation>
-                    The depth attribute is an integer value that indicates the depth of the image in pixel units. 
+                    The depth attribute is an integer value that indicates the depth of the image in pixel units.
                     A 2-D image has a depth of 1, which is also the default value. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -1920,7 +1920,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:annotation>
             <xs:documentation>
             The light element declares a light source that illuminates the scene.
-            Light sources have many different properties and radiate light in many different patterns and 
+            Light sources have many different properties and radiate light in many different patterns and
             frequencies.
             </xs:documentation>
         </xs:annotation>
@@ -1936,7 +1936,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="technique_common">
                     <xs:annotation>
                         <xs:documentation>
-                        The technique_common element specifies the light information for the common profile which all 
+                        The technique_common element specifies the light information for the common profile which all
                         COLLADA implementations need to support.
                         </xs:documentation>
                     </xs:annotation>
@@ -1945,7 +1945,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="ambient">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    The ambient element declares the parameters required to describe an ambient light source.  
+                                    The ambient element declares the parameters required to describe an ambient light source.
                                     An ambient light is one that lights everything evenly, regardless of location or orientation.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -1955,7 +1955,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:annotation>
                                                 <xs:documentation>
                                                 The color element contains three floating point numbers specifying the color of the light.
-                                                The color element must occur exactly once.  
+                                                The color element must occur exactly once.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
@@ -1965,10 +1965,10 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="directional">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    The directional element declares the parameters required to describe a directional light source.  
-                                    A directional light is one that lights everything from the same direction, regardless of location.  
-                                    The light’s default direction vector in local coordinates is [0,0,-1], pointing down the -Z axis. 
-                                    The actual direction of the light is defined by the transform of the node where the light is 
+                                    The directional element declares the parameters required to describe a directional light source.
+                                    A directional light is one that lights everything from the same direction, regardless of location.
+                                    The light’s default direction vector in local coordinates is [0,0,-1], pointing down the -Z axis.
+                                    The actual direction of the light is defined by the transform of the node where the light is
                                     instantiated.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -1978,7 +1978,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:annotation>
                                                 <xs:documentation>
                                                 The color element contains three floating point numbers specifying the color of the light.
-                                                The color element must occur exactly once.  
+                                                The color element must occur exactly once.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
@@ -1988,9 +1988,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="point">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    The point element declares the parameters required to describe a point light source.  A point light 
-                                    source radiates light in all directions from a known location in space. The intensity of a point 
-                                    light source is attenuated as the distance to the light source increases. The position of the light 
+                                    The point element declares the parameters required to describe a point light source.  A point light
+                                    source radiates light in all directions from a known location in space. The intensity of a point
+                                    light source is attenuated as the distance to the light source increases. The position of the light
                                     is defined by the transform of the node in which it is instantiated.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -2000,31 +2000,31 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:annotation>
                                                 <xs:documentation>
                                                 The color element contains three floating point numbers specifying the color of the light.
-                                                The color element must occur exactly once.  
+                                                The color element must occur exactly once.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
                                         <xs:element name="constant_attenuation" type="TargetableFloat" default="1.0" minOccurs="0">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The constant_attenuation is used to calculate the total attenuation of this light given a distance. 
-                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation. 
+                                                The constant_attenuation is used to calculate the total attenuation of this light given a distance.
+                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
                                         <xs:element name="linear_attenuation" type="TargetableFloat" default="0.0" minOccurs="0">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The linear_attenuation is used to calculate the total attenuation of this light given a distance. 
-                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation. 
+                                                The linear_attenuation is used to calculate the total attenuation of this light given a distance.
+                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
                                         <xs:element name="quadratic_attenuation" type="TargetableFloat" default="0.0" minOccurs="0">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The quadratic_attenuation is used to calculate the total attenuation of this light given a distance. 
-                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation. 
+                                                The quadratic_attenuation is used to calculate the total attenuation of this light given a distance.
+                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
@@ -2034,13 +2034,13 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="spot">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    The spot element declares the parameters required to describe a spot light source.  A spot light 
-                                    source radiates light in one direction from a known location in space. The light radiates from 
-                                    the spot light source in a cone shape. The intensity of the light is attenuated as the radiation 
-                                    angle increases away from the direction of the light source. The intensity of a spot light source 
-                                    is also attenuated as the distance to the light source increases. The position of the light is 
-                                    defined by the transform of the node in which it is instantiated. The light’s default direction 
-                                    vector in local coordinates is [0,0,-1], pointing down the -Z axis. The actual direction of the 
+                                    The spot element declares the parameters required to describe a spot light source.  A spot light
+                                    source radiates light in one direction from a known location in space. The light radiates from
+                                    the spot light source in a cone shape. The intensity of the light is attenuated as the radiation
+                                    angle increases away from the direction of the light source. The intensity of a spot light source
+                                    is also attenuated as the distance to the light source increases. The position of the light is
+                                    defined by the transform of the node in which it is instantiated. The light’s default direction
+                                    vector in local coordinates is [0,0,-1], pointing down the -Z axis. The actual direction of the
                                     light is defined by the transform of the node where the light is instantiated.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -2050,31 +2050,31 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:annotation>
                                                 <xs:documentation>
                                                 The color element contains three floating point numbers specifying the color of the light.
-                                                The color element must occur exactly once.  
+                                                The color element must occur exactly once.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
                                         <xs:element name="constant_attenuation" type="TargetableFloat" default="1.0" minOccurs="0">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The constant_attenuation is used to calculate the total attenuation of this light given a distance. 
-                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation. 
+                                                The constant_attenuation is used to calculate the total attenuation of this light given a distance.
+                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
                                         <xs:element name="linear_attenuation" type="TargetableFloat" default="0.0" minOccurs="0">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The linear_attenuation is used to calculate the total attenuation of this light given a distance. 
-                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation. 
+                                                The linear_attenuation is used to calculate the total attenuation of this light given a distance.
+                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
                                         <xs:element name="quadratic_attenuation" type="TargetableFloat" default="0.0" minOccurs="0">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The quadratic_attenuation is used to calculate the total attenuation of this light given a distance. 
-                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation. 
+                                                The quadratic_attenuation is used to calculate the total attenuation of this light given a distance.
+                                                The equation used is A = constant_attenuation + Dist*linear_attenuation + Dist^2*quadratic_attenuation.
                                                 </xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
@@ -2116,7 +2116,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2163,7 +2163,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2181,7 +2181,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="camera">
         <xs:annotation>
             <xs:documentation>
-            The camera element declares a view into the scene hierarchy or scene graph. The camera contains 
+            The camera element declares a view into the scene hierarchy or scene graph. The camera contains
             elements that describe the camera’s optics and imager.
             </xs:documentation>
         </xs:annotation>
@@ -2205,7 +2205,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="technique_common">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    The technique_common element specifies the optics information for the common profile 
+                                    The technique_common element specifies the optics information for the common profile
                                     which all COLLADA implementations need to support.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -2224,7 +2224,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                             <xs:element name="xmag" type="TargetableFloat">
                                                                 <xs:annotation>
                                                                     <xs:documentation>
-                                                                    The xmag element contains a floating point number describing the horizontal 
+                                                                    The xmag element contains a floating point number describing the horizontal
                                                                     magnification of the view.
                                                                     </xs:documentation>
                                                                 </xs:annotation>
@@ -2233,7 +2233,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                                 <xs:element name="ymag" type="TargetableFloat">
                                                                     <xs:annotation>
                                                                         <xs:documentation>
-                                                                        The ymag element contains a floating point number describing the vertical 
+                                                                        The ymag element contains a floating point number describing the vertical
                                                                         magnification of the view.  It can also have a sid.
                                                                         </xs:documentation>
                                                                     </xs:annotation>
@@ -2241,8 +2241,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                                 <xs:element name="aspect_ratio" type="TargetableFloat">
                                                                     <xs:annotation>
                                                                         <xs:documentation>
-                                                                        The aspect_ratio element contains a floating point number describing the aspect ratio of 
-                                                                        the field of view. If the aspect_ratio element is not present the aspect ratio is to be 
+                                                                        The aspect_ratio element contains a floating point number describing the aspect ratio of
+                                                                        the field of view. If the aspect_ratio element is not present the aspect ratio is to be
                                                                         calculated from the xmag or ymag elements and the current viewport.
                                                                         </xs:documentation>
                                                                     </xs:annotation>
@@ -2257,7 +2257,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                     <xs:element name="znear" type="TargetableFloat">
                                                         <xs:annotation>
                                                             <xs:documentation>
-                                                            The znear element contains a floating point number that describes the distance to the near 
+                                                            The znear element contains a floating point number that describes the distance to the near
                                                             clipping plane. The znear element must occur exactly once.
                                                             </xs:documentation>
                                                         </xs:annotation>
@@ -2265,7 +2265,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                     <xs:element name="zfar" type="TargetableFloat">
                                                         <xs:annotation>
                                                             <xs:documentation>
-                                                            The zfar element contains a floating point number that describes the distance to the far 
+                                                            The zfar element contains a floating point number that describes the distance to the far
                                                             clipping plane. The zfar element must occur exactly once.
                                                             </xs:documentation>
                                                         </xs:annotation>
@@ -2301,8 +2301,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                                 <xs:element name="aspect_ratio" type="TargetableFloat">
                                                                     <xs:annotation>
                                                                         <xs:documentation>
-                                                                        The aspect_ratio element contains a floating point number describing the aspect ratio of the field 
-                                                                        of view. If the aspect_ratio element is not present the aspect ratio is to be calculated from the 
+                                                                        The aspect_ratio element contains a floating point number describing the aspect ratio of the field
+                                                                        of view. If the aspect_ratio element is not present the aspect ratio is to be calculated from the
                                                                         xfov or yfov elements and the current viewport.
                                                                         </xs:documentation>
                                                                     </xs:annotation>
@@ -2317,7 +2317,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                     <xs:element name="znear" type="TargetableFloat">
                                                         <xs:annotation>
                                                             <xs:documentation>
-                                                            The znear element contains a floating point number that describes the distance to the near 
+                                                            The znear element contains a floating point number that describes the distance to the near
                                                             clipping plane. The znear element must occur exactly once.
                                                             </xs:documentation>
                                                         </xs:annotation>
@@ -2325,7 +2325,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                     <xs:element name="zfar" type="TargetableFloat">
                                                         <xs:annotation>
                                                             <xs:documentation>
-                                                            The zfar element contains a floating point number that describes the distance to the far 
+                                                            The zfar element contains a floating point number that describes the distance to the far
                                                             clipping plane. The zfar element must occur exactly once.
                                                             </xs:documentation>
                                                         </xs:annotation>
@@ -2390,7 +2390,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2408,8 +2408,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="animation">
         <xs:annotation>
             <xs:documentation>
-            The animation element categorizes the declaration of animation information. The animation 
-            hierarchy contains elements that describe the animation’s key-frame data and sampler functions, 
+            The animation element categorizes the declaration of animation information. The animation
+            hierarchy contains elements that describe the animation’s key-frame data and sampler functions,
             ordered in such a way to group together animations that should be executed together.
             </xs:documentation>
         </xs:annotation>
@@ -2476,7 +2476,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2493,7 +2493,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="animation_clip">
         <xs:annotation>
             <xs:documentation>
-            The animation_clip element defines a section of the animation curves to be used together as 
+            The animation_clip element defines a section of the animation curves to be used together as
             an animation clip.
             </xs:documentation>
         </xs:annotation>
@@ -2524,7 +2524,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2539,10 +2539,10 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="start" type="xs:double" default="0.0">
                 <xs:annotation>
                     <xs:documentation>
-                    The start attribute is the time in seconds of the beginning of the clip.  This time is 
-                    the same as that used in the key-frame data and is used to determine which set of 
-                    key-frames will be included in the clip.  The start time does not specify when the clip 
-                    will be played.  If the time falls between two keyframes of a referenced animation, an 
+                    The start attribute is the time in seconds of the beginning of the clip.  This time is
+                    the same as that used in the key-frame data and is used to determine which set of
+                    key-frames will be included in the clip.  The start time does not specify when the clip
+                    will be played.  If the time falls between two keyframes of a referenced animation, an
                     interpolated value should be used.  The default value is 0.0.  Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2550,8 +2550,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="end" type="xs:double">
                 <xs:annotation>
                     <xs:documentation>
-                    The end attribute is the time in seconds of the end of the clip.  This is used in the 
-                    same way as the start time.  If end is not specified, the value is taken to be the end 
+                    The end attribute is the time in seconds of the end of the clip.  This is used in the
+                    same way as the start time.  If end is not specified, the value is taken to be the end
                     time of the longest animation.  Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2568,7 +2568,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="source" type="URIFragmentType" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The source attribute indicates the location of the sampler using a URL expression. 
+                    The source attribute indicates the location of the sampler using a URL expression.
                     The sampler must be declared within the same document. Required attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2576,8 +2576,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="target" type="xs:token" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The target attribute indicates the location of the element bound to the output of the sampler. 
-                    This text string is a path-name following a simple syntax described in Address Syntax. 
+                    The target attribute indicates the location of the element bound to the output of the sampler.
+                    This text string is a path-name following a simple syntax described in Address Syntax.
                     Required attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2587,8 +2587,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="sampler">
         <xs:annotation>
             <xs:documentation>
-            The sampler element declares an N-dimensional function used for animation. Animation function curves 
-            are represented by 1-D sampler elements in COLLADA. The sampler defines sampling points and how to 
+            The sampler element declares an N-dimensional function used for animation. Animation function curves
+            are represented by 1-D sampler elements in COLLADA. The sampler defines sampling points and how to
             interpolate between them.
             </xs:documentation>
         </xs:annotation>
@@ -2605,7 +2605,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2656,7 +2656,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2681,7 +2681,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="bind_shape_matrix" type="float4x4" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        This provides extra information about the position and orientation of the base mesh before binding. 
+                        This provides extra information about the position and orientation of the base mesh before binding.
                         If bind_shape_matrix is not specified then an identity matrix may be used as the bind_shape_matrix.
                         The bind_shape_matrix element may occur zero or one times.
                         </xs:documentation>
@@ -2697,7 +2697,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="joints">
                     <xs:annotation>
                         <xs:documentation>
-                        The joints element associates joint, or skeleton, nodes with attribute data.  
+                        The joints element associates joint, or skeleton, nodes with attribute data.
                         In COLLADA, this is specified by the inverse bind matrix of each joint (influence) in the skeleton.
                         </xs:documentation>
                     </xs:annotation>
@@ -2746,7 +2746,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="v" type="ListOfInts" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    The v element describes which bones and attributes are associated with each vertex.  An index 
+                                    The v element describes which bones and attributes are associated with each vertex.  An index
                                     of –1 into the array of joints refers to the bind shape.  Weights should be normalized before use.
                                     The v element must occur zero or one times.
                                     </xs:documentation>
@@ -2763,7 +2763,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="count" type="uint" use="required">
                             <xs:annotation>
                                 <xs:documentation>
-                                The count attribute describes the number of vertices in the base mesh. Required element. 
+                                The count attribute describes the number of vertices in the base mesh. Required element.
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
@@ -2790,7 +2790,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="morph">
         <xs:annotation>
             <xs:documentation>
-            The morph element describes the data required to blend between sets of static meshes. Each 
+            The morph element describes the data required to blend between sets of static meshes. Each
             possible mesh that can be blended (a morph target) must be specified.
             </xs:documentation>
         </xs:annotation>
@@ -2806,7 +2806,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="targets">
                     <xs:annotation>
                         <xs:documentation>
-                        The targets element declares the morph targets, their weights and any user defined attributes 
+                        The targets element declares the morph targets, their weights and any user defined attributes
                         associated with them.
                         </xs:documentation>
                     </xs:annotation>
@@ -2840,7 +2840,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="method" type="MorphMethodType" default="NORMALIZED">
                 <xs:annotation>
                     <xs:documentation>
-                    The method attribute specifies the which blending technique to use. The accepted values are 
+                    The method attribute specifies the which blending technique to use. The accepted values are
                     NORMALIZED, and RELATIVE. The default value if not specified is NORMALIZED.  Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -2917,7 +2917,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="created" type="xs:dateTime">
                     <xs:annotation>
                         <xs:documentation>
-                        The created element contains the date and time that the parent element was created and is 
+                        The created element contains the date and time that the parent element was created and is
                         represented in an ISO 8601 format.  The created element may appear zero or one time.
                         </xs:documentation>
                     </xs:annotation>
@@ -2925,7 +2925,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="keywords" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The keywords element contains a list of words used as search criteria for the parent element. 
+                        The keywords element contains a list of words used as search criteria for the parent element.
                         The keywords element may appear zero or more times.
                         </xs:documentation>
                     </xs:annotation>
@@ -2933,7 +2933,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="modified" type="xs:dateTime">
                     <xs:annotation>
                         <xs:documentation>
-                        The modified element contains the date and time that the parent element was last modified and 
+                        The modified element contains the date and time that the parent element was last modified and
                         represented in an ISO 8601 format. The modified element may appear zero or one time.
                         </xs:documentation>
                     </xs:annotation>
@@ -2941,7 +2941,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="revision" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The revision element contains the revision information for the parent element. The revision 
+                        The revision element contains the revision information for the parent element. The revision
                         element may appear zero or one time.
                         </xs:documentation>
                     </xs:annotation>
@@ -2949,7 +2949,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="subject" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The subject element contains a description of the topical subject of the parent element. The 
+                        The subject element contains a description of the topical subject of the parent element. The
                         subject element may appear zero or one time.
                         </xs:documentation>
                     </xs:annotation>
@@ -2957,7 +2957,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="title" type="xs:string" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The title element contains the title information for the parent element. The title element may 
+                        The title element contains the title information for the parent element. The title element may
                         appear zero or one time.
                         </xs:documentation>
                     </xs:annotation>
@@ -2965,8 +2965,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="unit" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The unit element contains descriptive information about unit of measure. It has attributes for 
-                        the name of the unit and the measurement with respect to the meter. The unit element may appear 
+                        The unit element contains descriptive information about unit of measure. It has attributes for
+                        the name of the unit and the measurement with respect to the meter. The unit element may appear
                         zero or one time.
                         </xs:documentation>
                     </xs:annotation>
@@ -2974,7 +2974,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="meter" type="float" default="1.0">
                             <xs:annotation>
                                 <xs:documentation>
-                                The meter attribute specifies the measurement with respect to the meter. The default 
+                                The meter attribute specifies the measurement with respect to the meter. The default
                                 value for the meter attribute is “1.0”.
                                 </xs:documentation>
                             </xs:annotation>
@@ -2982,7 +2982,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="name" type="xs:NMTOKEN" default="meter">
                             <xs:annotation>
                                 <xs:documentation>
-                                The name attribute specifies the name of the unit. The default value for the name 
+                                The name attribute specifies the name of the unit. The default value for the name
                                 attribute is “meter”.
                                 </xs:documentation>
                             </xs:annotation>
@@ -2992,8 +2992,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="up_axis" type="UpAxisType" default="Y_UP" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        The up_axis element contains descriptive information about coordinate system of the geometric 
-                        data. All coordinates are right-handed by definition. This element specifies which axis is 
+                        The up_axis element contains descriptive information about coordinate system of the geometric
+                        data. All coordinates are right-handed by definition. This element specifies which axis is
                         considered up. The default is the Y-axis. The up_axis element may appear zero or one time.
                         </xs:documentation>
                     </xs:annotation>
@@ -3027,7 +3027,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3042,7 +3042,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="type" type="xs:NMTOKEN">
                 <xs:annotation>
                     <xs:documentation>
-                    The type attribute indicates the type of the value data. This text string must be understood by 
+                    The type attribute indicates the type of the value data. This text string must be understood by
                     the application. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3053,9 +3053,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:annotation>
             <xs:appinfo>enable-xmlns</xs:appinfo>
             <xs:documentation>
-            The technique element declares the information used to process some portion of the content. Each 
-            technique conforms to an associated profile. Techniques generally act as a “switch”. If more than 
-            one is present for a particular portion of content, on import, one or the other is picked, but 
+            The technique element declares the information used to process some portion of the content. Each
+            technique conforms to an associated profile. Techniques generally act as a “switch”. If more than
+            one is present for a particular portion of content, on import, one or the other is picked, but
             usually not both. Selection should be based on which profile the importing application can support.
             Techniques contain application data and programs, making them assets that can be managed as a unit.
             </xs:documentation>
@@ -3067,7 +3067,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="profile" type="xs:NMTOKEN" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The profile attribute indicates the type of profile. This is a vendor defined character 
+                    The profile attribute indicates the type of profile. This is a vendor defined character
                     string that indicates the platform or capability target for the technique. Required attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3187,7 +3187,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3202,7 +3202,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. 
+                    The sid attribute is a text string value containing the sub-identifier of this element.
                     This value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3210,7 +3210,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="type" type="NodeType" default="NODE">
                 <xs:annotation>
                     <xs:documentation>
-                    The type attribute indicates the type of the node element. The default value is “NODE”. 
+                    The type attribute indicates the type of the node element. The default value is “NODE”.
                     Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3218,9 +3218,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="layer" type="ListOfNames">
                 <xs:annotation>
                     <xs:documentation>
-                    The layer attribute indicates the names of the layers to which this node belongs.  For example, 
-                    a value of “foreground glowing” indicates that this node belongs to both the ‘foreground’ layer 
-                    and the ‘glowing’ layer.  The default value is empty, indicating that the node doesn’t belong to 
+                    The layer attribute indicates the names of the layers to which this node belongs.  For example,
+                    a value of “foreground glowing” indicates that this node belongs to both the ‘foreground’ layer
+                    and the ‘glowing’ layer.  The default value is empty, indicating that the node doesn’t belong to
                     any layer.  Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3230,8 +3230,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="visual_scene">
         <xs:annotation>
             <xs:documentation>
-            The visual_scene element declares the base of the visual_scene hierarchy or scene graph. The 
-            scene contains elements that comprise much of the visual and transformational information 
+            The visual_scene element declares the base of the visual_scene hierarchy or scene graph. The
+            scene contains elements that comprise much of the visual and transformational information
             content as created by the authoring tools.
             </xs:documentation>
         </xs:annotation>
@@ -3254,7 +3254,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="evaluate_scene" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The evaluate_scene element declares information specifying a specific way to evaluate this 
+                        The evaluate_scene element declares information specifying a specific way to evaluate this
                         visual_scene. There may be any number of evaluate_scene elements.
                         </xs:documentation>
                     </xs:annotation>
@@ -3272,7 +3272,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                         <xs:element name="layer" type="xs:NCName" minOccurs="0" maxOccurs="unbounded">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The layer element specifies which layer to render in this compositing step 
+                                                The layer element specifies which layer to render in this compositing step
                                                 while evaluating the scene. You may specify any number of layers.
                                                 </xs:documentation>
                                             </xs:annotation>
@@ -3280,7 +3280,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                         <xs:element ref="instance_effect" minOccurs="0">
                                             <xs:annotation>
                                                 <xs:documentation>
-                                                The instance_effect element specifies which effect to render in this compositing step 
+                                                The instance_effect element specifies which effect to render in this compositing step
                                                 while evaluating the scene.
                                                 </xs:documentation>
                                             </xs:annotation>
@@ -3289,7 +3289,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                     <xs:attribute name="camera_node" type="xs:anyURI" use="required">
                                         <xs:annotation>
                                             <xs:documentation>
-                                            The camera_node attribute refers to a node that contains a camera describing the viewpoint to 
+                                            The camera_node attribute refers to a node that contains a camera describing the viewpoint to
                                             render this compositing step from.
                                             </xs:documentation>
                                         </xs:annotation>
@@ -3317,7 +3317,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="optional">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This 
+                    The id attribute is a text string containing the unique identifier of this element. This
                     value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3335,7 +3335,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="bind_material">
         <xs:annotation>
             <xs:documentation>
-            Bind a specific material to a piece of geometry, binding varying and uniform parameters at the 
+            Bind a specific material to a piece of geometry, binding varying and uniform parameters at the
             same time.
             </xs:documentation>
         </xs:annotation>
@@ -3351,7 +3351,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="technique_common">
                     <xs:annotation>
                         <xs:documentation>
-                        The technique_common element specifies the bind_material information for the common 
+                        The technique_common element specifies the bind_material information for the common
                         profile which all COLLADA implementations need to support.
                         </xs:documentation>
                     </xs:annotation>
@@ -3403,7 +3403,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="skeleton" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
                         <xs:documentation>
-                        The skeleton element is used to indicate where a skin controller is to start to search for 
+                        The skeleton element is used to indicate where a skin controller is to start to search for
                         the joint nodes it needs.  This element is meaningless for morph controllers.
                         </xs:documentation>
                     </xs:annotation>
@@ -3411,7 +3411,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element ref="bind_material" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        Bind a specific material to a piece of geometry, binding varying and uniform parameters at the 
+                        Bind a specific material to a piece of geometry, binding varying and uniform parameters at the
                         same time.
                         </xs:documentation>
                     </xs:annotation>
@@ -3427,8 +3427,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="url" type="xs:anyURI" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The url attribute refers to resource. This may refer to a local resource using a relative 
-                    URL fragment identifier that begins with the “#” character. The url attribute may refer to an 
+                    The url attribute refers to resource. This may refer to a local resource using a relative
+                    URL fragment identifier that begins with the “#” character. The url attribute may refer to an
                     external resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -3436,7 +3436,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3512,8 +3512,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="url" type="xs:anyURI" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The url attribute refers to resource.  This may refer to a local resource using a relative URL 
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external 
+                    The url attribute refers to resource.  This may refer to a local resource using a relative URL
+                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -3521,7 +3521,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3553,7 +3553,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element ref="bind_material" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
-                        Bind a specific material to a piece of geometry, binding varying and uniform parameters at the 
+                        Bind a specific material to a piece of geometry, binding varying and uniform parameters at the
                         same time.
                         </xs:documentation>
                     </xs:annotation>
@@ -3569,8 +3569,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="url" type="xs:anyURI" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The url attribute refers to resource.  This may refer to a local resource using a relative URL 
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external 
+                    The url attribute refers to resource.  This may refer to a local resource using a relative URL
+                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -3578,7 +3578,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3624,8 +3624,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="target" type="xs:token" use="required">
                             <xs:annotation>
                                 <xs:documentation>
-                                The target attribute specifies the location of the value to bind to the specified semantic. 
-                                This text string is a path-name following a simple syntax described in the “Addressing Syntax” 
+                                The target attribute specifies the location of the value to bind to the specified semantic.
+                                This text string is a path-name following a simple syntax described in the “Addressing Syntax”
                                 section.
                                 </xs:documentation>
                             </xs:annotation>
@@ -3656,7 +3656,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="input_set" type="uint">
                             <xs:annotation>
                                 <xs:documentation>
-                                The input_set attribute specifies which input set to bind. 
+                                The input_set attribute specifies which input set to bind.
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
@@ -3687,7 +3687,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3711,7 +3711,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="instance_physics_material" type="InstanceWithExtra">
         <xs:annotation>
             <xs:documentation>
-            The instance_physics_material element declares the instantiation of a COLLADA physics_material 
+            The instance_physics_material element declares the instantiation of a COLLADA physics_material
             resource.
             </xs:documentation>
         </xs:annotation>
@@ -3756,8 +3756,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="url" type="xs:anyURI" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The url attribute refers to resource.  This may refer to a local resource using a relative URL 
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external 
+                    The url attribute refers to resource.  This may refer to a local resource using a relative URL
+                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -3765,7 +3765,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3780,8 +3780,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="parent" type="xs:anyURI">
                 <xs:annotation>
                     <xs:documentation>
-                    The parent attribute points to the id of a node in the visual scene. This allows a physics model 
-                    to be instantiated under a specific transform node, which will dictate the initial position and 
+                    The parent attribute points to the id of a node in the visual scene. This allows a physics model
+                    to be instantiated under a specific transform node, which will dictate the initial position and
                     orientation, and could be animated to influence kinematic rigid bodies.
                     </xs:documentation>
                 </xs:annotation>
@@ -3791,7 +3791,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="instance_rigid_body">
         <xs:annotation>
             <xs:documentation>
-            This element allows instancing a rigid_body within an instance_physics_model. 
+            This element allows instancing a rigid_body within an instance_physics_model.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
@@ -3799,7 +3799,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="technique_common">
                     <xs:annotation>
                         <xs:documentation>
-                        The technique_common element specifies the instance_rigid_body information for the common 
+                        The technique_common element specifies the instance_rigid_body information for the common
                         profile which all COLLADA implementations need to support.
                         </xs:documentation>
                     </xs:annotation>
@@ -3808,7 +3808,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="angular_velocity" type="float3" default="0.0 0.0 0.0" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    Specifies the initial angular velocity of the rigid_body instance in degrees per second 
+                                    Specifies the initial angular velocity of the rigid_body instance in degrees per second
                                     around each axis, in the form of an X-Y-Z Euler rotation.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -3827,7 +3827,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:attribute name="sid" type="xs:NCName">
                                                 <xs:annotation>
                                                     <xs:documentation>
-                                                    The sid attribute is a text string value containing the sub-identifier of this element. 
+                                                    The sid attribute is a text string value containing the sub-identifier of this element.
                                                     This value must be unique within the scope of the parent element. Optional attribute.
                                                     </xs:documentation>
                                                 </xs:annotation>
@@ -3926,7 +3926,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3941,7 +3941,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="target" type="xs:anyURI" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The target attribute indicates which node is influenced by this rigid_body instance. 
+                    The target attribute indicates which node is influenced by this rigid_body instance.
                     Required attribute
                     </xs:documentation>
                 </xs:annotation>
@@ -3951,7 +3951,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="instance_rigid_constraint">
         <xs:annotation>
             <xs:documentation>
-            This element allows instancing a rigid_constraint within an instance_physics_model. 
+            This element allows instancing a rigid_constraint within an instance_physics_model.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
@@ -3974,7 +3974,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4022,7 +4022,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4069,7 +4069,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4116,7 +4116,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4163,7 +4163,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4210,7 +4210,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4257,7 +4257,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4304,7 +4304,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4351,7 +4351,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4398,7 +4398,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4445,7 +4445,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4492,7 +4492,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4539,7 +4539,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4586,7 +4586,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4633,7 +4633,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -4680,7 +4680,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -5367,7 +5367,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName" use="required">
             <xs:annotation>
                 <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. 
+                    The sid attribute is a text string value containing the sub-identifier of this element.
                     This value must be unique within the scope of the parent element. Optional attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -5375,8 +5375,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="url" type="xs:anyURI" use="required">
             <xs:annotation>
                 <xs:documentation>
-                    The url attribute refers to resource.  This may refer to a local resource using a relative URL 
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external 
+                    The url attribute refers to resource.  This may refer to a local resource using a relative URL
+                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                 </xs:documentation>
             </xs:annotation>
@@ -5415,7 +5415,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName" use="required">
             <xs:annotation>
                 <xs:documentation>
-                The sid attribute is a text string value containing the sub-identifier of this element. 
+                The sid attribute is a text string value containing the sub-identifier of this element.
                 This value must be unique within the scope of the parent element. Optional attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -5435,7 +5435,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:attribute name="sid" type="xs:NCName" use="optional">
                     <xs:annotation>
                         <xs:documentation>
-                        The sid attribute is a text string value containing the sub-identifier of this element. 
+                        The sid attribute is a text string value containing the sub-identifier of this element.
                         This value must be unique within the scope of the parent element. Optional attribute.
                         </xs:documentation>
                     </xs:annotation>
@@ -5507,7 +5507,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -7296,7 +7296,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                                 <xs:attribute name="symbol" type="xs:NCName" use="required">
                                                                     <xs:annotation>
                                                                         <xs:documentation>
-                                                                        The identifier for a uniform input parameter to the shader (a formal function parameter or in-scope 
+                                                                        The identifier for a uniform input parameter to the shader (a formal function parameter or in-scope
                                                                         global) that will be bound to an external resource.
                                                                         </xs:documentation>
                                                                     </xs:annotation>
@@ -7319,7 +7319,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                     <xs:attribute name="sid" type="xs:NCName" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                                            The sid attribute is a text string value containing the sub-identifier of this element.
                                             This value must be unique within the scope of the parent element. Optional attribute.
                                             </xs:documentation>
                                         </xs:annotation>
@@ -7331,7 +7331,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="id" type="xs:ID">
                             <xs:annotation>
                                 <xs:documentation>
-                                The id attribute is a text string containing the unique identifier of this element. 
+                                The id attribute is a text string containing the unique identifier of this element.
                                 This value must be unique within the instance document. Optional attribute.
                                 </xs:documentation>
                             </xs:annotation>
@@ -7339,7 +7339,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="sid" type="xs:NCName" use="required">
                             <xs:annotation>
                                 <xs:documentation>
-                                The sid attribute is a text string value containing the sub-identifier of this element. 
+                                The sid attribute is a text string value containing the sub-identifier of this element.
                                 This value must be unique within the scope of the parent element. Optional attribute.
                                 </xs:documentation>
                             </xs:annotation>
@@ -7351,7 +7351,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="optional">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -7428,7 +7428,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName" use="required">
             <xs:annotation>
                 <xs:documentation>
-                The sid attribute is a text string value containing the sub-identifier of this element. 
+                The sid attribute is a text string value containing the sub-identifier of this element.
                 This value must be unique within the scope of the parent element. Optional attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -7537,7 +7537,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="id" type="xs:ID">
                             <xs:annotation>
                                 <xs:documentation>
-                                The id attribute is a text string containing the unique identifier of this element. 
+                                The id attribute is a text string containing the unique identifier of this element.
                                 This value must be unique within the instance document. Optional attribute.
                                 </xs:documentation>
                             </xs:annotation>
@@ -7545,7 +7545,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="sid" type="xs:NCName" use="required">
                             <xs:annotation>
                                 <xs:documentation>
-                                The sid attribute is a text string value containing the sub-identifier of this element. 
+                                The sid attribute is a text string value containing the sub-identifier of this element.
                                 This value must be unique within the scope of the parent element. Optional attribute.
                                 </xs:documentation>
                             </xs:annotation>
@@ -7563,7 +7563,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="optional">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -8712,7 +8712,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                                 <xs:attribute name="symbol" type="xs:NCName" use="required">
                                                                     <xs:annotation>
                                                                         <xs:documentation>
-                                                                        The identifier for a uniform input parameter to the shader (a formal function parameter or in-scope 
+                                                                        The identifier for a uniform input parameter to the shader (a formal function parameter or in-scope
                                                                         global) that will be bound to an external resource.
                                                                         </xs:documentation>
                                                                     </xs:annotation>
@@ -8735,7 +8735,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                     <xs:attribute name="sid" type="xs:NCName" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                                            The sid attribute is a text string value containing the sub-identifier of this element.
                                             This value must be unique within the scope of the parent element. Optional attribute.
                                             </xs:documentation>
                                         </xs:annotation>
@@ -8747,7 +8747,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="id" type="xs:ID">
                             <xs:annotation>
                                 <xs:documentation>
-                                The id attribute is a text string containing the unique identifier of this element. 
+                                The id attribute is a text string containing the unique identifier of this element.
                                 This value must be unique within the instance document. Optional attribute.
                                 </xs:documentation>
                             </xs:annotation>
@@ -8755,7 +8755,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="sid" type="xs:NCName" use="required">
                             <xs:annotation>
                                 <xs:documentation>
-                                The sid attribute is a text string value containing the sub-identifier of this element. 
+                                The sid attribute is a text string value containing the sub-identifier of this element.
                                 This value must be unique within the scope of the parent element. Optional attribute.
                                 </xs:documentation>
                             </xs:annotation>
@@ -8767,7 +8767,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="optional">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -9064,7 +9064,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName">
             <xs:annotation>
                 <xs:documentation>
-                The sid attribute is a text string value containing the sub-identifier of this element. 
+                The sid attribute is a text string value containing the sub-identifier of this element.
                 This value must be unique within the scope of the parent element. Optional attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -9084,7 +9084,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName">
             <xs:annotation>
                 <xs:documentation>
-                The sid attribute is a text string value containing the sub-identifier of this element. 
+                The sid attribute is a text string value containing the sub-identifier of this element.
                 This value must be unique within the scope of the parent element. Optional attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -9131,7 +9131,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName">
             <xs:annotation>
                 <xs:documentation>
-                The sid attribute is a text string value containing the sub-identifier of this element. 
+                The sid attribute is a text string value containing the sub-identifier of this element.
                 This value must be unique within the scope of the parent element. Optional attribute.
                 </xs:documentation>
             </xs:annotation>
@@ -9772,7 +9772,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
         <xs:attribute name="sid" type="xs:NCName" use="required">
             <xs:annotation>
                 <xs:documentation>
-                The sid attribute is a text string value containing the sub-identifier of this element. 
+                The sid attribute is a text string value containing the sub-identifier of this element.
                 This value must be unique within the scope of the parent element.
                 </xs:documentation>
             </xs:annotation>
@@ -9841,7 +9841,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                     <xs:attribute name="sid" type="xs:NCName" use="optional">
                                         <xs:annotation>
                                             <xs:documentation>
-                                            The sid attribute is a text string value containing the sub-identifier of this element. 
+                                            The sid attribute is a text string value containing the sub-identifier of this element.
                                             This value must be unique within the scope of the parent element. Optional attribute.
                                             </xs:documentation>
                                         </xs:annotation>
@@ -9854,7 +9854,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="sid" type="xs:NCName" use="required">
                             <xs:annotation>
                                 <xs:documentation>
-                                The sid attribute is a text string value containing the sub-identifier of this element. 
+                                The sid attribute is a text string value containing the sub-identifier of this element.
                                 This value must be unique within the scope of the parent element.
                                 </xs:documentation>
                             </xs:annotation>
@@ -9866,7 +9866,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID" use="optional">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -10014,7 +10014,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="radius1" type="float2">
                     <xs:annotation>
                         <xs:documentation>
-                        Two float values that represent the radii of the tapered cylinder at the positive (height/2) 
+                        Two float values that represent the radii of the tapered cylinder at the positive (height/2)
                         Y value. Both ends of the tapered cylinder may be elliptical.
                         </xs:documentation>
                     </xs:annotation>
@@ -10022,7 +10022,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="radius2" type="float2">
                     <xs:annotation>
                         <xs:documentation>
-                        Two float values that represent the radii of the tapered cylinder at the negative (height/2) 
+                        Two float values that represent the radii of the tapered cylinder at the negative (height/2)
                         Y value.Both ends of the tapered cylinder may be elliptical.
                         </xs:documentation>
                     </xs:annotation>
@@ -10048,7 +10048,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="height" type="float">
                     <xs:annotation>
                         <xs:documentation>
-                        A float value that represents the length of the line segment connecting the centers 
+                        A float value that represents the length of the line segment connecting the centers
                         of the capping hemispheres.
                         </xs:documentation>
                     </xs:annotation>
@@ -10081,7 +10081,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="height" type="float">
                     <xs:annotation>
                         <xs:documentation>
-                        A float value that represents the length of the line segment connecting the centers of the 
+                        A float value that represents the length of the line segment connecting the centers of the
                         capping hemispheres.
                         </xs:documentation>
                     </xs:annotation>
@@ -10089,7 +10089,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="radius1" type="float2">
                     <xs:annotation>
                         <xs:documentation>
-                        Two float values that represent the radii of the tapered capsule at the positive (height/2) 
+                        Two float values that represent the radii of the tapered capsule at the positive (height/2)
                         Y value.Both ends of the tapered capsule may be elliptical.
                         </xs:documentation>
                     </xs:annotation>
@@ -10097,7 +10097,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="radius2" type="float2">
                     <xs:annotation>
                         <xs:documentation>
-                        Two float values that represent the radii of the tapered capsule at the negative (height/2) 
+                        Two float values that represent the radii of the tapered capsule at the negative (height/2)
                         Y value.Both ends of the tapered capsule may be elliptical.
                         </xs:documentation>
                     </xs:annotation>
@@ -10115,9 +10115,9 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="convex_mesh">
         <xs:annotation>
             <xs:documentation>
-            The definition of the convex_mesh element is identical to the mesh element with the exception that 
-            instead of a complete description (source, vertices, polygons etc.), it may simply point to another 
-            geometry to derive its shape. The latter case means that the convex hull of that geometry should 
+            The definition of the convex_mesh element is identical to the mesh element with the exception that
+            instead of a complete description (source, vertices, polygons etc.), it may simply point to another
+            geometry to derive its shape. The latter case means that the convex hull of that geometry should
             be computed and is indicated by the optional “convex_hull_of” attribute.
             </xs:documentation>
         </xs:annotation>
@@ -10145,7 +10145,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="convex_hull_of" type="xs:anyURI">
                 <xs:annotation>
                     <xs:documentation>
-                    The convex_hull_of attribute is a URI string of geometry to compute the convex hull of. 
+                    The convex_hull_of attribute is a URI string of geometry to compute the convex hull of.
                     Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -10186,7 +10186,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. This value 
+                    The id attribute is a text string containing the unique identifier of this element. This value
                     must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -10203,7 +10203,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="physics_material">
         <xs:annotation>
             <xs:documentation>
-            This element defines the physical properties of an object. It contains a technique/profile with 
+            This element defines the physical properties of an object. It contains a technique/profile with
             parameters. The COMMON profile defines the built-in names, such as static_friction.
             </xs:documentation>
         </xs:annotation>
@@ -10219,7 +10219,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="technique_common">
                     <xs:annotation>
                         <xs:documentation>
-                        The technique_common element specifies the physics_material information for the common profile 
+                        The technique_common element specifies the physics_material information for the common profile
                         which all COLLADA implementations need to support.
                         </xs:documentation>
                     </xs:annotation>
@@ -10267,7 +10267,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -10308,7 +10308,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="technique_common">
                     <xs:annotation>
                         <xs:documentation>
-                        The technique_common element specifies the physics_scene information for the common profile 
+                        The technique_common element specifies the physics_scene information for the common profile
                         which all COLLADA implementations need to support.
                         </xs:documentation>
                     </xs:annotation>
@@ -10349,7 +10349,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -10372,8 +10372,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="rigid_body">
         <xs:annotation>
             <xs:documentation>
-            This element allows for describing simulated bodies that do not deform. These bodies may or may 
-            not be connected by constraints (hinge, ball-joint etc.).  Rigid-bodies, constraints etc. are 
+            This element allows for describing simulated bodies that do not deform. These bodies may or may
+            not be connected by constraints (hinge, ball-joint etc.).  Rigid-bodies, constraints etc. are
             encapsulated in physics_model elements to allow for instantiating complex models.
             </xs:documentation>
         </xs:annotation>
@@ -10382,7 +10382,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="technique_common">
                     <xs:annotation>
                         <xs:documentation>
-                        The technique_common element specifies the rigid_body information for the common profile which all 
+                        The technique_common element specifies the rigid_body information for the common profile which all
                         COLLADA implementations need to support.
                         </xs:documentation>
                     </xs:annotation>
@@ -10400,7 +10400,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:attribute name="sid" type="xs:NCName">
                                                 <xs:annotation>
                                                     <xs:documentation>
-                                                    The sid attribute is a text string value containing the sub-identifier of this element. 
+                                                    The sid attribute is a text string value containing the sub-identifier of this element.
                                                     This value must be unique within the scope of the parent element. Optional attribute.
                                                     </xs:documentation>
                                                 </xs:annotation>
@@ -10419,8 +10419,8 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="mass_frame" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    Defines the center and orientation of mass of the rigid-body relative to the local origin of the 
-                                    “root” shape.This makes the off-diagonal elements of the inertia tensor (products of inertia) all 
+                                    Defines the center and orientation of mass of the rigid-body relative to the local origin of the
+                                    “root” shape.This makes the off-diagonal elements of the inertia tensor (products of inertia) all
                                     0 and allows us to just store the diagonal elements (moments of inertia).
                                     </xs:documentation>
                                 </xs:annotation>
@@ -10434,7 +10434,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="inertia" type="TargetableFloat3" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    float3 – The diagonal elements of the inertia tensor (moments of inertia), which is represented 
+                                    float3 – The diagonal elements of the inertia tensor (moments of inertia), which is represented
                                     in the local frame of the center of mass. See above.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -10475,7 +10475,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                         <xs:attribute name="sid" type="xs:NCName">
                                                             <xs:annotation>
                                                                 <xs:documentation>
-                                                                The sid attribute is a text string value containing the sub-identifier of this element. 
+                                                                The sid attribute is a text string value containing the sub-identifier of this element.
                                                                 This value must be unique within the scope of the parent element. Optional attribute.
                                                                 </xs:documentation>
                                                             </xs:annotation>
@@ -10619,7 +10619,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. This 
+                    The sid attribute is a text string value containing the sub-identifier of this element. This
                     value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -10636,7 +10636,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="rigid_constraint">
         <xs:annotation>
             <xs:documentation>
-            This element allows for connecting components, such as rigid_body into complex physics models 
+            This element allows for connecting components, such as rigid_body into complex physics models
             with moveable parts.
             </xs:documentation>
         </xs:annotation>
@@ -10675,7 +10675,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                         <xs:attribute name="rigid_body" type="xs:anyURI">
                             <xs:annotation>
                                 <xs:documentation>
-                                The “rigid_body” attribute is a relative reference to a rigid-body within the same 
+                                The “rigid_body” attribute is a relative reference to a rigid-body within the same
                                 physics_model.
                                 </xs:documentation>
                             </xs:annotation>
@@ -10724,7 +10724,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                 <xs:element name="technique_common">
                     <xs:annotation>
                         <xs:documentation>
-                        The technique_common element specifies the rigid_constraint information for the common profile 
+                        The technique_common element specifies the rigid_constraint information for the common profile
                         which all COLLADA implementations need to support.
                         </xs:documentation>
                     </xs:annotation>
@@ -10742,7 +10742,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:attribute name="sid" type="xs:NCName">
                                                 <xs:annotation>
                                                     <xs:documentation>
-                                                    The sid attribute is a text string value containing the sub-identifier of this element. 
+                                                    The sid attribute is a text string value containing the sub-identifier of this element.
                                                     This value must be unique within the scope of the parent element. Optional attribute.
                                                     </xs:documentation>
                                                 </xs:annotation>
@@ -10763,7 +10763,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:attribute name="sid" type="xs:NCName">
                                                 <xs:annotation>
                                                     <xs:documentation>
-                                                    The sid attribute is a text string value containing the sub-identifier of this element. 
+                                                    The sid attribute is a text string value containing the sub-identifier of this element.
                                                     This value must be unique within the scope of the parent element. Optional attribute.
                                                     </xs:documentation>
                                                 </xs:annotation>
@@ -10775,7 +10775,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="limits" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    The limits element provides a flexible way to specify the constraint limits (degrees of freedom 
+                                    The limits element provides a flexible way to specify the constraint limits (degrees of freedom
                                     and ranges).
                                     </xs:documentation>
                                 </xs:annotation>
@@ -10785,7 +10785,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                             <xs:annotation>
                                                 <xs:documentation>
                                                 The swing_cone_and_twist element describes the angular limits along each rotation axis in degrees.
-                                                The the X and Y limits describe a “swing cone” and the Z limits describe the “twist angle” range 
+                                                The the X and Y limits describe a “swing cone” and the Z limits describe the “twist angle” range
                                                 </xs:documentation>
                                             </xs:annotation>
                                             <xs:complexType>
@@ -10838,7 +10838,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                             <xs:element name="spring" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    Spring, based on distance (“LINEAR”) or angle (“ANGULAR”). 
+                                    Spring, based on distance (“LINEAR”) or angle (“ANGULAR”).
                                     </xs:documentation>
                                 </xs:annotation>
                                 <xs:complexType>
@@ -10854,7 +10854,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                     <xs:element name="stiffness" type="TargetableFloat" default="1.0" minOccurs="0">
                                                         <xs:annotation>
                                                             <xs:documentation>
-                                                            The stiffness (also called spring coefficient) has units of force/angle in degrees. 
+                                                            The stiffness (also called spring coefficient) has units of force/angle in degrees.
                                                             </xs:documentation>
                                                         </xs:annotation>
                                                     </xs:element>
@@ -10886,7 +10886,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
                                                     <xs:element name="stiffness" type="TargetableFloat" default="1.0" minOccurs="0">
                                                         <xs:annotation>
                                                             <xs:documentation>
-                                                            The stiffness (also called spring coefficient) has units of force/distance. 
+                                                            The stiffness (also called spring coefficient) has units of force/distance.
                                                             </xs:documentation>
                                                         </xs:annotation>
                                                     </xs:element>
@@ -10931,7 +10931,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="sid" type="xs:NCName" use="required">
                 <xs:annotation>
                     <xs:documentation>
-                    The sid attribute is a text string value containing the sub-identifier of this element. 
+                    The sid attribute is a text string value containing the sub-identifier of this element.
                     This value must be unique within the scope of the parent element. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -10948,7 +10948,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
     <xs:element name="physics_model">
         <xs:annotation>
             <xs:documentation>
-            This element allows for building complex combinations of rigid-bodies and constraints that 
+            This element allows for building complex combinations of rigid-bodies and constraints that
             may be instantiated multiple times.
             </xs:documentation>
         </xs:annotation>
@@ -10993,7 +10993,7 @@ COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
             <xs:attribute name="id" type="xs:ID">
                 <xs:annotation>
                     <xs:documentation>
-                    The id attribute is a text string containing the unique identifier of this element. 
+                    The id attribute is a text string containing the unique identifier of this element.
                     This value must be unique within the instance document. Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -11074,7 +11074,7 @@ XML_XSD = """<?xml version='1.0'?>
    http://www.w3.org/TR/REC-xml for information about this namespace.
 
     This schema document describes the XML namespace, in a form
-    suitable for import by other schema documents.  
+    suitable for import by other schema documents.
 
     Note that local names in this namespace are intended to be defined
     only by the World Wide Web Consortium or its subgroups.  The
@@ -11092,16 +11092,16 @@ XML_XSD = """<?xml version='1.0'?>
          is a language code for the natural language of the content of
          any element; its value is inherited.  This name is reserved
          by virtue of its definition in the XML specification.
-  
+
     space (as an attribute name): denotes an attribute whose
          value is a keyword indicating what whitespace processing
          discipline is intended for the content of the element; its
          value is inherited.  This name is reserved by virtue of its
          definition in the XML specification.
 
-    Father (in any context at all): denotes Jon Bosak, the chair of 
-         the original XML Working Group.  This name is reserved by 
-         the following decision of the W3C XML Plenary and 
+    Father (in any context at all): denotes Jon Bosak, the chair of
+         the original XML Working Group.  This name is reserved by
+         the following decision of the W3C XML Plenary and
          XML Coordination groups:
 
              In appreciation for his vision, leadership and dedication
@@ -11130,7 +11130,7 @@ XML_XSD = """<?xml version='1.0'?>
         &lt;type . . .>
          . . .
          &lt;attributeGroup ref="xml:specialAttrs"/>
- 
+
          will define a type which will schema-validate an instance
          element with any of those attributes</xs:documentation>
  </xs:annotation>
@@ -11197,20 +11197,24 @@ class ColladaResolver(lxml.etree.Resolver):
         else:
             return None
 
+
 class ColladaValidator(object):
     """Validates a collada lxml document"""
-    
+
     def __init__(self):
         """Initializes the validator"""
         self.COLLADA_SCHEMA_1_4_1_DOC = None
         self._COLLADA_SCHEMA_1_4_1_INSTANCE = None
-    
+
     def _getColladaSchemaInstance(self):
         if self._COLLADA_SCHEMA_1_4_1_INSTANCE is None:
             self._parser = lxml.etree.XMLParser()
             self._parser.resolvers.add(ColladaResolver())
-            self.COLLADA_SCHEMA_1_4_1_DOC = lxml.etree.parse(StringIO.StringIO(COLLADA_SCHEMA_1_4_1), self._parser)
-            self._COLLADA_SCHEMA_1_4_1_INSTANCE = lxml.etree.XMLSchema(self.COLLADA_SCHEMA_1_4_1_DOC)
+            self.COLLADA_SCHEMA_1_4_1_DOC = lxml.etree.parse(
+                    BytesIO(bytes(COLLADA_SCHEMA_1_4_1, encoding='utf-8')),
+                    self._parser)
+            self._COLLADA_SCHEMA_1_4_1_INSTANCE = lxml.etree.XMLSchema(
+                    self.COLLADA_SCHEMA_1_4_1_DOC)
         return self._COLLADA_SCHEMA_1_4_1_INSTANCE
 
     COLLADA_SCHEMA_1_4_1_INSTANCE = property(_getColladaSchemaInstance)
@@ -11219,3 +11223,4 @@ class ColladaValidator(object):
     def validate(self, *args, **kwargs):
         """A wrapper for lxml.XMLSchema.validate"""
         return self.COLLADA_SCHEMA_1_4_1_INSTANCE.validate(*args, **kwargs)
+

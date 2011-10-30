@@ -11,11 +11,13 @@
 ####################################################################
 
 """Module containing the base class for primitives"""
-from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
-                    DaeUnsupportedError, DaeObject
 import numpy
 import types
-from source import InputList
+
+from collada.common import DaeObject
+from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+        DaeMalformedError, DaeUnsupportedError
+from collada.source import InputList
 
 class Primitive(DaeObject):
     """Base class for all primitive sets like TriangleSet, LineSet, Polylist, etc."""
@@ -35,7 +37,7 @@ class Primitive(DaeObject):
     texbinormalset = property( lambda s: s._texbinormalset, doc=
     """Read-only tuple of texture binormal arrays. Each value is a numpy.array of size
     Nx3 where N is the number of texture binormals in the primitive's source array.""" )
-    
+
     vertex_index = property( lambda s: s._vertex_index, doc=
     """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
     To get the actual vertex points, one can use this array to select into the vertex
@@ -71,10 +73,10 @@ class Primitive(DaeObject):
         :param numpy.array matrix:
           A 4x4 numpy float matrix
         :param dict materialnodebysymbol:
-          A dictionary with the material symbols inside the primitive 
+          A dictionary with the material symbols inside the primitive
           assigned to :class:`collada.scene.MaterialNode` defined in the
           scene
-        
+
         :rtype: :class:`collada.primitive.Primitive`
 
         """
@@ -88,15 +90,16 @@ class Primitive(DaeObject):
             offset, semantic, source, set = input
             if semantic == 'VERTEX':
                 vertex_source = localscope.get(source[1:])
-                if type(vertex_source) == types.DictType:
+                if isinstance(vertex_source, dict):
                     for inputsemantic, inputsource in vertex_source.items():
                         if inputsemantic == 'POSITION':
                             to_append.append([offset, 'VERTEX', '#' + inputsource.id, set])
                         else:
                             to_append.append([offset, inputsemantic, '#' + inputsource.id, set])
-        
+
         #remove all the dicts
-        inputs[:] = [input for input in inputs if not type(localscope.get(input[2][1:])) is types.DictType]
+        inputs[:] = [input for input in inputs
+                if not isinstance(localscope.get(input[2][1:]), dict)]
 
         #append the dereferenced dicts
         for a in to_append:
@@ -110,15 +113,15 @@ class Primitive(DaeObject):
         color_inputs = []
         tangent_inputs = []
         binormal_inputs = []
-        
+
         all_inputs = {}
-        
+
         for input in inputs:
             offset, semantic, source, set = input
             if len(source) < 2 or source[0] != '#':
                 raise DaeMalformedError('Incorrect source id "%s" in input' % source)
             if source[1:] not in localscope:
-                raise DaeBrokenRefError('Source input id "%s" not found'%source)
+                raise DaeBrokenRefError('Source input id "%s" not found' % source)
             input = (input[0], input[1], input[2], input[3], localscope[source[1:]])
             if semantic == 'VERTEX':
                 vertex_inputs.append(input)
@@ -139,12 +142,12 @@ class Primitive(DaeObject):
             else:
                 try:
                     raise DaeUnsupportedError('Unknown input semantic: %s' % semantic)
-                except DaeUnsupportedError, ex:
+                except DaeUnsupportedError as ex:
                     collada.handleError(ex)
                 unknown_input = all_inputs.get(semantic, [])
                 unknown_input.append(input)
                 all_inputs[semantic] = unknown_input
-            
+
         all_inputs['VERTEX'] = vertex_inputs
         all_inputs['NORMAL'] = normal_inputs
         all_inputs['TEXCOORD'] = texcoord_inputs
@@ -153,18 +156,20 @@ class Primitive(DaeObject):
         all_inputs['COLOR'] = color_inputs
         all_inputs['TANGENT'] = tangent_inputs
         all_inputs['BINORMAL'] = binormal_inputs
-        
+
         return all_inputs
 
     @staticmethod
     def _getInputs(collada, localscope, inputnodes):
-        try: 
-            inputs = [ (int(i.get('offset')), i.get('semantic'), i.get('source'), i.get('set')) 
-                           for i in inputnodes ]
-        except ValueError, ex: raise DaeMalformedError('Corrupted offsets in primitive')
-        
+        try:
+            inputs = [(int(i.get('offset')), i.get('semantic'),
+                    i.get('source'), i.get('set'))
+                for i in inputnodes]
+        except ValueError as ex:
+            raise DaeMalformedError('Corrupted offsets in primitive')
+
         return Primitive._getInputsFromList(collada, localscope, inputs)
-    
+
     def getInputList(self):
         """Gets a :class:`collada.source.InputList` representing the inputs from a primitive"""
         inpl = InputList()
@@ -172,7 +177,7 @@ class Primitive(DaeObject):
             for (offset, semantic, source, set, srcobj) in tupes:
                 inpl.addInput(offset, semantic, source, set)
         return inpl
-    
+
     def save(self):
         return NotImplementedError("Primitives are read-only")
 
@@ -184,14 +189,14 @@ class BoundPrimitive(object):
         """Iterate through the items in this primitive. The shape returned
         depends on the primitive type. Examples: Triangle, Polygon."""
         pass
-    
+
     vertex = property( lambda s: s._vertex, doc=
     """Read-only numpy.array of size Nx3 where N is the number of vertex points in the
-    primitive's vertex source array. The values will be transformed according to the 
+    primitive's vertex source array. The values will be transformed according to the
     bound transformation matrix.""" )
     normal = property( lambda s: s._normal, doc=
     """Read-only numpy.array of size Nx3 where N is the number of normal values in the
-    primitive's normal source array. The values will be transformed according to the 
+    primitive's normal source array. The values will be transformed according to the
     bound transformation matrix.""" )
     texcoordset = property( lambda s: s._texcoordset, doc=
     """Read-only tuple of texture coordinate arrays. Each value is a numpy.array of size
@@ -200,12 +205,12 @@ class BoundPrimitive(object):
     vertex_index = property( lambda s: s._vertex_index, doc=
     """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
     To get the actual vertex points, one can use this array to select into the vertex
-    array, e.g. ``vertex[vertex_index]``. The values will be transformed according to the 
+    array, e.g. ``vertex[vertex_index]``. The values will be transformed according to the
     bound transformation matrix.""" )
     normal_index = property( lambda s: s._normal_index, doc=
     """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
     To get the actual normal values, one can use this array to select into the normals
-    array, e.g. ``normal[normal_index]``. The values will be transformed according to the 
+    array, e.g. ``normal[normal_index]``. The values will be transformed according to the
     bound transformation matrix.""" )
     texcoord_indexset = property( lambda s: s._texcoord_indexset, doc=
     """Read-only tuple of texture coordinate index arrays. Each value is a numpy.array of size
