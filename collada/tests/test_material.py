@@ -105,15 +105,22 @@ class TestMaterial(unittest.TestCase):
         cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
         image_data = cimage.data
         self.assertEqual(len(image_data), 786476)
-        pil_image = cimage.pilimage
-        self.assertTupleEqual(pil_image.size, (512,512))
-        self.assertEqual(pil_image.format, "TGA")
+        
+        try:
+            import Image as pil
+        except ImportError:
+            pil = None
+            
+        if pil is not None:
+            pil_image = cimage.pilimage
+            self.assertTupleEqual(pil_image.size, (512,512))
+            self.assertEqual(pil_image.format, "TGA")
 
-        numpy_uints = cimage.uintarray
-        self.assertTupleEqual(numpy_uints.shape, (512, 512, 3))
-
-        numpy_floats = cimage.floatarray
-        self.assertTupleEqual(numpy_uints.shape, (512, 512, 3))
+            numpy_uints = cimage.uintarray
+            self.assertTupleEqual(numpy_uints.shape, (512, 512, 3))
+    
+            numpy_floats = cimage.floatarray
+            self.assertTupleEqual(numpy_uints.shape, (512, 512, 3))
 
     def test_surface_saving(self):
         cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
