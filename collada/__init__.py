@@ -34,14 +34,9 @@ from collada import light
 from collada import material
 from collada import scene
 from collada.common import E, tag
-<<<<<<< HEAD
 from collada.common import DaeError, DaeObject, DaeIncompleteError, \
     DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
     DaeSaveValidationError
-from collada.util import IndexedList
-=======
-from collada.common import DaeError
->>>>>>> d4032b862e20bf7e1a3681fef4ffc4dec0b2b856
 from collada.util import basestring, BytesIO
 from collada.util import IndexedList
 from collada.xmlutil import etree as ElementTree
