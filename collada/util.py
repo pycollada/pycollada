@@ -19,12 +19,14 @@ import sys
 if sys.version_info[0] > 2:
     import unittest
     from io import StringIO, BytesIO
+
     bytes = bytes
     basestring = (str,bytes)
     xrange = range
 else:
     import unittest2 as unittest
     from StringIO import StringIO
+
     BytesIO = StringIO
     def bytes(s, encoding='utf-8'):
         return s
@@ -269,3 +271,4 @@ def _correctValInNode(outernode, tagname, value):
         innernode.text = str(value)
     elif value is not None:
         outernode.append(E(tagname, str(value)))
+

@@ -15,12 +15,12 @@
 import numpy
 import datetime
 import dateutil.parser
-from lxml import etree as ElementTree
 
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from collada.util import _correctValInNode
+from collada.xmlutil import etree as ElementTree
 
 
 class UP_AXIS:

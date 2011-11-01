@@ -15,7 +15,6 @@
     experimental. More support will be added in version 0.4.**"""
 
 import numpy
-from lxml import etree as ElementTree
 
 from collada import source
 from collada.common import DaeObject, tag
@@ -23,6 +22,7 @@ from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from collada.geometry import Geometry
 from collada.util import checkSource
+from collada.xmlutil import etree as ElementTree
 
 
 class Controller(DaeObject):

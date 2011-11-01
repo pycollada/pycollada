@@ -1,8 +1,11 @@
 import numpy
-from lxml.etree import fromstring, tostring
 
 import collada
 from collada.util import unittest
+from collada.xmlutil import etree
+
+fromstring = etree.fromstring
+tostring = etree.tostring
 
 
 class TestSource(unittest.TestCase):

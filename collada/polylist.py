@@ -13,7 +13,6 @@
 """Module containing classes and functions for the <polylist> primitive."""
 
 import numpy
-from lxml import etree as ElementTree
 
 from collada import primitive
 from collada import triangleset
@@ -21,6 +20,7 @@ from collada.common import E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from collada.util import toUnitVec, checkSource, xrange
+from collada.xmlutil import etree as ElementTree
 
 
 class Polygon(object):
