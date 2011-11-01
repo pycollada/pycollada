@@ -36,7 +36,9 @@ from collada import material
 from collada import scene
 from collada import schema
 from collada.common import E, tag
-from collada.common import DaeError
+from collada.common import DaeError, DaeObject, DaeIncompleteError, \
+    DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
+    DaeSaveValidationError
 from collada.util import IndexedList
 from collada.util import basestring, BytesIO
 
