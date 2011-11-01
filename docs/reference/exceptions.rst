@@ -7,8 +7,9 @@ Exceptions
    :toctree: generated
    :nosignatures:
 
-   collada.DaeError
-   collada.DaeIncompleteError
-   collada.DaeBrokenRefError
-   collada.DaeMalformedError
-   collada.DaeUnsupportedError
+   collada.common.DaeError
+   collada.common.DaeIncompleteError
+   collada.common.DaeBrokenRefError
+   collada.common.DaeMalformedError
+   collada.common.DaeUnsupportedError
+   collada.common.DaeSaveValidationError

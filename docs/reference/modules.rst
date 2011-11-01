@@ -6,6 +6,7 @@ Modules
 
 	collada
 	collada.camera
+	collada.common
 	collada.controller
 	collada.geometry
 	collada.light

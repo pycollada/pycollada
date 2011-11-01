@@ -75,7 +75,7 @@ class Collada(object):
           Uncompressed .dae files are supported, as well as zip file archives.
           If this is set to ``None``, a new collada instance is created.
         :param list ignore:
-          A list of :class:`collada.DaeError` types that should be ignored
+          A list of :class:`common.DaeError` types that should be ignored
           when loading the collada document. Instances of these types will
           be added to :attr:`errors` after loading but won't be raised.
           Only used if `filename` is not ``None``.
@@ -94,11 +94,11 @@ class Collada(object):
         :param bool validate_output:
           If set to True, the XML written when calling :meth:`save` will be
           validated against the COLLADA 1.4.1 schema. If validation fails, the
-          :class:`collada.DaeSaveValidationError` exception will be thrown.
+          :class:`common.DaeSaveValidationError` exception will be thrown.
         """
 
         self.errors = []
-        """List of :class:`collada.DaeError` objects representing errors encounterd while loading collada file"""
+        """List of :class:`common.common.DaeError` objects representing errors encountered while loading collada file"""
         self.assetInfo = None
         """Instance of :class:`collada.asset.Asset` containing asset information"""
 

@@ -1,7 +1,7 @@
-collada.DaeObject
-=================
+collada.common.DaeObject
+========================
 
-.. currentmodule:: collada
+.. currentmodule:: collada.common
 
 .. autoclass:: DaeObject
 

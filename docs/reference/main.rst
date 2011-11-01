@@ -6,4 +6,4 @@ Main
    :nosignatures:
 
    collada.Collada
-   collada.DaeObject
+   collada.common.DaeObject

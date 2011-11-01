@@ -53,7 +53,7 @@ class PerspectiveCamera(Camera):
          * :attr:`xfov` and :attr:`aspect_ratio`
          * :attr:`yfov` and :attr:`aspect_ratio`
 
-        Any other combination will raise :class:`collada.DaeMalformedError`
+        Any other combination will raise :class:`collada.common.DaeMalformedError`
 
         :param str id:
           Identifier for the camera
@@ -200,7 +200,7 @@ class OrthographicCamera(Camera):
          * :attr:`xmag` and :attr:`aspect_ratio`
          * :attr:`ymag` and :attr:`aspect_ratio`
 
-        Any other combination will raise :class:`collada.DaeMalformedError`
+        Any other combination will raise :class:`collada.common.DaeMalformedError`
 
         :param str id:
           Identifier for the camera

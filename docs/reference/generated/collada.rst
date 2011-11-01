@@ -11,10 +11,10 @@ collada
 		:nosignatures:
    
 		collada.Collada
-		collada.DaeBrokenRefError
-		collada.DaeError
-		collada.DaeIncompleteError
-		collada.DaeMalformedError
-		collada.DaeObject
-		collada.DaeUnsupportedError
+		collada.common.DaeBrokenRefError
+		collada.common.DaeError
+		collada.common.DaeIncompleteError
+		collada.common.DaeMalformedError
+		collada.common.DaeObject
+		collada.common.DaeUnsupportedError
 
