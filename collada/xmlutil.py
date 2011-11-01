@@ -1,10 +1,9 @@
 import sys
 
-if sys.version_info[0] > 2:
-    from xml.etree import ElementTree as etree
-else:
+try:
     from lxml import etree
-
+except ImportError:
+    from xml.etree import ElementTree as etree
 
 #
 # Element generator factory by Fredrik Lundh.

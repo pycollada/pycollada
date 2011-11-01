@@ -15,6 +15,7 @@
 with the COLLADA 1.4.1 schema."""
 
 import lxml
+import lxml.etree
 from collada.util import bytes, BytesIO
 
 COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
