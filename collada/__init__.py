@@ -24,7 +24,6 @@ import traceback
 import types
 import zipfile
 from datetime import datetime
-from lxml import etree as ElementTree
 
 from collada import animation
 from collada import asset
@@ -34,13 +33,23 @@ from collada import geometry
 from collada import light
 from collada import material
 from collada import scene
-from collada import schema
 from collada.common import E, tag
+<<<<<<< HEAD
 from collada.common import DaeError, DaeObject, DaeIncompleteError, \
     DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
     DaeSaveValidationError
 from collada.util import IndexedList
+=======
+from collada.common import DaeError
+>>>>>>> d4032b862e20bf7e1a3681fef4ffc4dec0b2b856
 from collada.util import basestring, BytesIO
+from collada.util import IndexedList
+from collada.xmlutil import etree as ElementTree
+
+try:
+    from collada import schema
+except ImportError: # no lxml
+    schema = None
 
 
 class Collada(object):
@@ -116,7 +125,7 @@ class Collada(object):
         self.scene = None
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
 
-        if validate_output:
+        if validate_output and schema:
             self.validator = schema.ColladaValidator()
         else:
             self.validator = None
@@ -187,13 +196,12 @@ class Collada(object):
         if aux_file_loader is not None:
             self.getFileData = aux_file_loader
 
-        etree_parser = ElementTree.XMLParser(remove_comments=True,
-                remove_blank_text=True)
+        etree_parser = ElementTree.XMLParser()
         try:
             self.xmlnode = ElementTree.ElementTree(element=None,
-                    file=BytesIO(data), parser=etree_parser)
-        except ElementTree.XMLSyntaxError as e:
-            raise DaeMalformedError("XML Syntax Parsing Error: %s" % e)
+                    file=BytesIO(data))
+        except ElementTree.ParseError as e:
+            raise DaeMalformedError("XML Parsing Error: %s" % e)
 
         self._loadAssetInfo()
         self._loadImages()
@@ -458,9 +466,8 @@ class Collada(object):
         self.assetInfo.save()
         assetnode = self.xmlnode.getroot().find(tag('asset'))
         if assetnode is not None:
-            self.xmlnode.getroot().replace(assetnode, self.assetInfo.xmlnode)
-        else:
-            self.xmlnode.getroot().insert(0, self.assetInfo.xmlnode)
+            self.xmlnode.getroot().remove(assetnode)
+        self.xmlnode.getroot().insert(0, self.assetInfo.xmlnode)
 
         library_loc = 0
         for i, node in enumerate(self.xmlnode.getroot()):
@@ -512,7 +519,7 @@ class Collada(object):
         self.save()
         if isinstance(fp, basestring):
             fp = open(fp, 'wb')
-        self.xmlnode.write(fp, pretty_print=True)
+        self.xmlnode.write(fp)
 
     def __str__(self):
         return '<Collada geometries=%d>' % (len(self.geometries))

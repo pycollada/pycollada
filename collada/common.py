@@ -1,5 +1,4 @@
-from lxml import etree
-from lxml.builder import ElementMaker
+from collada.xmlutil import etree, ElementMaker
 
 
 COLLADA_NS = 'http://www.collada.org/2005/11/COLLADASchema'

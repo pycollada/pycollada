@@ -21,12 +21,12 @@ This module contains all the functionality to load and manage:
 
 import copy
 import numpy
-from lxml import etree as ElementTree
 
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from collada.util import falmostEqual, StringIO
+from collada.xmlutil import etree as ElementTree
 
 try:
     import Image as pil
@@ -642,7 +642,8 @@ class Effect(DaeObject):
             else:
                 return None
         else:
-            raise DaeUnsupportedError('Unknown shading param definition ' + vnode.tag)
+            raise DaeUnsupportedError('Unknown shading param definition ' + \
+                    vnode.tag)
         return value
 
     def _fixColorValues(self):
@@ -670,7 +671,8 @@ class Effect(DaeObject):
         for param in self.params:
             param.save()
             if param.xmlnode not in profilenode.getchildren():
-                profilenode.insert(profilenode.index(tecnode), param.xmlnode)
+                profilenode.insert(list(profilenode).index(tecnode),
+                        param.xmlnode)
 
         deletenodes = []
         for oldparam in profilenode.findall( tag('newparam') ):

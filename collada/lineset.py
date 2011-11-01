@@ -13,13 +13,13 @@
 """Module containing classes and functions for the <lines> primitive."""
 
 import numpy
-from lxml import etree as ElementTree
 
 from collada import primitive
 from collada.util import toUnitVec, checkSource
 from collada.common import E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
+from collada.xmlutil import etree as ElementTree
 
 
 class Line(object):

@@ -1,10 +1,13 @@
 import os
 import numpy
 import dateutil.parser
-from lxml.etree import fromstring, tostring
 
 import collada
 from collada.util import unittest, BytesIO
+from collada.xmlutil import etree
+
+fromstring = etree.fromstring
+tostring = etree.tostring
 
 
 class TestCollada(unittest.TestCase):
@@ -268,7 +271,7 @@ class TestCollada(unittest.TestCase):
 
         loaded_mesh.save()
 
-        strdata = tostring(loaded_mesh.xmlnode)
+        strdata = tostring(loaded_mesh.xmlnode.getroot())
         indata = BytesIO(strdata)
         loaded_mesh2 = collada.Collada(indata, validate_output=True)
 

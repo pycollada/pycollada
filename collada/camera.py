@@ -13,11 +13,11 @@
 """Contains objects for representing cameras"""
 
 import numpy
-from lxml import etree as ElementTree
 
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError
+from collada.xmlutil import etree as ElementTree
 
 
 class Camera(DaeObject):
