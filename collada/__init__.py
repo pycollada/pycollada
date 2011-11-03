@@ -541,7 +541,7 @@ class Collada(object):
         if self.validator is not None:
             if not self.validator.validate(self.xmlnode):
                 raise DaeSaveValidationError("Validation error when saving: " + 
-                                             schema.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
+                                             self.validator.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
 
     def write(self, file):
         """Writes out the collada document to a file. Note that this also
