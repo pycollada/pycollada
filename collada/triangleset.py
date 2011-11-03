@@ -22,7 +22,7 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
 
 class Triangle(object):
     """Single triangle representation."""
-    def __init__(self, indices, vertices, normals, texcoords, material):
+    def __init__(self, indices, vertices, normal_indices, normals, texcoord_indices, texcoords, material):
         """A triangle should not be created manually."""
 
         self.vertices = vertices
@@ -39,7 +39,14 @@ class Triangle(object):
           :class:`collada.triangleset.BoundTriangleSet`, contains the actual
           :class:`collada.material.Effect` the triangle is bound to."""
         self.indices = indices
-        """A (3, 3) int array with vertex indexes in the vertex array"""
+        """A (3,) int array with vertex indexes of the 3 vertices in
+           the vertex array"""
+        self.normal_indices = normal_indices
+        """A (3,) int array with normal indexes of the 3 vertices in
+           the normal array"""
+        self.texcoord_indices = texcoord_indices
+        """A (3,2) int array with texture coordinate indexes of the 3
+           vertices in the texcoord array."""
 
         if self.normals is None:
             #generate normals
@@ -170,10 +177,12 @@ class TriangleSet(primitive.Primitive):
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
         n = self._normal[ self._normal_index[i] ]
+        uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
+            uvindices.append( uvindex[i] )
             uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Triangle(self._vertex_index[i], v, n, uv, self.material)
+        return Triangle(self._vertex_index[i], v, self._normal_index[i], n, uvindices, uv, self.material)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -326,10 +335,12 @@ class BoundTriangleSet(primitive.BoundPrimitive):
             n = None
         else:
             n = self._normal[ self._normal_index[i] ]
+        uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
+            uvindices.append( uvindex[i] )
             uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Triangle(self._vertex_index[i], v, n, uv, self.material)
+        return Triangle(self._vertex_index[i], v, self._normal_index[i], n, uvindices, uv, self.material)
 
     def triangles(self):
         """Iterate through all the triangles contained in the set.
@@ -362,4 +373,3 @@ class BoundTriangleSet(primitive.BoundPrimitive):
 
     def __str__(self): return '<BoundTriangleSet length=%d>' % len(self)
     def __repr__(self): return str(self)
-    

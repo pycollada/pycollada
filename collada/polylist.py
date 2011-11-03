@@ -23,9 +23,9 @@ from collada import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, \
 
 class Polygon(object):
     """Single polygon representation. Represents a polygon of N points."""
-    def __init__(self, indices, vertices, normals, texcoords, material):
+    def __init__(self, indices, vertices, normal_indices, normals, texcoord_indices, texcoords, material):
         """A Polygon should not be created manually."""
-        
+
         self.vertices = vertices
         """A (N, 3) float array containing the points in the polygon."""
         self.normals = normals
@@ -40,6 +40,14 @@ class Polygon(object):
         :class:`collada.polylist.BoundPolylist`, contains the actual
         :class:`collada.material.Effect` the line is bound to."""
         self.indices = indices
+        """A (N,) int array containing the indices for the vertices
+           of the N points in the polygon."""
+        self.normal_indices = normal_indices
+        """A (N,) int array containing the indices for the normals of
+           the N points in the polygon"""
+        self.texcoord_indices = texcoord_indices
+        """A (N,2) int array with texture coordinate indexes for the
+           texcoords of the N points in the polygon"""
 
     def triangles(self):
         """This triangulates the polygon using a simple fanning method.
@@ -174,14 +182,21 @@ class Polylist(primitive.Primitive):
         polyrange = self.polyindex[i]
         vertindex = self._vertex_index[polyrange[0]:polyrange[1]]
         v = self._vertex[vertindex]
+
+        normalindex = None
         if self.normal is None:
             n = None
         else:
-            n = self._normal[ self._normal_index[polyrange[0]:polyrange[1]] ]
+            normalindex = self._normal_index[polyrange[0]:polyrange[1]]
+            n = self._normal[normalindex]
+
+        uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
+            uvindices.append( uvindex[polyrange[0]:polyrange[1]] )
             uv.append( self._texcoordset[j][ uvindex[polyrange[0]:polyrange[1]] ] )
-        return Polygon(vertindex, v, n, uv, self.material)
+
+        return Polygon(vertindex, v, normalindex, n, uvindices, uv, self.material)
 
     _triangleset = None
     def triangleset(self):
@@ -285,14 +300,21 @@ class BoundPolylist(primitive.BoundPrimitive):
         polyrange = self.polyindex[i]
         vertindex = self._vertex_index[polyrange[0]:polyrange[1]]
         v = self._vertex[vertindex]
+
+        normalindex = None
         if self.normal is None:
             n = None
         else:
-            n = self._normal[ self._normal_index[polyrange[0]:polyrange[1]] ]
+            normalindex = self._normal_index[polyrange[0]:polyrange[1]]
+            n = self._normal[normalindex]
+
+        uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
+            uvindices.append( uvindex[polyrange[0]:polyrange[1]] )
             uv.append( self._texcoordset[j][ uvindex[polyrange[0]:polyrange[1]] ] )
-        return Polygon(vertindex, v, n, uv, self.material)
+
+        return Polygon(vertindex, v, normalindex, n, uvindices, uv, self.material)
 
     _triangleset = None
     def triangleset(self):
