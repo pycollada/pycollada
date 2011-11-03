@@ -61,25 +61,30 @@ class Polygon(object):
             
             tri_indices = numpy.array([
                 self.indices[0], self.indices[i+1], self.indices[i+2]
-                ])
+                ], dtype=numpy.float32)
             
             tri_vertices = numpy.array([
                 self.vertices[0], self.vertices[i+1], self.vertices[i+2]
-                ])
+                ], dtype=numpy.float32)
             
             if self.normals is None:
                 tri_normals = None
+                normal_indices = None
             else:
                 tri_normals = numpy.array([
                     self.normals[0], self.normals[i+1], self.normals[i+2]
-                    ])
+                    ], dtype=numpy.float32)
+                normal_indices = numpy.array([
+                    self.normal_indices[0], self.normal_indices[i+1], self.normal_indices[i+2]
+                    ], dtype=numpy.float32)
             
             tri_texcoords = []
-            for texcoord in self.texcoords:
-                tri_texcoords.append([texcoord[0], texcoord[i+1], texcoord[i+2]])
-            tri_texcoords = numpy.array(tri_texcoords)
+            tri_texcoord_indices = []
+            for texcoord, texcoord_indices in zip(self.texcoords, self.texcoord_indices):
+                tri_texcoords.append(numpy.array([texcoord[0], texcoord[i+1], texcoord[i+2]], dtype=numpy.float32))
+                tri_texcoord_indices.append(numpy.array([texcoord_indices[0], texcoord_indices[i+1], texcoord_indices[i+2]], dtype=numpy.float32))
             
-            tri = triangleset.Triangle(tri_indices, tri_vertices, tri_normals, tri_texcoords, self.material)
+            tri = triangleset.Triangle(tri_indices, tri_vertices, normal_indices, tri_normals, tri_texcoord_indices, tri_texcoords, self.material)
             yield tri
 
     def __repr__(self): 

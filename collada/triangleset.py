@@ -330,17 +330,23 @@ class BoundTriangleSet(primitive.BoundPrimitive):
     def __len__(self): return len(self.index)
 
     def __getitem__(self, i):
-        v = self._vertex[ self._vertex_index[i] ]
+        vindex = self._vertex_index[i]
+        v = self._vertex[vindex]
+        
         if self._normal is None:
             n = None
+            nindex = None
         else:
-            n = self._normal[ self._normal_index[i] ]
+            nindex = self._normal_index[i]
+            n = self._normal[nindex]
+        
         uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uvindices.append( uvindex[i] )
-            uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Triangle(self._vertex_index[i], v, self._normal_index[i], n, uvindices, uv, self.material)
+            uvindices.append(uvindex[i])
+            uv.append(self._texcoordset[j][uvindex[i]])
+        
+        return Triangle(vindex, v, nindex, n, uvindices, uv, self.material)
 
     def triangles(self):
         """Iterate through all the triangles contained in the set.
