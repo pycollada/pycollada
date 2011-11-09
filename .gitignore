@@ -7,3 +7,5 @@ docs/_build
 build
 dist
 pycollada.egg-info
+__testing
+distribute*.tar.gz
