@@ -1,6 +1,7 @@
 import sys
 import functools
 
+COLLADA_NS = 'http://www.collada.org/2005/11/COLLADASchema'
 HAVE_LXML = False
 
 try:
@@ -68,3 +69,42 @@ else:
             return functools.partial(self, tag)
 
     E = ElementMaker()
+    
+    if etree.VERSION[0:3] == '1.2':
+        #in etree < 1.3, this is a workaround for supressing prefixes
+        
+        def fixtag(tag, namespaces):
+            import string
+            # given a decorated tag (of the form {uri}tag), return prefixed
+            # tag and namespace declaration, if any
+            if isinstance(tag, etree.QName):
+                tag = tag.text
+            namespace_uri, tag = string.split(tag[1:], "}", 1)
+            prefix = namespaces.get(namespace_uri)
+            if namespace_uri not in namespaces:
+                prefix = etree._namespace_map.get(namespace_uri)
+                if namespace_uri not in etree._namespace_map:
+                    prefix = "ns%d" % len(namespaces)
+                namespaces[namespace_uri] = prefix
+                if prefix == "xml":
+                    xmlns = None
+                else:
+                    if prefix is not None:
+                        nsprefix = ':' + prefix
+                    else:
+                        nsprefix = ''
+                    xmlns = ("xmlns%s" % nsprefix, namespace_uri)
+            else:
+                xmlns = None
+            if prefix is not None:
+                prefix += ":"
+            else:
+                prefix = ''
+                
+            return "%s%s" % (prefix, tag), xmlns
+    
+        etree.fixtag = fixtag
+        etree._namespace_map[COLLADA_NS] = None
+    else:
+        #For etree > 1.3, use register_namespace function
+        etree.register_namespace('', COLLADA_NS)
