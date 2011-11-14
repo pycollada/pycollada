@@ -1,5 +1,7 @@
 import numpy
-from lxml.etree import fromstring, tostring
+from collada.xmlutil import etree
+fromstring = etree.fromstring
+tostring = etree.tostring
 
 import collada
 from collada.util import unittest
