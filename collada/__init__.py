@@ -40,6 +40,7 @@ from collada.common import DaeError, DaeObject, DaeIncompleteError, \
 from collada.util import basestring, BytesIO
 from collada.util import IndexedList
 from collada.xmlutil import etree as ElementTree
+from collada.xmlutil import writeXML
 
 try:
     from collada import schema
@@ -514,7 +515,7 @@ class Collada(object):
         self.save()
         if isinstance(fp, basestring):
             fp = open(fp, 'wb')
-        self.xmlnode.write(fp)
+        writeXML(self.xmlnode, fp)
 
     def __str__(self):
         return '<Collada geometries=%d>' % (len(self.geometries))

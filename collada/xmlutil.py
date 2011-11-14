@@ -38,6 +38,9 @@ except (NameError, KeyError):
 
 if HAVE_LXML:
     from lxml.builder import E, ElementMaker
+    
+    def writeXML(xmlnode, fp):
+        xmlnode.write(fp, pretty_print=True)
 else:    
     class ElementMaker(object):
         def __init__(self, namespace=None, nsmap=None):
@@ -108,3 +111,22 @@ else:
     else:
         #For etree > 1.3, use register_namespace function
         etree.register_namespace('', COLLADA_NS)
+
+    def indent(elem, level=0):
+        i = "\n" + level*"  "
+        if len(elem):
+            if not elem.text or not elem.text.strip():
+                elem.text = i + "  "
+            if not elem.tail or not elem.tail.strip():
+                elem.tail = i
+            for elem in elem:
+                indent(elem, level+1)
+            if not elem.tail or not elem.tail.strip():
+                elem.tail = i
+        else:
+            if level and (not elem.tail or not elem.tail.strip()):
+                elem.tail = i
+
+    def writeXML(xmlnode, fp):
+        indent(xmlnode.getroot())
+        xmlnode.write(fp)
