@@ -27,12 +27,12 @@ except NameError:
         return hasattr(f, '__call__')
 
 try:
-    basestring = __builtins__["basestring"]
+    basestring
 except (NameError, KeyError):
     basestring = str
 
 try:
-    unicode = __builtins__["unicode"]
+    unicode
 except (NameError, KeyError):
     unicode = str
 
