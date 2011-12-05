@@ -24,12 +24,11 @@ Supported scene nodes are:
 """
 
 import copy
-import numpy
 
 from collada.common import DaeObject, E, tag
 from collada.common import DaeError, DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec
+from collada.util import toUnitVec, numpy
 from collada.xmlutil import etree as ElementTree
 
 

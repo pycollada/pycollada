@@ -12,13 +12,11 @@
 
 """Module containing classes and functions for the <triangles> primitive."""
 
-import numpy
-
 from collada import primitive
 from collada.common import E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource, normalize_v3, dot_v3, xrange
+from collada.util import toUnitVec, checkSource, normalize_v3, dot_v3, xrange, numpy
 from collada.xmlutil import etree as ElementTree
 
 

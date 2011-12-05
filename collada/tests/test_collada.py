@@ -1,9 +1,8 @@
 import os
-import numpy
 import dateutil.parser
 
 import collada
-from collada.util import unittest, BytesIO
+from collada.util import unittest, BytesIO, numpy
 from collada.xmlutil import etree
 
 fromstring = etree.fromstring

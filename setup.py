@@ -4,7 +4,10 @@ from setuptools import find_packages, setup
 install_requires = []
 
 try: import numpy
-except ImportError: install_requires.append('numpy')
+except ImportError:
+    try: import numpypy as numpy
+    except ImportError:
+        install_requires.append('numpy')
 
 if sys.version_info[0] > 2:
     install_requires.append('python-dateutil>=2.0')

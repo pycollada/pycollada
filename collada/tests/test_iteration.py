@@ -1,10 +1,9 @@
-import numpy
 from collada.xmlutil import etree
 fromstring = etree.fromstring
 tostring = etree.tostring
 
 import collada
-from collada.util import unittest
+from collada.util import unittest, numpy
 
 
 class TestIteration(unittest.TestCase):

@@ -14,14 +14,12 @@
     support for loading Skin and Morph. **This module is highly
     experimental. More support will be added in version 0.4.**"""
 
-import numpy
-
 from collada import source
 from collada.common import DaeObject, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from collada.geometry import Geometry
-from collada.util import checkSource
+from collada.util import checkSource, numpy
 from collada.xmlutil import etree as ElementTree
 
 

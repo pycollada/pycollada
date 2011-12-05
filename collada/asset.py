@@ -12,14 +12,13 @@
 
 """Contains COLLADA asset information."""
 
-import numpy
 import datetime
 import dateutil.parser
 
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import _correctValInNode
+from collada.util import _correctValInNode, numpy
 from collada.xmlutil import etree as ElementTree
 
 

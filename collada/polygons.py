@@ -12,15 +12,13 @@
 
 """Module containing classes and functions for the <polygons> primitive."""
 
-import numpy
-
 from collada import primitive
 from collada import polylist
 from collada import triangleset
 from collada.common import E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource
+from collada.util import toUnitVec, checkSource, numpy
 from collada.xmlutil import etree as ElementTree
 
 

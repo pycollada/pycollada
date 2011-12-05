@@ -12,9 +12,12 @@
 
 """This module contains utility functions"""
 
-import numpy
 import math
 import sys
+
+try: import numpy
+except ImportError:
+    import numpypy as numpy
 
 if sys.version_info[0] > 2:
     import unittest

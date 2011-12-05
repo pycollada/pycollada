@@ -11,13 +11,13 @@
 ####################################################################
 
 """Module containing the base class for primitives"""
-import numpy
 import types
 
 from collada.common import DaeObject
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from collada.source import InputList
+from collada.util import numpy
 
 class Primitive(DaeObject):
     """Base class for all primitive sets like TriangleSet, LineSet, Polylist, etc."""

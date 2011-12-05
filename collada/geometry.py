@@ -12,8 +12,6 @@
 
 """Contains objects for representing a geometry."""
 
-import numpy
-
 from collada import source
 from collada import triangleset
 from collada import lineset
@@ -24,6 +22,7 @@ from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from collada.xmlutil import etree as ElementTree
+from collada.util import numpy
 
 
 class Geometry(DaeObject):
