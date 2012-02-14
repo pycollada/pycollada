@@ -141,6 +141,35 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(loaded_surface.image.id, "yourcimage")
         self.assertEqual(loaded_surface.format, "OtherFormat")
 
+    def test_surface_empty(self):
+        surface1 = """
+        <surface xmlns="http://www.collada.org/2005/11/COLLADASchema" type="2D">
+        <init_from>file1-image</init_from>
+        <format>A8R8G8B8</format>
+        </surface>
+        """
+        self.assertRaises(collada.DaeIncompleteError, collada.material.Surface.load, self.dummy, {}, fromstring(surface1))
+        
+        surface2 = """
+        <newparam xmlns="http://www.collada.org/2005/11/COLLADASchema" sid="file1-surface">
+        <surface xmlns="http://www.collada.org/2005/11/COLLADASchema" type="2D">
+        <init_from>file1-image</init_from>
+        <format>A8R8G8B8</format>
+        </surface>
+        </newparam>
+        """
+        self.assertRaises(collada.DaeBrokenRefError, collada.material.Surface.load, self.dummy, {}, fromstring(surface2))
+        
+        surface3 = """
+        <newparam xmlns="http://www.collada.org/2005/11/COLLADASchema" sid="file1-surface">
+        <surface xmlns="http://www.collada.org/2005/11/COLLADASchema" type="2D">
+        <init_from></init_from>
+        <format>A8R8G8B8</format>
+        </surface>
+        </newparam>
+        """
+        self.assertRaises(collada.DaeBrokenRefError, collada.material.Surface.load, self.dummy, {}, fromstring(surface3))
+
     def test_sampler2d_saving(self):
         cimage = collada.material.CImage("mycimage", "./whatever.tga", self.dummy)
         surface = collada.material.Surface("mysurface", cimage)

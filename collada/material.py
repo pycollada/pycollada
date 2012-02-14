@@ -226,7 +226,7 @@ class Surface(DaeObject):
             img = localscope[imgid]
         else:
             img = collada.images.get(imgid)
-        if img is None: raise DaeBrokenRefError('Missing image ' + imgid)
+        if img is None: raise DaeBrokenRefError("Missing image '%s' in surface '%s'" % (imgid, id))
         return Surface(id, img, format, xmlnode=node)
 
     def save(self):
