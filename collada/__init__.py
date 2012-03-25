@@ -311,6 +311,7 @@ class Collada(object):
                             self.handleError(ex)
                         else:
                             self.animations.append(A)
+        print 'animations', self.animations
 
     def _loadLights(self):
         """Load light library."""
