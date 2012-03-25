@@ -330,7 +330,7 @@ class BoundPolylist(primitive.BoundPrimitive):
         self.materialnodebysymbol = materialnodebysymbol
         self.original = pl
 
-    def __len__(self): return len(self.index)
+    def __len__(self): return self.npolygons
 
     def __getitem__(self, i):
         polyrange = self.polyindex[i]
