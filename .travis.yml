@@ -1,13 +1,17 @@
 language: python
 
+env:
+  # Using numpy from github due to numpy issue #1857
+  - DEPS="git+git://github.com/numpy/numpy.git@dba98cc1"
+  - DEPS="git+git://github.com/numpy/numpy.git@dba98cc1 lxml"
+
 python:
   - 2.6
   - 2.7
   - 3.2
 
 install:
-  # numpy has a known bug that it won't install properly from within distutils
-  - pip install numpy
+  - pip install $DEPS
   - python setup.py install
 
 script: python collada
