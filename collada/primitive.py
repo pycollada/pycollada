@@ -113,6 +113,9 @@ class Primitive(DaeObject):
         color_inputs = []
         tangent_inputs = []
         binormal_inputs = []
+        joint_inputs = []
+        inv_bind_matrix_inputs = []
+        weight_inputs = []
 
         all_inputs = {}
 
@@ -139,6 +142,12 @@ class Primitive(DaeObject):
                 tangent_inputs.append(input)
             elif semantic == 'BINORMAL':
                 binormal_inputs.append(input)
+            elif semantic == 'JOINT':
+                joint_inputs.append(input)
+            elif semantic == 'INV_BIND_MATRIX':
+                inv_bind_matrix_inputs.append(input)
+            elif semantic == 'WEIGHT':
+                weight_inputs.append(input)
             else:
                 try:
                     raise DaeUnsupportedError('Unknown input semantic: %s' % semantic)
@@ -156,13 +165,16 @@ class Primitive(DaeObject):
         all_inputs['COLOR'] = color_inputs
         all_inputs['TANGENT'] = tangent_inputs
         all_inputs['BINORMAL'] = binormal_inputs
+        all_inputs['JOINT'] = joint_inputs
+        all_inputs['INV_BIND_MATRIX'] = inv_bind_matrix_inputs
+        all_inputs['WEIGHT'] = weight_inputs
 
         return all_inputs
 
     @staticmethod
     def _getInputs(collada, localscope, inputnodes):
         try:
-            inputs = [(int(i.get('offset')), i.get('semantic'),
+            inputs = [(int(i.get('offset', 0)), i.get('semantic'),
                     i.get('source'), i.get('set'))
                 for i in inputnodes]
         except ValueError as ex:
