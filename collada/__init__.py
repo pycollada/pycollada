@@ -133,7 +133,9 @@ class Collada(object):
         if filename is None:
             self.filename = None
             self.zfile = None
-            self.getFileData = aux_file_loader
+            self.getFileData = self._nullGetFile
+            if aux_file_loader is not None:
+                self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
             self.xmlnode = ElementTree.ElementTree(
                                E.COLLADA(
@@ -190,7 +192,7 @@ class Collada(object):
             data = strdata
 
         if aux_file_loader is not None:
-            self.getFileData = aux_file_loader
+            self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
         etree_parser = ElementTree.XMLParser()
         try:
@@ -253,6 +255,14 @@ class Collada(object):
             raise DaeBrokenRefError('Auxiliar file %s not found on disk'%fname)
         fdata = open(aux_path, 'rb')
         return fdata.read()
+
+    def _wrappedFileLoader(self, aux_file_loader):
+        def __wrapped(fname):
+            res = aux_file_loader(fname)
+            if res is None:
+                raise DaeBrokenRefError('Auxiliar file %s from auxiliary file loader not found' % fname)
+            return res
+        return __wrapped
 
     def _nullGetFile(self, fname):
         raise DaeBrokenRefError('Trying to load auxiliary file but collada was not loaded from disk, zip, or with custom handler')

@@ -77,7 +77,6 @@ class TestMaterial(unittest.TestCase):
 
     def image_dummy_loader(self, fname):
         return self.image_return
-        pass
 
     def test_cimage_saving(self):
         self.image_return = None
@@ -90,7 +89,9 @@ class TestMaterial(unittest.TestCase):
         loaded_cimage = collada.material.CImage.load(self.dummy, {}, fromstring(tostring(cimage.xmlnode)))
         self.assertEqual(loaded_cimage.id, "yourcimage")
         self.assertEqual(loaded_cimage.path, "./next.tga")
-        self.assertEqual(loaded_cimage.data, None)
+        with self.assertRaises(collada.DaeBrokenRefError):
+            loaded_cimage.data
+        self.assertEqual(loaded_cimage.data, '')
         self.assertEqual(loaded_cimage.pilimage, None)
         self.assertEqual(loaded_cimage.uintarray, None)
         self.assertEqual(loaded_cimage.floatarray, None)
