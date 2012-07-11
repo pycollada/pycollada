@@ -24,7 +24,10 @@ if sys.version_info[0] > 2:
     basestring = (str,bytes)
     xrange = range
 else:
-    import unittest2 as unittest
+    import unittest
+    if not hasattr(unittest.TestCase, "assertIsNone"):
+        # external dependency unittest2 required for Python <= 2.6
+        import unittest2 as unittest
     from StringIO import StringIO
 
     BytesIO = StringIO
