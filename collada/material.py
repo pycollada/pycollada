@@ -392,6 +392,14 @@ class Map(DaeObject):
     def __repr__(self):
         return str(self)
 
+class OPAQUE_MODE:
+    """The opaque mode of an effect."""
+    A_ONE = 'A_ONE'
+    """Takes the transparency information from the color's alpha channel, where the value 1.0 is opaque (default)."""
+    RGB_ZERO = 'RGB_ZERO'
+    """Takes the transparency information from the color's red, green, and blue
+    channels, where the value 0.0 is opaque, with each channel modulated
+    independently."""
 
 class Effect(DaeObject):
     """Class containing data coming from an <effect> tag.
@@ -414,6 +422,7 @@ class Effect(DaeObject):
                        transparent = (0.0, 0.0, 0.0, 1.0),
                        transparency = 0.0,
                        index_of_refraction = None,
+                       opaque_mode = None,
                        xmlnode = None):
         """Create an effect instance out of properties.
 
@@ -456,6 +465,8 @@ class Effect(DaeObject):
         :param float index_of_refraction:
           A single float indicating the index of refraction for perfectly
           refracted light
+        :param :class:`collada.material.OPAQUE_MODE` opaque_mode:
+          The opaque mode for the effect. If not specified, defaults to A_ONE.
         :param xmlnode:
           If loaded from xml, the xml node
 
@@ -499,6 +510,8 @@ class Effect(DaeObject):
         self.index_of_refraction = index_of_refraction
         """A single float indicating the index of refraction for perfectly
           refracted light"""
+        self.opaque_mode = OPAQUE_MODE.A_ONE if opaque_mode is None else opaque_mode
+        """The opaque mode for the effect. An instance of :class:`collada.material.OPAQUE_MODE`."""
 
         self._fixColorValues()
 
@@ -512,6 +525,8 @@ class Effect(DaeObject):
                 value = getattr(self, prop)
                 if value is None: continue
                 propnode = E(prop)
+                if prop == 'transparent' and self.opaque_mode == OPAQUE_MODE.RGB_ZERO:
+                    propnode.set('opaque', OPAQUE_MODE.RGB_ZERO)
                 shadnode.append( propnode )
                 if type(value) is Map:
                     propnode.append(value.xmlnode)
@@ -597,6 +612,11 @@ class Effect(DaeObject):
                 except DaeUnsupportedError as ex:
                     props[key] = None
                     collada.handleError(ex) # Give the chance to ignore error and load the rest
+                
+                if key == 'transparent' and key in props and props[key] is not None:
+                    opaque_mode = pnode.get('opaque')
+                    if opaque_mode is not None and opaque_mode == OPAQUE_MODE.RGB_ZERO:
+                        props['opaque_mode'] = OPAQUE_MODE.RGB_ZERO
         props['xmlnode'] = node
 
         bumpnode = node.find('.//%s//%s' % (tag('extra'), tag('texture')))
@@ -688,6 +708,8 @@ class Effect(DaeObject):
 
         def getPropNode(prop, value):
             propnode = E(prop)
+            if prop == 'transparent' and self.opaque_mode == OPAQUE_MODE.RGB_ZERO:
+                propnode.set('opaque', OPAQUE_MODE.RGB_ZERO)
             if type(value) is Map:
                 propnode.append(copy.deepcopy(value.xmlnode))
             elif type(value) is float:

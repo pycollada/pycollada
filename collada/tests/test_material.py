@@ -4,6 +4,7 @@ import sys
 import collada
 from collada.util import unittest
 from collada.xmlutil import etree
+from collada.material import OPAQUE_MODE
 
 fromstring = etree.fromstring
 tostring = etree.tostring
@@ -45,6 +46,7 @@ class TestMaterial(unittest.TestCase):
         self.assertTupleEqual(effect.reflective, (0.7, 0.6, 0.5, 1.0))
         self.assertTupleEqual(effect.transparent, (0.2, 0.4, 0.6, 1.0))
         self.assertEqual(effect.double_sided, False)
+        self.assertEqual(effect.opaque_mode, OPAQUE_MODE.A_ONE)
         self.assertIsNotNone(str(effect))
 
         effect.id = "youreffect"
@@ -57,6 +59,7 @@ class TestMaterial(unittest.TestCase):
         effect.specular = (1.3, 1.2, 1.1, 1.0)
         effect.reflective = (1.7, 1.6, 1.5, 0.3)
         effect.transparent = (1.2, 1.4, 1.6, 1.0)
+        effect.opaque_mode = OPAQUE_MODE.RGB_ZERO
         effect.double_sided = True
         effect.save()
 
@@ -73,6 +76,7 @@ class TestMaterial(unittest.TestCase):
         self.assertTupleEqual(loaded_effect.specular, (1.3, 1.2, 1.1, 1.0))
         self.assertTupleEqual(loaded_effect.reflective, (1.7, 1.6, 1.5, 0.3))
         self.assertTupleEqual(loaded_effect.transparent, (1.2, 1.4, 1.6, 1.0))
+        self.assertEqual(loaded_effect.opaque_mode, OPAQUE_MODE.RGB_ZERO)
         self.assertEqual(loaded_effect.double_sided, True)
 
     def image_dummy_loader(self, fname):
@@ -229,7 +233,8 @@ class TestMaterial(unittest.TestCase):
                        reflective = (0.7, 0.6, 0.5, 1.0),
                        reflectivity = 0.8,
                        transparent = (0.2, 0.4, 0.6, 1.0),
-                       transparency = 0.9)
+                       transparency = 0.9,
+                       opaque_mode = OPAQUE_MODE.A_ONE)
 
         other_cimage = collada.material.CImage("yourcimage", "./whatever.tga", self.dummy)
         other_surface = collada.material.Surface("yoursurface", other_cimage)
@@ -253,6 +258,17 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(loaded_effect.params[1].id, "yoursurface")
         self.assertTrue(type(loaded_effect.params[2]) is collada.material.Sampler2D)
         self.assertEqual(loaded_effect.params[2].id, "yoursampler2d")
+        self.assertEqual(loaded_effect.opaque_mode, OPAQUE_MODE.A_ONE)
+
+    def test_rgbzero(self):
+        effect = collada.material.Effect("myeffect", [], "phong",
+                       opaque_mode = OPAQUE_MODE.RGB_ZERO)
+        
+        self.assertEqual(effect.opaque_mode, OPAQUE_MODE.RGB_ZERO)
+        effect.save()
+        
+        loaded_effect = collada.material.Effect.load(self.dummy, {}, fromstring(tostring(effect.xmlnode)))
+        self.assertEqual(loaded_effect.opaque_mode, OPAQUE_MODE.RGB_ZERO)
 
     def test_material_saving(self):
         effect = collada.material.Effect("myeffect", [], "phong")
