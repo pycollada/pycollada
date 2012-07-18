@@ -11,3 +11,4 @@ Material
    collada.material.Surface
    collada.material.Sampler2D
    collada.material.Map
+   collada.material.OPAQUE_MODE

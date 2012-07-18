@@ -465,7 +465,7 @@ class Effect(DaeObject):
         :param float index_of_refraction:
           A single float indicating the index of refraction for perfectly
           refracted light
-        :param :class:`collada.material.OPAQUE_MODE` opaque_mode:
+        :param `collada.material.OPAQUE_MODE` opaque_mode:
           The opaque mode for the effect. If not specified, defaults to A_ONE.
         :param xmlnode:
           If loaded from xml, the xml node
