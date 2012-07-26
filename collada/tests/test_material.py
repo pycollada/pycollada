@@ -265,10 +265,17 @@ class TestMaterial(unittest.TestCase):
                        opaque_mode = OPAQUE_MODE.RGB_ZERO)
         
         self.assertEqual(effect.opaque_mode, OPAQUE_MODE.RGB_ZERO)
+        self.assertEqual(effect.transparency, 0.0)
         effect.save()
         
         loaded_effect = collada.material.Effect.load(self.dummy, {}, fromstring(tostring(effect.xmlnode)))
         self.assertEqual(loaded_effect.opaque_mode, OPAQUE_MODE.RGB_ZERO)
+        
+        effect = collada.material.Effect("myeffect", [], "phong")
+        
+        self.assertEqual(effect.opaque_mode, OPAQUE_MODE.A_ONE)
+        self.assertEqual(effect.transparency, 1.0)
+        effect.save()
 
     def test_material_saving(self):
         effect = collada.material.Effect("myeffect", [], "phong")

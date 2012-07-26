@@ -420,7 +420,7 @@ class Effect(DaeObject):
                        reflective = (0.0, 0.0, 0.0, 1.0),
                        reflectivity = 0.0,
                        transparent = (0.0, 0.0, 0.0, 1.0),
-                       transparency = 0.0,
+                       transparency = None,
                        index_of_refraction = None,
                        opaque_mode = None,
                        xmlnode = None):
@@ -512,6 +512,12 @@ class Effect(DaeObject):
           refracted light"""
         self.opaque_mode = OPAQUE_MODE.A_ONE if opaque_mode is None else opaque_mode
         """The opaque mode for the effect. An instance of :class:`collada.material.OPAQUE_MODE`."""
+
+        if self.transparency is None:
+            if self.opaque_mode == OPAQUE_MODE.A_ONE:
+                self.transparency = 1.0
+            else:
+                self.transparency = 0.0
 
         self._fixColorValues()
 
