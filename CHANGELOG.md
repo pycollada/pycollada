@@ -1,6 +1,31 @@
 pycollada Changelog
 ===================
 
+0.4 (2012-07-31)
+----------------
+
+Backwards Compatibility Notes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* Python 2.5 is no longer supported. Supported versions are now 2.6, 2.7 and 3.2.
+
+New Features
+^^^^^^^^^^^^
+* Added support for reading the opaque attribute from <transparent> tag.
+* Normals and texture coordinate indices are now available in shapes (Triangle and Polygon).
+* Library is now compatible with python's built-in ElementTree API instead of requiring lxml. lxml is still recommended.
+* Added support for Python 3.2. Supported versions are now 2.6, 2.7 and 3.2.
+* Added support for index_of_refraction in <effect>.
+* Added optional parameter to Collada that does XML schema validation when saving.
+* Automatically corrects broken files that don't have correct xfov, yfov, and aspect ratio in cameras.
+
+Bug Fixes
+^^^^^^^^^
+* Fix the default value for transparency in Effect. Now correctly defaults to 1.0 when opaque mode is A_ONE, and 0.0 when opaque mode is RGB_ZERO.
+* Fixed bug where BoundPolylist was not returning the correct length value.
+* Removed support for RGB from Effect since it's not valid in the spec. If an RGB is given, a fourth A channel is automatically added as 1.0.
+* Made instance_geometry not write an empty bind_material if it's empty since it breaks validation.
+* Made saving strip out empty <library_*> tags since it breaks validation.
+
 0.3 (2011-08-31)
 ----------------
 
