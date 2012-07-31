@@ -27,7 +27,7 @@ setup(
         'prettyprint': ["lxml"],
         'validation': ["lxml"]
     },
-    url = "http://pycollada.github.com/",
+    url = "http://pycollada.readthedocs.org/",
     test_suite = "collada.tests",
     packages = find_packages()
 )
