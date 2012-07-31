@@ -18,6 +18,8 @@ file is not what is expected.
 
 """
 
+__version__ = "0.4"
+
 import os.path
 import posixpath
 import traceback
