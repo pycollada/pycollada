@@ -1,5 +1,4 @@
-pycollada
-=========
+# pycollada
 
 pycollada is a python module for creating, editing and loading
 [COLLADA](http://www.collada.org/), which is a COLLAborative Design Activity
@@ -12,6 +11,11 @@ as well as in-place editing.
 See the [pycollada Documentation](http://pycollada.readthedocs.org/) for more
 information.
 
-Travis CI Tests
----------------
 [![Build Status](https://secure.travis-ci.org/pycollada/pycollada.png)](http://travis-ci.org/#!/pycollada/pycollada)
+
+## Projects using pycollada
+
+* [FreeCAD COLLADA Import/Export](http://sourceforge.net/apps/mediawiki/free-cad/index.php?title=Main_Page)
+* [Blender COLLADA Importer](https://github.com/skrat/bpycollada)
+* [Meshtool](https://github.com/pycollada/meshtool)
+* [SceneJS COLLADA Import](https://github.com/xeolabs/scenejs-pycollada)
