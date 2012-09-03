@@ -14,14 +14,14 @@
 
 import numpy
 
-from collada import primitive
-from collada import polylist
-from collada import triangleset
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import primitive
+from . import polylist
+from . import triangleset
+from .common import E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource
-from collada.xmlutil import etree as ElementTree
+from .util import toUnitVec, checkSource
+from .xmlutil import etree as ElementTree
 
 
 class Polygons(polylist.Polylist):
@@ -77,7 +77,7 @@ class Polygons(polylist.Polylist):
 
     @staticmethod
     def load( collada, localscope, node ):
-        indexnodes = node.findall(tag('p'))
+        indexnodes = node.findall(common.tag('p'))
         if indexnodes is None: raise DaeIncompleteError('Missing indices in polygons')
 
         polygon_indices = []
@@ -86,7 +86,7 @@ class Polygons(polylist.Polylist):
             index[numpy.isnan(index)] = 0
             polygon_indices.append(index)
 
-        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
+        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(common.tag('input')))
 
         polygons = Polygons(all_inputs, node.get('material'), polygon_indices, node)
         return polygons

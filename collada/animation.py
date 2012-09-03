@@ -12,9 +12,9 @@
 
 """Contains objects representing animations."""
 
-from collada import source
-from collada.common import DaeObject, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import source
+from .common import DaeObject, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 
 class Animation(DaeObject):

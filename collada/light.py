@@ -14,11 +14,11 @@
 
 import numpy
 
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from .common import DaeObject, E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import _correctValInNode
-from collada.xmlutil import etree as ElementTree
+from .util import _correctValInNode
+from .xmlutil import etree as ElementTree
 
 
 class Light(DaeObject):

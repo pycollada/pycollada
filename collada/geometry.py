@@ -14,16 +14,16 @@
 
 import numpy
 
-from collada import source
-from collada import triangleset
-from collada import lineset
-from collada import polylist
-from collada import polygons
-from collada import primitive
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import source
+from . import triangleset
+from . import lineset
+from . import polylist
+from . import polygons
+from . import primitive
+from .common import DaeObject, E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.xmlutil import etree as ElementTree
+from .xmlutil import etree as ElementTree
 
 
 class Geometry(DaeObject):

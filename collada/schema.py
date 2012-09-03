@@ -16,7 +16,7 @@ with the COLLADA 1.4.1 schema."""
 
 import lxml
 import lxml.etree
-from collada.util import bytes, BytesIO
+from .util import bytes, BytesIO
 
 COLLADA_SCHEMA_1_4_1 = """<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns="http://www.collada.org/2005/11/COLLADASchema" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.collada.org/2005/11/COLLADASchema" elementFormDefault="qualified" version="1.4.1" xml:lang="EN" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">

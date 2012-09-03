@@ -36,7 +36,7 @@ else:
     basestring = basestring
     xrange = xrange
 
-from collada.common import DaeMalformedError, E, tag
+from .common import DaeMalformedError, E, tag
 
 
 def falmostEqual(a, b, rtol=1.0000000000000001e-05, atol=1e-08):

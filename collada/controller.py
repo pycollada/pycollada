@@ -16,13 +16,13 @@
 
 import numpy
 
-from collada import source
-from collada.common import DaeObject, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import source
+from .common import DaeObject, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.geometry import Geometry
-from collada.util import checkSource
-from collada.xmlutil import etree as ElementTree
+from .geometry import Geometry
+from .util import checkSource
+from .xmlutil import etree as ElementTree
 
 
 class Controller(DaeObject):

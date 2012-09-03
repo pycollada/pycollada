@@ -1,7 +1,28 @@
 import sys
 import functools
 
-COLLADA_NS = 'http://www.collada.org/2005/11/COLLADASchema'
+_COLLADA_VERSION = '1.4.1'
+
+def GetColladaVersion():
+    global _COLLADA_VERSION
+    return _COLLADA_VERSION
+
+def SetColladaVersion(version):
+    """sets a new collada version for all of pycollada
+    """
+    global _COLLADA_VERSION
+    _COLLADA_VERSION = version
+    
+# xmlutil.py
+COLLADA_NAMESPACES = {
+   '1.4.1': 'http://www.collada.org/2005/11/COLLADASchema',
+   '1.5.0': 'http://www.collada.org/2008/03/COLLADASchema',
+}
+
+def GetColladaNS():
+    global COLLADA_NAMESPACES
+    return COLLADA_NAMESPACES[GetColladaVersion()]
+
 HAVE_LXML = False
 
 try:
@@ -107,10 +128,10 @@ else:
             return "%s%s" % (prefix, tag), xmlns
     
         etree.fixtag = fixtag
-        etree._namespace_map[COLLADA_NS] = None
+        etree._namespace_map[GetColladaNS()] = None
     else:
         #For etree > 1.3, use register_namespace function
-        etree.register_namespace('', COLLADA_NS)
+        etree.register_namespace('', GetColladaNS())
 
     def indent(elem, level=0):
         i = "\n" + level*"  "

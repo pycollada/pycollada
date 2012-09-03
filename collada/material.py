@@ -22,11 +22,11 @@ This module contains all the functionality to load and manage:
 import copy
 import numpy
 
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from .common import DaeObject, E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import falmostEqual, StringIO
-from collada.xmlutil import etree as ElementTree
+from .util import falmostEqual, StringIO
+from .xmlutil import etree as ElementTree
 
 try:
     import Image as pil

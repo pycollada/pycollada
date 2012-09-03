@@ -35,14 +35,14 @@ from collada import geometry
 from collada import light
 from collada import material
 from collada import scene
-from collada.common import E, tag
-from collada.common import DaeError, DaeObject, DaeIncompleteError, \
+from .common import E, tag
+from .common import DaeError, DaeObject, DaeIncompleteError, \
     DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
     DaeSaveValidationError
-from collada.util import basestring, BytesIO
-from collada.util import IndexedList
-from collada.xmlutil import etree as ElementTree
-from collada.xmlutil import writeXML
+from .util import basestring, BytesIO
+from .util import IndexedList
+from .xmlutil import etree as ElementTree
+from .xmlutil import writeXML
 
 try:
     from collada import schema
@@ -74,7 +74,7 @@ class Collada(object):
     scenes = property( lambda s: s._scenes, lambda s,v: s._setIndexedList('_scenes', v), doc="""
     A list of :class:`collada.scene.Scene` objects. Can also be indexed by id""" )
 
-    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None, validate_output=False):
+    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None, validate_output=False, version=None):
         """Load collada data from filename or file like object.
 
         :param filename:
@@ -102,6 +102,7 @@ class Collada(object):
           If set to True, the XML written when calling :meth:`save` will be
           validated against the COLLADA 1.4.1 schema. If validation fails, the
           :class:`common.DaeSaveValidationError` exception will be thrown.
+        : param str version: If filename is None, the version of collada to open. If None uses the default version from xmlutil.GetColladaVersion()
         """
 
         self.errors = []
@@ -133,6 +134,10 @@ class Collada(object):
             self.ignoreErrors( *ignore )
 
         if filename is None:
+            if version is None:
+                version=xmlutil.GetColladaVersion()
+            else:
+                xmlutil.SetColladaVersion(version)
             self.filename = None
             self.zfile = None
             self.getFileData = self._nullGetFile
@@ -151,12 +156,16 @@ class Collada(object):
                                    E.library_nodes(),
                                    E.library_visual_scenes(),
                                    E.scene(),
-                               version='1.4.1'))
+                               version=version))
             """ElementTree representation of the collada document"""
 
             self.assetInfo = asset.Asset()
             return
 
+        if version is not None:
+            # have to set the version if explicitly specified
+            xmlutil.SetColladaVersion(version)
+            
         if isinstance(filename, basestring):
             fdata = open(filename, 'rb')
             self.filename = filename

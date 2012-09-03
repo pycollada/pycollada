@@ -1,10 +1,10 @@
-from collada.xmlutil import etree, ElementMaker, COLLADA_NS
+from .xmlutil import etree, ElementMaker, GetColladaNS
 
-E = ElementMaker(namespace=COLLADA_NS, nsmap={None: COLLADA_NS})
+E = ElementMaker(namespace=GetColladaNS(), nsmap={None: GetColladaNS()})
 
 
 def tag(text):
-    return str(etree.QName(COLLADA_NS, text))
+    return str(etree.QName(GetColladaNS(), text))
 
 
 class DaeObject(object):

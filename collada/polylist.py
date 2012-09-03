@@ -14,13 +14,13 @@
 
 import numpy
 
-from collada import primitive
-from collada import triangleset
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import primitive
+from . import triangleset
+from .common import E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource, xrange
-from collada.xmlutil import etree as ElementTree
+from .util import toUnitVec, checkSource, xrange
+from .xmlutil import etree as ElementTree
 
 
 class Polygon(object):
