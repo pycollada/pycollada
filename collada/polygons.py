@@ -77,7 +77,7 @@ class Polygons(polylist.Polylist):
 
     @staticmethod
     def load( collada, localscope, node ):
-        indexnodes = node.findall(common.tag('p'))
+        indexnodes = node.findall(tag('p'))
         if indexnodes is None: raise DaeIncompleteError('Missing indices in polygons')
 
         polygon_indices = []
@@ -86,7 +86,7 @@ class Polygons(polylist.Polylist):
             index[numpy.isnan(index)] = 0
             polygon_indices.append(index)
 
-        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(common.tag('input')))
+        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
 
         polygons = Polygons(all_inputs, node.get('material'), polygon_indices, node)
         return polygons
