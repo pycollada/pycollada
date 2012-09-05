@@ -17,43 +17,66 @@ import numpy
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
+from .kinematics_model import InstanceKinematicsModel
 
+class InstanceArticulatedSystem(object):
+    def __init__(self,url, xmlnode=None):
+        self.url = url
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+        else:
+            self.xmlnode = E.instance_articulated_system()
+            self.xmlnode.set('url',url)
+    
 class Kinematics(object):
     """A class containing the data coming from a COLLADA <kinematics> tag"""
-    def __init__(self, collada, instance_kinematics_model_urls,axisinfo,xmlnode=None):
-        self.instance_kinematics_model_urls = []
+    def __init__(self, collada, kinematics_models, instance_kinematics_models=None,axisinfos=None,xmlnode=None):
+        """Create a <kinematics>
+
+        :param list kinematics_models: a resolved KinematicsModel
+        :param list instance_kinematics_models: a InstanceKinematicsModel if could not resolve
+        :param list axisinfos: list of xmlnodes
+        :param xmlnode:
+        When loaded, the xmlnode it comes from
+        """
+
         self.kinematics_models = []
-        for url in instance_kinematics_model_urls:
-            if 0:#url.startswith('#'): # inside this doc, so search for it
-                kmodel = collada.kinematics_models.get(url[1:])
-                if kmodel is None:
-                    raise DaeBrokenRefError('kinematics_model %s not found in library'%url)
-                self.kinematics_models.append(kmodel)
-            else:
-                self.instance_kinematics_model_urls.append(url) # external
-        self.axisinfo = axisinfo
+        if kinematics_models is not None:
+            self.kinematics_models = kinematics_models
+        self.instance_kinematics_models = []
+        if instance_kinematics_models is not None:
+            self.instance_kinematics_models = instance_kinematics_models
+        self.axisinfos = axisinfos
         if xmlnode != None:
             self.xmlnode = xmlnode
         else:
-            self.xmlnode = E.kinematics(*self.axisinfo)
+            self.xmlnode = E.kinematics(*self.axisinfos)
             self.xmlnode.append(E.technique_common())
         self.xmlnode = xmlnode
         
     @staticmethod
     def load(collada, node):
-        instance_kinematics_model_urls = []
-        axisinfo = []
+        kinematics_models = []
+        instance_kinematics_models = []
+        axisinfos = []
         for subnode in node:
             if subnode.tag == tag('instance_kinematics_model'):
                 url=subnode.get('url')
                 if url is not None:
-                    instance_kinematics_model_urls.append(url)
+                    if url.startswith('#'): # inside this doc, so search for it
+                        kmodel = collada.kinematics_models.get(url[1:])
+                        if kmodel is None:
+                            raise DaeBrokenRefError('kinematics_model %s not found in library'%url)
+
+                        kinematics_models.append(kmodel)
+                    else:
+                        instance_kinematics_models.append(InstanceKinematicsModel(url,xmlnode=subnode)) # external reference
             elif subnode.tag == tag('technique_common'):
                 for subsubnode in subnode:
                     if subsubnode == tag('axis_info'):
-                        axisinfo.append(subsubnode)
+                        axisinfos.append(subsubnode)
                         # parse <limits>?
-        return Kinematics(collada, instance_kinematics_model_urls,axisinfo,xmlnode=node)
+        return Kinematics(collada, kinematics_models, instance_kinematics_models,axisinfos,xmlnode=node)
 
     def save(self):
         """Saves the kinematics node back to :attr:`xmlnode`"""
@@ -61,43 +84,55 @@ class Kinematics(object):
 
 class Motion(object):
     """A class containing the data coming from a COLLADA <motion> tag"""
-    def __init__(self, collada, instance_articulated_system_url,axisinfo,xmlnode=None):
-        self.instance_articulated_system_url = None
-        self.articulated_system = None
-        if instance_articulated_system_url.startswith('#'):
-            self.articulated_system = collada.articulated_systems.get(instance_articulated_system_url[1:])
-            if self.articulated_system is None:
-                raise DaeBrokenRefError('articulated_system %s not found in library'%url)
-            
-        else:
-            self.instance_articulated_system_url = instance_articulated_system_url # external reference
-        self.axisinfo = axisinfo
+    def __init__(self, collada, articulated_system=None,instance_articulated_system=None,axisinfos=None,xmlnode=None):
+        """Create a <motion>
+
+        :param articulated_system: a resolved ArticultedSystem
+        :param instance_articulated_system: a InstanceArticulatedSystem if could not resolve
+        :param list axisinfos: list of xmlnodes
+        :param xmlnode:
+        When loaded, the xmlnode it comes from
+        """
+        self.articulated_system = articulated_system
+        self.instance_articulated_system = instance_articulated_system
+        self.axisinfos = axisinfos
         if xmlnode != None:
             self.xmlnode = xmlnode
         else:
-            self.xmlnode = E.motion(*self.axisinfo)
+            self.xmlnode = E.motion(*self.axisinfos)
             self.xmlnode.append(E.technique_common())
+            if self.articulated_system is not None:
+                pass
+            elif self.instance_articulated_system is not None:
+                self.xmlnode.append(self.instance_articulated_system.xmlnode)
         
     @staticmethod
     def load(collada, node):
-        instance_articulated_system_url = None
-        axisinfo = []
+        instance_articulated_system = None
+        articulated_system = None
+        axisinfos = []
         for subnode in node:
             if subnode.tag == tag('instance_articulated_system'):
                 url=subnode.get('url')
                 if url is not None:
-                    instance_articulated_system_url = url
+                    if url.startswith('#'):
+                        articulated_system = collada.articulated_systems.get(url[1:])
+                        if articulated_system is None:
+                            raise DaeBrokenRefError('articulated_system %s not found in library'%url)
+                        
+                    else:
+                        instance_articulated_system = InstanceArticulatedSystem(url,xmlnode=subnode) # external reference
             elif subnode.tag == tag('technique_common'):
                 for subsubnode in subnode:
                     if subsubnode == tag('axis_info'):
-                        axisinfo.append(subsubnode)
+                        axisinfos.append(subsubnode)
                         # parse <speed>, <acceleration>, <deceleration>, <jerk>?
-        return Motion(collada, instance_articulated_system_url,axisinfo,xmlnode=node)
+        return Motion(collada, articulated_system,instance_articulated_system,axisinfos,xmlnode=node)
 
 class ArticulatedSystem(DaeObject):
     """A class containing the data coming from a COLLADA <articulated_system> tag"""
     def __init__(self, collada, id, name, kinematics=None, motion=None, xmlnode=None):
-        """Create a geometry instance
+        """Create a articulated_system instance
 
           :param collada.Collada collada:
             The collada object this geometry belongs to
@@ -105,8 +140,8 @@ class ArticulatedSystem(DaeObject):
             A unique string identifier for the geometry
           :param str name:
             A text string naming the geometry
-          :param kinematics: xml element for <kinematics>
-          :param motion: xml element for <motion>
+          :param kinematics: Kinematics object
+          :param motion: Motion object
           :param xmlnode:
             When loaded, the xmlnode it comes from.
 
@@ -127,9 +162,9 @@ class ArticulatedSystem(DaeObject):
             """ElementTree representation of the geometry."""
         else:
             if self.kinematics is not None:
-                self.xmlnode = E.articulated_system(self.kinematics)
+                self.xmlnode = E.articulated_system(self.kinematics.xmlnode)
             else:
-                self.xmlnode = E.articulated_system(self.motion)
+                self.xmlnode = E.articulated_system(self.motion.xmlnode)
             if len(self.id) > 0: self.xmlnode.set("id", self.id)
             if len(self.name) > 0: self.xmlnode.set("name", self.name)
 

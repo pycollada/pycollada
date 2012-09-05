@@ -8,4 +8,5 @@ Authors (Ordered by date of first contribution)
 * Dusan Maliarik
 * Ewen Cheslack-Postava
 * Ole Laursen
-* Rosen Diankov
+* Rosen Diankov (rosen.diankov AT gmail.com)
+  * helped with collada 1.5 support

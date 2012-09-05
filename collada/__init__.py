@@ -34,7 +34,11 @@ from . import controller
 from . import geometry
 from . import light
 from . import material
+from . import physics_model
+from . import kinematics_model
 from . import articulated_system
+from . import physics_scene
+from . import kinematics_scene
 from . import scene
 from .common import E, tag
 from .common import DaeError, DaeObject, DaeIncompleteError, \
@@ -70,6 +74,8 @@ class Collada(object):
     A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
     materials = property( lambda s: s._materials, lambda s,v: s._setIndexedList('_materials', v), doc="""
     A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
+    physics_models = property( lambda s: s._physics_models, lambda s,v: s._setIndexedList('_physics_models', v), doc="""
+    A list of :class:`collada.physics_model.PhysicsModel` objects. Can also be indexed by id""" )
     kinematics_models = property( lambda s: s._kinematics_models, lambda s,v: s._setIndexedList('_kinematics_models', v), doc="""
     A list of :class:`collada.kinematics_model.KinematicsModel` objects. Can also be indexed by id""" )
     articulated_systems = property( lambda s: s._articulated_systems, lambda s,v: s._setIndexedList('_articulated_systems', v), doc="""
@@ -78,7 +84,11 @@ class Collada(object):
     A list of :class:`collada.scene.Node` objects. Can also be indexed by id""" )
     scenes = property( lambda s: s._scenes, lambda s,v: s._setIndexedList('_scenes', v), doc="""
     A list of :class:`collada.scene.Scene` objects. Can also be indexed by id""" )
-
+    physics_scenes = property( lambda s: s._physics_scenes, lambda s,v: s._setIndexedList('_physics_scenes', v), doc="""
+    A list of :class:`collada.physics_scene.PhysicsScene` objects. Can also be indexed by id""" )
+    kinematics_scenes = property( lambda s: s._kinematics_scenes, lambda s,v: s._setIndexedList('_kinematics_scenes', v), doc="""
+    A list of :class:`collada.kinematics_scene.KinematicsScene` objects. Can also be indexed by id""" )
+    
     def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None, validate_output=False, version=None):
         """Load collada data from filename or file like object.
 
@@ -124,9 +134,12 @@ class Collada(object):
         self._effects = IndexedList([], ('id',))
         self._materials = IndexedList([], ('id',))
         self._nodes = IndexedList([], ('id',))
+        self._physics_models = IndexedList([], ('id',))
         self._kinematics_models = IndexedList([], ('id',))
         self._articulated_systems = IndexedList([], ('id',))
         self._scenes = IndexedList([], ('id',))
+        self._physics_scenes = IndexedList([], ('id',))
+        self._kinematics_scenes = IndexedList([], ('id',))
 
         self.scene = None
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
@@ -162,8 +175,11 @@ class Collada(object):
                                    E.library_materials(),
                                    E.library_nodes(),
                                    E.library_visual_scenes(),
+                                   E.library_physics_models(),
                                    E.library_kinematics_models(),
                                    E.library_articulated_systems(),
+                                   E.library_physics_scenes(),
+                                   E.library_kinematics_scenes(),
                                    E.scene(),
                                version=version))
             """ElementTree representation of the collada document"""
@@ -231,8 +247,12 @@ class Collada(object):
         self._loadLights()
         self._loadCameras()
         self._loadNodes()
-        self._loadArticulatedSystem()
+        self._loadPhysicsModels()
+        self._loadKinematicsModels()
+        self._loadArticulatedSystems()
         self._loadScenes()
+        self._loadPhysicsScenes()
+        self._loadKinematicsScenes()
         self._loadDefaultScene()
 
     def _setIndexedList(self, propname, data):
@@ -450,7 +470,35 @@ class Collada(object):
                         for node, ex in tried_loading:
                             raise DaeBrokenRefError(ex.msg)
 
-    def _loadArticulatedSystem(self):
+    def _loadPhysicsModels(self):
+        """Load physics_model library."""
+        libphysics_models = self.xmlnode.findall(tag('library_physics_models'))
+        if libphysics_models is not None:
+            for libphysics_model in libphysics_models:
+                if libphysics_model is not None:
+                    for physics_model_node in libphysics_model:
+                        try:
+                            pmodel = physics_model.PhysicsModel.load(self, {}, physics_model_node)
+                        except DaeError as ex:
+                            self.handleError(ex)
+                        else:
+                            self.physics_models.append(pmodel)
+
+    def _loadKinematicsModels(self):
+        """Load kinematics_model library."""
+        libkinematics_models = self.xmlnode.findall(tag('library_kinematics_models'))
+        if libkinematics_models is not None:
+            for libkinematics_model in libkinematics_models:
+                if libkinematics_model is not None:
+                    for kinematics_model_node in libkinematics_model:
+                        try:
+                            kmodel = kinematics_model.KinematicsModel.load(self, {}, kinematics_model_node)
+                        except DaeError as ex:
+                            self.handleError(ex)
+                        else:
+                            self.kinematics_models.append(kmodel)
+
+    def _loadArticulatedSystems(self):
         """Load articulated_system library."""
         libsystems = self.xmlnode.findall(tag('library_articulated_systems'))
         if libsystems is not None:
@@ -478,6 +526,34 @@ class Collada(object):
                         else:
                             self.scenes.append(S)
 
+    def _loadPhysicsScenes(self):
+        """Load scene library."""
+        libphysics_scenes = self.xmlnode.findall(tag('library_physics_scenes'))
+        if libphysics_scenes is not None:
+            for libphysics_scene in libphysics_scenes:
+                if libphysics_scene is not None:
+                    for physics_scene_node in libphysics_scene.findall(tag('physics_scene')):
+                        try:
+                            S = physics_scene.PhysicsScene.load(self, physics_scene_node)
+                        except DaeError as ex:
+                            self.handleError(ex)
+                        else:
+                            self.physics_scenes.append(S)
+
+    def _loadKinematicsScenes(self):
+        """Load scene library."""
+        libkinematics_scenes = self.xmlnode.findall(tag('library_kinematics_scenes'))
+        if libkinematics_scenes is not None:
+            for libkinematics_scene in libkinematics_scenes:
+                if libkinematics_scene is not None:
+                    for kinematics_scene_node in libkinematics_scene.findall(tag('kinematics_scene')):
+                        try:
+                            S = kinematics_scene.KinematicsScene.load(self, kinematics_scene_node)
+                        except DaeError as ex:
+                            self.handleError(ex)
+                        else:
+                            self.kinematics_scenes.append(S)
+
     def _loadDefaultScene(self):
         """Loads the default scene from <scene> tag in the root node."""
         node = self.xmlnode.find('%s/%s' % (tag('scene'), tag('instance_visual_scene')))
@@ -502,9 +578,13 @@ class Collada(object):
                      (self.effects, 'library_effects'),
                      (self.materials, 'library_materials'),
                      (self.nodes, 'library_nodes'),
+                     (self.physics_models, 'library_kinematics_models'),
                      (self.kinematics_models, 'library_kinematics_models'),
                      (self.articulated_systems, 'library_articulated_systems'),
-                     (self.scenes, 'library_visual_scenes')]
+                     (self.scenes, 'library_visual_scenes'),
+                     (self.physics_scenes, 'library_physics_scenes'),
+                     (self.kinematics_scenes, 'library_kinematics_scenes'),
+                     ]
 
         self.assetInfo.save()
         assetnode = self.xmlnode.getroot().find(tag('asset'))
@@ -565,7 +645,7 @@ class Collada(object):
         writeXML(self.xmlnode, fp)
 
     def __str__(self):
-        return '<Collada geometries=%d, articulated_systems=%d, kinematics_models>' % (len(self.geometries),len(self.articulated_systems), len(self.kinematics_models))
+        return '<Collada geometries=%d, articulated_systems=%d, kinematics_models=%d>' % (len(self.geometries),len(self.articulated_systems), len(self.kinematics_models))
 
     def __repr__(self):
         return str(self)
