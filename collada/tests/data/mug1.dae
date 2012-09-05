@@ -4,8 +4,8 @@
 		<contributor>
 			<authoring_tool>OpenRAVE Collada Writer</authoring_tool>
 		</contributor>
-		<created>2012-09-04T23:11:14.000000</created>
-		<modified>2012-09-04T23:11:14.000000</modified>
+		<created>2012-09-05T18:38:56.000000</created>
+		<modified>2012-09-05T18:38:56.000000</modified>
 		<unit/>
 		<up_axis>Z_UP</up_axis>
 	</asset>
@@ -14,7 +14,7 @@
 			<node id="visual1" name="mug" sid="visual1">
 				<translate>0 0 0</translate>
 				<rotate>1 0 0 89.99999999999999</rotate>
-				<node id="v1.node0" sid="node0">
+				<node id="v1.node0" name="mugbase" sid="node0">
 					<translate>0 0 0</translate>
 					<rotate>1 0 0 0</rotate>
 					<instance_geometry url="#g1_link0_geom0">
@@ -90,7 +90,7 @@
 				<subject/>
 			</asset>
 			<technique_common>
-				<link sid="link0">
+				<link sid="link0" name="mugbase">
 					<translate>0 0 0</translate>
 					<rotate>1 0 0 0</rotate>
 				</link>
@@ -106,6 +106,16 @@
 		</kinematics_model>
 	</library_kinematics_models>
 	<library_articulated_systems id="asystems">
+		<articulated_system id="robot1_kinematics">
+			<kinematics>
+				<instance_kinematics_model url="#kmodel1" sid="kmodel1_inst">
+					<newparam sid="robot1_kinematics_kmodel1_inst">
+						<SIDREF>robot1_kinematics/kmodel1_inst</SIDREF>
+					</newparam>
+				</instance_kinematics_model>
+				<technique_common/>
+			</kinematics>
+		</articulated_system>
 		<articulated_system id="robot1_motion">
 			<motion>
 				<instance_articulated_system url="#robot1_kinematics">
@@ -120,16 +130,6 @@
 					<interface type="kinbody"/>
 				</technique>
 			</extra>
-		</articulated_system>
-		<articulated_system id="robot1_kinematics">
-			<kinematics>
-				<instance_kinematics_model url="#kmodel1" sid="kmodel1_inst">
-					<newparam sid="robot1_kinematics_kmodel1_inst">
-						<SIDREF>robot1_kinematics/kmodel1_inst</SIDREF>
-					</newparam>
-				</instance_kinematics_model>
-				<technique_common/>
-			</kinematics>
 		</articulated_system>
 	</library_articulated_systems>
 	<library_kinematics_scenes id="kscenes">
@@ -153,7 +153,7 @@
 	</library_physics_scenes>
 	<library_physics_models id="pmodels">
 		<physics_model id="pmodel1" name="mug">
-			<rigid_body sid="rigid0">
+			<rigid_body sid="rigid0" name="mugbase">
 				<technique_common>
 					<dynamic>true</dynamic>
 					<mass>1</mass>

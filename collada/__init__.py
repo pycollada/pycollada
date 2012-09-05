@@ -455,12 +455,14 @@ class Collada(object):
         libsystems = self.xmlnode.findall(tag('library_articulated_systems'))
         if libsystems is not None:
             for libsystem in libsystems:
-                try:
-                    asystem = articulated_system.ArticulatedSystem.load(self, {}, libsystem)
-                except DaeError as ex:
-                    self.handleError(ex)
-                else:
-                    self.articulated_systems.append(asystem)
+                if libsystem is not None:
+                    for asnode in libsystem:
+                        try:
+                            asystem = articulated_system.ArticulatedSystem.load(self, {}, asnode)
+                        except DaeError as ex:
+                            self.handleError(ex)
+                        else:
+                            self.articulated_systems.append(asystem)
 
     def _loadScenes(self):
         """Load scene library."""
