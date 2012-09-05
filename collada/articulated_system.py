@@ -9,10 +9,7 @@
 # by Jeff Terrace and contributors                                 #
 #                                                                  #
 ####################################################################
-
 """Contains objects for representing an articulated system."""
-
-import numpy
 
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
@@ -93,17 +90,23 @@ class Kinematics(object):
 
     def save(self):
         """Saves the kinematics node back to :attr:`xmlnode`"""
-        #self.xmlnode.
+        for oldnode in self.xmlnode.findall(tag('instance_kinematics_model')):
+            self.xmlnode.remove(oldnode)
         for kmodel in self.kinematics_models:
             ikmodel = E.instance_kinematics_model()
             ikmodel.set('url','#'+kmodel.id)
             self.xmlnode.append(ikmodel)
-        
-        #self.xmlnode.set('url', "#%s" % self.geometry.id)
-        #self.instance_kinematics_models
-        #self.axisinfos
-        #instance_kinematics_models
-        
+        for ikmodel in self.instance_kinematics_models:
+            ikmodel.save()
+            self.xmlnode.append(ikmodel.xmlnode)
+        technique_common = self.xmlnode.find(tag('technique_common'))
+        if technique_common is None:
+            technique_common = E.technique_common()
+            self.xmlnode.append(technique_common)
+        else:
+            technique_common.clear()
+        for axisinfo in self.axisinfos:
+            technique_common.append(axisinfo)        
 
 class Motion(object):
     """A class containing the data coming from a COLLADA <motion> tag"""
@@ -151,6 +154,27 @@ class Motion(object):
                         axisinfos.append(subsubnode)
                         # parse <speed>, <acceleration>, <deceleration>, <jerk>?
         return Motion(collada, articulated_system,instance_articulated_system,axisinfos,xmlnode=node)
+
+    def save(self):
+        """Saves the motion node back to :attr:`xmlnode`"""
+        ias = self.xmlnode.find(tag('instance_articulated_system'))
+        if ias is None:
+            self.xmlnode.remove(ias)
+        if self.articulated_system is not None:
+            ias = E.instance_articulated_system()
+            ikmodel.set('url','#'+self.articulated_system.id)
+            self.xmlnode.append(ias)
+        elif self.instance_articulated_system is not None:
+            self.instance_articulated_system.save()
+            self.xmlnode.append(self.instance_articulated_system.xmlnode)
+        technique_common = self.xmlnode.find(tag('technique_common'))
+        if technique_common is None:
+            technique_common = E.technique_common()
+            self.xmlnode.append(technique_common)
+        else:
+            technique_common.clear()
+        for axisinfo in self.axisinfos:
+            technique_common.append(axisinfo)
 
 class ArticulatedSystem(DaeObject):
     """A class containing the data coming from a COLLADA <articulated_system> tag"""

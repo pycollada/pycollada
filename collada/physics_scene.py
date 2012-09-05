@@ -9,10 +9,7 @@
 # by Jeff Terrace and contributors                                 #
 #                                                                  #
 ####################################################################
-
 """Contains objects for representing a physics scene."""
-
-import numpy
 
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
@@ -20,7 +17,7 @@ from .xmlutil import etree as ElementTree
 
 class PhysicsScene(DaeObject):
     """A class containing the data coming from a COLLADA <physics_scene> tag"""
-    def __init__(self, id, physics_models=None, xmlnode=None, collada=None):
+    def __init__(self, collada, id, physics_models=None, xmlnode=None):
         """Create a scene
 
         :param str id:
@@ -48,6 +45,6 @@ class PhysicsScene(DaeObject):
     @staticmethod
     def load( collada, node ):
         id = node.get('id')
-        return PhysicsScene(id)
+        return PhysicsScene(collada, id)
     
     

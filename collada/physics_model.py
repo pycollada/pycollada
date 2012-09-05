@@ -9,10 +9,7 @@
 # by Jeff Terrace and contributors                                 #
 #                                                                  #
 ####################################################################
-
 """Contains objects for representing a physics model."""
-
-import numpy
 
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
