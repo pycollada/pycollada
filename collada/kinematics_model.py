@@ -19,14 +19,27 @@ from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, Da
 from .xmlutil import etree as ElementTree
 
 class InstanceKinematicsModel(object):
-    def __init__(self,url, xmlnode=None):
+    def __init__(self,url, sid='', name='', xmlnode=None):
         self.url = url
+        self.sid = sid
+        self.name = name
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.instance_kinematics_model()
-            self.xmlnode.set('url',url)
-
+            self.save()
+    def save(self):
+        """Saves the info back to :attr:`xmlnode`"""
+        self.xmlnode.set('url',self.url)
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)
+            
 class KinematicsModel(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics_model> tag"""
     def __init__(self, collada, id, name, links=None, joints=None, formulas=None, xmlnode=None):
@@ -89,4 +102,3 @@ class KinematicsModel(DaeObject):
         formulas=[]
         node = KinematicsModel(collada, id, name, links=links, joints=joints, formulas=formulas, xmlnode=node )
         return node
-

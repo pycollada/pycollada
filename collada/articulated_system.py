@@ -20,17 +20,31 @@ from .xmlutil import etree as ElementTree
 from .kinematics_model import InstanceKinematicsModel
 
 class InstanceArticulatedSystem(object):
-    def __init__(self,url, xmlnode=None):
+    def __init__(self,url, sid='', name='', xmlnode=None):
         self.url = url
+        self.sid = sid
+        self.name = name
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.instance_articulated_system()
-            self.xmlnode.set('url',url)
-    
+            self.save()
+
+    def save(self):
+        """Saves the info back to :attr:`xmlnode`"""
+        self.xmlnode.set('url',url)
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)
+            
 class Kinematics(object):
     """A class containing the data coming from a COLLADA <kinematics> tag"""
-    def __init__(self, collada, kinematics_models, instance_kinematics_models=None,axisinfos=None,xmlnode=None):
+    def __init__(self, collada, kinematics_models=None, instance_kinematics_models=None,axisinfos=None,xmlnode=None):
         """Create a <kinematics>
 
         :param list kinematics_models: a resolved KinematicsModel
@@ -39,7 +53,6 @@ class Kinematics(object):
         :param xmlnode:
         When loaded, the xmlnode it comes from
         """
-
         self.kinematics_models = []
         if kinematics_models is not None:
             self.kinematics_models = kinematics_models
@@ -80,7 +93,17 @@ class Kinematics(object):
 
     def save(self):
         """Saves the kinematics node back to :attr:`xmlnode`"""
-        self.xmlnode.set('url', "#%s" % self.geometry.id)
+        #self.xmlnode.
+        for kmodel in self.kinematics_models:
+            ikmodel = E.instance_kinematics_model()
+            ikmodel.set('url','#'+kmodel.id)
+            self.xmlnode.append(ikmodel)
+        
+        #self.xmlnode.set('url', "#%s" % self.geometry.id)
+        #self.instance_kinematics_models
+        #self.axisinfos
+        #instance_kinematics_models
+        
 
 class Motion(object):
     """A class containing the data coming from a COLLADA <motion> tag"""
@@ -121,7 +144,7 @@ class Motion(object):
                             raise DaeBrokenRefError('articulated_system %s not found in library'%url)
                         
                     else:
-                        instance_articulated_system = InstanceArticulatedSystem(url,xmlnode=subnode) # external reference
+                        instance_articulated_system = InstanceArticulatedSystem(url,subnode.get('sid'), subnode.get('name'), xmlnode=subnode) # external reference
             elif subnode.tag == tag('technique_common'):
                 for subsubnode in subnode:
                     if subsubnode == tag('axis_info'):
