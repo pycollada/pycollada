@@ -27,14 +27,15 @@ import types
 import zipfile
 from datetime import datetime
 
-from collada import animation
-from collada import asset
-from collada import camera
-from collada import controller
-from collada import geometry
-from collada import light
-from collada import material
-from collada import scene
+from . import animation
+from . import asset
+from . import camera
+from . import controller
+from . import geometry
+from . import light
+from . import material
+from . import articulated_system
+from . import scene
 from .common import E, tag
 from .common import DaeError, DaeObject, DaeIncompleteError, \
     DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
@@ -45,7 +46,7 @@ from .xmlutil import etree as ElementTree
 from .xmlutil import writeXML
 
 try:
-    from collada import schema
+    from . import schema
 except ImportError: # no lxml
     schema = None
 
@@ -69,6 +70,10 @@ class Collada(object):
     A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
     materials = property( lambda s: s._materials, lambda s,v: s._setIndexedList('_materials', v), doc="""
     A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
+    kinematics_models = property( lambda s: s._kinematics_models, lambda s,v: s._setIndexedList('_kinematics_models', v), doc="""
+    A list of :class:`collada.kinematics_model.KinematicsModel` objects. Can also be indexed by id""" )
+    articulated_systems = property( lambda s: s._articulated_systems, lambda s,v: s._setIndexedList('_articulated_systems', v), doc="""
+    A list of :class:`collada.articulated_system.ArticulatedSystem` objects. Can also be indexed by id""" )
     nodes = property( lambda s: s._nodes, lambda s,v: s._setIndexedList('_nodes', v), doc="""
     A list of :class:`collada.scene.Node` objects. Can also be indexed by id""" )
     scenes = property( lambda s: s._scenes, lambda s,v: s._setIndexedList('_scenes', v), doc="""
@@ -119,6 +124,8 @@ class Collada(object):
         self._effects = IndexedList([], ('id',))
         self._materials = IndexedList([], ('id',))
         self._nodes = IndexedList([], ('id',))
+        self._kinematics_models = IndexedList([], ('id',))
+        self._articulated_systems = IndexedList([], ('id',))
         self._scenes = IndexedList([], ('id',))
 
         self.scene = None
@@ -155,6 +162,8 @@ class Collada(object):
                                    E.library_materials(),
                                    E.library_nodes(),
                                    E.library_visual_scenes(),
+                                   E.library_kinematics_models(),
+                                   E.library_articulated_systems(),
                                    E.scene(),
                                version=version))
             """ElementTree representation of the collada document"""
@@ -165,7 +174,7 @@ class Collada(object):
         if version is not None:
             # have to set the version if explicitly specified
             xmlutil.SetColladaVersion(version)
-            
+        self.version = xmlutil.GetColladaVersion()
         if isinstance(filename, basestring):
             fdata = open(filename, 'rb')
             self.filename = filename
@@ -222,6 +231,7 @@ class Collada(object):
         self._loadLights()
         self._loadCameras()
         self._loadNodes()
+        self._loadArticulatedSystem()
         self._loadScenes()
         self._loadDefaultScene()
 
@@ -440,6 +450,18 @@ class Collada(object):
                         for node, ex in tried_loading:
                             raise DaeBrokenRefError(ex.msg)
 
+    def _loadArticulatedSystem(self):
+        """Load articulated_system library."""
+        libsystems = self.xmlnode.findall(tag('library_articulated_systems'))
+        if libsystems is not None:
+            for libsystem in libsystems:
+                try:
+                    asystem = articulated_system.ArticulatedSystem.load(self, {}, libsystem)
+                except DaeError as ex:
+                    self.handleError(ex)
+                else:
+                    self.articulated_systems.append(asystem)
+
     def _loadScenes(self):
         """Load scene library."""
         libnodes = self.xmlnode.findall(tag('library_visual_scenes'))
@@ -478,6 +500,8 @@ class Collada(object):
                      (self.effects, 'library_effects'),
                      (self.materials, 'library_materials'),
                      (self.nodes, 'library_nodes'),
+                     (self.kinematics_models, 'library_kinematics_models'),
+                     (self.articulated_systems, 'library_articulated_systems'),
                      (self.scenes, 'library_visual_scenes')]
 
         self.assetInfo.save()
@@ -539,7 +563,7 @@ class Collada(object):
         writeXML(self.xmlnode, fp)
 
     def __str__(self):
-        return '<Collada geometries=%d>' % (len(self.geometries))
+        return '<Collada geometries=%d, articulated_systems=%d, kinematics_models>' % (len(self.geometries),len(self.articulated_systems), len(self.kinematics_models))
 
     def __repr__(self):
         return str(self)
