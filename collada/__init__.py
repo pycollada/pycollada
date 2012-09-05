@@ -165,7 +165,7 @@ class Collada(object):
         if version is not None:
             # have to set the version if explicitly specified
             xmlutil.SetColladaVersion(version)
-            
+        self.version = xmlutil.GetColladaVersion()
         if isinstance(filename, basestring):
             fdata = open(filename, 'rb')
             self.filename = filename
