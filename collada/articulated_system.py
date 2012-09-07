@@ -15,20 +15,24 @@ from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .kinematics_model import InstanceKinematicsModel
+from .extra import Extra
 
-class InstanceArticulatedSystem(object):
+class InstanceArticulatedSystem(DaeObject):
     def __init__(self,url, sid='', name='', xmlnode=None):
         self.url = url
         self.sid = sid
         self.name = name
         if xmlnode is not None:
             self.xmlnode = xmlnode
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_articulated_system()
             self.save()
 
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url',url)
         if self.sid is not None:
             self.xmlnode.set('sid',self.sid)
@@ -38,8 +42,8 @@ class InstanceArticulatedSystem(object):
             self.xmlnode.set('name',self.name)
         else:
             self.xmlnode.attrib.pop('name',None)
-            
-class Kinematics(object):
+
+class Kinematics(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics> tag"""
     def __init__(self, collada, kinematics_models=None, instance_kinematics_models=None,axisinfos=None,xmlnode=None):
         """Create a <kinematics>
@@ -50,6 +54,7 @@ class Kinematics(object):
         :param xmlnode:
         When loaded, the xmlnode it comes from
         """
+        self.collada=collada
         self.kinematics_models = []
         if kinematics_models is not None:
             self.kinematics_models = kinematics_models
@@ -59,7 +64,9 @@ class Kinematics(object):
         self.axisinfos = axisinfos
         if xmlnode != None:
             self.xmlnode = xmlnode
+            self.extras = Extra.loadextras(self.collada,self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.kinematics(*self.axisinfos)
             self.xmlnode.append(E.technique_common())
         self.xmlnode = xmlnode
@@ -90,6 +97,7 @@ class Kinematics(object):
 
     def save(self):
         """Saves the kinematics node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         for oldnode in self.xmlnode.findall(tag('instance_kinematics_model')):
             self.xmlnode.remove(oldnode)
         for kmodel in self.kinematics_models:
@@ -108,7 +116,7 @@ class Kinematics(object):
         for axisinfo in self.axisinfos:
             technique_common.append(axisinfo)        
 
-class Motion(object):
+class Motion(DaeObject):
     """A class containing the data coming from a COLLADA <motion> tag"""
     def __init__(self, collada, articulated_system=None,instance_articulated_system=None,axisinfos=None,xmlnode=None):
         """Create a <motion>
@@ -119,12 +127,15 @@ class Motion(object):
         :param xmlnode:
         When loaded, the xmlnode it comes from
         """
+        self.collada=collada
         self.articulated_system = articulated_system
         self.instance_articulated_system = instance_articulated_system
         self.axisinfos = axisinfos
         if xmlnode != None:
             self.xmlnode = xmlnode
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.motion(*self.axisinfos)
             self.xmlnode.append(E.technique_common())
             if self.articulated_system is not None:
@@ -157,6 +168,7 @@ class Motion(object):
 
     def save(self):
         """Saves the motion node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         ias = self.xmlnode.find(tag('instance_articulated_system'))
         if ias is None:
             self.xmlnode.remove(ias)
@@ -207,7 +219,9 @@ class ArticulatedSystem(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             if self.kinematics is not None:
                 self.xmlnode = E.articulated_system(self.kinematics.xmlnode)
             else:
@@ -235,6 +249,7 @@ class ArticulatedSystem(DaeObject):
 
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
+        self.extras = Extra.loadextras(self.collada, self.xmlnode)
         if self.kinematics is not None:
             self.kinematics.save()
             node = self.xmlnode.find(tag('kinematics'))

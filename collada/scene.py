@@ -31,7 +31,7 @@ from .common import DaeError, DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import toUnitVec
 from .xmlutil import etree as ElementTree
-
+from .extra import Extra
 
 class DaeInstanceNotLoadedError(Exception):
     """Raised when an instance_node refers to a node that isn't loaded yet. Will always be caught"""
@@ -108,7 +108,7 @@ class TranslateTransform(Transform):
         """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.translate(' '.join([str(x),str(y),str(z)]))
-
+            
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
@@ -201,7 +201,7 @@ class ScaleTransform(Transform):
         """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.scale(' '.join([str(x),str(y),str(z)]))
-
+            
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
@@ -236,7 +236,7 @@ class MatrixTransform(Transform):
         """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.matrix(' '.join(map(str, self.matrix.flat)))
-
+            
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
@@ -290,6 +290,7 @@ class LookAtTransform(Transform):
         if xmlnode is None:
             self.xmlnode = E.lookat(' '.join(map(str,
                                         numpy.concatenate((self.eye, self.interest, self.upvector)) )))
+            
     @staticmethod
     def load(collada, node):
         floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
@@ -310,7 +311,7 @@ class Node(SceneNode):
     Contains the list of transformations effecting the node as well as any children.
     """
 
-    def __init__(self, id, children=None, transforms=None, xmlnode=None):
+    def __init__(self, collada, id, children=None, transforms=None, xmlnode=None):
         """Create a node in the scene graph.
 
         :param str id:
@@ -325,6 +326,7 @@ class Node(SceneNode):
           When loaded, the xmlnode it comes from
 
         """
+        self.collada = collada
         self.id = id
         """The unique string identifier for the node"""
         self.children = []
@@ -348,7 +350,9 @@ class Node(SceneNode):
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the transform."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.node(id=self.id, name=self.id)
             for t in self.transforms:
                 self.xmlnode.append(t.xmlnode)
@@ -377,6 +381,7 @@ class Node(SceneNode):
     def save(self):
         """Saves the geometry back to :attr:`xmlnode`. Also updates
         :attr:`matrix` if :attr:`transforms` has been modified."""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.matrix = numpy.identity(4, dtype=numpy.float32)
         for t in self.transforms:
             self.matrix = numpy.dot(self.matrix, t.matrix)
@@ -415,7 +420,7 @@ class Node(SceneNode):
             except DaeError as ex:
                 collada.handleError(ex)
 
-        return Node(id, children, transforms, xmlnode=node)
+        return Node(collada, id, children, transforms, xmlnode=node)
 
     def __str__(self):
         return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
@@ -442,7 +447,9 @@ class NodeNode(Node):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the node node."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_node(url="#%s" % self.node.id)
 
     def objects(self, tipo, matrix=None):
@@ -467,6 +474,7 @@ class NodeNode(Node):
 
     def save(self):
         """Saves the node node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', "#%s" % self.node.id)
 
     def __str__(self):
@@ -479,7 +487,7 @@ class NodeNode(Node):
 class GeometryNode(SceneNode):
     """Represents a geometry instance in a scene, as defined in the collada <instance_geometry> tag."""
 
-    def __init__(self, geometry, materials=None, xmlnode=None):
+    def __init__(self, collada, geometry, materials=None, xmlnode=None):
         """Creates a geometry node
 
         :param collada.geometry.Geometry geometry:
@@ -492,6 +500,7 @@ class GeometryNode(SceneNode):
           When loaded, the xmlnode it comes from
 
         """
+        self.collada = collada
         self.geometry = geometry
         """An object of type :class:`collada.geometry.Geometry` representing the
         geometry to bind in the scene"""
@@ -503,7 +512,9 @@ class GeometryNode(SceneNode):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry node."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_geometry(url="#%s" % self.geometry.id)
             if len(self.materials) > 0:
                 self.xmlnode.append(E.bind_material(
@@ -531,10 +542,11 @@ class GeometryNode(SceneNode):
         materials = []
         for matnode in matnodes:
             materials.append( MaterialNode.load(collada, matnode) )
-        return GeometryNode( geometry, materials, xmlnode=node)
+        return GeometryNode( collada, geometry, materials, xmlnode=node)
 
     def save(self):
         """Saves the geometry node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', "#%s" % self.geometry.id)
 
         for m in self.materials:
@@ -592,7 +604,9 @@ class ControllerNode(SceneNode):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the controller node."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = ElementTree.Element( tag('instance_controller') )
             bindnode = ElementTree.Element( tag('bind_material') )
             technode = ElementTree.Element( tag('technique_common') )
@@ -623,6 +637,7 @@ class ControllerNode(SceneNode):
 
     def save(self):
         """Saves the controller node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', '#'+self.controller.id)
         for mat in self.materials:
             mat.save()
@@ -637,7 +652,7 @@ class ControllerNode(SceneNode):
 class MaterialNode(SceneNode):
     """Represents a material being instantiated in a scene, as defined in the collada <instance_material> tag."""
 
-    def __init__(self, symbol, target, inputs, xmlnode = None):
+    def __init__(self, collada, symbol, target, inputs, xmlnode = None):
         """Creates a material node
 
         :param str symbol:
@@ -654,6 +669,7 @@ class MaterialNode(SceneNode):
           When loaded, the xmlnode it comes from
 
         """
+        self.collada = collada
         self.symbol = symbol
         """The symbol within a geometry this material should be bound to"""
         self.target = target
@@ -667,7 +683,9 @@ class MaterialNode(SceneNode):
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the material node."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_material(
                 *[E.bind_vertex_input(semantic=sem, input_semantic=input_sem, input_set=set)
                   for sem, input_sem, set in self.inputs]
@@ -682,13 +700,14 @@ class MaterialNode(SceneNode):
         if not targetid.startswith('#'): raise DaeMalformedError('Incorrect target id in material '+targetid)
         target = collada.materials.get(targetid[1:])
         if not target: raise DaeBrokenRefError('Material %s not found'%targetid)
-        return MaterialNode(node.get('symbol'), target, inputs, xmlnode = node)
+        return MaterialNode(collada, node.get('symbol'), target, inputs, xmlnode = node)
 
     def objects(self):
         pass
 
     def save(self):
         """Saves the material node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('symbol', self.symbol)
         self.xmlnode.set('target', "#%s"%self.target.id)
 
@@ -727,7 +746,9 @@ class CameraNode(SceneNode):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the camera node."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_camera(url="#%s"%camera.id)
 
     def objects(self, tipo, matrix=None):
@@ -746,6 +767,7 @@ class CameraNode(SceneNode):
 
     def save(self):
         """Saves the camera node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', '#'+self.camera.id)
 
     def __str__(self):
@@ -772,7 +794,9 @@ class LightNode(SceneNode):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light node."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_light(url="#%s"%light.id)
 
     def objects(self, tipo, matrix=None):
@@ -791,40 +815,11 @@ class LightNode(SceneNode):
 
     def save(self):
         """Saves the light node back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', '#'+self.light.id)
 
     def __str__(self): return '<LightNode light=%s>' % (self.light.id,)
     def __repr__(self): return str(self)
-
-
-class ExtraNode(SceneNode):
-    """Represents extra information in a scene, as defined in a collada <extra> tag."""
-
-    def __init__(self, xmlnode):
-        """Create an extra node which stores arbitrary xml
-
-        :param xmlnode:
-          Should be an ElementTree instance of tag type <extra>
-
-        """
-        if xmlnode != None:
-            self.xmlnode = xmlnode
-            """ElementTree representation of the extra node."""
-        else:
-            self.xmlnode = E.extra()
-
-    def objects(self, tipo, matrix=None):
-        if tipo == 'extra':
-            for e in self.xmlnode.findall(tag(tipo)):
-                yield e
-
-    @staticmethod
-    def load( collada, node ):
-        return ExtraNode(node)
-
-    def save(self):
-        pass
-
 
 def loadNode( collada, node, localscope ):
     """Generic scene node loading from a xml `node` and a `collada` object.
@@ -845,7 +840,7 @@ def loadNode( collada, node, localscope ):
     elif node.tag == tag('instance_controller'): return ControllerNode.load(collada, node)
     elif node.tag == tag('instance_node'): return NodeNode.load(collada, node, localscope)
     elif node.tag == tag('extra'):
-        return ExtraNode.load(collada, node)
+        return Extra.load(collada, localscope, node)
     elif node.tag == tag('asset'):
         return None
     else: raise DaeUnsupportedError('Unknown scene node %s' % str(node.tag))
@@ -876,7 +871,9 @@ class Scene(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the scene node."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.visual_scene(id=self.id)
             for node in nodes:
                 self.xmlnode.append( node.xmlnode )
@@ -939,6 +936,7 @@ class Scene(DaeObject):
 
     def save(self):
         """Saves the scene back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         for node in self.nodes:
             node.save()

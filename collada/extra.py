@@ -18,6 +18,8 @@ from .asset import Asset
 from .technique import Technique
 
 class Extra(DaeObject):
+    """Represents extra information in a scene, as defined in a collada <extra> tag."""
+        
     def __init__(self, collada, id=None, name=None, type=None, asset=None, technique_common=None, techniques=None, xmlnode=None):
         """Create a <extra>
 
@@ -46,7 +48,20 @@ class Extra(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        pass
+        id=node.get('id')
+        name = node.get('name')
+        type = node.get('type')
+        asset=None
+        technique_common=None
+        techniques=[]
+        for subnode in node:
+            if subnode.tag == tag('asset'):
+                asset=Asset.load(collada,localscope,subnode)
+            elif subnode.tag == tag('technique_common'):
+                technique_common = subnode
+            elif subnode.tag == tag('technique'):
+                techniques.append(Technique.load(collada,localscope,subnode))
+        return Extra(collada,id,name,type,asset,technique_common,techniques,xmlnode=node)
 
     def save(self):
         if self.id is not None:
@@ -64,12 +79,12 @@ class Extra(DaeObject):
         if self.asset is not None:
             self.asset.save()
             node = self.xmlnode.find(tag('asset'))
-            if not is not None:
+            if node is not None:
                 self.xmlnode.remove(node)
             self.xmlnode.append(self.asset)
         if self.technique_common is not None:
             node = self.xmlnode.find(tag('technique_common'))
-            if not is not None:
+            if node is not None:
                 self.xmlnode.remove(node)
             self.xmlnode.append(self.technique_common)
         for oldnode in self.xmlnode.findall(tag('technique')):
@@ -77,3 +92,23 @@ class Extra(DaeObject):
         for tec in self.techniques:
             tec.save()
             self.xmlnode.append(tec.xmlnode)
+
+    @staticmethod
+    def loadextras(collada, xmlnode):
+        """returns all extras from children of node"""
+        extras = []
+        for subnode in xmlnode:
+            if subnode.tag == tag('extra'):
+                extras.append(Extra.load(collada, {}, subnode))
+        return extras
+
+    @staticmethod
+    def saveextras(xmlnode,extras):
+        """saves extras to children of node"""
+        # remove all <extra> tags and add the new ones
+        for oldnode in xmlnode.findall(tag('extra')):
+            xmlnode.remove(oldnode)
+        for extra in extras:
+            extra.save()
+            xmlnode.append(extra.xmlnode)
+

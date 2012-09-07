@@ -19,7 +19,7 @@ from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import _correctValInNode
 from .xmlutil import etree as ElementTree
-
+from .extra import Extra
 
 class Light(DaeObject):
     """Base light class holding data from <light> tags."""
@@ -70,7 +70,9 @@ class DirectionalLight(Light):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.light(
                 E.technique_common(
                     E.directional(
@@ -81,6 +83,7 @@ class DirectionalLight(Light):
 
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
@@ -143,7 +146,9 @@ class AmbientLight(Light):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.light(
                 E.technique_common(
                     E.ambient(
@@ -154,6 +159,7 @@ class AmbientLight(Light):
 
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
@@ -237,7 +243,9 @@ class PointLight(Light):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             pnode = E.point(
                 E.color(' '.join(map(str, self.color ) ))
             )
@@ -256,6 +264,7 @@ class PointLight(Light):
 
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('point')) )
@@ -360,7 +369,9 @@ class SpotLight(Light):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             pnode = E.spot(
                 E.color(' '.join(map(str, self.color ) )),
             )
@@ -381,6 +392,7 @@ class SpotLight(Light):
 
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         pnode = self.xmlnode.find('%s/%s' % (tag('technique_common'), tag('spot')))

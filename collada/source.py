@@ -17,6 +17,7 @@ import numpy
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError
 from .xmlutil import etree as ElementTree
+from .extra import Extra
 
 class InputList(object):
     """Used for defining input sources to a geometry."""
@@ -105,7 +106,7 @@ class FloatSource(Source):
     item in the source array.
     """
 
-    def __init__(self, id, data, components, xmlnode=None):
+    def __init__(self, collada, id, data, components, xmlnode=None):
         """Create a float source instance.
 
         :param str id:
@@ -120,7 +121,7 @@ class FloatSource(Source):
           When loaded, the xmlnode it comes from.
 
         """
-
+        self.collada = collada
         self.id = id
         """The unique string identifier for the source"""
         self.data = data
@@ -131,7 +132,13 @@ class FloatSource(Source):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
+            technique_common = self.xmlnode.find(tag('technique_common'))
+            if technique_common is not None:
+                self.extras = Extra.loadextras(self.collada, technique_common)
+            else:
+                self.extras = []
         else:
+            self.extras = []
             self.data.shape = (-1,)
             txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
@@ -155,6 +162,11 @@ class FloatSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
+        technique_common = self.xmlnode.find('technique_common')
+        if technique_common is None:
+            technique_common = E.technique_common()
+            self.xmlnode.append(technique_common)
+        Extra.saveextras(technique_common,self.extras)
         self.data.shape = (-1,)
 
         txtdata = ' '.join(map(lambda x: '%.7g'%x , self.data.tolist()))
@@ -200,7 +212,7 @@ class FloatSource(Source):
             #TODO
             data = numpy.array(zip(data[:,0], data[:,1]))
             data.shape = (-1)
-        return FloatSource( sourceid, data, tuple(components), xmlnode=node )
+        return FloatSource( collada, sourceid, data, tuple(components), xmlnode=node )
 
     def __str__(self): return '<FloatSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
@@ -242,7 +254,13 @@ class IDRefSource(Source):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
+            technique_common = self.xmlnode.find(tag('technique_common'))
+            if technique_common is not None:
+                self.extras = Extra.loadextras(self.collada, technique_common)
+            else:
+                self.extras = []
         else:
+            self.extras = []
             self.data.shape = (-1,)
             txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
@@ -266,6 +284,12 @@ class IDRefSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
+        technique_common = self.xmlnode.find('technique_common')
+        if technique_common is None:
+            technique_common = E.technique_common()
+            self.xmlnode.append(technique_common)
+        Extra.saveextras(technique_common,self.extras)
+
         self.data.shape = (-1,)
         txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
@@ -341,7 +365,13 @@ class NameSource(Source):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
+            technique_common = self.xmlnode.find(tag('technique_common'))
+            if technique_common is not None:
+                self.extras = Extra.loadextras(self.collada, technique_common)
+            else:
+                self.extras = []
         else:
+            self.extras = []
             self.data.shape = (-1,)
             txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
@@ -365,6 +395,12 @@ class NameSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
+        technique_common = self.xmlnode.find('technique_common')
+        if technique_common is None:
+            technique_common = E.technique_common()
+            self.xmlnode.append(technique_common)
+        Extra.saveextras(technique_common,self.extras)
+
         self.data.shape = (-1,)
         txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )

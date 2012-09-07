@@ -18,7 +18,7 @@ from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError
 from .xmlutil import etree as ElementTree
-
+from .extra import Extra
 
 class Camera(DaeObject):
     """Base camera class holding data from <camera> tags."""
@@ -90,7 +90,9 @@ class PerspectiveCamera(Camera):
         if xmlnode is not  None:
             self.xmlnode = xmlnode
             """ElementTree representation of the data."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self._recreateXmlNode()
 
     def _recreateXmlNode(self):
@@ -131,6 +133,7 @@ class PerspectiveCamera(Camera):
 
     def save(self):
         """Saves the perspective camera's properties back to xmlnode"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self._checkValidParams()
         self._recreateXmlNode()
 
@@ -237,7 +240,9 @@ class OrthographicCamera(Camera):
         if xmlnode is not  None:
             self.xmlnode = xmlnode
             """ElementTree representation of the data."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self._recreateXmlNode()
 
     def _recreateXmlNode(self):
@@ -278,6 +283,7 @@ class OrthographicCamera(Camera):
 
     def save(self):
         """Saves the orthographic camera's properties back to xmlnode"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self._checkValidParams()
         self._recreateXmlNode()
 

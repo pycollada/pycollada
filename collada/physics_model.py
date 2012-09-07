@@ -15,8 +15,9 @@ from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .rigid_body import InstanceRigidBody
+from .extra import Extra
 
-class InstancePhysicsModel(object):
+class InstancePhysicsModel(DaeObject):
     def __init__(self,url, sid=None, name=None, parent=None, instance_rigid_bodies=None, xmlnode=None):
         self.url = url
         self.sid = sid
@@ -27,12 +28,15 @@ class InstancePhysicsModel(object):
             self.instance_rigid_bodies = instance_rigid_bodies
         if xmlnode is not None:
             self.xmlnode = xmlnode
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_physics_model()
             self.save()
             
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url',self.url)
         if self.sid is not None:
             self.xmlnode.set('sid',self.sid)
@@ -98,7 +102,9 @@ class PhysicsModel(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.physics_model()
             for rigid_body in self.rigid_bodies:
                 self.xmlnode.append(rigid_body.xmlnode)
@@ -136,3 +142,7 @@ class PhysicsModel(DaeObject):
                 pass
         node = PhysicsModel(collada, id, name, rigid_bodies, physics_models, instance_physics_models, xmlnode=node )
         return node
+
+    def save(self):
+        Extra.saveextras(self.xmlnode,self.extras)
+        # TODO

@@ -24,7 +24,7 @@ from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
-
+from .extra import Extra
 
 class Geometry(DaeObject):
     """A class containing the data coming from a COLLADA <geometry> tag"""
@@ -81,7 +81,9 @@ class Geometry(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             sourcenodes = []
             verticesnode = None
             for srcid, src in self.sourceById.items():
@@ -224,6 +226,7 @@ class Geometry(DaeObject):
 
     def save(self):
         """Saves the geometry back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         meshnode = self.xmlnode.find(tag('mesh'))
         for src in self.sourceById.values():
             if isinstance(src, source.Source):

@@ -27,6 +27,7 @@ from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import falmostEqual, StringIO
 from .xmlutil import etree as ElementTree
+from .extra import Extra
 
 try:
     import Image as pil
@@ -74,7 +75,9 @@ class CImage(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the image."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.image(
                 E.init_from(path)
             , id=self.id, name=self.id)
@@ -157,6 +160,7 @@ class CImage(DaeObject):
     def save(self):
         """Saves the image back to :attr:`xmlnode`. Only the :attr:`id` attribute is saved.
         The image itself will have to be saved to its original source to make modifications."""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         initnode = self.xmlnode.find( tag('init_from') )
@@ -202,7 +206,9 @@ class Surface(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the surface."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.newparam(
                 E.surface(
                     E.init_from(self.image.id),
@@ -231,6 +237,7 @@ class Surface(DaeObject):
 
     def save(self):
         """Saves the surface data back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         surfacenode = self.xmlnode.find( tag('surface') )
         initnode = surfacenode.find( tag('init_from') )
         if self.format:
@@ -285,7 +292,9 @@ class Sampler2D(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the sampler."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             sampler_node = E.sampler2D(E.source(self.surface.id))
             if minfilter:
                 sampler_node.append(E.minfilter(self.minfilter))
@@ -315,6 +324,7 @@ class Sampler2D(DaeObject):
 
     def save(self):
         """Saves the sampler data back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         samplernode = self.xmlnode.find( tag('sampler2D') )
         sourcenode = samplernode.find( tag('source') )
         if self.minfilter:
@@ -361,7 +371,9 @@ class Map(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the map"""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.texture(texture=self.sampler.id, texcoord=self.texcoord)
 
     @staticmethod
@@ -383,6 +395,7 @@ class Map(DaeObject):
 
     def save(self):
         """Saves the map back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('texture', self.sampler.id)
         self.xmlnode.set('texcoord', self.texcoord)
 
@@ -411,7 +424,7 @@ class Effect(DaeObject):
     shaders = [ 'phong', 'lambert', 'blinn', 'constant']
     """Supported shader list."""
 
-    def __init__(self, id, params, shadingtype, bumpmap = None, double_sided = False,
+    def __init__(self, collada, id, params, shadingtype, bumpmap = None, double_sided = False,
                        emission = (0.0, 0.0, 0.0, 1.0),
                        ambient = (0.0, 0.0, 0.0, 1.0),
                        diffuse = (0.0, 0.0, 0.0, 1.0),
@@ -471,6 +484,7 @@ class Effect(DaeObject):
           If loaded from xml, the xml node
 
         """
+        self.collada = collada
         self.id = id
         """The string identifier for the effect"""
         self.params = params
@@ -524,7 +538,9 @@ class Effect(DaeObject):
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the effect"""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             shadnode = E(self.shadingtype)
 
             for prop in self.supported:
@@ -640,7 +656,7 @@ class Effect(DaeObject):
                     double_sided = True
             except ValueError:
                 pass
-        return Effect(id, params, shadingtype, bumpmap, double_sided, **props)
+        return Effect(collada, id, params, shadingtype, bumpmap, double_sided, **props)
 
     @staticmethod
     def _loadShadingParam( collada, localscope, node ):
@@ -686,6 +702,7 @@ class Effect(DaeObject):
 
     def save(self):
         """Saves the effect back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
         profilenode = self.xmlnode.find( tag('profile_COMMON') )
@@ -814,7 +831,7 @@ class Material(DaeObject):
 
     """
 
-    def __init__(self, id, name, effect, xmlnode=None):
+    def __init__(self, collada, id, name, effect, xmlnode=None):
         """Creates a material.
 
         :param str id:
@@ -827,7 +844,7 @@ class Material(DaeObject):
           If loaded from xml, the xml node
 
         """
-
+        self.collada = collada
         self.id = id
         """The unique string identifier for the material"""
         self.name = name
@@ -838,7 +855,9 @@ class Material(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the surface."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.material(
                 E.instance_effect(url="#%s" % self.effect.id)
             , id=str(self.id), name=str(self.name))
@@ -859,10 +878,11 @@ class Material(DaeObject):
         if not effect:
             raise DaeBrokenRefError('Effect not found: '+effectid)
 
-        return Material(matid, matname, effect, xmlnode=node)
+        return Material(collada, matid, matname, effect, xmlnode=node)
 
     def save(self):
         """Saves the material data back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', str(self.id))
         self.xmlnode.set('name', str(self.name))
         effnode = self.xmlnode.find( tag('instance_effect') )

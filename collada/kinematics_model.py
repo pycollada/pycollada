@@ -14,19 +14,24 @@
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
+from .extra import Extra
+from .technique import Technique
 
-class InstanceKinematicsModel(object):
+class InstanceKinematicsModel(DaeObject):
     def __init__(self,url, sid='', name='', xmlnode=None):
         self.url = url
         self.sid = sid
         self.name = name
         if xmlnode is not None:
             self.xmlnode = xmlnode
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
+            self.extras = []
             self.xmlnode = E.instance_kinematics_model()
             self.save()
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url',self.url)
         if self.sid is not None:
             self.xmlnode.set('sid',self.sid)
@@ -79,7 +84,11 @@ class KinematicsModel(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
+            self.techniques = Technique.loadtechniques(self.collada, self.xmlnode)
         else:
+            self.extras = []
+            self.techniques = []
             self.xmlnode = E.kinematics_model()
             for link in self.links:
                 self.xmlnode.append(link.node)
@@ -99,3 +108,16 @@ class KinematicsModel(DaeObject):
         formulas=[]
         node = KinematicsModel(collada, id, name, links=links, joints=joints, formulas=formulas, xmlnode=node )
         return node
+
+    def save(self):
+        Extra.saveextras(self.xmlnode,self.extras)
+        Technique.savetechniques(self.xmlnode,self.techniques)
+        technique_common = self.xmlnode.find(tag('technique_common'))
+        if technique_common is None:
+            technique_common = E.technique_common()
+            self.xmlnode.append(technique_common)
+        technique_common.clear()
+        for obj in self.links + self.joints + self.formulas:
+            obj.save()
+            self.xmlnode.append(obj.xmlnode)
+

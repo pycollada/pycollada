@@ -23,7 +23,7 @@ from .common import DaeIncompleteError, DaeBrokenRefError, \
 from .geometry import Geometry
 from .util import checkSource
 from .xmlutil import etree as ElementTree
-
+from .extra import Extra
 
 class Controller(DaeObject):
     """Base controller class holding data from <controller> tags."""
@@ -331,6 +331,10 @@ class Morph(Controller):
             a Geometry (g) and a float weight value (w)"""
 
         self.xmlnode = xmlnode
+        if self.xmlnode is not None:
+            self.extras = Extra.loadextras(self.collada, self.xmlnode)
+        else:
+            self.extras = []
         #TODO
 
     def __len__(self):
@@ -392,8 +396,7 @@ class Morph(Controller):
         return Morph(basegeom, target_list, controllernode)
 
     def save(self):
-        #TODO
-        pass
+        Extra.saveextras(self.xmlnode,self.extras)
 
 
 class BoundMorph(BoundController):

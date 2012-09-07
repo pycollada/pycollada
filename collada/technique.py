@@ -33,3 +33,28 @@ class Technique(DaeObject):
             self.xmlnode.set('xmlns',self.xmlns)
         else:
             self.xmlnode.attrib.pop('xmlns',None)
+
+    @staticmethod
+    def load( collada, localscope, node ):
+        profile = node.get('profile')
+        xmlns = node.get('xmlns')
+        return Technique(collada, profile, xmlns, xmlnode=node)
+
+    @staticmethod
+    def loadtechniques(collada, xmlnode):
+        """returns all techniques from children of node"""
+        techniques = []
+        for subnode in xmlnode:
+            if subnode.tag == tag('technique'):
+                techniques.append(Technique.load(collada, {}, subnode))
+        return techniques
+
+    @staticmethod
+    def savetechniques(xmlnode,techniques):
+        """saves techniques to children of node"""
+        # remove all <technique> tags and add the new ones
+        for oldnode in xmlnode.findall(tag('technique')):
+            xmlnode.remove(oldnode)
+        for technique in techniques:
+            technique.save()
+            xmlnode.append(technique.xmlnode)
