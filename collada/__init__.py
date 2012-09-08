@@ -140,8 +140,10 @@ class Collada(object):
         self._scenes = IndexedList([], ('id',))
         self._physics_scenes = IndexedList([], ('id',))
         self._kinematics_scenes = IndexedList([], ('id',))
-
+        
         self.scene = None
+        self.ikscene = None
+        self.ipscenes = []
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
 
         if validate_output and schema:
@@ -556,6 +558,9 @@ class Collada(object):
 
     def _loadDefaultScene(self):
         """Loads the default scene from <scene> tag in the root node."""
+        self.scene=None
+        self.ikscene=None
+        self.ipscenes=[]
         node = self.xmlnode.find('%s/%s' % (tag('scene'), tag('instance_visual_scene')))
         try:
             if node != None:
@@ -567,6 +572,19 @@ class Collada(object):
                     raise DaeBrokenRefError('Default scene %s not found' % sceneid)
         except DaeError as ex:
             self.handleError(ex)
+        node = self.xmlnode.find('%s/%s' % (tag('scene'), tag('instance_kinematics_scene')))
+        if node != None:
+            try:
+                self.ikscene = kinematics_scene.InstanceKinematicsScene.load(self,{},node)
+            except DaeError as ex:
+                self.handleError(ex)
+
+        nodes = self.xmlnode.findall('%s/%s' % (tag('scene'), tag('instance_physics_scene')))
+        for node in nodes:
+            try:
+                self.ipscenes.append(physics_scene.InstancePhysicsScene.load(self,{},node))
+            except DaeError as ex:
+                self.handleError(ex)
 
     def save(self):
         """Saves the collada document back to :attr:`xmlnode`"""

@@ -432,25 +432,30 @@ class Node(SceneNode):
 class NodeNode(Node):
     """Represents a node being instantiated in a scene, as defined in the collada <instande_node> tag."""
 
-    def __init__(self, node, xmlnode=None):
+    def __init__(self, node, sid=None, name=None, url=None, proxy=None, extras=None, xmlnode=None):
         """Creates a node node
 
         :param collada.scene.Node node:
-          A node to instantiate in the scene
+          A node to instantiate in the scene, can be None to indicate that the url was not resolved
         :param xmlnode:
           When loaded, the xmlnode it comes from
 
         """
         self.node = node
         """An object of type :class:`collada.scene.Node` representing the node to bind in the scene"""
-
+        self.sid=sid
+        self.name=name
+        self.url=url
+        self.proxy=proxy
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the node node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
-            self.xmlnode = E.instance_node(url="#%s" % self.node.id)
+            self.xmlnode = E.instance_node()
+            self.save()
 
     def objects(self, tipo, matrix=None):
         for obj in self.node.objects(tipo, matrix):
@@ -462,20 +467,37 @@ class NodeNode(Node):
 
     @staticmethod
     def load( collada, node, localscope ):
+        referred_node=None
+        sid = node.get("sid") or ""
+        name = node.get("name") or ""
         url = node.get('url')
-        if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in node instance %s' % url)
-        referred_node = localscope.get(url[1:])
-        if not referred_node:
-            referred_node = collada.nodes.get(url[1:])
-        if not referred_node:
-            raise DaeInstanceNotLoadedError('Node %s not found in library'%url)
-        return NodeNode(referred_node, xmlnode=node)
+        proxy = node.get('proxy') or ''
+        if url.startswith('#'):
+            referred_node = localscope.get(url[1:])
+            if not referred_node:
+                referred_node = collada.nodes.get(url[1:])
+        extras = Extra.loadextras(collada, node)
+        return NodeNode(referred_node, sid, name, url, proxy, extras, xmlnode=node)
 
     def save(self):
         """Saves the node node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        self.xmlnode.set('url', "#%s" % self.node.id)
+        if self.node is not None:
+            self.xmlnode.set('url', "#%s" % self.node.id)
+        else:
+            self.xmlnode.set('url',self.url)
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)
+        if self.proxy is not None:
+            self.xmlnode.set('proxy',self.proxy)
+        else:
+            self.xmlnode.attrib.pop('proxy',None)
 
     def __str__(self):
         return '<NodeNode node=%s>' % (self.node.id,)

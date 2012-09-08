@@ -18,7 +18,7 @@ from .rigid_body import InstanceRigidBody
 from .extra import Extra
 
 class InstancePhysicsModel(DaeObject):
-    def __init__(self,url, sid=None, name=None, parent=None, instance_rigid_bodies=None, xmlnode=None):
+    def __init__(self, url, sid=None, name=None, parent=None, instance_rigid_bodies=None, extras=None, xmlnode=None):
         self.url = url
         self.sid = sid
         self.name = name
@@ -26,11 +26,12 @@ class InstancePhysicsModel(DaeObject):
         self.instance_rigid_bodies = []
         if instance_rigid_bodies is not None:
             self.instance_rigid_bodies = instance_rigid_bodies
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
         if xmlnode is not None:
             self.xmlnode = xmlnode
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_physics_model()
             self.save()
             
@@ -57,12 +58,12 @@ class InstancePhysicsModel(DaeObject):
         for subnode in node:
             if subnode.tag == tag('instance_rigid_body'):
                 pass
-            
-        return InstancePhysicsModel(node.get('url'),node.get('sid'), node.get('name'), node.get('parent'), instance_rigid_bodies, xmlnode=node) # external reference
+        extras = Extra.loadextras(collada, node)
+        return InstancePhysicsModel(node.get('url'),node.get('sid'), node.get('name'), node.get('parent'), instance_rigid_bodies, extras, xmlnode=node) # external reference
         
 class PhysicsModel(DaeObject):
     """A class containing the data coming from a COLLADA <physics_model> tag"""
-    def __init__(self, collada, id, name, rigid_bodies=None, physics_models=None, instance_physics_models=None, xmlnode=None):
+    def __init__(self, id, name, rigid_bodies=None, physics_models=None, instance_physics_models=None, extras=None, xmlnode=None):
         """Create a physics_model instance
 
           :param collada.Collada collada:
@@ -78,7 +79,6 @@ class PhysicsModel(DaeObject):
             When loaded, the xmlnode it comes from.
 
         """
-        self.collada = collada
         """The :class:`collada.Collada` object this geometry belongs to"""
 
         self.id = id
@@ -98,13 +98,15 @@ class PhysicsModel(DaeObject):
         self.instance_physics_models = []
         if instance_physics_models is not None:
             self.instance_physics_models = instance_physics_models
+
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
             
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.physics_model()
             for rigid_body in self.rigid_bodies:
                 self.xmlnode.append(rigid_body.xmlnode)
@@ -140,9 +142,22 @@ class PhysicsModel(DaeObject):
             elif subnode.tag == tag('rigid_constraint'):
                 # todo
                 pass
-        node = PhysicsModel(collada, id, name, rigid_bodies, physics_models, instance_physics_models, xmlnode=node )
+        extras = Extra.loadextras(collada, node)
+        node = PhysicsModel(id, name, rigid_bodies, physics_models, instance_physics_models, extras, xmlnode=node )
         return node
 
     def save(self):
         Extra.saveextras(self.xmlnode,self.extras)
-        # TODO
+        oldnodes = self.xmlnode.findall(tag('instance_physics_model')+tag('rigid_body'))
+        for node in oldnodes:
+            self.xmlnode.remove(oldnode)    
+        for rigid_body in self.rigid_bodies:
+            self.xmlnode.append(rigid_body.xmlnode)
+        for physics_model in self.physics_models:
+            ipm = E.instance_physics_model()
+            ipm.set('url','#'+physics_model.id)
+            self.xmlnode.append(ipm)
+        for instance_physics_model in self.instance_physics_models:
+            self.xmlnode.append(instance_physics_model.xmlnode)
+        if len(self.id) > 0: self.xmlnode.set("id", self.id)
+        if len(self.name) > 0: self.xmlnode.set("name", self.name)

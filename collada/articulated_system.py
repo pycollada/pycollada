@@ -16,17 +16,20 @@ from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, Da
 from .xmlutil import etree as ElementTree
 from .kinematics_model import InstanceKinematicsModel
 from .extra import Extra
+from .asset import Asset
 
 class InstanceArticulatedSystem(DaeObject):
-    def __init__(self,url, sid='', name='', xmlnode=None):
+    def __init__(self,url, sid=None, name=None, extras=None, xmlnode=None):
         self.url = url
         self.sid = sid
         self.name = name
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode is not None:
             self.xmlnode = xmlnode
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_articulated_system()
             self.save()
 
@@ -158,7 +161,7 @@ class Motion(DaeObject):
                             raise DaeBrokenRefError('articulated_system %s not found in library'%url)
                         
                     else:
-                        instance_articulated_system = InstanceArticulatedSystem(url,subnode.get('sid'), subnode.get('name'), xmlnode=subnode) # external reference
+                        instance_articulated_system = InstanceArticulatedSystem(url,subnode.get('sid'), subnode.get('name'), Extra.loadextras(collada, subnode), xmlnode=subnode) # external reference
             elif subnode.tag == tag('technique_common'):
                 for subsubnode in subnode:
                     if subsubnode == tag('axis_info'):
@@ -190,7 +193,7 @@ class Motion(DaeObject):
 
 class ArticulatedSystem(DaeObject):
     """A class containing the data coming from a COLLADA <articulated_system> tag"""
-    def __init__(self, collada, id, name, kinematics=None, motion=None, xmlnode=None):
+    def __init__(self, collada, id, name, kinematics=None, motion=None, asset=None, xmlnode=None):
         """Create a articulated_system instance
 
           :param collada.Collada collada:
@@ -215,6 +218,8 @@ class ArticulatedSystem(DaeObject):
         """The text string naming the geometry"""
 
         self.kinematics = kinematics
+        self.motion = motion
+        self.asset = asset
 
         if xmlnode != None:
             self.xmlnode = xmlnode
@@ -235,6 +240,7 @@ class ArticulatedSystem(DaeObject):
         name = node.get("name") or ""
         motion = None
         kinematics = None
+        asset = None
         kinematicsnode = node.find(tag('kinematics'))
         if kinematicsnode is None:
             motionnode = node.find(tag('motion'))
@@ -244,7 +250,10 @@ class ArticulatedSystem(DaeObject):
             motion = Motion.load(collada, motionnode)
         else:
             kinematics = Kinematics.load(collada, kinematicsnode)
-        node = ArticulatedSystem(collada, id, name, kinematics, motion, xmlnode=node )
+        assetnode = node.find(tag('asset'))
+        if assetnode is not None:
+            asset = Asset.load(collada,localscope,assetnode)
+        node = ArticulatedSystem(collada, id, name, kinematics, motion, asset, xmlnode=node )
         return node
 
     def save(self):

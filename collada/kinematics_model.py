@@ -16,9 +16,12 @@ from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, Da
 from .xmlutil import etree as ElementTree
 from .extra import Extra
 from .technique import Technique
+from .asset import Asset
+from .link import Link
+from .joint import Joint
 
 class InstanceKinematicsModel(DaeObject):
-    def __init__(self,url, sid='', name='', xmlnode=None):
+    def __init__(self,url, sid=None, name=None, xmlnode=None):
         self.url = url
         self.sid = sid
         self.name = name
@@ -44,7 +47,7 @@ class InstanceKinematicsModel(DaeObject):
             
 class KinematicsModel(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics_model> tag"""
-    def __init__(self, collada, id, name, links=None, joints=None, formulas=None, xmlnode=None):
+    def __init__(self, id, name, links=None, joints=None, formulas=None, asset = None, techniques=None, extras=None, xmlnode=None):
         """Create a kinematics_model instance
 
           :param collada.Collada collada:
@@ -60,9 +63,6 @@ class KinematicsModel(DaeObject):
             When loaded, the xmlnode it comes from.
 
         """
-        self.collada = collada
-        """The :class:`collada.Collada` object this geometry belongs to"""
-
         self.id = id
         """The unique string identifier for the geometry"""
 
@@ -81,21 +81,26 @@ class KinematicsModel(DaeObject):
         if formulas is not None:
             self.formulas = formulas
 
+        self.asset = asset
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+        self.techniques = []
+        if techniques is not None:
+            self.techniques = techniques            
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
-            self.techniques = Technique.loadtechniques(self.collada, self.xmlnode)
         else:
-            self.extras = []
-            self.techniques = []
             self.xmlnode = E.kinematics_model()
             for link in self.links:
-                self.xmlnode.append(link.node)
+                self.xmlnode.append(link.xmlnode)
             for joint in self.joints:
-                self.xmlnode.append(joint.node)
+                self.xmlnode.append(joint.xmlnode)
             for formula in self.formulas:
-                self.xmlnode.append(formula.node)
+                self.xmlnode.append(formula.xmlnode)
+            if self.asset is not None:
+                self.xmlnode.append(self.asset.xmlnode)
             if len(self.id) > 0: self.xmlnode.set("id", self.id)
             if len(self.name) > 0: self.xmlnode.set("name", self.name)
 
@@ -106,18 +111,42 @@ class KinematicsModel(DaeObject):
         links=[]
         joints=[]
         formulas=[]
-        node = KinematicsModel(collada, id, name, links=links, joints=joints, formulas=formulas, xmlnode=node )
+        asset = None
+        for subnode in node:
+            if subnode.tag == tag('technique_common'):
+                for subnode2 in subnode:
+                    if subnode2.tag == tag('link'):
+                        links.append(Link.load(collada, localscope, subnode2))
+                    elif subnode2.tag == tag('formula'):
+                        pass
+                    elif subnode2.tag == tag('joint'):
+                        joints.append(Joint.load(collada,localscope, subnode2))
+                    elif subnode2.tag == tag('instance_joint'):
+                        pass
+                        #joints.append(Joint.load(collada,localscope, subnode2))
+            elif subnode.tag == tag('asset'):
+                asset = Asset.load(collada, localscope, node)
+        techniques = Technique.loadtechniques(collada, node)
+        extras = Extra.loadextras(collada, node)
+        node = KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
         return node
 
     def save(self):
         Extra.saveextras(self.xmlnode,self.extras)
         Technique.savetechniques(self.xmlnode,self.techniques)
         technique_common = self.xmlnode.find(tag('technique_common'))
-        if technique_common is None:
-            technique_common = E.technique_common()
-            self.xmlnode.append(technique_common)
-        technique_common.clear()
+        if technique_common is not None:
+            self.xmlnode.remove(technique_common)
+        if self.technique_common is not None:
+            self.xmlnode.append(self.technique_common)
         for obj in self.links + self.joints + self.formulas:
             obj.save()
             self.xmlnode.append(obj.xmlnode)
-
+        asset = self.xmlnode.find('asset')
+        if asset is not None:
+            self.xmlnode.remove(asset)
+        if self.asset is not None:
+            self.asset.save()
+            self.xmlnode.append(self.asset.xmlnode)
+        self.xmlnode.set('id', self.id)
+        self.xmlnode.set('name', self.name)
