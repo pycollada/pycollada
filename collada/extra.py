@@ -20,7 +20,7 @@ from .technique import Technique
 class Extra(DaeObject):
     """Represents extra information in a scene, as defined in a collada <extra> tag."""
         
-    def __init__(self, collada, id=None, name=None, type=None, asset=None, technique_common=None, techniques=None, xmlnode=None):
+    def __init__(self, id=None, name=None, type=None, asset=None, technique_common=None, techniques=None, xmlnode=None):
         """Create a <extra>
 
         :param collada:
@@ -31,7 +31,6 @@ class Extra(DaeObject):
         A list of Technique objects
         :param technique_common: lxml node whose tag is technique_common
         """
-        self.collada=collada
         self.id = id
         self.name = name
         self.type = type
@@ -61,7 +60,7 @@ class Extra(DaeObject):
                 technique_common = subnode
             elif subnode.tag == tag('technique'):
                 techniques.append(Technique.load(collada,localscope,subnode))
-        return Extra(collada,id,name,type,asset,technique_common,techniques,xmlnode=node)
+        return Extra(id,name,type,asset,technique_common,techniques,xmlnode=node)
 
     def save(self):
         if self.id is not None:

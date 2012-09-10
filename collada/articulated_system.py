@@ -193,11 +193,9 @@ class Motion(DaeObject):
 
 class ArticulatedSystem(DaeObject):
     """A class containing the data coming from a COLLADA <articulated_system> tag"""
-    def __init__(self, collada, id, name, kinematics=None, motion=None, asset=None, xmlnode=None):
+    def __init__(self, id, name, kinematics=None, motion=None, asset=None, extras=None, xmlnode=None):
         """Create a articulated_system instance
 
-          :param collada.Collada collada:
-            The collada object this geometry belongs to
           :param str id:
             A unique string identifier for the geometry
           :param str name:
@@ -208,9 +206,6 @@ class ArticulatedSystem(DaeObject):
             When loaded, the xmlnode it comes from.
 
         """
-        self.collada = collada
-        """The :class:`collada.Collada` object this geometry belongs to"""
-
         self.id = id
         """The unique string identifier for the geometry"""
 
@@ -220,13 +215,14 @@ class ArticulatedSystem(DaeObject):
         self.kinematics = kinematics
         self.motion = motion
         self.asset = asset
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             if self.kinematics is not None:
                 self.xmlnode = E.articulated_system(self.kinematics.xmlnode)
             else:
@@ -253,7 +249,8 @@ class ArticulatedSystem(DaeObject):
         assetnode = node.find(tag('asset'))
         if assetnode is not None:
             asset = Asset.load(collada,localscope,assetnode)
-        node = ArticulatedSystem(collada, id, name, kinematics, motion, asset, xmlnode=node )
+        extras = Extra.loadextras(collada, node)
+        node = ArticulatedSystem(id, name, kinematics, motion, asset, extras, xmlnode=node )
         return node
 
     def save(self):

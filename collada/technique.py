@@ -16,8 +16,7 @@ from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, Da
 from .xmlutil import etree as ElementTree
 
 class Technique(DaeObject):
-    def __init__(self, collada, profile, xmlns=None, xmlnode=None):
-        self.collada = collada
+    def __init__(self, profile, xmlns=None, xmlnode=None):
         self.profile = profile
         self.xmlns = xmlns
         if xmlnode is not None:
@@ -38,7 +37,7 @@ class Technique(DaeObject):
     def load( collada, localscope, node ):
         profile = node.get('profile')
         xmlns = node.get('xmlns')
-        return Technique(collada, profile, xmlns, xmlnode=node)
+        return Technique(profile, xmlns, xmlnode=node)
 
     @staticmethod
     def loadtechniques(collada, xmlnode):

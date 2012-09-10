@@ -11,6 +11,7 @@
 ####################################################################
 """Contains objects for representing a kinematics scene."""
 
+import copy
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
@@ -205,6 +206,9 @@ class KinematicsScene(DaeObject):
                         if kmodel is None:
                             raise DaeBrokenRefError('kinematics_model %s not found in library'%url)
 
+                        kmodel = copy.copy(kmodel)
+                        if subnode.get('name') is not None:
+                            kmodel.name = subnode.get('name')
                         kinematics_models.append(kmodel)
                     else:
                         instance_kinematics_models.append(InstanceKinematicsModel(url,xmlnode=subnode)) # external reference
@@ -215,7 +219,10 @@ class KinematicsScene(DaeObject):
                         asystem = collada.articulated_systems.get(url[1:])
                         if asystem is None:
                             raise DaeBrokenRefError('articulated_system %s not found in library'%url)
-                        
+
+                        asystem = copy.copy(asystem)
+                        if subnode.get('name') is not None:
+                            asystem.name = subnode.get('name')
                         articulated_systems.append(asystem)
                     else:
                         instance_articulated_systems.append(InstanceArticulatedSystem(url,xmlnode=subnode)) # external reference
@@ -234,8 +241,12 @@ class KinematicsScene(DaeObject):
         for km in self.kinematics_models:
             ikm = E.instance_kinematics_model()
             ikm.set('url','#'+km.id)
+            if km.name is not None:
+                ikm.set('name',km.name)
             self.xmlnode.append(ikm)
         for asystem in self.articulated_systems:
             ias = E.instance_articulated_system()
             ias.set('url','#'+asystem.id)
+            if asystem.name is not None:
+                ias.set('name',asystem.name)
             self.xmlnode.append(ias)
