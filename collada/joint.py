@@ -18,37 +18,41 @@ from .extra import Extra
 
 class Joint(DaeObject):
     """A class containing the data coming from a COLLADA <joint> tag"""
-    def __init__(self, collada, id, sid, name, attachments=None, xmlnode=None):
-        self.collada = collada
+    def __init__(self, id, sid, name, extras=None, xmlnode=None):
         self.id = id
         self.sid = sid
         self.name = name
-
-        self.attachments = []
-        if attachments is not None:
-            self.attachments = attachments
-
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+            
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.joint()
-            if len(self.id) > 0: self.xmlnode.set("id", self.id)
-            if len(self.sid) > 0: self.xmlnode.set("sid", self.id)
-            if len(self.name) > 0: self.xmlnode.set("name", self.name)
+            self.save(0)
 
     @staticmethod
     def load( collada, localscope, node ):
-        id = node.get("id") or ""
-        sid = node.get("sid") or ""
-        name = node.get("name") or ""     
-        node = Joint(collada, id, sid, name, xmlnode=node )
+        id = node.get("id")
+        sid = node.get("sid")
+        name = node.get("name")
+        extras = Extra.loadextras(collada, node)
+        node = Joint(id, sid, name, extras, xmlnode=node )
         return node
 
-    def save(self):
+    def save(self, recurse=-1):
         Extra.saveextras(self.xmlnode,self.extras)
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('sid', self.sid)
-        self.xmlnode.set('name', self.name)
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)

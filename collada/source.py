@@ -162,10 +162,11 @@ class FloatSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        technique_common = self.xmlnode.find('technique_common')
+        technique_common = self.xmlnode.find(tag('technique_common'))
         if technique_common is None:
             technique_common = E.technique_common()
             self.xmlnode.append(technique_common)
+        technique_common.clear()
         Extra.saveextras(technique_common,self.extras)
         self.data.shape = (-1,)
 
@@ -178,7 +179,10 @@ class FloatSource(Source):
         node.text = txtdata
         node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
-        node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
+        node = technique_common.find(tag('accessor'))
+        if node is None:
+            node = E.accessor()
+            technique_common.append(node)
         node.clear()
         node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
@@ -193,9 +197,9 @@ class FloatSource(Source):
         arraynode = node.find(tag('float_array'))
         if arraynode is None: raise DaeIncompleteError('No float_array in source node')
         if arraynode.text is None:
-            data = numpy.array([], dtype=numpy.float32)
+            data = numpy.array([], dtype=numpy.float64)
         else:
-            try: data = numpy.fromstring(arraynode.text, dtype=numpy.float32, sep=' ')
+            try: data = numpy.fromstring(arraynode.text, dtype=numpy.float64, sep=' ')
             except ValueError: raise DaeMalformedError('Corrupted float array')
         data[numpy.isnan(data)] = 0
 
@@ -284,10 +288,11 @@ class IDRefSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        technique_common = self.xmlnode.find('technique_common')
+        technique_common = self.xmlnode.find(tag('technique_common'))
         if technique_common is None:
             technique_common = E.technique_common()
             self.xmlnode.append(technique_common)
+        technique_common.clear()
         Extra.saveextras(technique_common,self.extras)
 
         self.data.shape = (-1,)
@@ -300,7 +305,10 @@ class IDRefSource(Source):
         node.text = txtdata
         node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
-        node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
+        node = technique_common.find(tag('accessor'))
+        if node is None:
+            node = E.accessor()
+            technique_common.append(node)
         node.clear()
         node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
@@ -395,10 +403,11 @@ class NameSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        technique_common = self.xmlnode.find('technique_common')
+        technique_common = self.xmlnode.find(tag('technique_common'))
         if technique_common is None:
             technique_common = E.technique_common()
             self.xmlnode.append(technique_common)
+        technique_common.clear()
         Extra.saveextras(technique_common,self.extras)
 
         self.data.shape = (-1,)
@@ -411,7 +420,10 @@ class NameSource(Source):
         node.text = txtdata
         node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
-        node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
+        node = technique_common.find(tag('accessor'))
+        if node is None:
+            node = E.accessor()
+            technique_common.append(node)
         node.clear()
         node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')

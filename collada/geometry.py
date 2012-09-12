@@ -171,8 +171,8 @@ class Geometry(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        id = node.get("id") or ""
-        name = node.get("name") or ""
+        id = node.get("id")
+        name = node.get("name")
         meshnode = node.find(tag('mesh'))
         if meshnode is None: raise DaeUnsupportedError('Unknown geometry node')
         sourcebyid = {}
@@ -287,8 +287,14 @@ class Geometry(DaeObject):
                 if src == vert_ref:
                     node.set('source', '#%s' % vert_src)
 
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.name)
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)
 
         for prim in self.primitives:
             if type(prim) is triangleset.TriangleSet and prim.xmlnode.tag != tag('triangles'):

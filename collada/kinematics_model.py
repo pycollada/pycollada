@@ -21,21 +21,49 @@ from .link import Link
 from .joint import Joint
 
 class InstanceKinematicsModel(DaeObject):
-    def __init__(self,url, sid=None, name=None, xmlnode=None):
+    def __init__(self,kmodel=None, url=None, sid=None, name=None, extras = None, xmlnode=None):
+        self.kmodel = kmodel
         self.url = url
         self.sid = sid
         self.name = name
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+            
         if xmlnode is not None:
             self.xmlnode = xmlnode
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_kinematics_model()
             self.save()
+
+    @staticmethod
+    def load( collada, localscope, node ):
+        kmodel=None
+        url=node.get('url')
+        sid=node.get('sid')
+        name=node.get('name')
+        if url is not None:
+            if url.startswith('#'): # inside this doc, so search for it
+                kmodel = collada.kinematics_models.get(url[1:])
+                if kmodel is None:
+                    raise DaeBrokenRefError('kinematics_model %s not found in library'%url)
+                
+                if name is not None:
+                    kmodel = copy.copy(kmodel)
+                    kmodel.name = name
+                
+        extras = Extra.loadextras(collada, node)
+        return InstanceKinematicsModel(kmodel, url, sid, name, extras, xmlnode=node)
+    
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        self.xmlnode.set('url',self.url)
+        if self.kmodel is not None and self.kmodel.id is not None:
+            self.xmlnode.set('url','#'+self.kmodel.id)
+        elif self.url is not None:
+            self.xmlnode.set('url',self.url)
+        else:
+            self.xmlnode.attrib.pop('url',None)
         if self.sid is not None:
             self.xmlnode.set('sid',self.sid)
         else:
@@ -106,8 +134,8 @@ class KinematicsModel(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        id = node.get("id") or ""
-        name = node.get("name") or ""
+        id = node.get("id")
+        name = node.get("name")
         links=[]
         joints=[]
         formulas=[]
@@ -125,7 +153,7 @@ class KinematicsModel(DaeObject):
                         pass
                         #joints.append(Joint.load(collada,localscope, subnode2))
             elif subnode.tag == tag('asset'):
-                asset = Asset.load(collada, localscope, node)
+                asset = Asset.load(collada, localscope, subnode)
         techniques = Technique.loadtechniques(collada, node)
         extras = Extra.loadextras(collada, node)
         node = KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
@@ -135,18 +163,24 @@ class KinematicsModel(DaeObject):
         Extra.saveextras(self.xmlnode,self.extras)
         Technique.savetechniques(self.xmlnode,self.techniques)
         technique_common = self.xmlnode.find(tag('technique_common'))
-        if technique_common is not None:
-            self.xmlnode.remove(technique_common)
-        if self.technique_common is not None:
-            self.xmlnode.append(self.technique_common)
+        if technique_common is None:
+            technique_common = E.technique_common(tag('technique_common'))
+            self.xmlnode.append(technique_common)
+        technique_common.clear()
         for obj in self.links + self.joints + self.formulas:
             obj.save()
-            self.xmlnode.append(obj.xmlnode)
-        asset = self.xmlnode.find('asset')
+            technique_common.append(obj.xmlnode)
+        asset = self.xmlnode.find(tag('asset'))
         if asset is not None:
             self.xmlnode.remove(asset)
         if self.asset is not None:
             self.asset.save()
             self.xmlnode.append(self.asset.xmlnode)
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.name)
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)

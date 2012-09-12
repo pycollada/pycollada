@@ -10,10 +10,7 @@
 #                                                                  #
 ####################################################################
 
-from .xmlutil import etree, ElementMaker, GetColladaNS
-
-E = ElementMaker(namespace=GetColladaNS(), nsmap={None: GetColladaNS()})
-
+from .xmlutil import etree, ElementMaker, GetColladaNS, E
 
 def tag(text):
     return str(etree.QName(GetColladaNS(), text))

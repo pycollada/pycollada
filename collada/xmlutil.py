@@ -6,12 +6,6 @@ _COLLADA_VERSION = '1.4.1'
 def GetColladaVersion():
     global _COLLADA_VERSION
     return _COLLADA_VERSION
-
-def SetColladaVersion(version):
-    """sets a new collada version for all of pycollada
-    """
-    global _COLLADA_VERSION
-    _COLLADA_VERSION = version
     
 # xmlutil.py
 COLLADA_NAMESPACES = {
@@ -62,6 +56,8 @@ if HAVE_LXML:
     
     def writeXML(xmlnode, fp):
         xmlnode.write(fp, pretty_print=True)
+
+    E = ElementMaker(namespace=GetColladaNS(), nsmap={None: GetColladaNS()})
 else:    
     class ElementMaker(object):
         def __init__(self, namespace=None, nsmap=None):
@@ -92,7 +88,7 @@ else:
         def __getattr__(self, tag):
             return functools.partial(self, tag)
 
-    E = ElementMaker()
+    E = ElementMaker(namespace=GetColladaNS(), nsmap={None: GetColladaNS()})
     
     if etree.VERSION[0:3] == '1.2':
         #in etree < 1.3, this is a workaround for supressing prefixes
@@ -151,3 +147,13 @@ else:
     def writeXML(xmlnode, fp):
         indent(xmlnode.getroot())
         xmlnode.write(fp)
+
+def SetColladaVersion(version):
+    """sets a new collada version for all of pycollada and changes the ElementMaker namespace
+    """
+    global _COLLADA_VERSION
+    _COLLADA_VERSION = version
+    # have to change the ElementMaker namespace!
+    # cannot replace it by E= since a lot of modules import E directly instead of always doing xmlutil.E
+    E._namespace = '{' + GetColladaNS() + '}'
+    E._nsmap = {None: GetColladaNS()}

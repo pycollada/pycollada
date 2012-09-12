@@ -31,8 +31,8 @@ from .kinematics_model import InstanceKinematicsModel
 #             self.save()
 #     @staticmethod
 #     def load( collada, localscope, node ):
-#         param = node.find('param')
-#         sidref = node.find('SIDREF')
+#         param = node.find(tag('param'))
+#         sidref = node.find(tag('SIDREF'))
 #         return CommonSidrefOrParam(param,sidref,xmlnode)
 
 class BindKinematicsModel(DaeObject):
@@ -52,8 +52,8 @@ class BindKinematicsModel(DaeObject):
         scenenode=None
         if noderef is not None:
             pass
-        param = node.find('param')
-        sidref = node.find('SIDREF')
+        param = node.find(tag('param'))
+        sidref = node.find(tag('SIDREF'))
         return BindKinematicsModel(scenenode, noderef, param,sidref,xmlnode=node)
 
 class BindJointAxis(DaeObject):
@@ -73,8 +73,8 @@ class BindJointAxis(DaeObject):
         scenenode=None
         if targetref is not None:
             pass
-        axis = node.find('axis')
-        value = node.find('value')
+        axis = node.find(tag('axis'))
+        value = node.find(tag('value'))
         return BindJointAxis(scenenode, targetref,axis, value,xmlnode=node)
     
 class InstanceKinematicsScene(DaeObject):
@@ -84,6 +84,7 @@ class InstanceKinematicsScene(DaeObject):
         self.sid = sid
         self.name = name
         self.extras = []
+        self.asset = asset
         if extras is not None:
             self.extras = extras
         self.bind_kinematics_models = []
@@ -106,6 +107,8 @@ class InstanceKinematicsScene(DaeObject):
             kscene = collada.kinematics_scenes.get(url[1:])
         sid = node.get('sid')
         name = node.get('name')
+        if name is not None and kscene is not None:
+            kscene.name = name
         asset=None
         extras=[]
         bind_kinematics_models=[]
@@ -114,9 +117,9 @@ class InstanceKinematicsScene(DaeObject):
             if subnode.tag == tag('asset'):
                 asset = Asset.load(collada, {}, subnode)
             elif subnode.tag == tag('bind_kinematics_model'):
-                bind_kinematics_models.append(BindKinematicsModel.load(collada,localscope,node))
+                bind_kinematics_models.append(BindKinematicsModel.load(collada,localscope,subnode))
             elif subnode.tag == tag('bind_joint_axis'):
-                bind_joint_axes.append(BindJointAxis.load(collada,localscope,node))
+                bind_joint_axes.append(BindJointAxis.load(collada,localscope,subnode))
         extras = Extra.loadextras(collada, node)
         return InstanceKinematicsScene(kscene,url,sid,name,asset,extras,bind_kinematics_models, bind_joint_axes, xmlnode=node)
     
@@ -125,8 +128,10 @@ class InstanceKinematicsScene(DaeObject):
         Extra.saveextras(self.xmlnode,self.extras)
         if self.kscene is not None:
             self.xmlnode.set('url','#'+self.kscene.id)
-        else:
+        elif self.url is not None:
             self.xmlnode.set('url',self.url)
+        else:
+            self.xmlnode.attrib.pop('url',None)
         if self.sid is not None:
             self.xmlnode.set('sid',self.sid)
         else:
@@ -135,7 +140,7 @@ class InstanceKinematicsScene(DaeObject):
             self.xmlnode.set('name',self.name)
         else:
             self.xmlnode.attrib.pop('name',None)
-        asset = self.xmlnode.find('asset')
+        asset = self.xmlnode.find(tag('asset'))
         if asset is not None:
             self.xmlnode.remove(asset)
         if self.asset is not None:
@@ -146,26 +151,20 @@ class InstanceKinematicsScene(DaeObject):
             self.xmlnode.remove(oldnode)
         for node in self.bind_kinematics_models + self.bind_joint_axes:
             node.save()
-            self.xmlnode.append(node)
+            self.xmlnode.append(node.xmlnode)
             
 class KinematicsScene(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics_scene> tag"""
-    def __init__( self, id, name, kinematics_models=None, instance_kinematics_models=None, articulated_systems=None, instance_articulated_systems=None, extras=None, xmlnode=None):
+    def __init__( self, id, name, instance_kinematics_models=None, instance_articulated_systems=None, extras=None, xmlnode=None):
         self.id = id
         """The unique string identifier for the scene"""
         
         self.name = name
         """The text string naming the scene"""
 
-        self.kinematics_models = []
-        if kinematics_models is not None:
-            self.kinematics_models = kinematics_models
         self.instance_kinematics_models = []
         if instance_kinematics_models is not None:
             self.instance_kinematics_models = instance_kinematics_models
-        self.articulated_systems = []
-        if articulated_systems is not None:
-            self.articulated_systems = articulated_systems
         self.instance_articulated_systems = []
         if instance_articulated_systems is not None:
             self.instance_articulated_systems = instance_articulated_systems
@@ -176,77 +175,37 @@ class KinematicsScene(DaeObject):
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.kinematics_scene()
-            for model in self.instance_kinematics_models + self.instance_articulated_systems:
-                self.xmlnode.append(model.xmlnode)
-            for km in self.kinematics_models:
-                ikm = E.instance_kinematics_model()
-                ikm.set('url','#'+ikm.id)
-                self.xmlnode.append(ikm)
-            for asystem in self.articulated_systems:
-                ias = E.instance_articulated_system()
-                ias.set('url','#'+asystem.id)
-            self.xmlnode.append(ias)
-            if len(self.id) > 0: self.xmlnode.set("id", self.id)
-            if len(self.name) > 0: self.xmlnode.set("name", self.name)
+            self.save(0)
             
     @staticmethod
     def load( collada, node ):
         id = node.get('id')
         name = node.get('name')
-        kinematics_models = []
         instance_kinematics_models = []
-        articulated_systems = []
         instance_articulated_systems = []
         for subnode in node:
             if subnode.tag == tag('instance_kinematics_model'):
-                url=subnode.get('url')
-                if url is not None:
-                    if url.startswith('#'): # inside this doc, so search for it
-                        kmodel = collada.kinematics_models.get(url[1:])
-                        if kmodel is None:
-                            raise DaeBrokenRefError('kinematics_model %s not found in library'%url)
-
-                        kmodel = copy.copy(kmodel)
-                        if subnode.get('name') is not None:
-                            kmodel.name = subnode.get('name')
-                        kinematics_models.append(kmodel)
-                    else:
-                        instance_kinematics_models.append(InstanceKinematicsModel(url,xmlnode=subnode)) # external reference
+                instance_kinematics_models.append(InstanceKinematicsModel.load(collada, {}, subnode))
             elif subnode.tag == tag('instance_articulated_system'):
-                url=subnode.get('url')
-                if url is not None:
-                    if url.startswith('#'): # inside this doc, so search for it
-                        asystem = collada.articulated_systems.get(url[1:])
-                        if asystem is None:
-                            raise DaeBrokenRefError('articulated_system %s not found in library'%url)
-
-                        asystem = copy.copy(asystem)
-                        if subnode.get('name') is not None:
-                            asystem.name = subnode.get('name')
-                        articulated_systems.append(asystem)
-                    else:
-                        instance_articulated_systems.append(InstanceArticulatedSystem(url,xmlnode=subnode)) # external reference
+                instance_articulated_systems.append(InstanceArticulatedSystem.load(collada, {}, subnode))
         extras = Extra.loadextras(collada, node)
-        return KinematicsScene(id, name, kinematics_models, instance_kinematics_models, articulated_systems, instance_articulated_systems, extras, xmlnode=node)
+        return KinematicsScene(id, name, instance_kinematics_models, instance_articulated_systems, extras, xmlnode=node)
 
-    def save(self):
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.name)
-        self.extras = Extra.loadextras(self.collada, self.xmlnode)
-        oldnodes = self.xmlnode.findall(tag('instance_kinematics_models')+tag('instance_articulated_systems'))
+    def save(self,recurse=-1):
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)
+            
+        Extra.saveextras(self.xmlnode,self.extras)
+        oldnodes = self.xmlnode.findall(tag('instance_kinematics_model'))+self.xmlnode.findall(tag('instance_articulated_system'))
         for node in oldnodes:
-            self.xmlnode.remove(oldnode)
+            self.xmlnode.remove(node)
         for model in self.instance_kinematics_models + self.instance_articulated_systems:
+            if recurse:
+                model.save()
             self.xmlnode.append(model.xmlnode)
-        for km in self.kinematics_models:
-            ikm = E.instance_kinematics_model()
-            ikm.set('url','#'+km.id)
-            if km.name is not None:
-                ikm.set('name',km.name)
-            self.xmlnode.append(ikm)
-        for asystem in self.articulated_systems:
-            ias = E.instance_articulated_system()
-            ias.set('url','#'+asystem.id)
-            if asystem.name is not None:
-                ias.set('name',asystem.name)
-            self.xmlnode.append(ias)

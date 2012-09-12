@@ -47,10 +47,12 @@ class InstancePhysicsScene(DaeObject):
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        if self.kscene is not None:
-            self.xmlnode.set('url','#'+self.kscene.id)
-        else:
+        if self.pscene is not None:
+            self.xmlnode.set('url','#'+self.pscene.id)
+        elif self.url is not None:
             self.xmlnode.set('url',self.url)
+        else:
+            self.xmlnode.attrib.pop('url',None)
         if self.sid is not None:
             self.xmlnode.set('sid',self.sid)
         else:
@@ -62,7 +64,7 @@ class InstancePhysicsScene(DaeObject):
 
 class PhysicsScene(DaeObject):
     """A class containing the data coming from a COLLADA <physics_scene> tag"""
-    def __init__(self, collada, id, name, physics_models=None, instance_physics_models=None, asset = None, technique_common=None, xmlnode=None):
+    def __init__(self, id, name, instance_physics_models=None, asset = None, technique_common=None, techniques=None, extras=None, xmlnode=None):
         """Create a scene
 
         :param str id:
@@ -71,31 +73,26 @@ class PhysicsScene(DaeObject):
           A list of type :class:`collada.scene.Node` representing the nodes in the scene
         :param xmlnode:
           When loaded, the xmlnode it comes from
-        :param collada:
-          The collada instance this is part of
 
         """
-        self.collada = collada
         self.id = id
         self.name = name
-        self.physics_models = []
-        if physics_models is not None:
-            self.physics_models = physics_models
         self.instance_physics_models = []
         if instance_physics_models is not None:
             self.instance_physics_models = instance_physics_models
-        
-        """The collada instance this is part of"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+        self.techniques = []
+        if techniques is not None:
+            self.techniques = techniques
+            
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the scene node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
-            self.techniques = Technique.loadtechniques(self.collada, self.xmlnode)
         else:
-            self.extras = []
-            self.techniques = []
             self.xmlnode = E.physics_scene()
-            self.save()
+            self.save(0)
         
     @staticmethod
     def load( collada, node ):
@@ -107,44 +104,39 @@ class PhysicsScene(DaeObject):
         asset = None
         for subnode in node:
             if subnode.tag == tag('instance_physics_model'):
-                url=subnode.get('url')
-                if url is not None:
-                    if url.startswith('#'): # inside this doc, so search for it
-                        kmodel = collada.physics_models.get(url[1:])
-                        if kmodel is None:
-                            raise DaeBrokenRefError('physics_model %s not found in library'%url)
-
-                        physics_models.append(kmodel)
-                    else:
-                        instance_physics_models.append(InstancePhysicsModel(url,xmlnode=subnode)) # external reference
+                instance_physics_models.append(InstancePhysicsModel.load(collada,{},subnode))
             elif subnode.tag == tag('asset'):
                 asset = Asset.load(collada, {}, subnode)
             elif subnode.tag == tag('technique_common'):
                 technique_common = subnode
             elif subnode.tag == tag('instance_force_field'):
                 pass
-        return PhysicsScene(collada, id, name, physics_models, instance_physics_models, asset, technique_common, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        techniques = Technique.loadtechniques(collada, node)
+        return PhysicsScene(id, name, instance_physics_models, asset, technique_common, techniques, extras, xmlnode=node)
 
-    def save(self):
+    def save(self,recurse=-1):
         Extra.saveextras(self.xmlnode,self.extras)
         Technique.savetechniques(self.xmlnode,self.techniques)
         technique_common = self.xmlnode.find(tag('technique_common'))
         if technique_common is None:
             technique_common = E.technique_common()
             self.xmlnode.append(technique_common)
-        else:
-            #technique_common.clear()
-            pass
+        technique_common.clear()
         
-        oldnodes = self.xmlnode.findall(tag('instance_physics_models'))
+        oldnodes = self.xmlnode.findall(tag('instance_physics_model'))
         for node in oldnodes:
-            self.xmlnode.remove(oldnode)
+            self.xmlnode.remove(node)
         for model in self.instance_physics_models:
+            if recurse:
+                model.save()
             self.xmlnode.append(model.xmlnode)
-        for pm in self.physics_models:
-            ipm = E.instance_physics_model()
-            ipm.set('url','#'+pm.id)
-            self.xmlnode.append(ipm)
 
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.name)
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)

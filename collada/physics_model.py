@@ -18,7 +18,8 @@ from .rigid_body import InstanceRigidBody
 from .extra import Extra
 
 class InstancePhysicsModel(DaeObject):
-    def __init__(self, url, sid=None, name=None, parent=None, instance_rigid_bodies=None, extras=None, xmlnode=None):
+    def __init__(self, pmodel=None, url=None, sid=None, name=None, parent=None, instance_rigid_bodies=None, extras=None, xmlnode=None):
+        self.pmodel = pmodel
         self.url = url
         self.sid = sid
         self.name = name
@@ -33,12 +34,17 @@ class InstancePhysicsModel(DaeObject):
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.instance_physics_model()
-            self.save()
+            self.save(0)
             
-    def save(self):
+    def save(self,recurse=-1):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        self.xmlnode.set('url',self.url)
+        if self.pmodel is not None and self.pmodel.id is not None:
+            self.xmlnode.set('url','#'+self.pmodel.id)
+        elif self.url is not None:
+            self.xmlnode.set('url',self.url)
+        else:
+            self.xmlnode.attrib.pop('url',None)
         if self.sid is not None:
             self.xmlnode.set('sid',self.sid)
         else:
@@ -54,12 +60,25 @@ class InstancePhysicsModel(DaeObject):
             
     @staticmethod
     def load( collada, localscope, node ):
+        url = node.get('url')
+        name = node.get('name')
+        pmodel = None
+        if url is not None:
+            if url.startswith('#'): # inside this doc, so search for it
+                pmodel = collada.physics_models.get(url[1:])
+                if pmodel is None:
+                    raise DaeBrokenRefError('physics_model %s not found in library'%url)
+                
+                if name is not None:
+                    pmodel = copy.copy(pmodel)
+                    pmodel.name = name
+
         instance_rigid_bodies = []
         for subnode in node:
             if subnode.tag == tag('instance_rigid_body'):
                 pass
         extras = Extra.loadextras(collada, node)
-        return InstancePhysicsModel(node.get('url'),node.get('sid'), node.get('name'), node.get('parent'), instance_rigid_bodies, extras, xmlnode=node) # external reference
+        return InstancePhysicsModel(pmodel,url,node.get('sid'), name, node.get('parent'), instance_rigid_bodies, extras, xmlnode=node) # external reference
         
 class PhysicsModel(DaeObject):
     """A class containing the data coming from a COLLADA <physics_model> tag"""
@@ -119,8 +138,8 @@ class PhysicsModel(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        id = node.get("id") or ""
-        name = node.get("name") or ""
+        id = node.get("id")
+        name = node.get("name")
         rigid_bodies = []
         physics_models = []
         instance_physics_models = []
@@ -135,7 +154,7 @@ class PhysicsModel(DaeObject):
 
                         physics_models.append(_physics_model)
                     else:
-                        instance_physics_model = InstancePhysicsModel.load(collada,localscope,node)
+                        instance_physics_model = InstancePhysicsModel.load(collada,localscope,subnode)
             elif subnode.tag == tag('rigid_body'):
                 # todo
                 pass
@@ -159,5 +178,12 @@ class PhysicsModel(DaeObject):
             self.xmlnode.append(ipm)
         for instance_physics_model in self.instance_physics_models:
             self.xmlnode.append(instance_physics_model.xmlnode)
-        if len(self.id) > 0: self.xmlnode.set("id", self.id)
-        if len(self.name) > 0: self.xmlnode.set("name", self.name)
+            
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)

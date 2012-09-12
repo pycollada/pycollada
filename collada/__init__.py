@@ -596,7 +596,7 @@ class Collada(object):
                      (self.effects, 'library_effects'),
                      (self.materials, 'library_materials'),
                      (self.nodes, 'library_nodes'),
-                     (self.physics_models, 'library_kinematics_models'),
+                     (self.physics_models, 'library_physics_models'),
                      (self.kinematics_models, 'library_kinematics_models'),
                      (self.articulated_systems, 'library_articulated_systems'),
                      (self.scenes, 'library_visual_scenes'),
@@ -642,11 +642,17 @@ class Collada(object):
             if sceneid not in self.scenes:
                 raise DaeBrokenRefError('Default scene %s not found' % sceneid)
             scenenode.append(E.instance_visual_scene(url="#%s" % sceneid))
-
+        if self.ikscene is not None:
+            self.ikscene.save()
+            scenenode.append(self.ikscene.xmlnode)
+        for ipscene in self.ipscenes:
+            if ipscene is not None:
+                ipscene.save()
+                scenenode.append(ipscene.xmlnode)
+            
         if self.validator is not None:
             if not self.validator.validate(self.xmlnode):
-                raise DaeSaveValidationError("Validation error when saving: " + 
-                        self.validator.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
+                raise DaeSaveValidationError("Validation error when saving: " + self.validator.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
 
     def write(self, fp):
         """Writes out the collada document to a file. Note that this also

@@ -27,7 +27,7 @@ class Technique(DaeObject):
 
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
-        self.xmlnode.set('profile',profile)
+        self.xmlnode.set('profile',self.profile)
         if self.xmlns is not None:
             self.xmlnode.set('xmlns',self.xmlns)
         else:
