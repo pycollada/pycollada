@@ -106,7 +106,7 @@ class FloatSource(Source):
     item in the source array.
     """
 
-    def __init__(self, collada, id, data, components, xmlnode=None):
+    def __init__(self, id, data, components, extras=None, xmlnode=None):
         """Create a float source instance.
 
         :param str id:
@@ -121,24 +121,21 @@ class FloatSource(Source):
           When loaded, the xmlnode it comes from.
 
         """
-        self.collada = collada
         self.id = id
         """The unique string identifier for the source"""
         self.data = data
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data.shape = (-1, len(components) )
         self.components = components
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+            
         """Tuple of strings describing the semantic of the data, e.g. ``('X','Y','Z')``"""
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
-            technique_common = self.xmlnode.find(tag('technique_common'))
-            if technique_common is not None:
-                self.extras = Extra.loadextras(self.collada, technique_common)
-            else:
-                self.extras = []
         else:
-            self.extras = []
             self.data.shape = (-1,)
             txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
@@ -203,6 +200,11 @@ class FloatSource(Source):
             except ValueError: raise DaeMalformedError('Corrupted float array')
         data[numpy.isnan(data)] = 0
 
+        technique_common = node.find(tag('technique_common'))
+        extras = None
+        if technique_common is not None:
+            extras = Extra.loadextras(collada, technique_common)
+        
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
@@ -216,7 +218,7 @@ class FloatSource(Source):
             #TODO
             data = numpy.array(zip(data[:,0], data[:,1]))
             data.shape = (-1)
-        return FloatSource( collada, sourceid, data, tuple(components), xmlnode=node )
+        return FloatSource( sourceid, data, tuple(components), extras, xmlnode=node )
 
     def __str__(self): return '<FloatSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
