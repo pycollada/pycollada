@@ -43,7 +43,7 @@ class Extra(DaeObject):
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.extra()
-            self.save()
+            self.save(0)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -62,7 +62,7 @@ class Extra(DaeObject):
                 techniques.append(Technique.load(collada,localscope,subnode))
         return Extra(id,name,type,asset,technique_common,techniques,xmlnode=node)
 
-    def save(self):
+    def save(self,recurse=-1):
         if self.id is not None:
             self.xmlnode.set('id',self.sid)
         else:
@@ -76,7 +76,8 @@ class Extra(DaeObject):
         else:
             self.xmlnode.attrib.pop('type',None)
         if self.asset is not None:
-            self.asset.save()
+            if recurse:
+                self.asset.save()
             node = self.xmlnode.find(tag('asset'))
             if node is not None:
                 self.xmlnode.remove(node)
@@ -89,7 +90,8 @@ class Extra(DaeObject):
         for oldnode in self.xmlnode.findall(tag('technique')):
             self.xmlnode.remove(oldnode)
         for tec in self.techniques:
-            tec.save()
+            if recurse:
+                tec.save()
             self.xmlnode.append(tec.xmlnode)
 
     @staticmethod
