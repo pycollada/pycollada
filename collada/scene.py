@@ -66,7 +66,7 @@ class Node(SceneNode):
     Contains the list of transformations effecting the node as well as any children.
     """
 
-    def __init__(self, collada, id, sid=None, name=None, type=None, layer=None, children=None, transforms=None, xmlnode=None):
+    def __init__(self, id, sid=None, name=None, type=None, layer=None, children=None, transforms=None, extras=None, xmlnode=None):
         """Create a node in the scene graph.
 
         :param str id:
@@ -81,7 +81,6 @@ class Node(SceneNode):
           When loaded, the xmlnode it comes from
 
         """
-        self.collada = collada
         self.id = id
         self.sid = sid
         self.name = name
@@ -102,6 +101,9 @@ class Node(SceneNode):
         """A numpy.array of size 4x4 containing a transformation matrix that
         combines all the transformations in :attr:`transforms`. This will only
         be updated after calling :meth:`save`."""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         for t in self.transforms:
             self.matrix = numpy.dot(self.matrix, t.matrix)
@@ -109,11 +111,9 @@ class Node(SceneNode):
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the transform."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.node(id=self.id, name=self.id)
-            self.save(False)
+            self.save(0)
 
     def objects(self, tipo, matrix=None):
         """Iterate through all objects under this node that match `tipo`.
@@ -134,7 +134,7 @@ class Node(SceneNode):
             for obj in node.objects(tipo, M):
                 yield obj
 
-    def save(self,recurse=True):
+    def save(self,recurse=-1):
         """Saves the geometry back to :attr:`xmlnode`. Also updates
         :attr:`matrix` if :attr:`transforms` has been modified."""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -196,7 +196,8 @@ class Node(SceneNode):
             except DaeError as ex:
                 collada.handleError(ex)
 
-        return Node(collada, id, sid, name, type, layer, children, transforms, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        return Node(id, sid, name, type, layer, children, transforms, extras, xmlnode=node)
 
     def __str__(self):
         return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
@@ -285,7 +286,7 @@ class NodeNode(Node):
 class GeometryNode(SceneNode):
     """Represents a geometry instance in a scene, as defined in the collada <instance_geometry> tag."""
 
-    def __init__(self, collada, geometry, materials=None, xmlnode=None):
+    def __init__(self, geometry, materials=None, extras=None, xmlnode=None):
         """Creates a geometry node
 
         :param collada.geometry.Geometry geometry:
@@ -298,7 +299,6 @@ class GeometryNode(SceneNode):
           When loaded, the xmlnode it comes from
 
         """
-        self.collada = collada
         self.geometry = geometry
         """An object of type :class:`collada.geometry.Geometry` representing the
         geometry to bind in the scene"""
@@ -307,12 +307,14 @@ class GeometryNode(SceneNode):
           Each of these represents a material that the geometry is bound to."""
         if materials is not None:
             self.materials = materials
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+            
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_geometry(url="#%s" % self.geometry.id)
             if len(self.materials) > 0:
                 self.xmlnode.append(E.bind_material(
@@ -340,7 +342,8 @@ class GeometryNode(SceneNode):
         materials = []
         for matnode in matnodes:
             materials.append( MaterialNode.load(collada, matnode) )
-        return GeometryNode( collada, geometry, materials, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        return GeometryNode( geometry, materials, extras, xmlnode=node)
 
     def save(self):
         """Saves the geometry node back to :attr:`xmlnode`"""
@@ -380,7 +383,7 @@ class ControllerNode(SceneNode):
     """Represents a controller instance in a scene, as defined in the collada <instance_controller> tag. **This class is highly
     experimental. More support will be added in version 0.4.**"""
 
-    def __init__(self, controller, materials, xmlnode=None):
+    def __init__(self, controller, materials, extras=None, xmlnode=None):
         """Creates a controller node
 
         :param collada.controller.Controller controller:
@@ -399,12 +402,14 @@ class ControllerNode(SceneNode):
         self.materials = materials
         """A list containing items of type :class:`collada.scene.MaterialNode`.
           Each of these represents a material that the controller is bound to."""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the controller node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = ElementTree.Element( tag('instance_controller') )
             bindnode = ElementTree.Element( tag('bind_material') )
             technode = ElementTree.Element( tag('technique_common') )
@@ -431,6 +436,7 @@ class ControllerNode(SceneNode):
         materials = []
         for matnode in matnodes:
             materials.append( MaterialNode.load(collada, matnode) )
+        extras = Extra.loadextras(collada, node)
         return ControllerNode( controller, materials, xmlnode=node)
 
     def save(self):
@@ -450,7 +456,7 @@ class ControllerNode(SceneNode):
 class MaterialNode(SceneNode):
     """Represents a material being instantiated in a scene, as defined in the collada <instance_material> tag."""
 
-    def __init__(self, collada, symbol, target, inputs, xmlnode = None):
+    def __init__(self, symbol, target, inputs, extras=None, xmlnode = None):
         """Creates a material node
 
         :param str symbol:
@@ -467,7 +473,6 @@ class MaterialNode(SceneNode):
           When loaded, the xmlnode it comes from
 
         """
-        self.collada = collada
         self.symbol = symbol
         """The symbol within a geometry this material should be bound to"""
         self.target = target
@@ -478,12 +483,14 @@ class MaterialNode(SceneNode):
           ``('TEX0', 'TEXCOORD', '0')`` would map the effect parameter ``'TEX0'``
           to the ``'TEXCOORD'`` semantic of the geometry, using texture coordinate
           set ``0``."""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the material node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_material(
                 *[E.bind_vertex_input(semantic=sem, input_semantic=input_sem, input_set=set)
                   for sem, input_sem, set in self.inputs]
@@ -498,7 +505,8 @@ class MaterialNode(SceneNode):
         if not targetid.startswith('#'): raise DaeMalformedError('Incorrect target id in material '+targetid)
         target = collada.materials.get(targetid[1:])
         if not target: raise DaeBrokenRefError('Material %s not found'%targetid)
-        return MaterialNode(collada, node.get('symbol'), target, inputs, xmlnode = node)
+        extras = Extra.loadextras(collada, node)
+        return MaterialNode(node.get('symbol'), target, inputs, extras, xmlnode = node)
 
     def objects(self):
         pass
@@ -530,7 +538,7 @@ class MaterialNode(SceneNode):
 class CameraNode(SceneNode):
     """Represents a camera being instantiated in a scene, as defined in the collada <instance_camera> tag."""
 
-    def __init__(self, camera, xmlnode=None):
+    def __init__(self, camera, extras=None, xmlnode=None):
         """Create a camera instance
 
         :param collada.camera.Camera camera:
@@ -541,12 +549,14 @@ class CameraNode(SceneNode):
         """
         self.camera = camera
         """An object of type :class:`collada.camera.Camera` representing the instantiated camera"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the camera node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_camera(url="#%s"%camera.id)
 
     def objects(self, tipo, matrix=None):
@@ -561,7 +571,8 @@ class CameraNode(SceneNode):
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in camera instance %s' % url)
         camera = collada.cameras.get(url[1:])
         if not camera: raise DaeBrokenRefError('Camera %s not found in library'%url)
-        return CameraNode( camera, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        return CameraNode( camera, extras, xmlnode=node)
 
     def save(self):
         """Saves the camera node back to :attr:`xmlnode`"""
@@ -578,7 +589,7 @@ class CameraNode(SceneNode):
 class LightNode(SceneNode):
     """Represents a light being instantiated in a scene, as defined in the collada <instance_light> tag."""
 
-    def __init__(self, light, xmlnode=None):
+    def __init__(self, light, extras=None, xmlnode=None):
         """Create a light instance
 
         :param collada.light.Light light:
@@ -589,12 +600,14 @@ class LightNode(SceneNode):
         """
         self.light = light
         """An object of type :class:`collada.light.Light` representing the instantiated light"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_light(url="#%s"%light.id)
 
     def objects(self, tipo, matrix=None):
@@ -609,7 +622,8 @@ class LightNode(SceneNode):
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in light instance %s' % url)
         light = collada.lights.get(url[1:])
         if not light: raise DaeBrokenRefError('Light %s not found in library'%url)
-        return LightNode( light, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        return LightNode( light, extras, xmlnode=node)
 
     def save(self):
         """Saves the light node back to :attr:`xmlnode`"""
@@ -647,7 +661,7 @@ def loadNode( collada, node, localscope ):
 class Scene(DaeObject):
     """The root object for a scene, as defined in a collada <scene> tag"""
 
-    def __init__(self, id, nodes, xmlnode=None, collada=None):
+    def __init__(self, id, nodes, extras=None, xmlnode=None, collada=None):
         """Create a scene
 
         :param str id:
@@ -664,14 +678,14 @@ class Scene(DaeObject):
         """The unique string identifier for the scene"""
         self.nodes = nodes
         """A list of type :class:`collada.scene.Node` representing the nodes in the scene"""
-        self.collada = collada
-        """The collada instance this is part of"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the scene node."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.visual_scene(id=self.id)
             for node in nodes:
                 self.xmlnode.append( node.xmlnode )
@@ -729,8 +743,8 @@ class Scene(DaeObject):
         if len(tried_loading) > 0:
             for nodenode, ex in tried_loading:
                 raise DaeBrokenRefError(ex.msg)
-
-        return Scene(id, nodes, xmlnode=node, collada=collada)
+        extras = Extra.loadextras(collada, node)
+        return Scene(id, nodes, extras, xmlnode=node, collada=collada)
 
     def save(self):
         """Saves the scene back to :attr:`xmlnode`"""

@@ -45,7 +45,7 @@ class Light(DaeObject):
 class DirectionalLight(Light):
     """Directional light as defined in COLLADA tag <directional> tag."""
 
-    def __init__(self, id, color, xmlnode = None):
+    def __init__(self, id, color, extras=None, xmlnode = None):
         """Create a new directional light.
 
         :param str id:
@@ -67,12 +67,13 @@ class DirectionalLight(Light):
         """Either a tuple of size 3 containing the RGB color value
           of the light or a tuple of size 4 containing the RGBA
           color value of the light"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.light(
                 E.technique_common(
                     E.directional(
@@ -101,7 +102,8 @@ class DirectionalLight(Light):
             color = tuple([float(v) for v in colornode.text.split()])
         except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
-        return DirectionalLight(node.get('id'), color, xmlnode = node)
+        extras = Extra.loadextras(collada, node)
+        return DirectionalLight(node.get('id'), color, extras, xmlnode = node)
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
@@ -124,7 +126,7 @@ class DirectionalLight(Light):
 class AmbientLight(Light):
     """Ambient light as defined in COLLADA tag <ambient>."""
 
-    def __init__(self, id, color, xmlnode = None):
+    def __init__(self, id, color, extras=None, xmlnode = None):
         """Create a new ambient light.
 
         :param str id:
@@ -143,12 +145,14 @@ class AmbientLight(Light):
         """Either a tuple of size 3 containing the RGB color value
           of the light or a tuple of size 4 containing the RGBA
           color value of the light"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.light(
                 E.technique_common(
                     E.ambient(
@@ -177,7 +181,8 @@ class AmbientLight(Light):
             color = tuple( [ float(v) for v in colornode.text.split() ] )
         except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
-        return AmbientLight(node.get('id'), color, xmlnode = node)
+        extras = Extra.loadextras(collada, node)
+        return AmbientLight(node.get('id'), color, extras, xmlnode = node)
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
@@ -201,7 +206,7 @@ class PointLight(Light):
     """Point light as defined in COLLADA tag <point>."""
 
     def __init__(self, id, color, constant_att=None, linear_att=None,
-            quad_att=None, zfar=None, xmlnode = None):
+            quad_att=None, zfar=None, extras=None, xmlnode = None):
         """Create a new sun light.
 
         :param str id:
@@ -239,13 +244,14 @@ class PointLight(Light):
         """Quadratic attenuation factor."""
         self.zfar = zfar
         """Distance to the far clipping plane"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             pnode = E.point(
                 E.color(' '.join(map(str, self.color ) ))
             )
@@ -301,8 +307,10 @@ class PointLight(Light):
                 zfar = float(zfarnode.text)
         except ValueError as ex:
             raise DaeMalformedError('Corrupted values in light definition')
+        
+        extras = Extra.loadextras(collada, node)
         return PointLight(node.get('id'), color, constant_att, linear_att,
-                quad_att, zfar, xmlnode = node)
+                quad_att, zfar, extras, xmlnode = node)
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
@@ -326,7 +334,7 @@ class SpotLight(Light):
     """Spot light as defined in COLLADA tag <spot>."""
 
     def __init__(self, id, color, constant_att=None, linear_att=None,
-            quad_att=None, falloff_ang=None, falloff_exp=None, xmlnode = None):
+            quad_att=None, falloff_ang=None, falloff_exp=None, extras=None, xmlnode = None):
         """Create a new spot light.
 
         :param str id:
@@ -365,13 +373,14 @@ class SpotLight(Light):
         """Falloff angle"""
         self.falloff_exp = falloff_exp
         """Falloff exponent"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the light."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             pnode = E.spot(
                 E.color(' '.join(map(str, self.color ) )),
             )
@@ -433,8 +442,10 @@ class SpotLight(Light):
                 falloff_exp = float(fexpnode.text)
         except ValueError as ex:
             raise DaeMalformedError('Corrupted values in spot light definition')
+        
+        extras = Extra.loadextras(collada, node)
         return SpotLight(node.get('id'), color, constant_att, linear_att,
-                quad_att, falloff_ang, falloff_exp, xmlnode = node)
+                quad_att, falloff_ang, falloff_exp, extras, xmlnode = node)
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.

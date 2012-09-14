@@ -14,6 +14,7 @@
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
+from .util import toUnitVec
 import numpy
 
 def makeRotationMatrix(x, y, z, angle):

@@ -329,12 +329,15 @@ class Morph(Controller):
         self.target_list = target_list
         """A list of tuples where each tuple (g,w) contains
             a Geometry (g) and a float weight value (w)"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         self.xmlnode = xmlnode
-        if self.xmlnode is not None:
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
-        else:
-            self.extras = []
+        if self.xmlnode is None:
+            self.xmlnode = E.morph()
+            self.save(0)
+
         #TODO
 
     def __len__(self):
@@ -393,9 +396,10 @@ class Morph(Controller):
                 raise DaeBrokenRefError("Targeted geometry %s in morph not found"%target)
             target_list.append((collada.geometries[target], weight[0]))
 
-        return Morph(basegeom, target_list, controllernode)
+        extras = Extra.loadextras(collada, controllernode)
+        return Morph(basegeom, target_list, extras, controllernode)
 
-    def save(self):
+    def save(self,recurse=-1):
         Extra.saveextras(self.xmlnode,self.extras)
 
 

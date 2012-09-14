@@ -18,25 +18,31 @@ from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .extra import Extra
+from .technique import Technique
 
 class InstanceRigidBody(object):
-    def __init__(self,body, target, sid=None, name=None, xmlnode=None):
+    def __init__(self,body, target, sid=None, name=None, techniques=None, extras=None, xmlnode=None):
         self.body = body
         self.target = target
         self.name = name
         self.sid = sid
+        self.techniques = []
+        if techniques is not None:
+            self.techniques = techniques
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode is not None:
             self.xmlnode = xmlnode
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.instance_articulated_system()
-            self.save()
+            self.save(0)
 
-    def save(self):
+    def save(self,recurse=-1):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        self.xmlnode.set('url',self.url)
+        Extra.savetechniques(self.xmlnode,self.techniques)
         self.xmlnode.set('body',self.body)
         self.xmlnode.set('target',self.target)
         if self.sid is not None:
@@ -48,3 +54,13 @@ class InstanceRigidBody(object):
         else:
             self.xmlnode.attrib.pop('name',None)
 
+
+    @staticmethod
+    def load( collada, localscope, node ):
+        body=node.get('body')
+        target=node.get('target')
+        sid=node.get('sid')
+        name=node.get('name')
+        extras = Extra.loadextras(collada, node)
+        techniques = Technique.loadtechniques(collada, node)
+        return InstanceRigidBody(body, target, sid, name, techniques, extras, xmlnode)

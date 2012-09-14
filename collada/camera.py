@@ -41,7 +41,7 @@ class PerspectiveCamera(Camera):
     """Perspective camera as defined in COLLADA tag <perspective>."""
 
     def __init__(self, id, znear, zfar, xfov=None, yfov=None,
-            aspect_ratio=None, xmlnode = None):
+            aspect_ratio=None, extras=None, xmlnode = None):
         """Create a new perspective camera.
 
         Note: ``aspect_ratio = tan(0.5*xfov) / tan(0.5*yfov)``
@@ -84,15 +84,16 @@ class PerspectiveCamera(Camera):
         """Distance to the near clipping plane"""
         self.zfar = zfar
         """Distance to the far clipping plane"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         self._checkValidParams()
 
         if xmlnode is not  None:
             self.xmlnode = xmlnode
             """ElementTree representation of the data."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self._recreateXmlNode()
 
     def _recreateXmlNode(self):
@@ -171,8 +172,9 @@ class PerspectiveCamera(Camera):
         if xfov is not None and yfov is not None and aspect_ratio is not None:
             aspect_ratio = None
 
+        extras = Extra.loadextras(collada, node)
         return PerspectiveCamera(id, znear, zfar, xfov=xfov, yfov=yfov,
-                aspect_ratio=aspect_ratio, xmlnode=node)
+                aspect_ratio=aspect_ratio, extras=extras, xmlnode=node)
 
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.
@@ -191,7 +193,7 @@ class PerspectiveCamera(Camera):
 class OrthographicCamera(Camera):
     """Orthographic camera as defined in COLLADA tag <orthographic>."""
 
-    def __init__(self, id, znear, zfar, xmag=None, ymag=None, aspect_ratio=None, xmlnode = None):
+    def __init__(self, id, znear, zfar, xmag=None, ymag=None, aspect_ratio=None, extras=None, xmlnode = None):
         """Create a new orthographic camera.
 
         Note: ``aspect_ratio = xmag / ymag``
@@ -234,15 +236,16 @@ class OrthographicCamera(Camera):
         """Distance to the near clipping plane"""
         self.zfar = zfar
         """Distance to the far clipping plane"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         self._checkValidParams()
 
         if xmlnode is not  None:
             self.xmlnode = xmlnode
             """ElementTree representation of the data."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self._recreateXmlNode()
 
     def _recreateXmlNode(self):
@@ -321,9 +324,9 @@ class OrthographicCamera(Camera):
         # So instead of failing to load, let's just add one more hack because of terrible exporters
         if xmag is not None and ymag is not None and aspect_ratio is not None:
             aspect_ratio = None
-
+        extras = Extra.loadextras(collada, node)
         return OrthographicCamera(id, znear, zfar, xmag=xmag, ymag=ymag,
-                aspect_ratio=aspect_ratio, xmlnode=node)
+                aspect_ratio=aspect_ratio, extras=extras, xmlnode=node)
 
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.

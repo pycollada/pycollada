@@ -29,7 +29,7 @@ from .extra import Extra
 class Geometry(DaeObject):
     """A class containing the data coming from a COLLADA <geometry> tag"""
 
-    def __init__(self, collada, id, name, sourcebyid, primitives=None,
+    def __init__(self, collada, id, name, sourcebyid, primitives=None, extras=None,
             xmlnode=None, double_sided=False):
         """Create a geometry instance
 
@@ -68,6 +68,10 @@ class Geometry(DaeObject):
         self.sourceById = sourcebyid
         """A dictionary containing :class:`collada.source.Source` objects indexed by their id."""
 
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if isinstance(sourcebyid, list):
             self.sourceById = {}
             for src in sourcebyid:
@@ -81,9 +85,7 @@ class Geometry(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             sourcenodes = []
             verticesnode = None
             for srcid, src in self.sourceById.items():
@@ -221,7 +223,9 @@ class Geometry(DaeObject):
                 _primitives.append( polygons.Polygons.load( collada, sourcebyid, subnode ) )
             elif subnode.tag != tag('source') and subnode.tag != tag('vertices') and subnode.tag != tag('extra'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
-        geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node, double_sided=double_sided )
+
+        extras = Extra.loadextras(collada, node)
+        geom = Geometry(collada, id, name, sourcebyid, _primitives, extras, xmlnode=node, double_sided=double_sided )
         return geom
 
     def save(self):

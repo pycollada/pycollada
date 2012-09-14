@@ -49,7 +49,7 @@ class CImage(DaeObject):
     named it CImage to avoid confusion with PIL's Image class.
 
     """
-    def __init__(self, id, path, collada = None, xmlnode = None):
+    def __init__(self, id, path, collada = None, extras=None, xmlnode = None):
         """Create an image object.
 
         :param str id:
@@ -72,12 +72,14 @@ class CImage(DaeObject):
         self._pilimage = None
         self._uintarray = None
         self._floatarray = None
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the image."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.image(
                 E.init_from(path)
             , id=self.id, name=self.id)
@@ -155,7 +157,8 @@ class CImage(DaeObject):
         initnode = node.find( tag('init_from') )
         if initnode is None: raise DaeIncompleteError('Image has no file path')
         path = initnode.text
-        return CImage(id, path, collada, xmlnode = node)
+        extras = Extra.loadextras(collada, node)
+        return CImage(id, path, collada, extras, xmlnode = node)
 
     def save(self):
         """Saves the image back to :attr:`xmlnode`. Only the :attr:`id` attribute is saved.
@@ -184,7 +187,7 @@ class Surface(DaeObject):
 
     """
 
-    def __init__(self, id, img, format=None, xmlnode=None):
+    def __init__(self, id, img, format=None, extras=None, xmlnode=None):
         """Creates a surface.
 
         :param str id:
@@ -203,12 +206,14 @@ class Surface(DaeObject):
         """:class:`collada.material.CImage` object from the image library."""
         self.format = format if format is not None else "A8R8G8B8"
         """Format string."""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+        
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the surface."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.newparam(
                 E.surface(
                     E.init_from(self.image.id),
@@ -233,7 +238,8 @@ class Surface(DaeObject):
         else:
             img = collada.images.get(imgid)
         if img is None: raise DaeBrokenRefError("Missing image '%s' in surface '%s'" % (imgid, id))
-        return Surface(id, img, format, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        return Surface(id, img, format, extras, xmlnode=node)
 
     def save(self):
         """Saves the surface data back to :attr:`xmlnode`"""
@@ -266,7 +272,7 @@ class Sampler2D(DaeObject):
     currently unimplemented.
 
     """
-    def __init__(self, id, surface, minfilter=None, magfilter=None, xmlnode=None):
+    def __init__(self, id, surface, minfilter=None, magfilter=None, extras=None, xmlnode=None):
         """Create a Sampler2D object.
 
         :param str id:
@@ -289,12 +295,14 @@ class Sampler2D(DaeObject):
         """Minification filter string id, see collada spec for details"""
         self.magfilter = magfilter
         """Maximization filter string id, see collada spec for details"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the sampler."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             sampler_node = E.sampler2D(E.source(self.surface.id))
             if minfilter:
                 sampler_node.append(E.minfilter(self.minfilter))
@@ -320,7 +328,8 @@ class Sampler2D(DaeObject):
         id = node.get('sid')
         surface = localscope.get(surfaceid)
         if surface is None or type(surface) != Surface: raise DaeBrokenRefError('Missing surface ' + surfaceid)
-        return Sampler2D(id, surface, minfilter, magfilter, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        return Sampler2D(id, surface, minfilter, magfilter, extras, xmlnode=node)
 
     def save(self):
         """Saves the sampler data back to :attr:`xmlnode`"""
@@ -353,7 +362,7 @@ class Map(DaeObject):
     corresponding attribute.
 
     """
-    def __init__(self, sampler, texcoord, xmlnode=None):
+    def __init__(self, sampler, texcoord, extras=None, xmlnode=None):
         """Create a map instance to a sampler using a texcoord channel.
 
         :param collada.material.Sampler2D sampler:
@@ -368,12 +377,14 @@ class Map(DaeObject):
         """:class:`collada.material.Sampler2D` object to map"""
         self.texcoord = texcoord
         """Texture coordinate channel symbol to use"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the map"""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.texture(texture=self.sampler.id, texcoord=self.texcoord)
 
     @staticmethod
@@ -391,7 +402,8 @@ class Map(DaeObject):
             err = DaeMissingSampler2D('Missing sampler ' + samplerid + ' in node ' + node.tag)
             err.samplerid = samplerid
             raise err
-        return Map(sampler, texcoord, xmlnode = node)
+        extras = Extra.loadextras(collada, node)
+        return Map(sampler, texcoord, extras, xmlnode = node)
 
     def save(self):
         """Saves the map back to :attr:`xmlnode`"""
@@ -424,7 +436,7 @@ class Effect(DaeObject):
     shaders = [ 'phong', 'lambert', 'blinn', 'constant']
     """Supported shader list."""
 
-    def __init__(self, collada, id, params, shadingtype, bumpmap = None, double_sided = False,
+    def __init__(self, id, params, shadingtype, bumpmap = None, double_sided = False,
                        emission = (0.0, 0.0, 0.0, 1.0),
                        ambient = (0.0, 0.0, 0.0, 1.0),
                        diffuse = (0.0, 0.0, 0.0, 1.0),
@@ -436,6 +448,7 @@ class Effect(DaeObject):
                        transparency = None,
                        index_of_refraction = None,
                        opaque_mode = None,
+                       extras = None,
                        xmlnode = None):
         """Create an effect instance out of properties.
 
@@ -484,7 +497,6 @@ class Effect(DaeObject):
           If loaded from xml, the xml node
 
         """
-        self.collada = collada
         self.id = id
         """The string identifier for the effect"""
         self.params = params
@@ -534,13 +546,14 @@ class Effect(DaeObject):
                 self.transparency = 0.0
 
         self._fixColorValues()
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the effect"""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             shadnode = E(self.shadingtype)
 
             for prop in self.supported:
@@ -584,7 +597,7 @@ class Effect(DaeObject):
                 global_image_id = local_image.id + "-" + uniquenum
                 uniquenum += 1
             collada.images.append(local_image)
-
+            
         for paramnode in profilenode.findall( tag('newparam') ):
             if paramnode.find( tag('surface') ) is not None:
                 param = Surface.load(collada, localscope, paramnode)
@@ -656,7 +669,8 @@ class Effect(DaeObject):
                     double_sided = True
             except ValueError:
                 pass
-        return Effect(collada, id, params, shadingtype, bumpmap, double_sided, **props)
+        extras = Extra.loadextras(collada, node)
+        return Effect(id, params, shadingtype, bumpmap, double_sided, extras=extras, **props)
 
     @staticmethod
     def _loadShadingParam( collada, localscope, node ):
@@ -831,7 +845,7 @@ class Material(DaeObject):
 
     """
 
-    def __init__(self, collada, id, name, effect, xmlnode=None):
+    def __init__(self, id, name, effect, extras=None, xmlnode=None):
         """Creates a material.
 
         :param str id:
@@ -844,20 +858,20 @@ class Material(DaeObject):
           If loaded from xml, the xml node
 
         """
-        self.collada = collada
         self.id = id
         """The unique string identifier for the material"""
         self.name = name
         """The name for the material"""
         self.effect = effect
         """The :class:`collada.material.Effect` instantiated in this material"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the surface."""
-            self.extras = Extra.loadextras(self.collada, self.xmlnode)
         else:
-            self.extras = []
             self.xmlnode = E.material(
                 E.instance_effect(url="#%s" % self.effect.id)
             , id=str(self.id), name=str(self.name))
@@ -878,7 +892,8 @@ class Material(DaeObject):
         if not effect:
             raise DaeBrokenRefError('Effect not found: '+effectid)
 
-        return Material(collada, matid, matname, effect, xmlnode=node)
+        extras = Extra.loadextras(collada, node)
+        return Material(matid, matname, effect, extras, xmlnode=node)
 
     def save(self):
         """Saves the material data back to :attr:`xmlnode`"""

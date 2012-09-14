@@ -234,7 +234,7 @@ class IDRefSource(Source):
 
     """
 
-    def __init__(self, id, data, components, xmlnode=None):
+    def __init__(self, id, data, components, extras=None, xmlnode=None):
         """Create an id ref source instance.
 
         :param str id:
@@ -256,17 +256,15 @@ class IDRefSource(Source):
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data.shape = (-1, len(components) )
         self.components = components
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         """Tuple of strings describing the semantic of the data, e.g. ``('MORPH_TARGET')``"""
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
-            technique_common = self.xmlnode.find(tag('technique_common'))
-            if technique_common is not None:
-                self.extras = Extra.loadextras(self.collada, technique_common)
-            else:
-                self.extras = []
         else:
-            self.extras = []
             self.data.shape = (-1,)
             txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
@@ -333,7 +331,8 @@ class IDRefSource(Source):
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
-        return IDRefSource( sourceid, data, tuple(components), xmlnode=node )
+        extras = Extra.loadextras(collada, node)
+        return IDRefSource( sourceid, data, tuple(components), extras, xmlnode=node )
 
     def __str__(self): return '<IDRefSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
@@ -349,7 +348,7 @@ class NameSource(Source):
 
     """
 
-    def __init__(self, id, data, components, xmlnode=None):
+    def __init__(self, id, data, components, extras=None, xmlnode=None):
         """Create a name source instance.
 
         :param str id:
@@ -372,16 +371,14 @@ class NameSource(Source):
         self.data.shape = (-1, len(components) )
         self.components = components
         """Tuple of strings describing the semantic of the data, e.g. ``('JOINT')``"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
-            technique_common = self.xmlnode.find(tag('technique_common'))
-            if technique_common is not None:
-                self.extras = Extra.loadextras(self.collada, technique_common)
-            else:
-                self.extras = []
         else:
-            self.extras = []
             self.data.shape = (-1,)
             txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
@@ -445,10 +442,14 @@ class NameSource(Source):
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted Name array')
         data = numpy.array( values, dtype=numpy.string_ )
+        technique_common = node.find(tag('technique_common'))
+        extras=None
+        if technique_common is not None:
+            extras = Extra.loadextras(collada, technique_common)
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
-        return NameSource( sourceid, data, tuple(components), xmlnode=node )
+        return NameSource( sourceid, data, tuple(components), extras, xmlnode=node )
 
     def __str__(self): return '<NameSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
