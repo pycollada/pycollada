@@ -89,7 +89,7 @@ class Collada(object):
     kinematics_scenes = property( lambda s: s._kinematics_scenes, lambda s,v: s._setIndexedList('_kinematics_scenes', v), doc="""
     A list of :class:`collada.kinematics_scene.KinematicsScene` objects. Can also be indexed by id""" )
     
-    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None, validate_output=False, version=None):
+    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None, validate_output=False, version='1.4.1'):
         """Load collada data from filename or file like object.
 
         :param filename:
