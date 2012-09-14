@@ -14,7 +14,7 @@
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
-from transform import TranslateTransform, RotateTransform
+from .transform import TranslateTransform, RotateTransform
 
 class Attachment(DaeObject):
     """A class containing the data coming from a COLLADA <attachment_full> tag"""
