@@ -97,7 +97,7 @@ class Node(SceneNode):
             self.transforms = transforms
         """A list of transformations effecting the node. This can
           contain any object that inherits from :class:`collada.transform.Transform`"""
-        self.matrix = numpy.identity(4, dtype=numpy.float64)
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
         """A numpy.array of size 4x4 containing a transformation matrix that
         combines all the transformations in :attr:`transforms`. This will only
         be updated after calling :meth:`save`."""
@@ -138,7 +138,7 @@ class Node(SceneNode):
         """Saves the geometry back to :attr:`xmlnode`. Also updates
         :attr:`matrix` if :attr:`transforms` has been modified."""
         Extra.saveextras(self.xmlnode,self.extras)
-        self.matrix = numpy.identity(4, dtype=numpy.float64)
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
         for t in self.transforms:
             self.matrix = numpy.dot(self.matrix, t.matrix)
 
@@ -326,7 +326,7 @@ class GeometryNode(SceneNode):
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.geometry.BoundGeometry` if ``tipo=='geometry'``"""
         if tipo == 'geometry':
-            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float64)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
             for mat in self.materials:
                 materialnodesbysymbol[mat.symbol] = mat
@@ -420,7 +420,7 @@ class ControllerNode(SceneNode):
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.controller.BoundController` if ``tipo=='controller'``"""
         if tipo == 'controller':
-            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float64)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
             for mat in self.materials:
                 materialnodesbysymbol[mat.symbol] = mat
@@ -562,7 +562,7 @@ class CameraNode(SceneNode):
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.camera.BoundCamera` if ``tipo=='camera'``"""
         if tipo == 'camera':
-            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float64)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.camera.bind(matrix)
 
     @staticmethod
@@ -613,7 +613,7 @@ class LightNode(SceneNode):
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.light.BoundLight` if ``tipo=='light'``"""
         if tipo == 'light':
-            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float64)
+            if matrix is None: matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.light.bind(matrix)
 
     @staticmethod

@@ -27,7 +27,7 @@ def makeRotationMatrix(x, y, z, angle):
                         [t*x*y+s*z,   t*y*y + c,   t*y*z - s*x, 0],
                         [t*x*z - s*y, t*y*z + s*x, t*z*z + c,   0],
                         [0,           0,           0,           1]],
-                       dtype=numpy.float64 )
+                       dtype=numpy.float32 )
 
 
 class Transform(DaeObject):
@@ -59,7 +59,7 @@ class TranslateTransform(Transform):
         """y coordinate"""
         self.z = z
         """z coordinate"""
-        self.matrix = numpy.identity(4, dtype=numpy.float64)
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.matrix[:3,3] = [ x, y, z ]
         self.xmlnode = xmlnode
@@ -69,7 +69,7 @@ class TranslateTransform(Transform):
             
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float64, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         if len(floats) != 3:
             raise DaeMalformedError("Translate node requires three float values")
         return TranslateTransform(floats[0], floats[1], floats[2], node)
@@ -116,7 +116,7 @@ class RotateTransform(Transform):
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float64, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         if len(floats) != 4:
             raise DaeMalformedError("Rotate node requires four float values")
         return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
@@ -150,7 +150,7 @@ class ScaleTransform(Transform):
         """y coordinate"""
         self.z = z
         """z coordinate"""
-        self.matrix = numpy.identity(4, dtype=numpy.float64)
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.matrix[0,0] = x
         self.matrix[1,1] = y
@@ -162,7 +162,7 @@ class ScaleTransform(Transform):
             
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float64, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         if len(floats) != 3:
             raise DaeMalformedError("Scale node requires three float values")
         return ScaleTransform(floats[0], floats[1], floats[2], node)
@@ -197,7 +197,7 @@ class MatrixTransform(Transform):
             
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float64, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         return MatrixTransform(floats, node)
 
     def __str__(self):
@@ -233,7 +233,7 @@ class LookAtTransform(Transform):
         if len(eye) != 3 or len(interest) != 3 or len(upvector) != 3:
             raise DaeMalformedError('Corrupted lookat transformation node')
 
-        self.matrix = numpy.identity(4, dtype=numpy.float64)
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
 
         front = toUnitVec(numpy.subtract(eye,interest))
@@ -251,7 +251,7 @@ class LookAtTransform(Transform):
             
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float64, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
         if len(floats) != 9:
             raise DaeMalformedError("Lookat node requires 9 float values")
         return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], node)

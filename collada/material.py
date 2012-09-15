@@ -129,7 +129,7 @@ class CImage(DaeObject):
         if array is None:
             self._floatarray = 'failed'
             return None
-        self._floatarray = numpy.asarray( array, dtype=numpy.float64)
+        self._floatarray = numpy.asarray( array, dtype=numpy.float32)
         self._floatarray *= 1.0/255.0
         return self._floatarray
 

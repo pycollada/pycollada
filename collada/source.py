@@ -194,9 +194,9 @@ class FloatSource(Source):
         arraynode = node.find(tag('float_array'))
         if arraynode is None: raise DaeIncompleteError('No float_array in source node')
         if arraynode.text is None:
-            data = numpy.array([], dtype=numpy.float64)
+            data = numpy.array([], dtype=numpy.float32)
         else:
-            try: data = numpy.fromstring(arraynode.text, dtype=numpy.float64, sep=' ')
+            try: data = numpy.fromstring(arraynode.text, dtype=numpy.float32, sep=' ')
             except ValueError: raise DaeMalformedError('Corrupted float array')
         data[numpy.isnan(data)] = 0
 
