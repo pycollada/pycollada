@@ -10,7 +10,7 @@
 #                                                                  #
 ####################################################################
 """Contains objects for representing an articulated system."""
-
+import copy
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
@@ -18,7 +18,6 @@ from .kinematics_model import InstanceKinematicsModel
 from .extra import Extra
 from .technique import Technique
 from .asset import Asset
-import copy
 
 class InstanceArticulatedSystem(DaeObject):
     def __init__(self,asystem=None, url=None, sid=None, name=None, extras=None, xmlnode=None):
