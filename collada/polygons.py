@@ -14,14 +14,14 @@
 
 import numpy
 
-from collada import primitive
-from collada import polylist
-from collada import triangleset
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import primitive
+from . import polylist
+from . import triangleset
+from .common import E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource
-from collada.xmlutil import etree as ElementTree
+from .util import toUnitVec, checkSource
+from .xmlutil import etree as ElementTree
 
 
 class Polygons(polylist.Polylist):
@@ -73,7 +73,7 @@ class Polygons(polylist.Polylist):
                 self.xmlnode.append(inpnode)
 
             for poly in polygons:
-                self.xmlnode.append(E.p(' '.join(map(str, poly.flatten().tolist()))))
+                self.xmlnode.append(E.p(' '.join(map(repr, poly.flatten().tolist()))))
 
     @staticmethod
     def load( collada, localscope, node ):

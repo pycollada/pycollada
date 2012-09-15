@@ -14,12 +14,12 @@
 
 import numpy
 
-from collada import primitive
-from collada.util import toUnitVec, checkSource
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import primitive
+from .util import toUnitVec, checkSource
+from .common import E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.xmlutil import etree as ElementTree
+from .xmlutil import etree as ElementTree
 
 
 class Line(object):
@@ -46,7 +46,7 @@ class Line(object):
         # Note: we can't generate normals for lines if there are none
 
     def __repr__(self):
-        return '<Line (%s, %s, "%s")>'%(str(self.vertices[0]), str(self.vertices[1]), str(self.material))
+        return '<Line (%s, %s, "%s")>'%(repr(self.vertices[0]), repr(self.vertices[1]), repr(self.material))
 
     def __str__(self):
         return repr(self)

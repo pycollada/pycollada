@@ -1,7 +1,22 @@
 import sys
 import functools
 
-COLLADA_NS = 'http://www.collada.org/2005/11/COLLADASchema'
+_COLLADA_VERSION = '1.4.1'
+
+def GetColladaVersion():
+    global _COLLADA_VERSION
+    return _COLLADA_VERSION
+    
+# xmlutil.py
+COLLADA_NAMESPACES = {
+   '1.4.1': 'http://www.collada.org/2005/11/COLLADASchema',
+   '1.5.0': 'http://www.collada.org/2008/03/COLLADASchema',
+}
+
+def GetColladaNS():
+    global COLLADA_NAMESPACES
+    return COLLADA_NAMESPACES[GetColladaVersion()]
+
 HAVE_LXML = False
 
 try:
@@ -41,6 +56,8 @@ if HAVE_LXML:
     
     def writeXML(xmlnode, fp):
         xmlnode.write(fp, pretty_print=True)
+
+    E = ElementMaker(namespace=GetColladaNS(), nsmap={None: GetColladaNS()})
 else:    
     class ElementMaker(object):
         def __init__(self, namespace=None, nsmap=None):
@@ -71,7 +88,7 @@ else:
         def __getattr__(self, tag):
             return functools.partial(self, tag)
 
-    E = ElementMaker()
+    E = ElementMaker(namespace=GetColladaNS(), nsmap={None: GetColladaNS()})
     
     if etree.VERSION[0:3] == '1.2':
         #in etree < 1.3, this is a workaround for supressing prefixes
@@ -107,10 +124,10 @@ else:
             return "%s%s" % (prefix, tag), xmlns
     
         etree.fixtag = fixtag
-        etree._namespace_map[COLLADA_NS] = None
+        etree._namespace_map[GetColladaNS()] = None
     else:
         #For etree > 1.3, use register_namespace function
-        etree.register_namespace('', COLLADA_NS)
+        etree.register_namespace('', GetColladaNS())
 
     def indent(elem, level=0):
         i = "\n" + level*"  "
@@ -130,3 +147,13 @@ else:
     def writeXML(xmlnode, fp):
         indent(xmlnode.getroot())
         xmlnode.write(fp)
+
+def SetColladaVersion(version):
+    """sets a new collada version for all of pycollada and changes the ElementMaker namespace
+    """
+    global _COLLADA_VERSION
+    _COLLADA_VERSION = version
+    # have to change the ElementMaker namespace!
+    # cannot replace it by E= since a lot of modules import E directly instead of always doing xmlutil.E
+    E._namespace = '{' + GetColladaNS() + '}'
+    E._nsmap = {None: GetColladaNS()}

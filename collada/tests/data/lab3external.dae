@@ -1,0 +1,1510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2008/03/COLLADASchema" version="1.5.0">
+	<asset>
+		<contributor>
+			<authoring_tool>OpenRAVE Collada Writer</authoring_tool>
+		</contributor>
+		<created>2012-09-05T18:56:27.000000</created>
+		<modified>2012-09-05T18:56:27.000000</modified>
+		<unit/>
+		<up_axis>Z_UP</up_axis>
+	</asset>
+	<library_visual_scenes id="vscenes">
+		<visual_scene id="vscene" name="OpenRAVE Visual Scene">
+			<node id="visual1" name="BarrettWAM" sid="visual1">
+				<translate sid="translate">-1.02 0 0.654</translate>
+				<rotate sid="rotate">1 0 0 0</rotate>
+				<instance_node url="barrett-wamhand.dae#v1.node0" sid="node0">
+					<extra name=".visual1" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual2" name="floorwalls" sid="visual2">
+				<translate>0 0 0</translate>
+				<rotate>1 0 0 0</rotate>
+				<node id="v2.node0" name="basefloor" sid="node0">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+					<instance_geometry url="#g2_link0_geom0">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g2_link0_geom0_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+					<instance_geometry url="#g2_link0_geom1">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g2_link0_geom1_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+					<instance_geometry url="#g2_link0_geom2">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g2_link0_geom2_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+					<instance_geometry url="#g2_link0_geom3">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g2_link0_geom3_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+					<instance_geometry url="#g2_link0_geom4">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g2_link0_geom4_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+				</node>
+			</node>
+			<node id="visual3" name="pole" sid="visual3">
+				<translate>-0.312 0.416 1</translate>
+				<rotate>1 0 0 0</rotate>
+				<node id="v3.node0" name="basepole" sid="node0">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+					<instance_geometry url="#g3_link0_geom0">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g3_link0_geom0_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+				</node>
+			</node>
+			<node id="visual4" name="pole2" sid="visual4">
+				<translate>1.3 0.6 1</translate>
+				<rotate>1 0 0 0</rotate>
+				<instance_node url="#v3.node0" sid="node0">
+					<extra name=".visual4" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual5" name="pole3" sid="visual5">
+				<translate>0.8 -0.9 1</translate>
+				<rotate>1 0 0 0</rotate>
+				<instance_node url="#v3.node0" sid="node0">
+					<extra name=".visual5" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual6" name="wall1" sid="visual6">
+				<translate>-0.173 -0.247 0</translate>
+				<rotate>1 0 0 0</rotate>
+				<node id="v6.node0" name="basewall" sid="node0">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+					<instance_geometry url="#g6_link0_geom0">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g6_link0_geom0_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+					<instance_geometry url="#g6_link0_geom1">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g6_link0_geom1_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+					<instance_geometry url="#g6_link0_geom2">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g6_link0_geom2_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+				</node>
+			</node>
+			<node id="visual7" name="mug1" sid="visual7">
+				<translate sid="translate">-0.0568 -0.2406 0.755</translate>
+				<rotate sid="rotate">1 0 0 89.99999999999999</rotate>
+				<instance_node url="mug1.dae#v1.node0" sid="node0">
+					<extra name=".visual7" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual8" name="mug2" sid="visual8">
+				<translate sid="translate">-0.02 0.15 0.755</translate>
+				<rotate sid="rotate">1 0 0 89.99999999999999</rotate>
+				<instance_node url="mug1.dae#v1.node0" sid="node0">
+					<extra name=".visual8" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual9" name="mug3" sid="visual9">
+				<translate sid="translate">0.0854 -0.0769 0.755</translate>
+				<rotate sid="rotate">1 0 0 89.99999999999999</rotate>
+				<instance_node url="mug1.dae#v1.node0" sid="node0">
+					<extra name=".visual9" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual10" name="mug4" sid="visual10">
+				<translate sid="translate">-0.23 -0.1446 0.755</translate>
+				<rotate sid="rotate">1 0 0 89.99999999999999</rotate>
+				<instance_node url="mug1.dae#v1.node0" sid="node0">
+					<extra name=".visual10" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual11" name="mug5" sid="visual11">
+				<translate sid="translate">-0.1 -0.0151 0.755</translate>
+				<rotate sid="rotate">1 0 0 89.99999999999999</rotate>
+				<instance_node url="mug1.dae#v1.node0" sid="node0">
+					<extra name=".visual11" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual12" name="mug6" sid="visual12">
+				<translate sid="translate">-0.2 0.11 0.755</translate>
+				<rotate sid="rotate">1 0 0 89.99999999999999</rotate>
+				<instance_node url="mug1.dae#v1.node0" sid="node0">
+					<extra name=".visual12" type="idsuffix"/>
+				</instance_node>
+			</node>
+			<node id="visual13" name="table" sid="visual13">
+				<translate>-0.4966 1.0164 0.9</translate>
+				<rotate>1 0 0 0</rotate>
+				<node id="v13.node0" name="basetable" sid="node0">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+					<instance_geometry url="#g13_link0_geom0">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g13_link0_geom0_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+					<instance_geometry url="#g13_link0_geom1">
+						<bind_material>
+							<technique_common>
+								<instance_material symbol="mat0" target="#g13_link0_geom1_mat"/>
+							</technique_common>
+						</bind_material>
+					</instance_geometry>
+				</node>
+			</node>
+		</visual_scene>
+	</library_visual_scenes>
+	<library_geometries id="geometries">
+		<geometry id="g2_link0_geom0">
+			<mesh>
+				<source id="g2_link0_geom0_positions">
+					<float_array id="g2_link0_geom0_positions-array" count="24" digits="2490384">2.5 2.5 0 2.5 2.5 -0.01 2.5 -2.5 0 2.5 -2.5 -0.01 -2.5 2.5 0 -2.5 2.5 -0.01 -2.5 -2.5 0 -2.5 -2.5 -0.01</float_array>
+					<technique_common>
+						<accessor count="8" source="#g2_link0_geom0_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g2_link0_geom0_vertices">
+					<input semantic="POSITION" source="#g2_link0_geom0_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g2_link0_geom0_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>0 0 -0.005</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>2.5 2.5 0.005</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g2_link0_geom1">
+			<mesh>
+				<source id="g2_link0_geom1_positions">
+					<float_array id="g2_link0_geom1_positions-array" count="24" digits="2490384">2.5 -2.49 0.4 2.5 -2.49 0 2.5 -2.51 0.4 2.5 -2.51 0 -2.5 -2.49 0.4 -2.5 -2.49 0 -2.5 -2.51 0.4 -2.5 -2.51 0</float_array>
+					<technique_common>
+						<accessor count="8" source="#g2_link0_geom1_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g2_link0_geom1_vertices">
+					<input semantic="POSITION" source="#g2_link0_geom1_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g2_link0_geom1_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>0 -2.5 0.2</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>2.5 0.01 0.2</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g2_link0_geom2">
+			<mesh>
+				<source id="g2_link0_geom2_positions">
+					<float_array id="g2_link0_geom2_positions-array" count="24" digits="2490384">2.5 2.51 0.4 2.5 2.51 0 2.5 2.49 0.4 2.5 2.49 0 -2.5 2.51 0.4 -2.5 2.51 0 -2.5 2.49 0.4 -2.5 2.49 0</float_array>
+					<technique_common>
+						<accessor count="8" source="#g2_link0_geom2_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g2_link0_geom2_vertices">
+					<input semantic="POSITION" source="#g2_link0_geom2_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g2_link0_geom2_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>0 2.5 0.2</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>2.5 0.01 0.2</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g2_link0_geom3">
+			<mesh>
+				<source id="g2_link0_geom3_positions">
+					<float_array id="g2_link0_geom3_positions-array" count="24" digits="2490384">2.51 2.5 0.4 2.51 2.5 0 2.51 -2.5 0.4 2.51 -2.5 0 2.49 2.5 0.4 2.49 2.5 0 2.49 -2.5 0.4 2.49 -2.5 0</float_array>
+					<technique_common>
+						<accessor count="8" source="#g2_link0_geom3_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g2_link0_geom3_vertices">
+					<input semantic="POSITION" source="#g2_link0_geom3_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g2_link0_geom3_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>2.5 0 0.2</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.01 2.5 0.2</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g2_link0_geom4">
+			<mesh>
+				<source id="g2_link0_geom4_positions">
+					<float_array id="g2_link0_geom4_positions-array" count="24" digits="2490384">-2.49 2.5 0.4 -2.49 2.5 0 -2.49 -2.5 0.4 -2.49 -2.5 0 -2.51 2.5 0.4 -2.51 2.5 0 -2.51 -2.5 0.4 -2.51 -2.5 0</float_array>
+					<technique_common>
+						<accessor count="8" source="#g2_link0_geom4_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g2_link0_geom4_vertices">
+					<input semantic="POSITION" source="#g2_link0_geom4_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g2_link0_geom4_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>-2.5 0 0.2</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.01 2.5 0.2</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g3_link0_geom0">
+			<mesh>
+				<source id="g3_link0_geom0_positions">
+					<float_array id="g3_link0_geom0_positions-array" count="24" digits="2490384">0.05 0.05 1 0.05 0.05 -1 0.05 -0.05 1 0.05 -0.05 -1 -0.05 0.05 1 -0.05 0.05 -1 -0.05 -0.05 1 -0.05 -0.05 -1</float_array>
+					<technique_common>
+						<accessor count="8" source="#g3_link0_geom0_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g3_link0_geom0_vertices">
+					<input semantic="POSITION" source="#g3_link0_geom0_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g3_link0_geom0_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.05 0.05 1</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g6_link0_geom0">
+			<mesh>
+				<source id="g6_link0_geom0_positions">
+					<float_array id="g6_link0_geom0_positions-array" count="24" digits="2490384">-0.665 -0.09000000000000008 1.405 -0.665 -0.09000000000000008 -0.05499999999999994 -0.665 -1.51 1.405 -0.665 -1.51 -0.05499999999999994 -0.8049999999999999 -0.09000000000000008 1.405 -0.8049999999999999 -0.09000000000000008 -0.05499999999999994 -0.8049999999999999 -1.51 1.405 -0.8049999999999999 -1.51 -0.05499999999999994</float_array>
+					<technique_common>
+						<accessor count="8" source="#g6_link0_geom0_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g6_link0_geom0_vertices">
+					<input semantic="POSITION" source="#g6_link0_geom0_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g6_link0_geom0_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>-0.735 -0.8 0.675</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.07000000000000001 0.71 0.73</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g6_link0_geom1">
+			<mesh>
+				<source id="g6_link0_geom1_positions">
+					<float_array id="g6_link0_geom1_positions-array" count="24" digits="2490384">-0.6950000000000001 -0.11 0.76 -0.6950000000000001 -0.11 0.6399999999999999 -0.6950000000000001 -0.8100000000000001 0.76 -0.6950000000000001 -0.8100000000000001 0.6399999999999999 -1.775 -0.11 0.76 -1.775 -0.11 0.6399999999999999 -1.775 -0.8100000000000001 0.76 -1.775 -0.8100000000000001 0.6399999999999999</float_array>
+					<technique_common>
+						<accessor count="8" source="#g6_link0_geom1_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g6_link0_geom1_vertices">
+					<input semantic="POSITION" source="#g6_link0_geom1_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g6_link0_geom1_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>-1.235 -0.46 0.7</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.54 0.35 0.06</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g6_link0_geom2">
+			<mesh>
+				<source id="g6_link0_geom2_positions">
+					<float_array id="g6_link0_geom2_positions-array" count="24" digits="2490384">-0.6950000000000001 -0.7 1.385 -0.6950000000000001 -0.7 -0.03499999999999992 -0.6950000000000001 -0.8200000000000001 1.385 -0.6950000000000001 -0.8200000000000001 -0.03499999999999992 -1.775 -0.7 1.385 -1.775 -0.7 -0.03499999999999992 -1.775 -0.8200000000000001 1.385 -1.775 -0.8200000000000001 -0.03499999999999992</float_array>
+					<technique_common>
+						<accessor count="8" source="#g6_link0_geom2_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g6_link0_geom2_vertices">
+					<input semantic="POSITION" source="#g6_link0_geom2_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g6_link0_geom2_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>-1.235 -0.76 0.675</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.54 0.06 0.71</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g13_link0_geom0">
+			<mesh>
+				<source id="g13_link0_geom0_positions">
+					<float_array id="g13_link0_geom0_positions-array" count="24" digits="2490384">0.2 0.21 0.01 0.2 0.21 -0.01 0.2 0.19 0.01 0.2 0.19 -0.01 -0.2 0.21 0.01 -0.2 0.21 -0.01 -0.2 0.19 0.01 -0.2 0.19 -0.01</float_array>
+					<technique_common>
+						<accessor count="8" source="#g13_link0_geom0_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g13_link0_geom0_vertices">
+					<input semantic="POSITION" source="#g13_link0_geom0_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g13_link0_geom0_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>0 0.2 0</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.2 0.01 0.01</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+		<geometry id="g13_link0_geom1">
+			<mesh>
+				<source id="g13_link0_geom1_positions">
+					<float_array id="g13_link0_geom1_positions-array" count="24" digits="2490384">0.2 -0.19 0.01 0.2 -0.19 -0.01 0.2 -0.21 0.01 0.2 -0.21 -0.01 -0.2 -0.19 0.01 -0.2 -0.19 -0.01 -0.2 -0.21 0.01 -0.2 -0.21 -0.01</float_array>
+					<technique_common>
+						<accessor count="8" source="#g13_link0_geom1_positions-array" stride="3">
+							<param name="X" type="float"/>
+							<param name="Y" type="float"/>
+							<param name="Z" type="float"/>
+						</accessor>
+					</technique_common>
+				</source>
+				<vertices id="g13_link0_geom1_vertices">
+					<input semantic="POSITION" source="#g13_link0_geom1_positions"/>
+				</vertices>
+				<triangles count="12" material="mat0">
+					<input offset="0" semantic="VERTEX" source="#g13_link0_geom1_vertices" set="0"/>
+					<p>0 2 1 1 2 3 4 5 6 5 7 6 0 1 4 1 5 4 2 6 3 3 6 7 0 4 2 2 4 6 1 3 5 3 7 5</p>
+				</triangles>
+			</mesh>
+			<extra type="geometry_info">
+				<technique profile="OpenRAVE">
+					<translate>0 -0.2 0</translate>
+					<rotate>1 0 0 0</rotate>
+					<box>
+						<half_extents>0.2 0.01 0.01</half_extents>
+					</box>
+					<visible>
+						<bool>true</bool>
+					</visible>
+				</technique>
+			</extra>
+		</geometry>
+	</library_geometries>
+	<library_effects id="effects">
+		<effect id="g2_link0_geom0_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g2_link0_geom1_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g2_link0_geom2_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g2_link0_geom3_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g2_link0_geom4_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6000000238418579 0.6000000238418579 0.6000000238418579 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g3_link0_geom0_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0 0 0 0</color>
+						</ambient>
+						<diffuse>
+							<color>1 0.2000000029802322 0.2000000029802322 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g6_link0_geom0_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0 0 0 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6399999856948853 0.6399999856948853 0.6399999856948853 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g6_link0_geom1_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0 0 0 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6399999856948853 0.6399999856948853 0.6399999856948853 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g6_link0_geom2_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0 0 0 0</color>
+						</ambient>
+						<diffuse>
+							<color>0.6399999856948853 0.6399999856948853 0.6399999856948853 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g13_link0_geom0_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0 0 0 0</color>
+						</ambient>
+						<diffuse>
+							<color>1 1 1 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+		<effect id="g13_link0_geom1_eff">
+			<profile_COMMON>
+				<technique sid="">
+					<phong>
+						<ambient>
+							<color>0 0 0 0</color>
+						</ambient>
+						<diffuse>
+							<color>1 1 1 0</color>
+						</diffuse>
+						<transparency>
+							<float>0</float>
+						</transparency>
+					</phong>
+				</technique>
+			</profile_COMMON>
+		</effect>
+	</library_effects>
+	<library_materials id="materials">
+		<material id="g2_link0_geom0_mat">
+			<instance_effect url="#g2_link0_geom0_eff"/>
+		</material>
+		<material id="g2_link0_geom1_mat">
+			<instance_effect url="#g2_link0_geom1_eff"/>
+		</material>
+		<material id="g2_link0_geom2_mat">
+			<instance_effect url="#g2_link0_geom2_eff"/>
+		</material>
+		<material id="g2_link0_geom3_mat">
+			<instance_effect url="#g2_link0_geom3_eff"/>
+		</material>
+		<material id="g2_link0_geom4_mat">
+			<instance_effect url="#g2_link0_geom4_eff"/>
+		</material>
+		<material id="g3_link0_geom0_mat">
+			<instance_effect url="#g3_link0_geom0_eff"/>
+		</material>
+		<material id="g6_link0_geom0_mat">
+			<instance_effect url="#g6_link0_geom0_eff"/>
+		</material>
+		<material id="g6_link0_geom1_mat">
+			<instance_effect url="#g6_link0_geom1_eff"/>
+		</material>
+		<material id="g6_link0_geom2_mat">
+			<instance_effect url="#g6_link0_geom2_eff"/>
+		</material>
+		<material id="g13_link0_geom0_mat">
+			<instance_effect url="#g13_link0_geom0_eff"/>
+		</material>
+		<material id="g13_link0_geom1_mat">
+			<instance_effect url="#g13_link0_geom1_eff"/>
+		</material>
+	</library_materials>
+	<library_kinematics_models id="kmodels">
+		<kinematics_model id="kmodel2" name="floorwalls">
+			<asset>
+				<subject/>
+			</asset>
+			<technique_common>
+				<link sid="link0" name="basefloor">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+				</link>
+			</technique_common>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+			<extra type="collision">
+				<technique profile="OpenRAVE"/>
+			</extra>
+		</kinematics_model>
+		<kinematics_model id="kmodel3" name="pole">
+			<asset>
+				<subject/>
+			</asset>
+			<technique_common>
+				<link sid="link0" name="basepole">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+				</link>
+			</technique_common>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+			<extra type="collision">
+				<technique profile="OpenRAVE"/>
+			</extra>
+		</kinematics_model>
+		<kinematics_model id="kmodel6" name="wall1">
+			<asset>
+				<subject/>
+			</asset>
+			<technique_common>
+				<link sid="link0" name="basewall">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+				</link>
+			</technique_common>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+			<extra type="collision">
+				<technique profile="OpenRAVE"/>
+			</extra>
+		</kinematics_model>
+		<kinematics_model id="kmodel13" name="table">
+			<asset>
+				<subject/>
+			</asset>
+			<technique_common>
+				<link sid="link0" name="basetable">
+					<translate>0 0 0</translate>
+					<rotate>1 0 0 0</rotate>
+				</link>
+			</technique_common>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+			<extra type="collision">
+				<technique profile="OpenRAVE"/>
+			</extra>
+		</kinematics_model>
+	</library_kinematics_models>
+	<library_articulated_systems id="asystems">
+		<articulated_system id="robot2_kinematics">
+			<kinematics>
+				<instance_kinematics_model url="#kmodel2" sid="kmodel2_inst">
+					<newparam sid="robot2_kinematics_kmodel2_inst">
+						<SIDREF>robot2_kinematics/kmodel2_inst</SIDREF>
+					</newparam>
+				</instance_kinematics_model>
+				<technique_common/>
+			</kinematics>
+		</articulated_system>
+		<articulated_system id="robot2_motion">
+			<motion>
+				<instance_articulated_system url="#robot2_kinematics">
+					<newparam sid="robot2_motion_kmodel2_inst">
+						<SIDREF>robot2_kinematics/robot2_kinematics_kmodel2_inst</SIDREF>
+					</newparam>
+				</instance_articulated_system>
+				<technique_common/>
+			</motion>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+		</articulated_system>
+		<articulated_system id="robot3_kinematics">
+			<kinematics>
+				<instance_kinematics_model url="#kmodel3" sid="kmodel3_inst">
+					<newparam sid="robot3_kinematics_kmodel3_inst">
+						<SIDREF>robot3_kinematics/kmodel3_inst</SIDREF>
+					</newparam>
+				</instance_kinematics_model>
+				<technique_common/>
+			</kinematics>
+		</articulated_system>
+		<articulated_system id="robot3_motion">
+			<motion>
+				<instance_articulated_system url="#robot3_kinematics">
+					<newparam sid="robot3_motion_kmodel3_inst">
+						<SIDREF>robot3_kinematics/robot3_kinematics_kmodel3_inst</SIDREF>
+					</newparam>
+				</instance_articulated_system>
+				<technique_common/>
+			</motion>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+		</articulated_system>
+		<articulated_system id="robot4_kinematics">
+			<kinematics>
+				<instance_kinematics_model url="#kmodel3" sid="kmodel4_inst">
+					<newparam sid="robot4_kinematics_kmodel4_inst">
+						<SIDREF>robot4_kinematics/kmodel4_inst</SIDREF>
+					</newparam>
+				</instance_kinematics_model>
+				<technique_common/>
+			</kinematics>
+		</articulated_system>
+		<articulated_system id="robot4_motion">
+			<motion>
+				<instance_articulated_system url="#robot4_kinematics">
+					<newparam sid="robot4_motion_kmodel4_inst">
+						<SIDREF>robot4_kinematics/robot4_kinematics_kmodel4_inst</SIDREF>
+					</newparam>
+				</instance_articulated_system>
+				<technique_common/>
+			</motion>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+		</articulated_system>
+		<articulated_system id="robot5_kinematics">
+			<kinematics>
+				<instance_kinematics_model url="#kmodel3" sid="kmodel5_inst">
+					<newparam sid="robot5_kinematics_kmodel5_inst">
+						<SIDREF>robot5_kinematics/kmodel5_inst</SIDREF>
+					</newparam>
+				</instance_kinematics_model>
+				<technique_common/>
+			</kinematics>
+		</articulated_system>
+		<articulated_system id="robot5_motion">
+			<motion>
+				<instance_articulated_system url="#robot5_kinematics">
+					<newparam sid="robot5_motion_kmodel5_inst">
+						<SIDREF>robot5_kinematics/robot5_kinematics_kmodel5_inst</SIDREF>
+					</newparam>
+				</instance_articulated_system>
+				<technique_common/>
+			</motion>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+		</articulated_system>
+		<articulated_system id="robot6_kinematics">
+			<kinematics>
+				<instance_kinematics_model url="#kmodel6" sid="kmodel6_inst">
+					<newparam sid="robot6_kinematics_kmodel6_inst">
+						<SIDREF>robot6_kinematics/kmodel6_inst</SIDREF>
+					</newparam>
+				</instance_kinematics_model>
+				<technique_common/>
+			</kinematics>
+		</articulated_system>
+		<articulated_system id="robot6_motion">
+			<motion>
+				<instance_articulated_system url="#robot6_kinematics">
+					<newparam sid="robot6_motion_kmodel6_inst">
+						<SIDREF>robot6_kinematics/robot6_kinematics_kmodel6_inst</SIDREF>
+					</newparam>
+				</instance_articulated_system>
+				<technique_common/>
+			</motion>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+		</articulated_system>
+		<articulated_system id="robot13_kinematics">
+			<kinematics>
+				<instance_kinematics_model url="#kmodel13" sid="kmodel13_inst">
+					<newparam sid="robot13_kinematics_kmodel13_inst">
+						<SIDREF>robot13_kinematics/kmodel13_inst</SIDREF>
+					</newparam>
+				</instance_kinematics_model>
+				<technique_common/>
+			</kinematics>
+		</articulated_system>
+		<articulated_system id="robot13_motion">
+			<motion>
+				<instance_articulated_system url="#robot13_kinematics">
+					<newparam sid="robot13_motion_kmodel13_inst">
+						<SIDREF>robot13_kinematics/robot13_kinematics_kmodel13_inst</SIDREF>
+					</newparam>
+				</instance_articulated_system>
+				<technique_common/>
+			</motion>
+			<extra type="interface_type">
+				<technique profile="OpenRAVE">
+					<interface type="kinbody"/>
+				</technique>
+			</extra>
+		</articulated_system>
+	</library_articulated_systems>
+	<library_kinematics_scenes id="kscenes">
+		<kinematics_scene id="kscene" name="OpenRAVE Kinematics Scene">
+			<instance_articulated_system sid="body1_kinematics_inst" url="barrett-wamhand.dae#robot1_motion" name="BarrettWAM">
+				<newparam sid="ias_param0">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint0.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param1">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint1.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param2">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint2.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param3">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint3.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param4">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint4.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param5">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint5.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param6">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint6.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param7">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint9.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param8">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint10.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param9">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint7.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param10">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint8.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param11">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint11.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param12">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint12.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param13">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint13.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param14">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint14.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ias_param15">
+					<SIDREF>robot1_motion/robot1_motion_robot1_kinematics_kmodel1_inst_joint15.axis0</SIDREF>
+				</newparam>
+				<newparam sid="ikmodel1_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="robot2_motion_inst" url="#robot2_motion" name="floorwalls">
+				<newparam sid="kscene_kmodel2_inst">
+					<SIDREF>robot2_motion/robot2_motion_kmodel2_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="robot3_motion_inst" url="#robot3_motion" name="pole">
+				<newparam sid="kscene_kmodel3_inst">
+					<SIDREF>robot3_motion/robot3_motion_kmodel3_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="robot4_motion_inst" url="#robot4_motion" name="pole2">
+				<newparam sid="kscene_kmodel4_inst">
+					<SIDREF>robot4_motion/robot4_motion_kmodel4_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="robot5_motion_inst" url="#robot5_motion" name="pole3">
+				<newparam sid="kscene_kmodel5_inst">
+					<SIDREF>robot5_motion/robot5_motion_kmodel5_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="robot6_motion_inst" url="#robot6_motion" name="wall1">
+				<newparam sid="kscene_kmodel6_inst">
+					<SIDREF>robot6_motion/robot6_motion_kmodel6_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="body7_kinematics_inst" url="mug1.dae#robot1_motion" name="mug1">
+				<newparam sid="ikmodel7_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="body8_kinematics_inst" url="mug1.dae#robot1_motion" name="mug2">
+				<newparam sid="ikmodel8_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="body9_kinematics_inst" url="mug1.dae#robot1_motion" name="mug3">
+				<newparam sid="ikmodel9_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="body10_kinematics_inst" url="mug1.dae#robot1_motion" name="mug4">
+				<newparam sid="ikmodel10_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="body11_kinematics_inst" url="mug1.dae#robot1_motion" name="mug5">
+				<newparam sid="ikmodel11_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="body12_kinematics_inst" url="mug1.dae#robot1_motion" name="mug6">
+				<newparam sid="ikmodel12_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+			<instance_articulated_system sid="robot13_motion_inst" url="#robot13_motion" name="table">
+				<newparam sid="kscene_kmodel13_inst">
+					<SIDREF>robot13_motion/robot13_motion_kmodel13_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+		</kinematics_scene>
+	</library_kinematics_scenes>
+	<library_physics_scenes id="pscenes">
+		<physics_scene id="pscene" name="OpenRAVE Physics Scene">
+			<instance_physics_model url="barrett-wamhand.dae#pmodel1" sid="pmodel1_inst" parent="#v1.node0.visual1">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual1"/>
+				<instance_rigid_body body="rigid1" sid="rigid1" target="#v1.node1.visual1"/>
+				<instance_rigid_body body="rigid2" sid="rigid2" target="#v1.node2.visual1"/>
+				<instance_rigid_body body="rigid3" sid="rigid3" target="#v1.node3.visual1"/>
+				<instance_rigid_body body="rigid4" sid="rigid4" target="#v1.node4.visual1"/>
+				<instance_rigid_body body="rigid5" sid="rigid5" target="#v1.node5.visual1"/>
+				<instance_rigid_body body="rigid6" sid="rigid6" target="#v1.node6.visual1"/>
+				<instance_rigid_body body="rigid7" sid="rigid7" target="#v1.node7.visual1"/>
+				<instance_rigid_body body="rigid8" sid="rigid8" target="#v1.node8.visual1"/>
+				<instance_rigid_body body="rigid15" sid="rigid15" target="#v1.node15.visual1"/>
+				<instance_rigid_body body="rigid16" sid="rigid16" target="#v1.node16.visual1"/>
+				<instance_rigid_body body="rigid9" sid="rigid9" target="#v1.node9.visual1"/>
+				<instance_rigid_body body="rigid10" sid="rigid10" target="#v1.node10.visual1"/>
+				<instance_rigid_body body="rigid11" sid="rigid11" target="#v1.node11.visual1"/>
+				<instance_rigid_body body="rigid12" sid="rigid12" target="#v1.node12.visual1"/>
+				<instance_rigid_body body="rigid13" sid="rigid13" target="#v1.node13.visual1"/>
+				<instance_rigid_body body="rigid14" sid="rigid14" target="#v1.node14.visual1"/>
+			</instance_physics_model>
+			<instance_physics_model url="#pmodel2" sid="pmodel2_inst" parent="#v2.node0">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v2.node0"/>
+			</instance_physics_model>
+			<instance_physics_model url="#pmodel3" sid="pmodel3_inst" parent="#v3.node0">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v3.node0"/>
+			</instance_physics_model>
+			<instance_physics_model url="#pmodel4" sid="pmodel4_inst" parent="#v3.node0.visual4">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v3.node0.visual4"/>
+			</instance_physics_model>
+			<instance_physics_model url="#pmodel5" sid="pmodel5_inst" parent="#v3.node0.visual5">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v3.node0.visual5"/>
+			</instance_physics_model>
+			<instance_physics_model url="#pmodel6" sid="pmodel6_inst" parent="#v6.node0">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v6.node0"/>
+			</instance_physics_model>
+			<instance_physics_model url="mug1.dae#pmodel1" sid="pmodel7_inst" parent="#v1.node0.visual7">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual7"/>
+			</instance_physics_model>
+			<instance_physics_model url="mug1.dae#pmodel1" sid="pmodel8_inst" parent="#v1.node0.visual8">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual8"/>
+			</instance_physics_model>
+			<instance_physics_model url="mug1.dae#pmodel1" sid="pmodel9_inst" parent="#v1.node0.visual9">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual9"/>
+			</instance_physics_model>
+			<instance_physics_model url="mug1.dae#pmodel1" sid="pmodel10_inst" parent="#v1.node0.visual10">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual10"/>
+			</instance_physics_model>
+			<instance_physics_model url="mug1.dae#pmodel1" sid="pmodel11_inst" parent="#v1.node0.visual11">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual11"/>
+			</instance_physics_model>
+			<instance_physics_model url="mug1.dae#pmodel1" sid="pmodel12_inst" parent="#v1.node0.visual12">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual12"/>
+			</instance_physics_model>
+			<instance_physics_model url="#pmodel13" sid="pmodel13_inst" parent="#v13.node0">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v13.node0"/>
+			</instance_physics_model>
+			<technique_common>
+				<gravity>0 0 -9.797930195020351</gravity>
+			</technique_common>
+		</physics_scene>
+	</library_physics_scenes>
+	<library_physics_models id="pmodels">
+		<physics_model id="pmodel2" name="floorwalls">
+			<rigid_body sid="rigid0" name="basefloor">
+				<technique_common>
+					<dynamic>false</dynamic>
+					<mass>1</mass>
+					<mass_frame>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</mass_frame>
+					<inertia>0.4 0.4 0.4</inertia>
+					<shape>
+						<instance_geometry url="#g2_link0_geom0"/>
+						<translate>0 0 -0.005</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+					<shape>
+						<instance_geometry url="#g2_link0_geom1"/>
+						<translate>0 -2.5 0.2</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+					<shape>
+						<instance_geometry url="#g2_link0_geom2"/>
+						<translate>0 2.5 0.2</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+					<shape>
+						<instance_geometry url="#g2_link0_geom3"/>
+						<translate>2.5 0 0.2</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+					<shape>
+						<instance_geometry url="#g2_link0_geom4"/>
+						<translate>-2.5 0 0.2</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+				</technique_common>
+			</rigid_body>
+		</physics_model>
+		<physics_model id="pmodel3" name="pole">
+			<rigid_body sid="rigid0" name="basepole">
+				<technique_common>
+					<dynamic>false</dynamic>
+					<mass>1</mass>
+					<mass_frame>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</mass_frame>
+					<inertia>0.4 0.4 0.4</inertia>
+					<shape>
+						<instance_geometry url="#g3_link0_geom0"/>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+				</technique_common>
+			</rigid_body>
+		</physics_model>
+		<physics_model id="pmodel4" name="pole2">
+			<rigid_body sid="rigid0" name="basepole">
+				<technique_common>
+					<dynamic>false</dynamic>
+					<mass>1</mass>
+					<mass_frame>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</mass_frame>
+					<inertia>0.4 0.4 0.4</inertia>
+					<shape>
+						<instance_geometry url="#g4_link0_geom0"/>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+				</technique_common>
+			</rigid_body>
+		</physics_model>
+		<physics_model id="pmodel5" name="pole3">
+			<rigid_body sid="rigid0" name="basepole">
+				<technique_common>
+					<dynamic>false</dynamic>
+					<mass>1</mass>
+					<mass_frame>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</mass_frame>
+					<inertia>0.4 0.4 0.4</inertia>
+					<shape>
+						<instance_geometry url="#g5_link0_geom0"/>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+				</technique_common>
+			</rigid_body>
+		</physics_model>
+		<physics_model id="pmodel6" name="wall1">
+			<rigid_body sid="rigid0" name="basewall">
+				<technique_common>
+					<dynamic>false</dynamic>
+					<mass>1</mass>
+					<mass_frame>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</mass_frame>
+					<inertia>0.4 0.4 0.4</inertia>
+					<shape>
+						<instance_geometry url="#g6_link0_geom0"/>
+						<translate>-0.735 -0.8 0.675</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+					<shape>
+						<instance_geometry url="#g6_link0_geom1"/>
+						<translate>-1.235 -0.46 0.7</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+					<shape>
+						<instance_geometry url="#g6_link0_geom2"/>
+						<translate>-1.235 -0.76 0.675</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+				</technique_common>
+			</rigid_body>
+		</physics_model>
+		<physics_model id="pmodel13" name="table">
+			<rigid_body sid="rigid0" name="basetable">
+				<technique_common>
+					<dynamic>true</dynamic>
+					<mass>1</mass>
+					<mass_frame>
+						<translate>0 0 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</mass_frame>
+					<inertia>0.4 0.4 0.4</inertia>
+					<shape>
+						<instance_geometry url="#g13_link0_geom0"/>
+						<translate>0 0.2 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+					<shape>
+						<instance_geometry url="#g13_link0_geom1"/>
+						<translate>0 -0.2 0</translate>
+						<rotate>1 0 0 0</rotate>
+					</shape>
+				</technique_common>
+			</rigid_body>
+		</physics_model>
+	</library_physics_models>
+	<scene>
+		<instance_physics_scene url="#pscene" sid="pscene_inst"/>
+		<instance_visual_scene url="#vscene" sid="vscene_inst"/>
+		<instance_kinematics_scene url="#kscene" sid="kscene_inst">
+			<bind_kinematics_model node="visual1/node0">
+				<param>ikmodel1_0</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual2/node0">
+				<param>kscene_kmodel2_inst</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual3/node0">
+				<param>kscene_kmodel3_inst</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual4/node0">
+				<param>kscene_kmodel4_inst</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual5/node0">
+				<param>kscene_kmodel5_inst</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual6/node0">
+				<param>kscene_kmodel6_inst</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual7/node0">
+				<param>ikmodel7_0</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual8/node0">
+				<param>ikmodel8_0</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual9/node0">
+				<param>ikmodel9_0</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual10/node0">
+				<param>ikmodel10_0</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual11/node0">
+				<param>ikmodel11_0</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual12/node0">
+				<param>ikmodel12_0</param>
+			</bind_kinematics_model>
+			<bind_kinematics_model node="visual13/node0">
+				<param>kscene_kmodel13_inst</param>
+			</bind_kinematics_model>
+			<bind_joint_axis target="visual1/node_joint0_axis0">
+				<axis>
+					<param>ias_param0</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint1_axis0">
+				<axis>
+					<param>ias_param1</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint2_axis0">
+				<axis>
+					<param>ias_param2</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint3_axis0">
+				<axis>
+					<param>ias_param3</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint4_axis0">
+				<axis>
+					<param>ias_param4</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint5_axis0">
+				<axis>
+					<param>ias_param5</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint6_axis0">
+				<axis>
+					<param>ias_param6</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint9_axis0">
+				<axis>
+					<param>ias_param7</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint10_axis0">
+				<axis>
+					<param>ias_param8</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint7_axis0">
+				<axis>
+					<param>ias_param9</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint8_axis0">
+				<axis>
+					<param>ias_param10</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint11_axis0">
+				<axis>
+					<param>ias_param11</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint12_axis0">
+				<axis>
+					<param>ias_param12</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint13_axis0">
+				<axis>
+					<param>ias_param13</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint14_axis0">
+				<axis>
+					<param>ias_param14</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+			<bind_joint_axis target="visual1/node_joint15_axis0">
+				<axis>
+					<param>ias_param15</param>
+				</axis>
+				<value>
+					<float>0</float>
+				</value>
+			</bind_joint_axis>
+		</instance_kinematics_scene>
+	</scene>
+	<extra id="sensors" type="library_sensors">
+		<technique profile="OpenRAVE"/>
+	</extra>
+	<extra id="actuators" type="library_actuators">
+		<technique profile="OpenRAVE"/>
+	</extra>
+</COLLADA>

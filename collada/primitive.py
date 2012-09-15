@@ -14,10 +14,10 @@
 import numpy
 import types
 
-from collada.common import DaeObject
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from .common import DaeObject
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.source import InputList
+from .source import InputList
 
 class Primitive(DaeObject):
     """Base class for all primitive sets like TriangleSet, LineSet, Polylist, etc."""

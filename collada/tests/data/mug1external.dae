@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2008/03/COLLADASchema" version="1.5.0">
+	<asset>
+		<contributor>
+			<authoring_tool>OpenRAVE Collada Writer</authoring_tool>
+		</contributor>
+		<created>2012-09-05T18:56:15.000000</created>
+		<modified>2012-09-05T18:56:15.000000</modified>
+		<unit/>
+		<up_axis>Z_UP</up_axis>
+	</asset>
+	<library_visual_scenes id="vscenes">
+		<visual_scene id="vscene" name="OpenRAVE Visual Scene">
+			<node id="visual1" name="mug" sid="visual1">
+				<translate sid="translate">0 0 0</translate>
+				<rotate sid="rotate">1 0 0 89.99999999999999</rotate>
+				<instance_node url="file:/home/rdiankov/mujin/dev/ros/mujin/openrave_mujin/openrave_svn/test/mug1.dae#v1.node0" sid="node0">
+					<extra name=".visual1" type="idsuffix"/>
+				</instance_node>
+			</node>
+		</visual_scene>
+	</library_visual_scenes>
+	<library_geometries id="geometries"/>
+	<library_effects id="effects"/>
+	<library_materials id="materials"/>
+	<library_kinematics_models id="kmodels"/>
+	<library_articulated_systems id="asystems"/>
+	<library_kinematics_scenes id="kscenes">
+		<kinematics_scene id="kscene" name="OpenRAVE Kinematics Scene">
+			<instance_articulated_system sid="body1_kinematics_inst" url="file:/home/rdiankov/mujin/dev/ros/mujin/openrave_mujin/openrave_svn/test/mug1.dae#robot1_motion" name="mug">
+				<newparam sid="ikmodel1_0">
+					<SIDREF>robot1_motion/robot1_motion_kmodel1_inst</SIDREF>
+				</newparam>
+			</instance_articulated_system>
+		</kinematics_scene>
+	</library_kinematics_scenes>
+	<library_physics_scenes id="pscenes">
+		<physics_scene id="pscene" name="OpenRAVE Physics Scene">
+			<instance_physics_model url="file:/home/rdiankov/mujin/dev/ros/mujin/openrave_mujin/openrave_svn/test/mug1.dae#pmodel1" sid="pmodel1_inst" parent="#v1.node0.visual1">
+				<instance_rigid_body body="rigid0" sid="rigid0" target="#v1.node0.visual1"/>
+			</instance_physics_model>
+			<technique_common>
+				<gravity>0 0 -9.797930195020351</gravity>
+			</technique_common>
+		</physics_scene>
+	</library_physics_scenes>
+	<library_physics_models id="pmodels"/>
+	<scene>
+		<instance_physics_scene url="#pscene" sid="pscene_inst"/>
+		<instance_visual_scene url="#vscene" sid="vscene_inst"/>
+		<instance_kinematics_scene url="#kscene" sid="kscene_inst">
+			<bind_kinematics_model node="visual1/node0">
+				<param>ikmodel1_0</param>
+			</bind_kinematics_model>
+		</instance_kinematics_scene>
+	</scene>
+	<extra id="sensors" type="library_sensors">
+		<technique profile="OpenRAVE"/>
+	</extra>
+	<extra id="actuators" type="library_actuators">
+		<technique profile="OpenRAVE"/>
+	</extra>
+</COLLADA>

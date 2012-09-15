@@ -16,11 +16,11 @@ import numpy
 import datetime
 import dateutil.parser
 
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from .common import DaeObject, E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import _correctValInNode
-from collada.xmlutil import etree as ElementTree
+from .util import _correctValInNode
+from .xmlutil import etree as ElementTree
 
 
 class UP_AXIS:
@@ -191,7 +191,7 @@ class Asset(DaeObject):
         if self.title is not None:
             self.xmlnode.append(E.title(self.title))
         if self.unitmeter is not None and self.unitname is not None:
-            self.xmlnode.append(E.unit(name=self.unitname, meter=str(self.unitmeter)))
+            self.xmlnode.append(E.unit(name=self.unitname, meter=repr(self.unitmeter)))
         self.xmlnode.append(E.up_axis(self.upaxis))
 
     def save(self):

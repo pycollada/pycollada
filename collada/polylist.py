@@ -14,13 +14,13 @@
 
 import numpy
 
-from collada import primitive
-from collada import triangleset
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import primitive
+from . import triangleset
+from .common import E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource, xrange
-from collada.xmlutil import etree as ElementTree
+from .util import toUnitVec, checkSource, xrange
+from .xmlutil import etree as ElementTree
 
 
 class Polygon(object):
@@ -63,11 +63,11 @@ class Polygon(object):
 
             tri_indices = numpy.array([
                 self.indices[0], self.indices[i+1], self.indices[i+2]
-                ], dtype=numpy.float32)
+                ], dtype=numpy.float64)
 
             tri_vertices = numpy.array([
                 self.vertices[0], self.vertices[i+1], self.vertices[i+2]
-                ], dtype=numpy.float32)
+                ], dtype=numpy.float64)
 
             if self.normals is None:
                 tri_normals = None
@@ -75,12 +75,12 @@ class Polygon(object):
             else:
                 tri_normals = numpy.array([
                     self.normals[0], self.normals[i+1], self.normals[i+2]
-                    ], dtype=numpy.float32)
+                    ], dtype=numpy.float64)
                 normal_indices = numpy.array([
                     self.normal_indices[0],
                     self.normal_indices[i+1],
                     self.normal_indices[i+2]
-                    ], dtype=numpy.float32)
+                    ], dtype=numpy.float64)
 
             tri_texcoords = []
             tri_texcoord_indices = []
@@ -90,12 +90,12 @@ class Polygon(object):
                     texcoord[0],
                     texcoord[i+1],
                     texcoord[i+2]
-                    ], dtype=numpy.float32))
+                    ], dtype=numpy.float64))
                 tri_texcoord_indices.append(numpy.array([
                     texcoord_indices[0],
                     texcoord_indices[i+1],
                     texcoord_indices[i+2]
-                    ], dtype=numpy.float32))
+                    ], dtype=numpy.float64))
 
             tri = triangleset.Triangle(
                     tri_indices, tri_vertices,

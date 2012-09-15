@@ -14,22 +14,22 @@
 
 import numpy
 
-from collada import source
-from collada import triangleset
-from collada import lineset
-from collada import polylist
-from collada import polygons
-from collada import primitive
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import source
+from . import triangleset
+from . import lineset
+from . import polylist
+from . import polygons
+from . import primitive
+from .common import DaeObject, E, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.xmlutil import etree as ElementTree
-
+from .xmlutil import etree as ElementTree
+from .extra import Extra
 
 class Geometry(DaeObject):
     """A class containing the data coming from a COLLADA <geometry> tag"""
 
-    def __init__(self, collada, id, name, sourcebyid, primitives=None,
+    def __init__(self, collada, id, name, sourcebyid, primitives=None, extras=None,
             xmlnode=None, double_sided=False):
         """Create a geometry instance
 
@@ -67,6 +67,10 @@ class Geometry(DaeObject):
 
         self.sourceById = sourcebyid
         """A dictionary containing :class:`collada.source.Source` objects indexed by their id."""
+
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         if isinstance(sourcebyid, list):
             self.sourceById = {}
@@ -169,8 +173,8 @@ class Geometry(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        id = node.get("id") or ""
-        name = node.get("name") or ""
+        id = node.get("id")
+        name = node.get("name")
         meshnode = node.find(tag('mesh'))
         if meshnode is None: raise DaeUnsupportedError('Unknown geometry node')
         sourcebyid = {}
@@ -219,11 +223,14 @@ class Geometry(DaeObject):
                 _primitives.append( polygons.Polygons.load( collada, sourcebyid, subnode ) )
             elif subnode.tag != tag('source') and subnode.tag != tag('vertices') and subnode.tag != tag('extra'):
                 raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
-        geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node, double_sided=double_sided )
+
+        extras = Extra.loadextras(collada, node)
+        geom = Geometry(collada, id, name, sourcebyid, _primitives, extras, xmlnode=node, double_sided=double_sided )
         return geom
 
     def save(self):
         """Saves the geometry back to :attr:`xmlnode`"""
+        Extra.saveextras(self.xmlnode,self.extras)
         meshnode = self.xmlnode.find(tag('mesh'))
         for src in self.sourceById.values():
             if isinstance(src, source.Source):
@@ -284,8 +291,14 @@ class Geometry(DaeObject):
                 if src == vert_ref:
                     node.set('source', '#%s' % vert_src)
 
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.name)
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)
 
         for prim in self.primitives:
             if type(prim) is triangleset.TriangleSet and prim.xmlnode.tag != tag('triangles'):

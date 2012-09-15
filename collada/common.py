@@ -1,10 +1,19 @@
-from collada.xmlutil import etree, ElementMaker, COLLADA_NS
+####################################################################
+#                                                                  #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
+# USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
+# GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
+# IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
+#                                                                  #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace and contributors                                 #
+#                                                                  #
+####################################################################
 
-E = ElementMaker(namespace=COLLADA_NS, nsmap={None: COLLADA_NS})
-
+from .xmlutil import etree, ElementMaker, GetColladaNS, E
 
 def tag(text):
-    return str(etree.QName(COLLADA_NS, text))
+    return str(etree.QName(GetColladaNS(), text))
 
 
 class DaeObject(object):
@@ -41,8 +50,10 @@ class DaeObject(object):
         """
         raise Exception('Not implemented')
 
-    def save(self):
-        """Put all the data to the internal xml node (xmlnode) so it can be serialized."""
+    def save(self,recurse=True):
+        """Put all the data to the internal xml node (xmlnode) so it can be serialized.
+        :param recurse: if True, will call save on the child nodes, otherwise will only save info pertaining to this node
+        """
 
 class DaeError(Exception):
     """General DAE exception."""

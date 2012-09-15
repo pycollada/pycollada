@@ -16,14 +16,14 @@
 
 import numpy
 
-from collada import source
-from collada.common import DaeObject, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
+from . import source
+from .common import DaeObject, tag
+from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.geometry import Geometry
-from collada.util import checkSource
-from collada.xmlutil import etree as ElementTree
-
+from .geometry import Geometry
+from .util import checkSource
+from .xmlutil import etree as ElementTree
+from .extra import Extra
 
 class Controller(DaeObject):
     """Base controller class holding data from <controller> tags."""
@@ -189,14 +189,14 @@ class Skin(Controller):
 
         bind_shape_mat = skinnode.find(tag('bind_shape_matrix'))
         if bind_shape_mat is None:
-            bind_shape_mat = numpy.identity(4, dtype=numpy.float32)
+            bind_shape_mat = numpy.identity(4, dtype=numpy.float64)
             bind_shape_mat.shape = (-1,)
         else:
             try:
                 values = [ float(v) for v in bind_shape_mat.text.split()]
             except ValueError:
                 raise DaeMalformedError('Corrupted bind shape matrix in skin')
-            bind_shape_mat = numpy.array( values, dtype=numpy.float32 )
+            bind_shape_mat = numpy.array( values, dtype=numpy.float64 )
 
         inputnodes = skinnode.findall('%s/%s'%(tag('joints'), tag('input')))
         if inputnodes is None or len(inputnodes) < 2:
@@ -329,8 +329,15 @@ class Morph(Controller):
         self.target_list = target_list
         """A list of tuples where each tuple (g,w) contains
             a Geometry (g) and a float weight value (w)"""
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
 
         self.xmlnode = xmlnode
+        if self.xmlnode is None:
+            self.xmlnode = E.morph()
+            self.save(0)
+
         #TODO
 
     def __len__(self):
@@ -389,11 +396,11 @@ class Morph(Controller):
                 raise DaeBrokenRefError("Targeted geometry %s in morph not found"%target)
             target_list.append((collada.geometries[target], weight[0]))
 
-        return Morph(basegeom, target_list, controllernode)
+        extras = Extra.loadextras(collada, controllernode)
+        return Morph(basegeom, target_list, extras, controllernode)
 
-    def save(self):
-        #TODO
-        pass
+    def save(self,recurse=True):
+        Extra.saveextras(self.xmlnode,self.extras)
 
 
 class BoundMorph(BoundController):
