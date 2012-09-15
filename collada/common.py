@@ -10,10 +10,10 @@
 #                                                                  #
 ####################################################################
 
-from .xmlutil import etree, ElementMaker, GetColladaNS, E
+from .xmlutil import etree, ElementMaker, get_collada_ns, E
 
 def tag(text):
-    return str(etree.QName(GetColladaNS(), text))
+    return str(etree.QName(get_collada_ns(), text))
 
 
 class DaeObject(object):
