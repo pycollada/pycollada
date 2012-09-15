@@ -39,7 +39,7 @@ class InstanceRigidBody(object):
             self.xmlnode = E.instance_articulated_system()
             self.save(0)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         Extra.savetechniques(self.xmlnode,self.techniques)

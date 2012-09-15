@@ -50,8 +50,10 @@ class DaeObject(object):
         """
         raise Exception('Not implemented')
 
-    def save(self):
-        """Put all the data to the internal xml node (xmlnode) so it can be serialized."""
+    def save(self,recurse=True):
+        """Put all the data to the internal xml node (xmlnode) so it can be serialized.
+        :param recurse: if True, will call save on the child nodes, otherwise will only save info pertaining to this node
+        """
 
 class DaeError(Exception):
     """General DAE exception."""

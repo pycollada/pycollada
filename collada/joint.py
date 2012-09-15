@@ -19,6 +19,16 @@ from .extra import Extra
 class Joint(DaeObject):
     """A class containing the data coming from a COLLADA <joint> tag"""
     def __init__(self, id, sid, name, extras=None, xmlnode=None):
+        """Create <joint>
+        
+        :param str id:
+          A unique string identifier for the object
+        :param str sid:
+            A text string for sid the object
+        :param str name:
+            A text string naming the object
+        :param list extras: list of Extra
+        """
         self.id = id
         self.sid = sid
         self.name = name
@@ -42,7 +52,7 @@ class Joint(DaeObject):
         node = Joint(id, sid, name, extras, xmlnode=node )
         return node
 
-    def save(self, recurse=-1):
+    def save(self, recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)
         if self.id is not None:
             self.xmlnode.set('id',self.id)

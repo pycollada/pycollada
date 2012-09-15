@@ -115,7 +115,7 @@ class PhysicsScene(DaeObject):
         techniques = Technique.loadtechniques(collada, node)
         return PhysicsScene(id, name, instance_physics_models, asset, technique_common, techniques, extras, xmlnode=node)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)
         Technique.savetechniques(self.xmlnode,self.techniques)
         technique_common = self.xmlnode.find(tag('technique_common'))

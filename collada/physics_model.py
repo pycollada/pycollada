@@ -36,7 +36,7 @@ class InstancePhysicsModel(DaeObject):
             self.xmlnode = E.instance_physics_model()
             self.save(0)
             
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.pmodel is not None and self.pmodel.id is not None:

@@ -191,7 +191,7 @@ class KinematicsScene(DaeObject):
         extras = Extra.loadextras(collada, node)
         return KinematicsScene(id, name, instance_kinematics_models, instance_articulated_systems, extras, xmlnode=node)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         if self.id is not None:
             self.xmlnode.set('id',self.id)
         else:

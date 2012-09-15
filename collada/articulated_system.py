@@ -53,7 +53,7 @@ class InstanceArticulatedSystem(DaeObject):
         extras = Extra.loadextras(collada, node)
         return InstanceArticulatedSystem(asystem, url, sid, name, extras, xmlnode=node)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.asystem is not None:
@@ -76,9 +76,10 @@ class Kinematics(DaeObject):
     def __init__(self, instance_kinematics_models=None,axisinfos=None,techniques=None, extras=None, xmlnode=None):
         """Create a <kinematics>
 
-        :param list kinematics_models: a resolved KinematicsModel
-        :param list instance_kinematics_models: a InstanceKinematicsModel if could not resolve
+        :param list instance_kinematics_models: a InstanceKinematicsModel
         :param list axisinfos: list of xmlnodes
+        :param list techniques: list of Technique
+        :param list extras: list of Extra
         :param xmlnode:
         When loaded, the xmlnode it comes from
         """
@@ -117,7 +118,7 @@ class Kinematics(DaeObject):
         techniques = Technique.loadtechniques(collada,node)
         return Kinematics(instance_kinematics_models,axisinfos,techniques, extras,xmlnode=node)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         """Saves the kinematics node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         for oldnode in self.xmlnode.findall(tag('instance_kinematics_model')):
@@ -139,9 +140,10 @@ class Motion(DaeObject):
     def __init__(self, instance_articulated_system=None,axisinfos=None,extras=None,xmlnode=None):
         """Create a <motion>
 
-        :param articulated_system: a resolved ArticultedSystem
-        :param instance_articulated_system: a InstanceArticulatedSystem if could not resolve
+        :param instance_articulated_system: a InstanceArticulatedSystem
         :param list axisinfos: list of xmlnodes
+        :param list techniques: list of Technique
+        :param list extras: list of Extra
         :param xmlnode:
         When loaded, the xmlnode it comes from
         """
@@ -173,7 +175,7 @@ class Motion(DaeObject):
         extras = Extra.loadextras(collada, node)
         return Motion(instance_articulated_system,axisinfos,extras, xmlnode=node)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         """Saves the motion node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         ias = self.xmlnode.find(tag('instance_articulated_system'))
@@ -202,6 +204,8 @@ class ArticulatedSystem(DaeObject):
             A text string naming the geometry
           :param kinematics: Kinematics object
           :param motion: Motion object
+          :param asset: Asset object
+          :param list extras: list of Extra
           :param xmlnode:
             When loaded, the xmlnode it comes from.
 
@@ -249,7 +253,7 @@ class ArticulatedSystem(DaeObject):
         node = ArticulatedSystem(id, name, kinematics, motion, asset, extras, xmlnode=node )
         return node
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.kinematics is not None:

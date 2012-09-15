@@ -142,10 +142,12 @@ class Collada(object):
         self._kinematics_scenes = IndexedList([], ('id',))
         
         self.scene = None
-        self.ikscene = None
-        self.ipscenes = []
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
-
+        self.ikscene = None
+        """The default kinematics_scene . This is either an instance of :class:`collada.kinematics_scene.InstanceKinematicsScene` or `None`."""
+        self.ipscenes = []
+        """The default physics_scenes . This is a lsit of of :class:`collada.kinematics_scene.InstancePhysicsScene` """
+        
         if validate_output and schema:
             self.validator = schema.ColladaValidator()
         else:

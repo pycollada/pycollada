@@ -134,7 +134,7 @@ class Node(SceneNode):
             for obj in node.objects(tipo, M):
                 yield obj
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         """Saves the geometry back to :attr:`xmlnode`. Also updates
         :attr:`matrix` if :attr:`transforms` has been modified."""
         Extra.saveextras(self.xmlnode,self.extras)

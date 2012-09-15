@@ -23,13 +23,16 @@ class Extra(DaeObject):
     def __init__(self, id=None, name=None, type=None, asset=None, technique_common=None, techniques=None, xmlnode=None):
         """Create a <extra>
 
-        :param collada:
-          The collada instance this is part of
         :param str id:
-          A unique string identifier for the scene
+          A unique string identifier for the object
+        :param str name:
+            A text string naming the object
+        :param str type:
+            A text string for type of object
+        :param str asset: Asset object
+        :param technique_common: lxml node whose tag is technique_common
         :param list techniques:
         A list of Technique objects
-        :param technique_common: lxml node whose tag is technique_common
         """
         self.id = id
         self.name = name
@@ -62,7 +65,7 @@ class Extra(DaeObject):
                 techniques.append(Technique.load(collada,localscope,subnode))
         return Extra(id,name,type,asset,technique_common,techniques,xmlnode=node)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         if self.id is not None:
             self.xmlnode.set('id',self.sid)
         else:

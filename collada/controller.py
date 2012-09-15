@@ -399,7 +399,7 @@ class Morph(Controller):
         extras = Extra.loadextras(collada, controllernode)
         return Morph(basegeom, target_list, extras, controllernode)
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)
 
 

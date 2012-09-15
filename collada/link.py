@@ -55,7 +55,7 @@ class Attachment(DaeObject):
         node = Attachment(attachmenttype, joint, link, transformnodes, xmlnode=node)
         return node
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         self.xmlnode.clear()
         self.xmlnode.set('joint', self.joint)
         for node in self.transformnodes:
@@ -108,7 +108,7 @@ class Link(DaeObject):
         node = Link(sid, name, transformnodes, attachments, xmlnode=node )
         return node
 
-    def save(self,recurse=-1):
+    def save(self,recurse=True):
         self.xmlnode.clear()
         for node in self.transformnodes:
             if recurse:
