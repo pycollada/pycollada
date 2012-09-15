@@ -137,7 +137,7 @@ class FloatSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join(map(str, self.data.tolist() ))
+            txtdata = ' '.join(map(repr, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -266,7 +266,7 @@ class IDRefSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join(map(str, self.data.tolist() ))
+            txtdata = ' '.join(map(repr, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -296,7 +296,7 @@ class IDRefSource(Source):
         Extra.saveextras(technique_common,self.extras)
 
         self.data.shape = (-1,)
-        txtdata = ' '.join(map(str, self.data.tolist() ))
+        txtdata = ' '.join(map(repr, self.data.tolist() ))
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )
@@ -380,7 +380,7 @@ class NameSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join(map(str, self.data.tolist() ))
+            txtdata = ' '.join(map(repr, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -410,7 +410,7 @@ class NameSource(Source):
         Extra.saveextras(technique_common,self.extras)
 
         self.data.shape = (-1,)
-        txtdata = ' '.join(map(str, self.data.tolist() ))
+        txtdata = ' '.join(map(repr, self.data.tolist() ))
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )

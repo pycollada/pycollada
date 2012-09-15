@@ -191,7 +191,7 @@ class Asset(DaeObject):
         if self.title is not None:
             self.xmlnode.append(E.title(self.title))
         if self.unitmeter is not None and self.unitname is not None:
-            self.xmlnode.append(E.unit(name=self.unitname, meter=str(self.unitmeter)))
+            self.xmlnode.append(E.unit(name=self.unitname, meter=repr(self.unitmeter)))
         self.xmlnode.append(E.up_axis(self.upaxis))
 
     def save(self):

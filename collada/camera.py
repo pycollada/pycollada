@@ -99,13 +99,13 @@ class PerspectiveCamera(Camera):
     def _recreateXmlNode(self):
         perspective_node = E.perspective()
         if self.xfov is not None:
-            perspective_node.append(E.xfov(str(self.xfov)))
+            perspective_node.append(E.xfov(repr(self.xfov)))
         if self.yfov is not None:
-            perspective_node.append(E.yfov(str(self.yfov)))
+            perspective_node.append(E.yfov(repr(self.yfov)))
         if self.aspect_ratio is not None:
-            perspective_node.append(E.aspect_ratio(str(self.aspect_ratio)))
-        perspective_node.append(E.znear(str(self.znear)))
-        perspective_node.append(E.zfar(str(self.zfar)))
+            perspective_node.append(E.aspect_ratio(repr(self.aspect_ratio)))
+        perspective_node.append(E.znear(repr(self.znear)))
+        perspective_node.append(E.zfar(repr(self.zfar)))
         self.xmlnode = E.camera(
             E.optics(
                 E.technique_common(perspective_node)
@@ -130,7 +130,7 @@ class PerspectiveCamera(Camera):
             pass
         else:
             raise DaeMalformedError("Received invalid combination of xfov (%s), yfov (%s), and aspect_ratio (%s)" %
-                    (str(self.xfov), str(self.yfov), str(self.aspect_ratio)))
+                    (repr(self.xfov), repr(self.yfov), repr(self.aspect_ratio)))
 
     def save(self):
         """Saves the perspective camera's properties back to xmlnode"""
@@ -251,13 +251,13 @@ class OrthographicCamera(Camera):
     def _recreateXmlNode(self):
         orthographic_node = E.orthographic()
         if self.xmag is not None:
-            orthographic_node.append(E.xmag(str(self.xmag)))
+            orthographic_node.append(E.xmag(repr(self.xmag)))
         if self.ymag is not None:
-            orthographic_node.append(E.ymag(str(self.ymag)))
+            orthographic_node.append(E.ymag(repr(self.ymag)))
         if self.aspect_ratio is not None:
-            orthographic_node.append(E.aspect_ratio(str(self.aspect_ratio)))
-        orthographic_node.append(E.znear(str(self.znear)))
-        orthographic_node.append(E.zfar(str(self.zfar)))
+            orthographic_node.append(E.aspect_ratio(repr(self.aspect_ratio)))
+        orthographic_node.append(E.znear(repr(self.znear)))
+        orthographic_node.append(E.zfar(repr(self.zfar)))
         self.xmlnode = E.camera(
             E.optics(
                 E.technique_common(orthographic_node)
@@ -282,7 +282,7 @@ class OrthographicCamera(Camera):
             pass
         else:
             raise DaeMalformedError("Received invalid combination of xmag (%s), ymag (%s), and aspect_ratio (%s)" %
-                    (str(self.xmag), str(self.ymag), str(self.aspect_ratio)))
+                    (repr(self.xmag), repr(self.ymag), repr(self.aspect_ratio)))
 
     def save(self):
         """Saves the orthographic camera's properties back to xmlnode"""

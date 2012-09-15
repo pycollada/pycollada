@@ -59,9 +59,9 @@ class Triangle(object):
             self.normals = numpy.array([vec3, vec3, vec3])
 
     def __repr__(self):
-        return '<Triangle (%s, %s, %s, "%s")>' % (str(self.vertices[0]),
-                str(self.vertices[1]), str(self.vertices[2]),
-                str(self.material))
+        return '<Triangle (%s, %s, %s, "%s")>' % (repr(self.vertices[0]),
+                repr(self.vertices[1]), repr(self.vertices[2]),
+                repr(self.material))
     def __str__(self):
         return repr(self)
 

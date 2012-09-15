@@ -65,7 +65,7 @@ class TranslateTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.translate(' '.join([str(x),str(y),str(z)]))
+            self.xmlnode = E.translate(' '.join([repr(x),repr(y),repr(z)]))
             
     @staticmethod
     def load(collada, node):
@@ -75,7 +75,7 @@ class TranslateTransform(Transform):
         return TranslateTransform(floats[0], floats[1], floats[2], node)
 
     def __str__(self):
-        return '<TranslateTransform (%s, %s, %s)>' % (self.x, self.y, self.z)
+        return '<TranslateTransform (%.15e, %.15e, %.15e)>' % (self.x, self.y, self.z)
 
     def __repr__(self):
         return str(self)
@@ -112,7 +112,7 @@ class RotateTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.rotate(' '.join([str(x),str(y),str(z),str(angle)]))
+            self.xmlnode = E.rotate(' '.join([repr(x),repr(y),repr(z),repr(angle)]))
 
     @staticmethod
     def load(collada, node):
@@ -122,7 +122,7 @@ class RotateTransform(Transform):
         return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
 
     def __str__(self):
-        return '<RotateTransform (%s, %s, %s) angle=%s>' % (self.x, self.y, self.z, self.angle)
+        return '<RotateTransform (%.15e, %.15e, %.15e) angle=%.15e>' % (self.x, self.y, self.z, self.angle)
 
     def __repr__(self):
         return str(self)
@@ -158,7 +158,7 @@ class ScaleTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.scale(' '.join([str(x),str(y),str(z)]))
+            self.xmlnode = E.scale(' '.join([repr(x),repr(y),repr(z)]))
             
     @staticmethod
     def load(collada, node):
@@ -168,7 +168,7 @@ class ScaleTransform(Transform):
         return ScaleTransform(floats[0], floats[1], floats[2], node)
 
     def __str__(self):
-        return '<ScaleTransform (%s, %s, %s)>' % (self.x, self.y, self.z)
+        return '<ScaleTransform (%.15e, %.15e, %.15e)>' % (self.x, self.y, self.z)
 
     def __repr__(self):
         return str(self)
@@ -193,7 +193,7 @@ class MatrixTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.matrix(' '.join(map(str, self.matrix.flat)))
+            self.xmlnode = E.matrix(' '.join(map(repr, self.matrix.flat)))
             
     @staticmethod
     def load(collada, node):
@@ -246,7 +246,7 @@ class LookAtTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.lookat(' '.join(map(str,
+            self.xmlnode = E.lookat(' '.join(map(repr,
                                         numpy.concatenate((self.eye, self.interest, self.upvector)) )))
             
     @staticmethod

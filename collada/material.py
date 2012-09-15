@@ -566,9 +566,9 @@ class Effect(DaeObject):
                 if type(value) is Map:
                     propnode.append(value.xmlnode)
                 elif type(value) is float:
-                    propnode.append(E.float(str(value)))
+                    propnode.append(E.float(repr(value)))
                 else:
-                    propnode.append(E.color(' '.join(map(str, value) )))
+                    propnode.append(E.color(' '.join(map(repr, value) )))
 
             effect_nodes = [param.xmlnode for param in self.params]
             effect_nodes.append(E.technique(shadnode, sid='common'))
@@ -750,9 +750,9 @@ class Effect(DaeObject):
             if type(value) is Map:
                 propnode.append(copy.deepcopy(value.xmlnode))
             elif type(value) is float:
-                propnode.append(E.float(str(value)))
+                propnode.append(E.float(repr(value)))
             else:
-                propnode.append(E.color(' '.join(map(str, value) )))
+                propnode.append(E.color(' '.join(map(repr, value) )))
             return propnode
 
         shadnode = tecnode.find(tag(self.shadingtype))
@@ -874,7 +874,7 @@ class Material(DaeObject):
         else:
             self.xmlnode = E.material(
                 E.instance_effect(url="#%s" % self.effect.id)
-            , id=str(self.id), name=str(self.name))
+            , id=self.id, name=self.name)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -898,8 +898,8 @@ class Material(DaeObject):
     def save(self):
         """Saves the material data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        self.xmlnode.set('id', str(self.id))
-        self.xmlnode.set('name', str(self.name))
+        self.xmlnode.set('id', self.id)
+        self.xmlnode.set('name', self.name)
         effnode = self.xmlnode.find( tag('instance_effect') )
         effnode.set('url', '#%s' % self.effect.id)
 
