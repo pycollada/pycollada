@@ -40,7 +40,7 @@ from . import articulated_system
 from . import physics_scene
 from . import kinematics_scene
 from . import scene
-from .common import E, tag
+from .common import E, tag, _set_number_dtype
 from .common import DaeError, DaeObject, DaeIncompleteError, \
     DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
     DaeSaveValidationError
@@ -671,3 +671,9 @@ class Collada(object):
 def set_collada_version(version):
     """Sets the COLLADA version number"""
     return _set_version(version)
+
+def set_number_dtype(dtype=None):
+    """sets a new dtype for all numbers stored in numpy.array
+    :param dtype: if None will set back to the default numpy.float32
+    """
+    return _set_number_dtype(dtype)

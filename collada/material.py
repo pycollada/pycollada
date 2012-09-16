@@ -22,7 +22,7 @@ This module contains all the functionality to load and manage:
 import copy
 import numpy
 
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, get_number_dtype
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import falmostEqual, StringIO
@@ -129,7 +129,7 @@ class CImage(DaeObject):
         if array is None:
             self._floatarray = 'failed'
             return None
-        self._floatarray = numpy.asarray( array, dtype=numpy.float32)
+        self._floatarray = numpy.asarray( array, dtype=get_number_dtype())
         self._floatarray *= 1.0/255.0
         return self._floatarray
 
@@ -898,8 +898,14 @@ class Material(DaeObject):
     def save(self):
         """Saves the material data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.name)
+        if self.id is not None:
+            self.xmlnode.set('id',self.id)
+        else:
+            self.xmlnode.attrib.pop('id',None)
+        if self.name is not None:
+            self.xmlnode.set('name',self.name)
+        else:
+            self.xmlnode.attrib.pop('name',None)
         effnode = self.xmlnode.find( tag('instance_effect') )
         effnode.set('url', '#%s' % self.effect.id)
 

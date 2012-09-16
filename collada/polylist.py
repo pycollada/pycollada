@@ -16,7 +16,7 @@ import numpy
 
 from . import primitive
 from . import triangleset
-from .common import E, tag
+from .common import E, tag, get_number_dtype
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import toUnitVec, checkSource, xrange
@@ -63,11 +63,11 @@ class Polygon(object):
 
             tri_indices = numpy.array([
                 self.indices[0], self.indices[i+1], self.indices[i+2]
-                ], dtype=numpy.float32)
+                ], dtype=get_number_dtype())
 
             tri_vertices = numpy.array([
                 self.vertices[0], self.vertices[i+1], self.vertices[i+2]
-                ], dtype=numpy.float32)
+                ], dtype=get_number_dtype())
 
             if self.normals is None:
                 tri_normals = None
@@ -75,12 +75,12 @@ class Polygon(object):
             else:
                 tri_normals = numpy.array([
                     self.normals[0], self.normals[i+1], self.normals[i+2]
-                    ], dtype=numpy.float32)
+                    ], dtype=get_number_dtype())
                 normal_indices = numpy.array([
                     self.normal_indices[0],
                     self.normal_indices[i+1],
                     self.normal_indices[i+2]
-                    ], dtype=numpy.float32)
+                    ], dtype=get_number_dtype())
 
             tri_texcoords = []
             tri_texcoord_indices = []
@@ -90,12 +90,12 @@ class Polygon(object):
                     texcoord[0],
                     texcoord[i+1],
                     texcoord[i+2]
-                    ], dtype=numpy.float32))
+                    ], dtype=get_number_dtype()))
                 tri_texcoord_indices.append(numpy.array([
                     texcoord_indices[0],
                     texcoord_indices[i+1],
                     texcoord_indices[i+2]
-                    ], dtype=numpy.float32))
+                    ], dtype=get_number_dtype()))
 
             tri = triangleset.Triangle(
                     tri_indices, tri_vertices,

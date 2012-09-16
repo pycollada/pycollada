@@ -14,7 +14,7 @@
 
 import numpy
 
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, get_number_dtype
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import _correctValInNode
@@ -60,7 +60,7 @@ class DirectionalLight(Light):
         """
         self.id = id
         """The unique string identifier for the light"""
-        self.direction = numpy.array( [0, 0, -1], dtype=numpy.float32 )
+        self.direction = numpy.array( [0, 0, -1], dtype=get_number_dtype() )
         #Not documenting this because it doesn't make sense to set the direction
         # of an unbound light. The direction isn't set until binding in a scene.
         self.color = color
@@ -229,7 +229,7 @@ class PointLight(Light):
         """
         self.id = id
         """The unique string identifier for the light"""
-        self.position = numpy.array( [0, 0, 0], dtype=numpy.float32 )
+        self.position = numpy.array( [0, 0, 0], dtype=get_number_dtype() )
         #Not documenting this because it doesn't make sense to set the position
         # of an unbound light. The position isn't set until binding in a scene.
         self.color = color

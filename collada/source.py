@@ -14,7 +14,7 @@
 
 import numpy
 
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, get_number_dtype
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError
 from .xmlutil import etree as ElementTree
 from .extra import Extra
@@ -194,9 +194,9 @@ class FloatSource(Source):
         arraynode = node.find(tag('float_array'))
         if arraynode is None: raise DaeIncompleteError('No float_array in source node')
         if arraynode.text is None:
-            data = numpy.array([], dtype=numpy.float32)
+            data = numpy.array([], dtype=get_number_dtype())
         else:
-            try: data = numpy.fromstring(arraynode.text, dtype=numpy.float32, sep=' ')
+            try: data = numpy.fromstring(arraynode.text, dtype=get_number_dtype(), sep=' ')
             except ValueError: raise DaeMalformedError('Corrupted float array')
         data[numpy.isnan(data)] = 0
 
