@@ -15,7 +15,7 @@
 import numpy
 
 from . import primitive
-from .common import E, tag
+from .common import E, tag, get_number_dtype
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import toUnitVec, checkSource, normalize_v3, dot_v3, xrange
@@ -56,7 +56,7 @@ class Triangle(object):
             vec1 = numpy.subtract(vertices[0], vertices[1])
             vec2 = numpy.subtract(vertices[2], vertices[0])
             vec3 = toUnitVec(numpy.cross(toUnitVec(vec2), toUnitVec(vec1)))
-            self.normals = numpy.array([vec3, vec3, vec3])
+            self.normals = numpy.array([vec3, vec3, vec3],dtype=get_number_dtype())
 
     def __repr__(self):
         return '<Triangle (%s, %s, %s, "%s")>' % (repr(self.vertices[0]),

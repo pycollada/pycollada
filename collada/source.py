@@ -216,7 +216,7 @@ class FloatSource(Source):
             data.shape = (-1, 3)
             #remove 3d texcoord dimension because we don't support it
             #TODO
-            data = numpy.array(zip(data[:,0], data[:,1]))
+            data = numpy.array(zip(data[:,0], data[:,1]),dtype=get_number_dtype())
             data.shape = (-1)
         return FloatSource( sourceid, data, tuple(components), extras, xmlnode=node )
 
