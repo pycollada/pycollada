@@ -5,12 +5,12 @@ pyglet before trying this example. The simplest way to do it is to run
 'easy_install pyglet'.
 
 There are two renderers implemented:
-* OldStyleRenderer which uses now depricated display lists to draw the
+* OldStyleRenderer which uses now deprecated display lists to draw the
   model.
 * GLSLRenderer which uses OpenGL shaders and VBOs.
 
 By default, this example uses OldStyleRenderer because it produces
-more correct results. Also, the code is quite streight forward and
+more correct results. Also, the code is quite straight forward and
 should be easy to understand.
 
 In contrast, GLSLRenderer should be much faster and is the way to go
@@ -30,7 +30,7 @@ To run the example, simply execute daeview.py <dae_file_name>. There
 are some models to test in the data/ directory. If started without
 parameters, cockpit.zip will be displayed.
 
-This example is not intendent to be complete DAE viewer and might fail
+This example is not intended to be complete DAE viewer and might fail
 to display some files. The main purpose of this example is to help
 understand how to get access to the important information and traverse
 the data structures created by pycollada after parsing certain dae
