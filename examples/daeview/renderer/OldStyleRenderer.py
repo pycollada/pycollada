@@ -4,6 +4,8 @@ import numpy
 import pyglet
 from pyglet.gl import *
 import ctypes
+import glutils
+
 
 class OldStyleRenderer: 
 
@@ -39,7 +41,11 @@ class OldStyleRenderer:
         self.displist = glGenLists(1)
         # compile the display list, store a triangle in it
         glNewList(self.displist, GL_COMPILE)
+        self.drawPrimitives()
+        glEndList()
+        print 'done. Ready to render.'
 
+    def drawPrimitives(self):
         glBegin(GL_TRIANGLES)
         
         if self.dae.scene is not None:
@@ -153,9 +159,8 @@ class OldStyleRenderer:
                                 self.z_max = v[2]
                             elif v[2] < self.z_min:
                                 self.z_min = v[2]
+        glutils.getGLError()
         glEnd()
-        glEndList()
-        print 'done. Ready to render.'
 
 
     def render(self, rotate_x, rotate_y, rotate_z):
@@ -178,6 +183,7 @@ class OldStyleRenderer:
         
         # draw the display list
         glCallList(self.displist)
+
 
     def cleanup(self):
         print 'Renderer cleaning up'
