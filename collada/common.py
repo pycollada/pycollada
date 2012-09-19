@@ -10,22 +10,23 @@
 #                                                                  #
 ####################################################################
 
+import numpy
 from .xmlutil import etree, ElementMaker, get_collada_ns, E
 
 def tag(text):
     return str(etree.QName(get_collada_ns(), text))
 
-from numpy import float32
-_number_dtype = float32
+_number_dtype = numpy.float32
 def get_number_dtype():
-    """returns the dtype for all numbers stored in numpy.array, default is numpy.float32
+    """Returns the dtype for all numbers stored in numpy arrays.
+    Default is numpy.float32.
     """
     return _number_dtype
 
 def _set_number_dtype(dtype=None):
     global _number_dtype
     if dtype is None:
-        _number_dtype = float32
+        _number_dtype = numpy.float32
     else:
         _number_dtype = dtype
 

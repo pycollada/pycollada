@@ -673,7 +673,9 @@ def set_collada_version(version):
     return _set_version(version)
 
 def set_number_dtype(dtype=None):
-    """sets a new dtype for all numbers stored in numpy.array
-    :param dtype: if None will set back to the default numpy.float32
+    """Sets a new dtype for all numbers stored in numpy arrays.
+
+    :param dtype: if None, will set back to the default numpy.float32
+
     """
     return _set_number_dtype(dtype)
