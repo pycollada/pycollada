@@ -167,7 +167,7 @@ class PhysicsModel(DaeObject):
 
     def save(self):
         Extra.saveextras(self.xmlnode,self.extras)
-        oldnodes = self.xmlnode.findall(tag('instance_physics_model')+tag('rigid_body'))
+        oldnodes = self.xmlnode.findall('%s/%s' % (tag('instance_physics_model'), tag('rigid_body')))
         for node in oldnodes:
             self.xmlnode.remove(oldnode)    
         for rigid_body in self.rigid_bodies:

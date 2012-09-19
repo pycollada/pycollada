@@ -1,3 +1,4 @@
+import sys
 import numpy
 
 import collada
@@ -31,6 +32,9 @@ class TestSource(unittest.TestCase):
     def test_precision_64(self):
         nums = ['5.0', '0.10000000000000001', '2.3999999999999999', '4.5555555555555554', '12345678.923456786', '17']
         real_repr = '5.0 0.1 2.4 4.555555555555555 12345678.923456786 17.0'
+        if sys.version_info[0] == 2 and sys.version_info[1] < 7:
+            # python prior to 2.7 doesn't have a fancy repr
+            real_repr = '5.0 0.10000000000000001 2.3999999999999999 4.5555555555555554 12345678.923456786 17.0'
         numarr = numpy.array(nums, dtype=numpy.float64)
         try:
             collada.set_number_dtype(numpy.float64)
