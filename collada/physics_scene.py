@@ -17,6 +17,7 @@ from .xmlutil import etree as ElementTree
 from .physics_model import InstancePhysicsModel
 from .extra import Extra
 from .technique import Technique
+from .asset import Asset
 
 class InstancePhysicsScene(DaeObject):
     def __init__(self,pscene=None, url=None, sid=None, name=None, extras=None, xmlnode=None):

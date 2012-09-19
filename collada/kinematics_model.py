@@ -11,6 +11,7 @@
 ####################################################################
 """Contains objects for representing a kinematics model."""
 
+import copy
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
