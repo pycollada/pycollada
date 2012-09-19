@@ -14,7 +14,7 @@
 
 import numpy
 
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, float_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError
 from .xmlutil import etree as ElementTree
@@ -99,13 +99,13 @@ class PerspectiveCamera(Camera):
     def _recreateXmlNode(self):
         perspective_node = E.perspective()
         if self.xfov is not None:
-            perspective_node.append(E.xfov(repr(self.xfov)))
+            perspective_node.append(E.xfov(float_format_func()(self.xfov)))
         if self.yfov is not None:
-            perspective_node.append(E.yfov(repr(self.yfov)))
+            perspective_node.append(E.yfov(float_format_func()(self.yfov)))
         if self.aspect_ratio is not None:
-            perspective_node.append(E.aspect_ratio(repr(self.aspect_ratio)))
-        perspective_node.append(E.znear(repr(self.znear)))
-        perspective_node.append(E.zfar(repr(self.zfar)))
+            perspective_node.append(E.aspect_ratio(float_format_func()(self.aspect_ratio)))
+        perspective_node.append(E.znear(float_format_func()(self.znear)))
+        perspective_node.append(E.zfar(float_format_func()(self.zfar)))
         self.xmlnode = E.camera(
             E.optics(
                 E.technique_common(perspective_node)
@@ -251,13 +251,13 @@ class OrthographicCamera(Camera):
     def _recreateXmlNode(self):
         orthographic_node = E.orthographic()
         if self.xmag is not None:
-            orthographic_node.append(E.xmag(repr(self.xmag)))
+            orthographic_node.append(E.xmag(float_format_func()(self.xmag)))
         if self.ymag is not None:
-            orthographic_node.append(E.ymag(repr(self.ymag)))
+            orthographic_node.append(E.ymag(float_format_func()(self.ymag)))
         if self.aspect_ratio is not None:
-            orthographic_node.append(E.aspect_ratio(repr(self.aspect_ratio)))
-        orthographic_node.append(E.znear(repr(self.znear)))
-        orthographic_node.append(E.zfar(repr(self.zfar)))
+            orthographic_node.append(E.aspect_ratio(float_format_func()(self.aspect_ratio)))
+        orthographic_node.append(E.znear(float_format_func()(self.znear)))
+        orthographic_node.append(E.zfar(float_format_func()(self.zfar)))
         self.xmlnode = E.camera(
             E.optics(
                 E.technique_common(orthographic_node)

@@ -14,9 +14,8 @@
 
 import numpy
 
-from .common import DaeObject, E, tag, get_number_dtype
-from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError
-from .xmlutil import etree as ElementTree
+from .common import DaeObject, E, tag, get_number_dtype, float_format_func
+from .common import DaeIncompleteError, DaeUnsupportedError, DaeMalformedError
 from .extra import Extra
 
 class InputList(object):
@@ -69,7 +68,7 @@ class InputList(object):
         retlist = []
         for inplist in self.inputs.values():
             for inp in inplist:
-                 retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
+                retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
         return retlist
 
     def __str__(self): return '<InputList>'
@@ -137,7 +136,7 @@ class FloatSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join(map(repr, self.data.tolist() ))
+            txtdata = ' '.join(map(float_format_func(), self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -167,7 +166,7 @@ class FloatSource(Source):
         Extra.saveextras(technique_common,self.extras)
         self.data.shape = (-1,)
 
-        txtdata = ' '.join(map(lambda x: '%.7g'%x , self.data.tolist()))
+        txtdata = ' '.join(map(float_format_func(), self.data.tolist()))
 
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
@@ -266,7 +265,7 @@ class IDRefSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join(map(repr, self.data.tolist() ))
+            txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -296,7 +295,7 @@ class IDRefSource(Source):
         Extra.saveextras(technique_common,self.extras)
 
         self.data.shape = (-1,)
-        txtdata = ' '.join(map(repr, self.data.tolist() ))
+        txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )
@@ -380,7 +379,7 @@ class NameSource(Source):
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join(map(repr, self.data.tolist() ))
+            txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -410,7 +409,7 @@ class NameSource(Source):
         Extra.saveextras(technique_common,self.extras)
 
         self.data.shape = (-1,)
-        txtdata = ' '.join(map(repr, self.data.tolist() ))
+        txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
         acclen = len( self.data )

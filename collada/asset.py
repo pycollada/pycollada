@@ -16,7 +16,7 @@ import numpy
 import datetime
 import dateutil.parser
 
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, float_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import _correctValInNode
@@ -191,7 +191,7 @@ class Asset(DaeObject):
         if self.title is not None:
             self.xmlnode.append(E.title(self.title))
         if self.unitmeter is not None and self.unitname is not None:
-            self.xmlnode.append(E.unit(name=self.unitname, meter=repr(self.unitmeter)))
+            self.xmlnode.append(E.unit(name=self.unitname, meter=float_format_func()(self.unitmeter)))
         self.xmlnode.append(E.up_axis(self.upaxis))
 
     def save(self):

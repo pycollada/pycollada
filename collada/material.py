@@ -22,7 +22,7 @@ This module contains all the functionality to load and manage:
 import copy
 import numpy
 
-from .common import DaeObject, E, tag, get_number_dtype
+from .common import DaeObject, E, tag, get_number_dtype, float_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import falmostEqual, StringIO
@@ -566,9 +566,9 @@ class Effect(DaeObject):
                 if type(value) is Map:
                     propnode.append(value.xmlnode)
                 elif type(value) is float:
-                    propnode.append(E.float(repr(value)))
+                    propnode.append(E.float(float_format_func()(value)))
                 else:
-                    propnode.append(E.color(' '.join(map(repr, value) )))
+                    propnode.append(E.color(' '.join(map(float_format_func(), value) )))
 
             effect_nodes = [param.xmlnode for param in self.params]
             effect_nodes.append(E.technique(shadnode, sid='common'))
@@ -750,9 +750,9 @@ class Effect(DaeObject):
             if type(value) is Map:
                 propnode.append(copy.deepcopy(value.xmlnode))
             elif type(value) is float:
-                propnode.append(E.float(repr(value)))
+                propnode.append(E.float(float_format_func()(value)))
             else:
-                propnode.append(E.color(' '.join(map(repr, value) )))
+                propnode.append(E.color(' '.join(map(float_format_func(), value) )))
             return propnode
 
         shadnode = tecnode.find(tag(self.shadingtype))

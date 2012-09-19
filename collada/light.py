@@ -14,7 +14,7 @@
 
 import numpy
 
-from .common import DaeObject, E, tag, get_number_dtype
+from .common import DaeObject, E, tag, get_number_dtype, float_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import _correctValInNode
@@ -77,7 +77,7 @@ class DirectionalLight(Light):
             self.xmlnode = E.light(
                 E.technique_common(
                     E.directional(
-                        E.color(' '.join(map(repr, self.color)))
+                        E.color(' '.join(map(float_format_func(), self.color)))
                     )
                 )
             , id=self.id, name=self.id)
@@ -89,7 +89,7 @@ class DirectionalLight(Light):
         self.xmlnode.set('name', self.id)
         colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
             tag('directional'), tag('color')))
-        colornode.text = ' '.join(map(repr, self.color))
+        colornode.text = ' '.join(map(float_format_func(), self.color))
 
 
     @staticmethod
@@ -156,7 +156,7 @@ class AmbientLight(Light):
             self.xmlnode = E.light(
                 E.technique_common(
                     E.ambient(
-                        E.color(' '.join(map(repr, self.color)))
+                        E.color(' '.join(map(float_format_func(), self.color)))
                     )
                 )
             , id=self.id, name=self.id)
@@ -168,7 +168,7 @@ class AmbientLight(Light):
         self.xmlnode.set('name', self.id)
         colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
             tag('ambient'), tag('color')))
-        colornode.text = ' '.join(map(repr, self.color))
+        colornode.text = ' '.join(map(float_format_func(), self.color))
 
 
     @staticmethod
@@ -253,16 +253,16 @@ class PointLight(Light):
             """ElementTree representation of the light."""
         else:
             pnode = E.point(
-                E.color(' '.join(map(repr, self.color ) ))
+                E.color(' '.join(map(float_format_func(), self.color ) ))
             )
             if self.constant_att is not None:
-                pnode.append(E.constant_attenuation(repr(self.constant_att)))
+                pnode.append(E.constant_attenuation(float_format_func()(self.constant_att)))
             if self.linear_att is not None:
-                pnode.append(E.linear_attenuation(repr(self.linear_att)))
+                pnode.append(E.linear_attenuation(float_format_func()(self.linear_att)))
             if self.quad_att is not None:
-                pnode.append(E.quadratic_attenuation(repr(self.quad_att)))
+                pnode.append(E.quadratic_attenuation(float_format_func()(self.quad_att)))
             if self.zfar is not None:
-                pnode.append(E.zfar(repr(self.zvar)))
+                pnode.append(E.zfar(float_format_func()(self.zvar)))
 
             self.xmlnode = E.light(
                 E.technique_common(pnode)
@@ -275,7 +275,7 @@ class PointLight(Light):
         self.xmlnode.set('name', self.id)
         pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('point')) )
         colornode = pnode.find( tag('color') )
-        colornode.text = ' '.join(map(repr, self.color ) )
+        colornode.text = ' '.join(map(float_format_func(), self.color ) )
         _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
         _correctValInNode(pnode, 'linear_attenuation', self.linear_att)
         _correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
@@ -382,18 +382,18 @@ class SpotLight(Light):
             """ElementTree representation of the light."""
         else:
             pnode = E.spot(
-                E.color(' '.join(map(repr, self.color ) )),
+                E.color(' '.join(map(float_format_func(), self.color ) )),
             )
             if self.constant_att is not None:
-                pnode.append(E.constant_attenuation(repr(self.constant_att)))
+                pnode.append(E.constant_attenuation(float_format_func()(self.constant_att)))
             if self.linear_att is not None:
-                pnode.append(E.linear_attenuation(repr(self.linear_att)))
+                pnode.append(E.linear_attenuation(float_format_func()(self.linear_att)))
             if self.quad_att is not None:
-                pnode.append(E.quadratic_attenuation(repr(self.quad_att)))
+                pnode.append(E.quadratic_attenuation(float_format_func()(self.quad_att)))
             if self.falloff_ang is not None:
-                pnode.append(E.falloff_angle(repr(self.falloff_ang)))
+                pnode.append(E.falloff_angle(float_format_func()(self.falloff_ang)))
             if self.falloff_exp is not None:
-                pnode.append(E.falloff_exponent(repr(self.falloff_exp)))
+                pnode.append(E.falloff_exponent(float_format_func()(self.falloff_exp)))
 
             self.xmlnode = E.light(
                 E.technique_common(pnode)
@@ -406,7 +406,7 @@ class SpotLight(Light):
         self.xmlnode.set('name', self.id)
         pnode = self.xmlnode.find('%s/%s' % (tag('technique_common'), tag('spot')))
         colornode = pnode.find(tag('color'))
-        colornode.text = ' '.join(map(repr, self.color ) )
+        colornode.text = ' '.join(map(float_format_func(), self.color ) )
         _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
         _correctValInNode(pnode, 'linear_attenuation', self.linear_att)
         _correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)

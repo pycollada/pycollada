@@ -11,7 +11,7 @@
 ####################################################################
 """Contains objects for representing a kinematics link."""
 
-from .common import DaeObject, E, tag, get_number_dtype
+from .common import DaeObject, E, tag, get_number_dtype, float_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .util import toUnitVec
@@ -65,7 +65,7 @@ class TranslateTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.translate(' '.join([repr(x),repr(y),repr(z)]))
+            self.xmlnode = E.translate(' '.join(map(float_format_func(), [x, y, z])))
             
     @staticmethod
     def load(collada, node):
@@ -112,7 +112,7 @@ class RotateTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.rotate(' '.join([repr(x),repr(y),repr(z),repr(angle)]))
+            self.xmlnode = E.rotate(' '.join(map(float_format_func(), [x, y, z, angle])))
 
     @staticmethod
     def load(collada, node):
@@ -158,7 +158,7 @@ class ScaleTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.scale(' '.join([repr(x),repr(y),repr(z)]))
+            self.xmlnode = E.scale(' '.join(map(float_format_func(), [x, y, z])))
             
     @staticmethod
     def load(collada, node):
@@ -193,7 +193,7 @@ class MatrixTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.matrix(' '.join(map(repr, self.matrix.flat)))
+            self.xmlnode = E.matrix(' '.join(map(float_format_func(), self.matrix.flat)))
             
     @staticmethod
     def load(collada, node):
@@ -246,7 +246,7 @@ class LookAtTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.lookat(' '.join(map(repr,
+            self.xmlnode = E.lookat(' '.join(map(float_format_func(),
                                         numpy.concatenate((self.eye, self.interest, self.upvector)) )))
             
     @staticmethod

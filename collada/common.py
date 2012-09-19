@@ -30,6 +30,18 @@ def _set_number_dtype(dtype=None):
     else:
         _number_dtype = dtype
 
+# The Python repr function has a smart dtoa implementation so it will convert,
+# e.g., 0.1 to 0.1 instead of 0.1000000001
+# Can't use this for 32-bit numbers because float(np.float32(v)) adds extra
+# unused precision, so repr spits out garbage.
+def float_format_func():
+    if _number_dtype == numpy.float64:
+        return lambda x: repr(float(x))
+    return lambda x: '%.9g' % x
+
+def int_format_func():
+    return lambda x: '%d' % x
+
 class DaeObject(object):
     """This class is the abstract interface to all collada objects.
 

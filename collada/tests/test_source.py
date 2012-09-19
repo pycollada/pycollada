@@ -13,6 +13,36 @@ class TestSource(unittest.TestCase):
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
 
+    def test_precision_32(self):
+        nums = ['5.0', '0.1', '2.4000001', '4.5555553', '12345679.0', '17']
+        real_repr = '5 0.100000001 2.4000001 4.55555534 12345679 17'
+        numarr = numpy.array(nums, dtype=numpy.float32)
+        try:
+            collada.set_number_dtype(numpy.float32)
+            floatsrc = collada.source.FloatSource("fltsrc", numarr, ('X', 'Y', 'X'))
+            floatsrc.save()
+            loaded_src = collada.source.Source.load(self.dummy, {}, fromstring(tostring(floatsrc.xmlnode)))
+        finally:
+            collada.set_number_dtype(None)
+        
+        self.assertEqual(floatsrc.xmlnode.getchildren()[0].text, real_repr)
+        self.assertEqual(loaded_src.xmlnode.getchildren()[0].text, real_repr)
+    
+    def test_precision_64(self):
+        nums = ['5.0', '0.10000000000000001', '2.3999999999999999', '4.5555555555555554', '12345678.923456786', '17']
+        real_repr = '5.0 0.1 2.4 4.555555555555555 12345678.923456786 17.0'
+        numarr = numpy.array(nums, dtype=numpy.float64)
+        try:
+            collada.set_number_dtype(numpy.float64)
+            floatsrc = collada.source.FloatSource("fltsrc", numarr, ('X', 'Y', 'X'))
+            floatsrc.save()
+            loaded_src = collada.source.Source.load(self.dummy, {}, fromstring(tostring(floatsrc.xmlnode)))
+        finally:
+            collada.set_number_dtype(None)
+        
+        self.assertEqual(floatsrc.xmlnode.getchildren()[0].text, real_repr)
+        self.assertEqual(loaded_src.xmlnode.getchildren()[0].text, real_repr)
+
     def test_float_source_saving(self):
         floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'X'))
         self.assertEqual(floatsource.id, "myfloatsource")

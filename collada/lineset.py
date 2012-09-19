@@ -16,7 +16,7 @@ import numpy
 
 from . import primitive
 from .util import toUnitVec, checkSource
-from .common import E, tag
+from .common import E, tag, int_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
@@ -126,7 +126,7 @@ class LineSet(primitive.Primitive):
         else:
             self.index.shape = (-1)
             acclen = len(self.index)
-            txtindices = ' '.join(map(str, self.index.tolist()))
+            txtindices = ' '.join(map(int_format_func(), self.index.tolist()))
             self.index.shape = (-1, 2, self.nindices)
 
             self.xmlnode = E.lines(count=str(self.nlines),

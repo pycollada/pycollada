@@ -15,7 +15,7 @@
 import numpy
 
 from . import primitive
-from .common import E, tag, get_number_dtype
+from .common import E, tag, get_number_dtype, int_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import toUnitVec, checkSource, normalize_v3, dot_v3, xrange
@@ -164,7 +164,7 @@ class TriangleSet(primitive.Primitive):
     def _recreateXmlNode(self):
         self.index.shape = (-1)
         acclen = len(self.index)
-        txtindices = ' '.join(map(str, self.index.tolist()))
+        txtindices = ' '.join(map(int_format_func(), self.index.tolist()))
         self.index.shape = (-1, 3, self.nindices)
 
         self.xmlnode = E.triangles(count=str(self.ntriangles))

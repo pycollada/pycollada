@@ -16,7 +16,7 @@ import numpy
 
 from . import primitive
 from . import triangleset
-from .common import E, tag, get_number_dtype
+from .common import E, tag, get_number_dtype, int_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import toUnitVec, checkSource, xrange
@@ -186,7 +186,7 @@ class Polylist(primitive.Primitive):
             self.xmlnode = xmlnode
             """ElementTree representation of the line set."""
         else:
-            txtindices = ' '.join(map(str, self.indices.flatten().tolist()))
+            txtindices = ' '.join(map(int_format_func(), self.indices.flatten().tolist()))
             acclen = len(self.indices)
 
             self.xmlnode = E.polylist(count=str(self.npolygons),

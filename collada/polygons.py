@@ -17,7 +17,7 @@ import numpy
 from . import primitive
 from . import polylist
 from . import triangleset
-from .common import E, tag
+from .common import E, tag, int_format_func
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import toUnitVec, checkSource
@@ -73,7 +73,7 @@ class Polygons(polylist.Polylist):
                 self.xmlnode.append(inpnode)
 
             for poly in polygons:
-                self.xmlnode.append(E.p(' '.join(map(repr, poly.flatten().tolist()))))
+                self.xmlnode.append(E.p(' '.join(map(int_format_func(), poly.flatten().tolist()))))
 
     @staticmethod
     def load( collada, localscope, node ):
