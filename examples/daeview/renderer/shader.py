@@ -6,6 +6,7 @@
 #
 
 from pyglet.gl import *
+import ctypes
 
 class Shader:
 	# vert, frag and geom take arrays of source strings
@@ -37,22 +38,23 @@ class Shader:
 
 		# convert the source strings into a ctypes pointer-to-char array, and upload them
 		# this is deep, dark, dangerous black magick - don't try stuff like this at home!
-		src = (c_char_p * count)(*strings)
-		glShaderSource(shader, count, cast(pointer(src), POINTER(POINTER(c_char))), None)
+		src = (ctypes.c_char_p * count)(*strings)
+		glShaderSource(shader, count, ctypes.cast(ctypes.pointer(src),
+			       ctypes.POINTER(ctypes.POINTER(ctypes.c_char))), None)
 
 		# compile the shader
 		glCompileShader(shader)
 
-		temp = c_int(0)
+		temp = ctypes.c_int(0)
 		# retrieve the compile status
-		glGetShaderiv(shader, GL_COMPILE_STATUS, byref(temp))
+		glGetShaderiv(shader, GL_COMPILE_STATUS, ctypes.byref(temp))
 
 		# if compilation failed, print the log
 		if not temp:
 			# retrieve the log length
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, byref(temp))
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, ctypes.byref(temp))
 			# create a buffer for the log
-			buffer = create_string_buffer(temp.value)
+			buffer = ctypes.create_string_buffer(temp.value)
 			# retrieve the log text
 			glGetShaderInfoLog(shader, temp, None, buffer)
 			# print the log to the console
@@ -65,14 +67,14 @@ class Shader:
 		# link the program
 		glLinkProgram(self.handle)
 
-		temp = c_int(0)
+		temp = ctypes.c_int(0)
 		# retrieve the link status
-		glGetProgramiv(self.handle, GL_LINK_STATUS, byref(temp))
+		glGetProgramiv(self.handle, GL_LINK_STATUS, ctypes.byref(temp))
 
 		# if linking failed, print the log
 		if not temp:
 			#	retrieve the log length
-			glGetProgramiv(self.handle, GL_INFO_LOG_LENGTH, byref(temp))
+			glGetProgramiv(self.handle, GL_INFO_LOG_LENGTH, ctypes.byref(temp))
 			# create a buffer for the log
 			buffer = create_string_buffer(temp.value)
 			# retrieve the log text

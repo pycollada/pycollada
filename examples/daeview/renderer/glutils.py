@@ -10,7 +10,7 @@ def VecF(*args):
 def getOpenGLVersion():
     """Get the OpenGL minor and major version number"""
     versionString = glGetString(GL_VERSION)
-    return ctypes.cast(versionString, c_char_p).value
+    return ctypes.cast(versionString, ctypes.c_char_p).value
 
 def getGLError():
     e = glGetError()
