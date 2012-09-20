@@ -1,0 +1,39 @@
+This example illustrates how to visualize COLLADA model using
+OpenGL. As a Python wrapper for OpenGL API the pyglet library
+(http://www.pyglet.org/) is used. Please see some more details
+regarding pyglet in the requirements.txt file.
+
+There are two renderers implemented:
+* GLSLRenderer which uses OpenGL shaders and VBOs.
+* OldStyleRenderer which uses now deprecated display lists to draw the
+  model.
+
+By default, this example uses GLSLRenderer which is fast and is the
+way to go with modern OpenGL API. However, most probably because of
+bug in our shaders code, there are some visualization artifacts when
+using GLSLRenderer.
+
+In contrast, OldStyleRenderer is slower but it produces more correct
+results. Also, the code is quite straight forward and should be easy
+to understand. OldStyleRenderer works fine on Windows but throws error
+on Linux and OSX. So please feel free to experiment and find out which
+one works for you.
+
+To switch between two renderes, just comment/uncomment corresponding
+code at line 64-65 in daeview.py. For example, to use
+OldStyleRenderer:
+  #daerender = renderer.GLSLRenderer(collada_file)
+  daerender = renderer.OldStyleRenderer(collada_file, window)
+
+To run the example, simply execute daeview.py <dae_file_name>. There
+are some models to test in the data/ directory. If started without
+parameters, cockpit.zip will be displayed.
+
+This example is not intended to be complete DAE viewer and might fail
+to display some files. The main purpose of this example is to help
+understand how to get access to the important information and traverse
+the data structures created by pycollada after parsing certain dae
+file.
+
+Regards,
+Andrey Nechypurenko (andreynech@gmail.com)
