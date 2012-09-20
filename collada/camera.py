@@ -134,9 +134,9 @@ class PerspectiveCamera(Camera):
 
     def save(self):
         """Saves the perspective camera's properties back to xmlnode"""
-        Extra.saveextras(self.xmlnode,self.extras)
         self._checkValidParams()
         self._recreateXmlNode()
+        Extra.saveextras(self.xmlnode,self.extras)
 
 
     @staticmethod

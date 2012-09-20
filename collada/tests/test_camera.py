@@ -60,6 +60,7 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(cam.xfov, 30)
         self.assertEqual(cam.yfov, None)
         self.assertEqual(cam.aspect_ratio, None)
+        self.assertEqual(len(cam.extras), 0)
 
         cam.save()
         self.assertEqual(cam.id, "mycam")
@@ -68,6 +69,7 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(cam.xfov, 30)
         self.assertEqual(cam.yfov, None)
         self.assertEqual(cam.aspect_ratio, None)
+        self.assertEqual(len(cam.extras), 0)
 
         cam = collada.camera.PerspectiveCamera.load(self.dummy, {}, fromstring(tostring(cam.xmlnode)))
         self.assertEqual(cam.id, "mycam")
@@ -76,6 +78,7 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(cam.xfov, 30)
         self.assertEqual(cam.yfov, None)
         self.assertEqual(cam.aspect_ratio, None)
+        self.assertEqual(len(cam.extras), 0)
 
         cam.id = "yourcam"
         cam.znear = 5
@@ -83,6 +86,7 @@ class TestCamera(unittest.TestCase):
         cam.xfov = None
         cam.yfov = 50
         cam.aspect_ratio = 1.3
+        cam.extras.append(collada.extra.Extra(id='extra1', techniques=[collada.technique.Technique(profile='jeff')]))
         cam.save()
         cam = collada.camera.PerspectiveCamera.load(self.dummy, {}, fromstring(tostring(cam.xmlnode)))
         self.assertEqual(cam.id, "yourcam")
@@ -91,6 +95,9 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(cam.xfov, None)
         self.assertEqual(cam.yfov, 50)
         self.assertEqual(cam.aspect_ratio, 1.3)
+        self.assertEqual(len(cam.extras), 1)
+        self.assertEqual(cam.extras[0].id, 'extra1')
+        self.assertEqual(cam.extras[0].techniques[0].profile, 'jeff')
 
         cam.xfov = 20
         with self.assertRaises(DaeMalformedError):

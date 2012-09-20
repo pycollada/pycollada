@@ -67,7 +67,7 @@ class Extra(DaeObject):
 
     def save(self,recurse=True):
         if self.id is not None:
-            self.xmlnode.set('id',self.sid)
+            self.xmlnode.set('id', self.id)
         else:
             self.xmlnode.attrib.pop('id',None)
         if self.name is not None:
