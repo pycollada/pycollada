@@ -10,7 +10,7 @@ void main(void)
   gl_Position = mvpMatrix * vVertex; 
 }'''],
 ['''
-precision mediump float;
+//precision mediump float;
 uniform vec4 vColor;
 void main(void) 
 {
@@ -48,7 +48,7 @@ void main(void)
   gl_Position = mvpMatrix * vVertex; 
 }'''],
 ['''
-precision mediump float;
+//precision mediump float;
 varying vec4 vFragColor; 
 void main(void) 
 {
@@ -110,7 +110,7 @@ void main(void)
   gl_Position = mvpMatrix * vVertex; 
 }'''],
 ['''
-precision mediump float;
+//precision mediump float;
 varying vec4 vVaryingColor; 
 void main(void) 
 {
@@ -125,39 +125,30 @@ void main(void)
 
 simplePhong = (['''
 varying vec3 normal, lightDir0, eyeVec;
-
 void main()
 {
   normal = gl_NormalMatrix * gl_Normal;
-
   vec3 vVertex = vec3(gl_ModelViewMatrix * gl_Vertex);
-
   lightDir0 = vec3(gl_LightSource[0].position.xyz - vVertex);
   eyeVec = -vVertex;
-
   gl_Position = ftransform();
 }
 '''], 
 ['''
-varying vec3 normal, lightDir0, eyeVec;
 uniform vec4 diffuse, specular, ambient;
 uniform float shininess;
-
+varying vec3 normal, lightDir0, eyeVec;
 void main (void)
 {
   vec4 final_color =
     (gl_FrontLightModelProduct.sceneColor * ambient)
     + (gl_LightSource[0].ambient * ambient);
-
   vec3 N = normalize(normal);
   vec3 L0 = normalize(lightDir0);
-
   float lambertTerm0 = dot(N,L0);
-
   if(lambertTerm0 > 0.0)
   {
     final_color += gl_LightSource[0].diffuse * diffuse * lambertTerm0;
-
     vec3 E = normalize(eyeVec);
     vec3 R = reflect(-L0, N);
     float spec = pow(max(dot(R, E), 0.0), shininess);
