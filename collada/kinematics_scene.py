@@ -45,7 +45,7 @@ class BindKinematicsModel(DaeObject):
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.bind_kinematics_model()
-            self.save()
+            self.save(0)
     @staticmethod
     def load( collada, localscope, node ):
         noderef = node.get('node')
@@ -55,6 +55,25 @@ class BindKinematicsModel(DaeObject):
         param = node.find(tag('param'))
         sidref = node.find(tag('SIDREF'))
         return BindKinematicsModel(scenenode, noderef, param,sidref,xmlnode=node)
+
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        if self.scenenode is not None:
+            self.xmlnode.set('node','#'+self.scenenode.id)
+        elif self.noderef is not None:
+            self.xmlnode.set('node',self.noderef)
+        else:
+            self.xmlnode.attrib.pop('node',None)
+        param = self.xmlnode.find(tag('param'))
+        if param is not None:
+            self.xmlnode.remove(param)
+        if self.param is not None:
+            self.xmlnode.append(self.param)
+        sidref = self.xmlnode.find(tag('sidref'))
+        if sidref is not None:
+            self.xmlnode.remove(sidref)
+        if self.sidref is not None:
+            self.xmlnode.append(self.sidref)
 
 class BindJointAxis(DaeObject):
     def __init__(self,scenenode,targetref, axis=None,value=None,xmlnode=None):
@@ -76,6 +95,25 @@ class BindJointAxis(DaeObject):
         axis = node.find(tag('axis'))
         value = node.find(tag('value'))
         return BindJointAxis(scenenode, targetref,axis, value,xmlnode=node)
+
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        if self.scenenode is not None:
+            self.xmlnode.set('target','#'+self.scenenode.id)
+        elif self.targetref is not None:
+            self.xmlnode.set('target',self.noderef)
+        else:
+            self.xmlnode.attrib.pop('target',None)
+        axis = self.xmlnode.find(tag('axis'))
+        if axis is not None:
+            self.xmlnode.remove(axis)
+        if self.axis is not None:
+            self.xmlnode.append(self.axis)
+        value = self.xmlnode.find(tag('value'))
+        if value is not None:
+            self.xmlnode.remove(value)
+        if self.value is not None:
+            self.xmlnode.append(self.value)
     
 class InstanceKinematicsScene(DaeObject):
     def __init__(self,kscene=None, url=None, sid=None, name=None, asset=None, extras=None, bind_kinematics_models=None, bind_joint_axes=None, xmlnode=None):
@@ -97,7 +135,7 @@ class InstanceKinematicsScene(DaeObject):
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.instance_kinematics_model()
-            self.save()
+            self.save(0)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -123,7 +161,7 @@ class InstanceKinematicsScene(DaeObject):
         extras = Extra.loadextras(collada, node)
         return InstanceKinematicsScene(kscene,url,sid,name,asset,extras,bind_kinematics_models, bind_joint_axes, xmlnode=node)
     
-    def save(self):
+    def save(self, recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.kscene is not None:
@@ -144,13 +182,15 @@ class InstanceKinematicsScene(DaeObject):
         if asset is not None:
             self.xmlnode.remove(asset)
         if self.asset is not None:
-            self.asset.save()
+            if recurse:
+                self.asset.save(recurse)
             self.xmlnode.append(self.asset.xmlnode)
         oldnodes = self.xmlnode.findall('bind_kinematics_model') + self.xmlnode.findall('bind_joint_axis')
         for oldnode in oldnodes:
             self.xmlnode.remove(oldnode)
         for node in self.bind_kinematics_models + self.bind_joint_axes:
-            node.save()
+            if recurse:
+                node.save(recurse)
             self.xmlnode.append(node.xmlnode)
             
 class KinematicsScene(DaeObject):
@@ -207,5 +247,5 @@ class KinematicsScene(DaeObject):
             self.xmlnode.remove(node)
         for model in self.instance_kinematics_models + self.instance_articulated_systems:
             if recurse:
-                model.save()
+                model.save(recurse)
             self.xmlnode.append(model.xmlnode)

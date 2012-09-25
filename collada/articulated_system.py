@@ -124,7 +124,7 @@ class Kinematics(DaeObject):
             self.xmlnode.remove(oldnode)
         for ikmodel in self.instance_kinematics_models:
             if recurse:
-                ikmodel.save()
+                ikmodel.save(recurse)
             self.xmlnode.append(ikmodel.xmlnode)
         technique_common = self.xmlnode.find(tag('technique_common'))
         if technique_common is None:
@@ -182,7 +182,7 @@ class Motion(DaeObject):
             self.xmlnode.remove(ias)
         elif self.instance_articulated_system is not None:
             if recurse:
-                self.instance_articulated_system.save()
+                self.instance_articulated_system.save(recurse)
             self.xmlnode.append(self.instance_articulated_system.xmlnode)
         technique_common = self.xmlnode.find(tag('technique_common'))
         if technique_common is None:
@@ -257,14 +257,14 @@ class ArticulatedSystem(DaeObject):
         Extra.saveextras(self.xmlnode,self.extras)
         if self.kinematics is not None:
             if recurse:
-                self.kinematics.save()
+                self.kinematics.save(recurse)
             node = self.xmlnode.find(tag('kinematics'))
             if node is not None:
                 self.xmlnode.remove(node)
             self.xmlnode.append(self.kinematics.xmlnode)
         if self.motion is not None:
             if recurse:
-                self.motion.save()
+                self.motion.save(recurse)
             node = self.xmlnode.find(tag('motion'))
             if node is not None:
                 self.xmlnode.remove(node)

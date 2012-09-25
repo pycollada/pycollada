@@ -35,7 +35,7 @@ class InstanceKinematicsModel(DaeObject):
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.instance_kinematics_model()
-            self.save()
+            self.save(0)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -56,7 +56,7 @@ class InstanceKinematicsModel(DaeObject):
         extras = Extra.loadextras(collada, node)
         return InstanceKinematicsModel(kmodel, url, sid, name, extras, xmlnode=node)
     
-    def save(self):
+    def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.kmodel is not None and self.kmodel.id is not None:
@@ -160,7 +160,7 @@ class KinematicsModel(DaeObject):
         node = KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
         return node
 
-    def save(self):
+    def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)
         Technique.savetechniques(self.xmlnode,self.techniques)
         technique_common = self.xmlnode.find(tag('technique_common'))
@@ -169,13 +169,15 @@ class KinematicsModel(DaeObject):
             self.xmlnode.append(technique_common)
         technique_common.clear()
         for obj in self.links + self.joints + self.formulas:
-            obj.save()
+            if recurse:
+                obj.save(recurse)
             technique_common.append(obj.xmlnode)
         asset = self.xmlnode.find(tag('asset'))
         if asset is not None:
             self.xmlnode.remove(asset)
         if self.asset is not None:
-            self.asset.save()
+            if recurse:
+                self.asset.save(recurse)
             self.xmlnode.append(self.asset.xmlnode)
         if self.id is not None:
             self.xmlnode.set('id',self.id)

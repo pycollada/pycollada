@@ -144,7 +144,7 @@ class Node(SceneNode):
 
         if recurse:
             for child in self.children:
-                child.save()
+                child.save(recurse)
                 
         if self.id is not None:
             self.xmlnode.set('id', self.id)
@@ -232,7 +232,7 @@ class NodeNode(Node):
             """ElementTree representation of the node node."""
         else:
             self.xmlnode = E.instance_node()
-            self.save()
+            self.save(0)
 
     def objects(self, tipo, matrix=None):
         for obj in self.node.objects(tipo, matrix):
@@ -256,7 +256,7 @@ class NodeNode(Node):
         extras = Extra.loadextras(collada, node)
         return NodeNode(referred_node, sid, name, url, proxy, extras, xmlnode=node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the node node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.node is not None:
@@ -345,13 +345,14 @@ class GeometryNode(SceneNode):
         extras = Extra.loadextras(collada, node)
         return GeometryNode( geometry, materials, extras, xmlnode=node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the geometry node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', "#%s" % self.geometry.id)
 
-        for m in self.materials:
-            m.save()
+        if recurse:
+            for m in self.materials:
+                m.save(recurse)
 
         matparent = self.xmlnode.find('%s/%s'%( tag('bind_material'), tag('technique_common') ) )
         if matparent is None and len(self.materials)==0:
@@ -439,12 +440,13 @@ class ControllerNode(SceneNode):
         extras = Extra.loadextras(collada, node)
         return ControllerNode( controller, materials, xmlnode=node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the controller node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', '#'+self.controller.id)
-        for mat in self.materials:
-            mat.save()
+        if recurse:
+            for mat in self.materials:
+                mat.save()
 
     def __str__(self):
         return '<ControllerNode controller=%s>' % (self.controller.id,)
@@ -511,7 +513,7 @@ class MaterialNode(SceneNode):
     def objects(self):
         pass
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the material node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('symbol', self.symbol)
@@ -574,7 +576,7 @@ class CameraNode(SceneNode):
         extras = Extra.loadextras(collada, node)
         return CameraNode( camera, extras, xmlnode=node)
 
-    def save(self):
+    def save(self,recurse=True):
         """Saves the camera node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', '#'+self.camera.id)
@@ -625,7 +627,7 @@ class LightNode(SceneNode):
         extras = Extra.loadextras(collada, node)
         return LightNode( light, extras, xmlnode=node)
 
-    def save(self):
+    def save(self,recurse=True):
         """Saves the light node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('url', '#'+self.light.id)
@@ -746,12 +748,13 @@ class Scene(DaeObject):
         extras = Extra.loadextras(collada, node)
         return Scene(id, nodes, extras, xmlnode=node, collada=collada)
 
-    def save(self):
+    def save(self,recurse=True):
         """Saves the scene back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
         for node in self.nodes:
-            node.save()
+            if recurse:
+                node.save(recurse)
             if node.xmlnode not in self.xmlnode:
                 self.xmlnode.append(node.xmlnode)
         xmlnodes = [n.xmlnode for n in self.nodes]
