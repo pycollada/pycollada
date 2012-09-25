@@ -94,7 +94,7 @@ class Contributor(DaeObject):
         return Contributor(author=author, authoring_tool=authoring_tool,
                            comments=comments, copyright=copyright, source_data=source_data, xmlnode=node)
 
-    def save(self):
+    def save(self,recurse=True):
         """Saves the contributor info back to :attr:`xmlnode`"""
         _correctValInNode(self.xmlnode, 'author', self.author)
         _correctValInNode(self.xmlnode, 'authoring_tool', self.authoring_tool)
@@ -194,7 +194,7 @@ class Asset(DaeObject):
             self.xmlnode.append(E.unit(name=self.unitname, meter=float_format_func()(self.unitmeter)))
         self.xmlnode.append(E.up_axis(self.upaxis))
 
-    def save(self):
+    def save(self,recurse=True):
         """Saves the asset info back to :attr:`xmlnode`"""
         self._recreateXmlNode()
 

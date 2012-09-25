@@ -101,7 +101,7 @@ class BindJointAxis(DaeObject):
         if self.scenenode is not None:
             self.xmlnode.set('target','#'+self.scenenode.id)
         elif self.targetref is not None:
-            self.xmlnode.set('target',self.noderef)
+            self.xmlnode.set('target',self.targetref)
         else:
             self.xmlnode.attrib.pop('target',None)
         axis = self.xmlnode.find(tag('axis'))
