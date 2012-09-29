@@ -41,20 +41,28 @@ class InstanceRigidBody(object):
             self.save(0)
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load( collada, pmodel, node ):
+        """loads a InstanceRigidBody
+        :param pmodel: a PhysicsModel object
+        """
         body=node.get('body')
         rigid_body = None
+        if pmodel is not None:
+            for testbody in pmodel.rigid_bodies:
+                if testbody.sid == body:
+                    rigid_body = testbody
+                    break
         target=node.get('target')
         sid=node.get('sid')
         name=node.get('name')
         extras = Extra.loadextras(collada, node)
         techniques = Technique.loadtechniques(collada, node)
-        return InstanceRigidBody(rigid_body, body, target, sid, name, techniques, extras, xmlnode)
+        return InstanceRigidBody(rigid_body, body, target, sid, name, techniques, extras, node)
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        Extra.savetechniques(self.xmlnode,self.techniques)
+        Technique.savetechniques(self.xmlnode,self.techniques)
         self.xmlnode.set('body',self.body)
         self.xmlnode.set('target',self.target)
         save_attribute(self.xmlnode,'sid',self.sid)

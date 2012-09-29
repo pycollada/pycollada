@@ -39,10 +39,11 @@ class InstancePhysicsModel(DaeObject):
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        if self.pmodel is not None and self.pmodel.id is not None:
-            self.xmlnode.set('url','#'+self.pmodel.id)
-        elif self.url is not None:
+        # prioritize saving the url rather than self.kscene in order to account for external references
+        if self.url is not None:
             self.xmlnode.set('url',self.url)
+        elif self.pmodel is not None and self.pmodel.id is not None:
+            self.xmlnode.set('url','#'+self.pmodel.id)
         else:
             self.xmlnode.attrib.pop('url',None)
         if self.sid is not None:
@@ -68,15 +69,15 @@ class InstancePhysicsModel(DaeObject):
                 pmodel = collada.physics_models.get(url[1:])
                 if pmodel is None:
                     raise DaeBrokenRefError('physics_model %s not found in library'%url)
-                
-                if name is not None:
-                    pmodel = copy.copy(pmodel)
-                    pmodel.name = name
+                # don't copy since then cannot compare with collada.physics_models
+#                 if name is not None:
+#                     pmodel = copy.copy(pmodel)
+#                     pmodel.name = name
         
         instance_rigid_bodies = []
         for subnode in node:
             if subnode.tag == tag('instance_rigid_body'):
-                pass
+                instance_rigid_bodies.append(InstanceRigidBody.load(collada, pmodel, subnode))
         extras = Extra.loadextras(collada, node)
         return InstancePhysicsModel(pmodel,url,node.get('sid'), name, node.get('parent'), instance_rigid_bodies, extras, xmlnode=node) # external reference
         

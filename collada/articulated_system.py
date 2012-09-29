@@ -58,19 +58,23 @@ class InstanceArticulatedSystem(DaeObject):
                 asystem = collada.articulated_systems.get(url[1:])
                 if asystem is None:
                     raise DaeBrokenRefError('articulated_system %s not found in library'%url)
-                if name is not None:
-                    asystem = copy.copy(asystem)
-                    asystem.name = name
+                # don't copy since then cannot compare with collada.physics_models
+#                 if name is not None:
+#                     asystem = copy.copy(asystem)
+#                     asystem.name = name
         extras = Extra.loadextras(collada, node)
         return InstanceArticulatedSystem(asystem, url, sid, name, newparams, setparams, extras, xmlnode=node)
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        if self.asystem is not None:
+        # prioritize saving the url rather than self.kscene in order to account for external references
+        if self.url is not None:
+            self.xmlnode.set('url',self.url)
+        elif self.asystem is not None:
             self.xmlnode.set('url','#'+self.asystem.id)
         else:
-            save_attribute(self.xmlnode,'url',self.url)
+            self.xmlnode.attrib.pop('url',None)
         save_attribute(self.xmlnode,'sid',self.sid)
         save_attribute(self.xmlnode,'name',self.name)
         for oldnode in self.xmlnode.findall(tag('newparam')) + self.xmlnode.findall(tag('sewparam')):

@@ -12,7 +12,7 @@
 """Contains objects for representing a kinematics scene."""
 
 import copy
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, save_attribute, save_child_object
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .asset import Asset
@@ -164,28 +164,17 @@ class InstanceKinematicsScene(DaeObject):
     def save(self, recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        if self.kscene is not None:
-            self.xmlnode.set('url','#'+self.kscene.id)
-        elif self.url is not None:
+        # prioritize saving the url rather than self.kscene in order to account for external references
+        if self.url is not None:
             self.xmlnode.set('url',self.url)
+        elif self.kscene is not None:
+            self.xmlnode.set('url','#'+self.kscene.id)
         else:
             self.xmlnode.attrib.pop('url',None)
-        if self.sid is not None:
-            self.xmlnode.set('sid',self.sid)
-        else:
-            self.xmlnode.attrib.pop('sid',None)
-        if self.name is not None:
-            self.xmlnode.set('name',self.name)
-        else:
-            self.xmlnode.attrib.pop('name',None)
-        asset = self.xmlnode.find(tag('asset'))
-        if asset is not None:
-            self.xmlnode.remove(asset)
-        if self.asset is not None:
-            if recurse:
-                self.asset.save(recurse)
-            self.xmlnode.append(self.asset.xmlnode)
-        oldnodes = self.xmlnode.findall('bind_kinematics_model') + self.xmlnode.findall('bind_joint_axis')
+        save_attribute(self.xmlnode,'sid',self.sid)
+        save_attribute(self.xmlnode,'name',self.name)
+        save_child_object(self.xmlnode, tag('asset'), self.asset, recurse)
+        oldnodes = self.xmlnode.findall(tag('bind_kinematics_model')) + self.xmlnode.findall(tag('bind_joint_axis'))
         for oldnode in oldnodes:
             self.xmlnode.remove(oldnode)
         for node in self.bind_kinematics_models + self.bind_joint_axes:

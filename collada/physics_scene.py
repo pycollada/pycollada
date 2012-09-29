@@ -48,10 +48,13 @@ class InstancePhysicsScene(DaeObject):
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        if self.pscene is not None:
+        # prioritize saving the url rather than self.kscene in order to account for external references
+        if self.url is not None:
+            self.xmlnode.set('url',self.url)
+        elif self.pscene is not None:
             self.xmlnode.set('url','#'+self.pscene.id)
         else:
-            save_attribute(self.xmlnode,'url',self.url)
+            self.xmlnode.attrib.pop('url',None)
         save_attribute(self.xmlnode,'sid',self.sid)
         save_attribute(self.xmlnode,'name',self.name)
 

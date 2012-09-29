@@ -264,7 +264,7 @@ class IndexedList(list):
             ind = list.index(self, ind_or_obj)
             obj = list.__getitem__(self, ind)
         self._delindex(obj)
-        return list.remove(self, ind)
+        return list.pop(self, ind)
 
 def _correctValInNode(outernode, tagname, value):
     innernode = outernode.find( tag(tagname) )

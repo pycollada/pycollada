@@ -48,10 +48,10 @@ class InstanceKinematicsModel(DaeObject):
                 kmodel = collada.kinematics_models.get(url[1:])
                 if kmodel is None:
                     raise DaeBrokenRefError('kinematics_model %s not found in library'%url)
-                
-                if name is not None:
-                    kmodel = copy.copy(kmodel)
-                    kmodel.name = name
+                # don't copy since then cannot compare with collada.physics_models
+#                 if name is not None:
+#                     kmodel = copy.copy(kmodel)
+#                     kmodel.name = name
                 
         extras = Extra.loadextras(collada, node)
         return InstanceKinematicsModel(kmodel, url, sid, name, extras, xmlnode=node)
@@ -59,10 +59,11 @@ class InstanceKinematicsModel(DaeObject):
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
-        if self.kmodel is not None and self.kmodel.id is not None:
-            self.xmlnode.set('url','#'+self.kmodel.id)
-        elif self.url is not None:
+        # prioritize saving the url rather than self.kscene in order to account for external references
+        if self.url is not None:
             self.xmlnode.set('url',self.url)
+        elif self.kmodel is not None and self.kmodel.id is not None:
+            self.xmlnode.set('url','#'+self.kmodel.id)
         else:
             self.xmlnode.attrib.pop('url',None)
         save_attribute(self.xmlnode,'sid',self.sid)
