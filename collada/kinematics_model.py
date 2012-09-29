@@ -12,7 +12,7 @@
 """Contains objects for representing a kinematics model."""
 
 import copy
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, save_attribute, save_child_object
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .extra import Extra
@@ -65,22 +65,14 @@ class InstanceKinematicsModel(DaeObject):
             self.xmlnode.set('url',self.url)
         else:
             self.xmlnode.attrib.pop('url',None)
-        if self.sid is not None:
-            self.xmlnode.set('sid',self.sid)
-        else:
-            self.xmlnode.attrib.pop('sid',None)
-        if self.name is not None:
-            self.xmlnode.set('name',self.name)
-        else:
-            self.xmlnode.attrib.pop('name',None)
+        save_attribute(self.xmlnode,'sid',self.sid)
+        save_attribute(self.xmlnode,'name',self.name)
             
 class KinematicsModel(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics_model> tag"""
     def __init__(self, id, name, links=None, joints=None, formulas=None, asset = None, techniques=None, extras=None, xmlnode=None):
         """Create a kinematics_model instance
 
-          :param collada.Collada collada:
-            The collada object this geometry belongs to
           :param str id:
             A unique string identifier for the geometry
           :param str name:
@@ -122,16 +114,7 @@ class KinematicsModel(DaeObject):
             """ElementTree representation of the geometry."""
         else:
             self.xmlnode = E.kinematics_model()
-            for link in self.links:
-                self.xmlnode.append(link.xmlnode)
-            for joint in self.joints:
-                self.xmlnode.append(joint.xmlnode)
-            for formula in self.formulas:
-                self.xmlnode.append(formula.xmlnode)
-            if self.asset is not None:
-                self.xmlnode.append(self.asset.xmlnode)
-            if len(self.id) > 0: self.xmlnode.set("id", self.id)
-            if len(self.name) > 0: self.xmlnode.set("name", self.name)
+            self.save(0)
 
     @staticmethod
     def load( collada, localscope, node ):
@@ -157,8 +140,7 @@ class KinematicsModel(DaeObject):
                 asset = Asset.load(collada, localscope, subnode)
         techniques = Technique.loadtechniques(collada, node)
         extras = Extra.loadextras(collada, node)
-        node = KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
-        return node
+        return KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)
@@ -172,18 +154,7 @@ class KinematicsModel(DaeObject):
             if recurse:
                 obj.save(recurse)
             technique_common.append(obj.xmlnode)
-        asset = self.xmlnode.find(tag('asset'))
-        if asset is not None:
-            self.xmlnode.remove(asset)
-        if self.asset is not None:
-            if recurse:
-                self.asset.save(recurse)
-            self.xmlnode.append(self.asset.xmlnode)
-        if self.id is not None:
-            self.xmlnode.set('id',self.id)
-        else:
-            self.xmlnode.attrib.pop('id',None)
-        if self.name is not None:
-            self.xmlnode.set('name',self.name)
-        else:
-            self.xmlnode.attrib.pop('name',None)
+        
+        save_child_object(self.xmlnode, tag('asset'), self.asset, recurse)
+        save_attribute(self.xmlnode,'id',self.id)
+        save_attribute(self.xmlnode,'name',self.name)

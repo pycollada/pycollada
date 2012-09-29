@@ -40,7 +40,7 @@ class Transform(DaeObject):
 class TranslateTransform(Transform):
     """Contains a translation transformation as defined in the collada <translate> tag."""
 
-    def __init__(self, x, y, z, xmlnode=None):
+    def __init__(self, x, y, z, sid=None, xmlnode=None):
         """Creates a translation transformation
 
         :param float x:
@@ -62,29 +62,39 @@ class TranslateTransform(Transform):
         self.matrix = numpy.identity(4, dtype=get_number_dtype())
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.matrix[:3,3] = [ x, y, z ]
+        self.sid = sid
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.translate(' '.join(map(float_format_func(), [x, y, z])))
+            self.xmlnode = E.translate()
+            self.save(0)
             
     @staticmethod
     def load(collada, node):
+        sid=node.get('sid')
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 3:
             raise DaeMalformedError("Translate node requires three float values")
-        return TranslateTransform(floats[0], floats[1], floats[2], node)
+        return TranslateTransform(floats[0], floats[1], floats[2], sid, node)
+
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        self.xmlnode.text = ' '.join(map(float_format_func(), [self.x, self.y, self.z]))
 
     def __str__(self):
         return '<TranslateTransform (%.15e, %.15e, %.15e)>' % (self.x, self.y, self.z)
 
     def __repr__(self):
         return str(self)
-
-
+        
 class RotateTransform(Transform):
     """Contains a rotation transformation as defined in the collada <rotate> tag."""
 
-    def __init__(self, x, y, z, angle, xmlnode=None):
+    def __init__(self, x, y, z, angle, sid=None, xmlnode=None):
         """Creates a rotation transformation
 
         :param float x:
@@ -108,18 +118,29 @@ class RotateTransform(Transform):
         self.angle = angle
         """angle of rotation, in radians"""
         self.matrix = makeRotationMatrix(x, y, z, angle*numpy.pi/180.0)
+        self.sid = sid
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.rotate(' '.join(map(float_format_func(), [x, y, z, angle])))
+            self.xmlnode = E.rotate()
+            self.save(0)
 
     @staticmethod
     def load(collada, node):
+        sid=node.get('sid')
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 4:
             raise DaeMalformedError("Rotate node requires four float values")
-        return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
+        return RotateTransform(floats[0], floats[1], floats[2], floats[3], sid, node)
+
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        self.xmlnode.text = ' '.join(map(float_format_func(), [self.x, self.y, self.z, self.angle]))
 
     def __str__(self):
         return '<RotateTransform (%.15e, %.15e, %.15e) angle=%.15e>' % (self.x, self.y, self.z, self.angle)
@@ -131,7 +152,7 @@ class RotateTransform(Transform):
 class ScaleTransform(Transform):
     """Contains a scale transformation as defined in the collada <scale> tag."""
 
-    def __init__(self, x, y, z, xmlnode=None):
+    def __init__(self, x, y, z, sid=None, xmlnode=None):
         """Creates a scale transformation
 
         :param float x:
@@ -155,6 +176,7 @@ class ScaleTransform(Transform):
         self.matrix[0,0] = x
         self.matrix[1,1] = y
         self.matrix[2,2] = z
+        self.sid = sid
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
@@ -162,10 +184,19 @@ class ScaleTransform(Transform):
             
     @staticmethod
     def load(collada, node):
+        sid=node.get('sid')
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 3:
             raise DaeMalformedError("Scale node requires three float values")
-        return ScaleTransform(floats[0], floats[1], floats[2], node)
+        return ScaleTransform(floats[0], floats[1], floats[2], sid, node)
+
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        self.xmlnode.text = ' '.join(map(float_format_func(), [self.x, self.y, self.z]))
 
     def __str__(self):
         return '<ScaleTransform (%.15e, %.15e, %.15e)>' % (self.x, self.y, self.z)
@@ -177,7 +208,7 @@ class ScaleTransform(Transform):
 class MatrixTransform(Transform):
     """Contains a matrix transformation as defined in the collada <matrix> tag."""
 
-    def __init__(self, matrix, xmlnode=None):
+    def __init__(self, matrix, sid=None, xmlnode=None):
         """Creates a matrix transformation
 
         :param numpy.array matrix:
@@ -190,15 +221,26 @@ class MatrixTransform(Transform):
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         if len(self.matrix) != 16: raise DaeMalformedError('Corrupted matrix transformation node')
         self.matrix.shape = (4, 4)
+        self.sid = sid
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.matrix(' '.join(map(float_format_func(), self.matrix.flat)))
-            
+            self.xmlnode = E.matrix()
+            self.save(0)
+
     @staticmethod
     def load(collada, node):
+        sid=node.get('sid')
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
-        return MatrixTransform(floats, node)
+        return MatrixTransform(floats, sid, node)
+
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        self.xmlnode.text = ' '.join(map(float_format_func(), self.matrix.flat))
 
     def __str__(self):
         return '<MatrixTransform>'
@@ -210,7 +252,7 @@ class MatrixTransform(Transform):
 class LookAtTransform(Transform):
     """Contains a transformation for aiming a camera as defined in the collada <lookat> tag."""
 
-    def __init__(self, eye, interest, upvector, xmlnode=None):
+    def __init__(self, eye, interest, upvector, sid=None, xmlnode=None):
         """Creates a lookat transformation
 
         :param numpy.array eye:
@@ -242,20 +284,29 @@ class LookAtTransform(Transform):
         self.matrix[1,0:3] = upvector
         self.matrix[2,0:3] = front
         self.matrix[3,0:3] = eye
-
+        self.sid = sid
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.lookat(' '.join(map(float_format_func(),
-                                        numpy.concatenate((self.eye, self.interest, self.upvector)) )))
-            
+            self.xmlnode = E.lookat()
+            self.save(0)
+
     @staticmethod
     def load(collada, node):
+        sid=node.get('sid')
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 9:
             raise DaeMalformedError("Lookat node requires 9 float values")
-        return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], node)
-
+        return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], sid, node)
+    
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        if self.sid is not None:
+            self.xmlnode.set('sid',self.sid)
+        else:
+            self.xmlnode.attrib.pop('sid',None)
+        self.xmlnode.text = ' '.join(map(float_format_func(), numpy.concatenate((self.eye, self.interest, self.upvector)) ))
+        
     def __str__(self):
         return '<LookAtTransform>'
 

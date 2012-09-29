@@ -36,12 +36,36 @@ def _set_number_dtype(dtype=None):
 # unused precision, so repr spits out garbage.
 def float_format_func():
     if _number_dtype == numpy.float64:
-        return lambda x: repr(float(x))
+        return lambda x: repr(_number_dtype(x))
+    
     return lambda x: '%.9g' % x
 
 def int_format_func():
     return lambda x: '%d' % x
 
+def save_attribute(xmlnode, attribute, value):
+    """saves an attribute to xmlnode
+   :param value: if value is None, will remove the attribute if one exists
+    """
+    if value is not None:
+        xmlnode.set(attribute, value)
+    else:
+        xmlnode.attrib.pop(attribute,None)
+
+def save_child_object(xmlnode,tag, childobject, recurse=True):
+    """Saves the DaeObject as a child of xmlnode with tag. 
+    If xmlnode already contains such a child, removes it and adds a new one.
+
+    :param childobject: derived from DaeObject. If childobject is None, will remove any children with the same tag from xmlnode
+    :param recurse: if true, will call childobject.save, otherwise will not
+    """
+    for previouschild in xmlnode.findall(tag):
+        xmlnode.remove(previouschild)
+    if childobject is not None:
+        if recurse:
+            childobject.save(recurse)
+        xmlnode.append(childobject.xmlnode)
+    
 class DaeObject(object):
     """This class is the abstract interface to all collada objects.
 

@@ -165,6 +165,8 @@ class Node(SceneNode):
         else:
             self.xmlnode.attrib.pop('layer',None)
         for t in self.transforms:
+            if recurse:
+                t.save(recurse)
             if t.xmlnode not in self.xmlnode:
                 self.xmlnode.append(t.xmlnode)
         for c in self.children:
