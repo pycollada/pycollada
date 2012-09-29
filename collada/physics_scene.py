@@ -11,7 +11,7 @@
 ####################################################################
 """Contains objects for representing a physics scene."""
 
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, save_attribute, save_child_object
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .physics_model import InstancePhysicsModel
@@ -31,7 +31,7 @@ class InstancePhysicsScene(DaeObject):
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
-            self.xmlnode = E.instance_kinematics_model()
+            self.xmlnode = E.instance_physics_scene()
             self.save()
 
     @staticmethod
@@ -50,18 +50,10 @@ class InstancePhysicsScene(DaeObject):
         Extra.saveextras(self.xmlnode,self.extras)
         if self.pscene is not None:
             self.xmlnode.set('url','#'+self.pscene.id)
-        elif self.url is not None:
-            self.xmlnode.set('url',self.url)
         else:
-            self.xmlnode.attrib.pop('url',None)
-        if self.sid is not None:
-            self.xmlnode.set('sid',self.sid)
-        else:
-            self.xmlnode.attrib.pop('sid',None)
-        if self.name is not None:
-            self.xmlnode.set('name',self.name)
-        else:
-            self.xmlnode.attrib.pop('name',None)
+            save_attribute(self.xmlnode,'url',self.url)
+        save_attribute(self.xmlnode,'sid',self.sid)
+        save_attribute(self.xmlnode,'name',self.name)
 
 class PhysicsScene(DaeObject):
     """A class containing the data coming from a COLLADA <physics_scene> tag"""
@@ -78,6 +70,7 @@ class PhysicsScene(DaeObject):
         """
         self.id = id
         self.name = name
+        self.asset = asset
         self.instance_physics_models = []
         if instance_physics_models is not None:
             self.instance_physics_models = instance_physics_models
@@ -133,11 +126,6 @@ class PhysicsScene(DaeObject):
                 model.save()
             self.xmlnode.append(model.xmlnode)
 
-        if self.id is not None:
-            self.xmlnode.set('id',self.id)
-        else:
-            self.xmlnode.attrib.pop('id',None)
-        if self.name is not None:
-            self.xmlnode.set('name',self.name)
-        else:
-            self.xmlnode.attrib.pop('name',None)
+        save_child_object(self.xmlnode, tag('asset'), self.asset, recurse)
+        save_attribute(self.xmlnode,'id',self.id)
+        save_attribute(self.xmlnode,'name',self.name)

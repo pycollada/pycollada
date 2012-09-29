@@ -58,10 +58,10 @@ class BindKinematicsModel(DaeObject):
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
-        if self.scenenode is not None:
-            self.xmlnode.set('node','#'+self.scenenode.id)
-        elif self.noderef is not None:
+        if self.noderef is not None:
             self.xmlnode.set('node',self.noderef)
+        elif self.scenenode is not None:
+            self.xmlnode.set('node','#'+self.scenenode.id)
         else:
             self.xmlnode.attrib.pop('node',None)
         param = self.xmlnode.find(tag('param'))
@@ -85,7 +85,7 @@ class BindJointAxis(DaeObject):
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.bind_joint_axis()
-            self.save()
+            self.save(0)
     @staticmethod
     def load( collada, localscope, node ):
         targetref = node.get('target')
@@ -98,10 +98,10 @@ class BindJointAxis(DaeObject):
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
-        if self.scenenode is not None:
-            self.xmlnode.set('target','#'+self.scenenode.id)
-        elif self.targetref is not None:
+        if self.targetref is not None:
             self.xmlnode.set('target',self.targetref)
+        elif self.scenenode is not None:
+            self.xmlnode.set('target','#'+self.scenenode.id)
         else:
             self.xmlnode.attrib.pop('target',None)
         axis = self.xmlnode.find(tag('axis'))

@@ -580,7 +580,7 @@ class Collada(object):
             except DaeError as ex:
                 self.handleError(ex)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the collada document back to :attr:`xmlnode`"""
         libraries = [(self.geometries, 'library_geometries'),
                      (self.controllers, 'library_controllers'),
@@ -598,7 +598,8 @@ class Collada(object):
                      (self.kinematics_scenes, 'library_kinematics_scenes'),
                      ]
 
-        self.assetInfo.save()
+        if recurse:
+            self.assetInfo.save()
         assetnode = self.xmlnode.getroot().find(tag('asset'))
         if assetnode is not None:
             self.xmlnode.getroot().remove(assetnode)
@@ -621,7 +622,8 @@ class Collada(object):
                 continue
 
             for o in arr:
-                o.save()
+                if recurse:
+                    o.save()
                 if o.xmlnode not in node:
                     node.append(o.xmlnode)
             xmlnodes = [o.xmlnode for o in arr]
@@ -637,11 +639,13 @@ class Collada(object):
                 raise DaeBrokenRefError('Default scene %s not found' % sceneid)
             scenenode.append(E.instance_visual_scene(url="#%s" % sceneid))
         if self.ikscene is not None:
-            self.ikscene.save()
+            if recurse:
+                self.ikscene.save()
             scenenode.append(self.ikscene.xmlnode)
         for ipscene in self.ipscenes:
             if ipscene is not None:
-                ipscene.save()
+                if recurse:
+                    ipscene.save()
                 scenenode.append(ipscene.xmlnode)
             
         if self.validator is not None:

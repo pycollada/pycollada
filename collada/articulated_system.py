@@ -11,7 +11,7 @@
 ####################################################################
 """Contains objects for representing an articulated system."""
 import copy
-from .common import DaeObject, E, tag
+from .common import DaeObject, E, tag, save_attribute
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .kinematics_model import InstanceKinematicsModel
@@ -20,27 +20,39 @@ from .technique import Technique
 from .asset import Asset
 
 class InstanceArticulatedSystem(DaeObject):
-    def __init__(self,asystem=None, url=None, sid=None, name=None, extras=None, xmlnode=None):
+    def __init__(self,asystem=None, url=None, sid=None, name=None, newparams=None, setparams=None, extras=None, xmlnode=None):
+        """
+        :param newparams: list of xml nodes for <newparam> tag
+        :param setparams: list of xml nodes for <setparam> tag
+        """
         self.asystem = asystem
         self.url = url
         self.sid = sid
         self.name = name
+        self.newparams = []
+        if newparams is not None:
+            self.newparams = newparams
+        self.setparams = []
+        if setparams is not None:
+            self.setparams = setparams
         self.extras = []
         if extras is not None:
             self.extras = extras
-
+            
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
             self.xmlnode = E.instance_articulated_system()
             self.save(0)
-
+            
     @staticmethod
     def load( collada, localscope, node ):
         asystem=None
         url=node.get('url')
         sid=node.get('sid')
         name=node.get('name')
+        newparams = node.findall(tag('newparam'))
+        setparams = node.findall(tag('sewparam'))
         if url is not None:
             if url.startswith('#'): # inside this doc, so search for it
                 asystem = collada.articulated_systems.get(url[1:])
@@ -50,31 +62,29 @@ class InstanceArticulatedSystem(DaeObject):
                     asystem = copy.copy(asystem)
                     asystem.name = name
         extras = Extra.loadextras(collada, node)
-        return InstanceArticulatedSystem(asystem, url, sid, name, extras, xmlnode=node)
+        return InstanceArticulatedSystem(asystem, url, sid, name, newparams, setparams, extras, xmlnode=node)
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.asystem is not None:
             self.xmlnode.set('url','#'+self.asystem.id)
-        elif self.url is not None:
-            self.xmlnode.set('url',self.url)
         else:
-            self.xmlnode.attrib.pop('url',None)
-        if self.sid is not None:
-            self.xmlnode.set('sid',self.sid)
-        else:
-            self.xmlnode.attrib.pop('sid',None)
-        if self.name is not None:
-            self.xmlnode.set('name',self.name)
-        else:
-            self.xmlnode.attrib.pop('name',None)
+            save_attribute(self.xmlnode,'url',self.url)
+        save_attribute(self.xmlnode,'sid',self.sid)
+        save_attribute(self.xmlnode,'name',self.name)
+        for oldnode in self.xmlnode.findall(tag('newparam')) + self.xmlnode.findall(tag('sewparam')):
+            self.xmlnode.remove(oldnode)
+        for newparam in self.newparams:
+            self.xmlnode.append(newparam)
+        for setparam in self.setparams:
+            self.xmlnode.append(setparam)
 
 class Kinematics(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics> tag"""
     def __init__(self, instance_kinematics_models=None,axisinfos=None,techniques=None, extras=None, xmlnode=None):
         """Create a <kinematics>
-
+        
         :param list instance_kinematics_models: a InstanceKinematicsModel
         :param list axisinfos: list of xmlnodes
         :param list techniques: list of Technique
@@ -178,7 +188,7 @@ class Motion(DaeObject):
         """Saves the motion node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         ias = self.xmlnode.find(tag('instance_articulated_system'))
-        if ias is None:
+        if ias is not None:
             self.xmlnode.remove(ias)
         elif self.instance_articulated_system is not None:
             if recurse:
@@ -249,8 +259,7 @@ class ArticulatedSystem(DaeObject):
         if assetnode is not None:
             asset = Asset.load(collada,localscope,assetnode)
         extras = Extra.loadextras(collada, node)
-        node = ArticulatedSystem(id, name, kinematics, motion, asset, extras, xmlnode=node )
-        return node
+        return ArticulatedSystem(id, name, kinematics, motion, asset, extras, xmlnode=node )
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -269,12 +278,5 @@ class ArticulatedSystem(DaeObject):
             if node is not None:
                 self.xmlnode.remove(node)
             self.xmlnode.append(self.motion.xmlnode)
-        if self.id is not None:
-            self.xmlnode.set('id',self.id)
-        else:
-            self.xmlnode.attrib.pop('id',None)
-        if self.name is not None:
-            self.xmlnode.set('name',self.name)
-        else:
-            self.xmlnode.attrib.pop('name',None)
-        
+        save_attribute(self.xmlnode,'id',self.id)
+        save_attribute(self.xmlnode,'name',self.name)

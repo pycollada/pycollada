@@ -240,7 +240,7 @@ class NodeNode(Node):
         for obj in self.node.objects(tipo, matrix):
             yield obj
 
-    id = property(lambda s: s.node.id)
+    id = property(lambda s: s.node.id if s.node is not None else None)
     children = property(lambda s: s.node.children)
     matrix = property(lambda s: s.node.matrix)
 
@@ -279,7 +279,7 @@ class NodeNode(Node):
             self.xmlnode.attrib.pop('proxy',None)
 
     def __str__(self):
-        return '<NodeNode node=%s>' % (self.node.id,)
+        return '<NodeNode node=%s, url=%s>' % (self.node.id if self.node is not None else None, self.url)
 
     def __repr__(self):
         return str(self)
