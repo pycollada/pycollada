@@ -46,13 +46,7 @@ class InstanceKinematicsModel(DaeObject):
         if url is not None:
             if url.startswith('#'): # inside this doc, so search for it
                 kmodel = collada.kinematics_models.get(url[1:])
-                if kmodel is None:
-                    raise DaeBrokenRefError('kinematics_model %s not found in library'%url)
-                # don't copy since then cannot compare with collada.physics_models
-#                 if name is not None:
-#                     kmodel = copy.copy(kmodel)
-#                     kmodel.name = name
-                
+                # don't raise an exception if asystem is None
         extras = Extra.loadextras(collada, node)
         return InstanceKinematicsModel(kmodel, url, sid, name, extras, xmlnode=node)
     

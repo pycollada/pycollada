@@ -67,13 +67,7 @@ class InstancePhysicsModel(DaeObject):
         if url is not None:
             if url.startswith('#'): # inside this doc, so search for it
                 pmodel = collada.physics_models.get(url[1:])
-                if pmodel is None:
-                    raise DaeBrokenRefError('physics_model %s not found in library'%url)
-                # don't copy since then cannot compare with collada.physics_models
-#                 if name is not None:
-#                     pmodel = copy.copy(pmodel)
-#                     pmodel.name = name
-        
+                # don't raise an exception if asystem is None        
         instance_rigid_bodies = []
         for subnode in node:
             if subnode.tag == tag('instance_rigid_body'):

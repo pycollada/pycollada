@@ -56,12 +56,7 @@ class InstanceArticulatedSystem(DaeObject):
         if url is not None:
             if url.startswith('#'): # inside this doc, so search for it
                 asystem = collada.articulated_systems.get(url[1:])
-                if asystem is None:
-                    raise DaeBrokenRefError('articulated_system %s not found in library'%url)
-                # don't copy since then cannot compare with collada.physics_models
-#                 if name is not None:
-#                     asystem = copy.copy(asystem)
-#                     asystem.name = name
+                # don't raise an exception if asystem is None
         extras = Extra.loadextras(collada, node)
         return InstanceArticulatedSystem(asystem, url, sid, name, newparams, setparams, extras, xmlnode=node)
 
