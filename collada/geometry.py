@@ -228,13 +228,14 @@ class Geometry(DaeObject):
         geom = Geometry(collada, id, name, sourcebyid, _primitives, extras, xmlnode=node, double_sided=double_sided )
         return geom
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the geometry back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         meshnode = self.xmlnode.find(tag('mesh'))
         for src in self.sourceById.values():
             if isinstance(src, source.Source):
-                src.save()
+                if recurse:
+                    src.save(recurse)
                 if src.xmlnode not in meshnode.getchildren():
                     meshnode.insert(0, src.xmlnode)
 

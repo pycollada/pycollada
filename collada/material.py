@@ -160,7 +160,7 @@ class CImage(DaeObject):
         extras = Extra.loadextras(collada, node)
         return CImage(id, path, collada, extras, xmlnode = node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the image back to :attr:`xmlnode`. Only the :attr:`id` attribute is saved.
         The image itself will have to be saved to its original source to make modifications."""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -241,7 +241,7 @@ class Surface(DaeObject):
         extras = Extra.loadextras(collada, node)
         return Surface(id, img, format, extras, xmlnode=node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the surface data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         surfacenode = self.xmlnode.find( tag('surface') )
@@ -331,7 +331,7 @@ class Sampler2D(DaeObject):
         extras = Extra.loadextras(collada, node)
         return Sampler2D(id, surface, minfilter, magfilter, extras, xmlnode=node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the sampler data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         samplernode = self.xmlnode.find( tag('sampler2D') )
@@ -405,7 +405,7 @@ class Map(DaeObject):
         extras = Extra.loadextras(collada, node)
         return Map(sampler, texcoord, extras, xmlnode = node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the map back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('texture', self.sampler.id)
@@ -714,7 +714,7 @@ class Effect(DaeObject):
                         propval.append(1.0)
                     setattr(self, prop, tuple(propval))
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the effect back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         self.xmlnode.set('id', self.id)
@@ -726,7 +726,8 @@ class Effect(DaeObject):
         self._fixColorValues()
 
         for param in self.params:
-            param.save()
+            if recurse:
+                param.save()
             if param.xmlnode not in profilenode.getchildren():
                 profilenode.insert(list(profilenode).index(tecnode),
                         param.xmlnode)
@@ -895,7 +896,7 @@ class Material(DaeObject):
         extras = Extra.loadextras(collada, node)
         return Material(matid, matname, effect, extras, xmlnode=node)
 
-    def save(self):
+    def save(self, recurse=True):
         """Saves the material data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
         if self.id is not None:
