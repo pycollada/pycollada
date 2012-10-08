@@ -235,7 +235,7 @@ class Geometry(DaeObject):
         for src in self.sourceById.values():
             if isinstance(src, source.Source):
                 if recurse:
-                    src.save(recurse)
+                    src.save()
                 if src.xmlnode not in meshnode.getchildren():
                     meshnode.insert(0, src.xmlnode)
 
