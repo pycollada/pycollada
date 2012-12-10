@@ -8,6 +8,8 @@ The library allows you to load a COLLADA file and interact with it as a python
 object. In addition, it supports creating a collada python object from scratch,
 as well as in-place editing.
 
+You can get help at the [pycollada mailing list](https://groups.google.com/d/forum/pycollada).
+
 See the [pycollada Documentation](http://pycollada.readthedocs.org/) for more
 information.
 
