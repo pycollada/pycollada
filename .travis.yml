@@ -1,9 +1,8 @@
 language: python
 
 env:
-  # Using numpy from github due to numpy issue #1857
-  - DEPS="git+git://github.com/numpy/numpy.git@dba98cc1"
-  - DEPS="git+git://github.com/numpy/numpy.git@dba98cc1 lxml"
+  - DEPS="numpy"
+  - DEPS="numpy lxml"
 
 python:
   - 2.6
