@@ -184,13 +184,13 @@ class TriangleSet(primitive.Primitive):
 
     def __getitem__(self, i):
         v = self._vertex[ self._vertex_index[i] ]
-        n = self._normal[ self._normal_index[i] ]
+        n = self._normal[ self._normal_index[i] ] if self._normal is not None else None
         uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
             uvindices.append( uvindex[i] )
             uv.append( self._texcoordset[j][ uvindex[i] ] )
-        return Triangle(self._vertex_index[i], v, self._normal_index[i], n, uvindices, uv, self.material)
+        return Triangle(self._vertex_index[i], v, self._normal_index[i] if self._normal_index is not None else 0, n, uvindices, uv, self.material)
 
     @staticmethod
     def load( collada, localscope, node ):
