@@ -9,4 +9,5 @@ Authors (Ordered by date of first contribution)
 * Ewen Cheslack-Postava
 * Ole Laursen
 * Andrey Nechypurenko (andreynech AT gmail.com)
+* Guohui Xiao (xiao AT kr.tuwien.ac.at)
 
