@@ -115,7 +115,7 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(len(image_data), 786476)
         
         try:
-            import Image as pil
+            from PIL import Image as pil
         except ImportError:
             pil = None
             
