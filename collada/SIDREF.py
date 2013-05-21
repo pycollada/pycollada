@@ -1,5 +1,6 @@
 from .common import DaeObject
 
+# FIXME: only works when the targets are newparams
 class SIDREF(DaeObject):
     def __init__(self, data, value, scoped_node_for_sids, xmlnode):
         self.data = data   # the Collada object
@@ -34,6 +35,16 @@ class SIDREF(DaeObject):
                 # FIXME: throw an error
                 return None
 
-            prev_node = best_sid_node
+
+            # FIXME: better not to use xmlnode
+            if best_sid_node.xmlnode.attrib.has_key('url'):
+                new_id = best_sid_node.xmlnode.attrib['url'].lstrip('#')
+                new_node = self.data.ids_map.get(new_id,None)
+                if new_node is None:
+                    return None
+                else:
+                    prev_node = new_node
+            else:
+                prev_node = best_sid_node
 
         return prev_node
