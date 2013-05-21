@@ -257,8 +257,12 @@ class Collada(object):
     def addId(self, id, daeObject):
         self.ids_map[id] = daeObject
 
+    # FIXME: this is getting called with sid==None a bunch of times!
     def addSid(self, sid, daeObject):
-        self.sids_map[sid] = daeObject
+        if self.sids_map.has_key(sid):
+            self.sids_map[sid].append(daeObject)
+        else:
+            self.sids_map[sid] = [daeObject]
 
     def _setIndexedList(self, propname, data):
         setattr(self, propname, IndexedList(data, ('id',)))
