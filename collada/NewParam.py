@@ -32,7 +32,10 @@ class NewParam(DaeObject):
     # FIXME: does not handle cycles!
     def resolve(self):
         newparam = self
-        while type(newparam) == SIDREF:
-            newparam = self.value.resolve()
-        return newparam.value
+        while type(newparam) == SIDREF or type(newparam) == NewParam:
+            if type(newparam) == SIDREF:
+                newparam = newparam.resolve()
+            else:
+                newparam = newparam.value
+        return newparam
 
