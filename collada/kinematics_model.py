@@ -55,7 +55,8 @@ class InstanceKinematicsModel(DaeObject):
         inst_kmodel = InstanceKinematicsModel(kmodel, url, sid, name, extras, newparams, xmlnode=node)
         collada.addSid(sid, inst_kmodel)
         return inst_kmodel
-    
+
+    # FIXME: needs to save the newparams?
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)

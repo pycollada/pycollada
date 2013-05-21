@@ -57,6 +57,7 @@ class BindKinematicsModel(DaeObject):
         sidref = node.find(tag('SIDREF'))
         return BindKinematicsModel(scenenode, noderef, param,sidref,xmlnode=node)
 
+    # FIXME: needs to save the newparams?
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         if self.noderef is not None:
