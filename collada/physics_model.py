@@ -73,7 +73,10 @@ class InstancePhysicsModel(DaeObject):
             if subnode.tag == tag('instance_rigid_body'):
                 instance_rigid_bodies.append(InstanceRigidBody.load(collada, pmodel, subnode))
         extras = Extra.loadextras(collada, node)
-        return InstancePhysicsModel(pmodel,url,node.get('sid'), name, node.get('parent'), instance_rigid_bodies, extras, xmlnode=node) # external reference
+        sid = node.get('sid')
+        inst_pmodel = InstancePhysicsModel(pmodel,url,sid, name, node.get('parent'), instance_rigid_bodies, extras, xmlnode=node) # external reference
+        collada.addSid(sid, inst_pmodel)
+        return inst_pmodel
         
 class PhysicsModel(DaeObject):
     """A class containing the data coming from a COLLADA <physics_model> tag"""
@@ -134,7 +137,9 @@ class PhysicsModel(DaeObject):
                 # todo
                 pass
         extras = Extra.loadextras(collada, node)
-        return PhysicsModel(id, name, rigid_bodies, instance_physics_models, extras, xmlnode=node )
+        pmodel = PhysicsModel(id, name, rigid_bodies, instance_physics_models, extras, xmlnode=node )
+        collada.addId(id, pmodel)
+        return pmodel
 
     def save(self, recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

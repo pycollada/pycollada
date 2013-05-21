@@ -226,6 +226,7 @@ class Geometry(DaeObject):
 
         extras = Extra.loadextras(collada, node)
         geom = Geometry(collada, id, name, sourcebyid, _primitives, extras, xmlnode=node, double_sided=double_sided )
+        collada.addId(id, geom)
         return geom
 
     def save(self, recurse=True):

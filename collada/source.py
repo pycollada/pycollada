@@ -217,7 +217,9 @@ class FloatSource(Source):
             #TODO
             data = numpy.array(zip(data[:,0], data[:,1]),dtype=get_number_dtype())
             data.shape = (-1)
-        return FloatSource( sourceid, data, tuple(components), extras, xmlnode=node )
+        fsource = FloatSource( sourceid, data, tuple(components), extras, xmlnode=node )
+        collada.addId(sourceid, fsource)
+        return fsource
 
     def __str__(self): return '<FloatSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
@@ -331,7 +333,9 @@ class IDRefSource(Source):
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
         extras = Extra.loadextras(collada, node)
-        return IDRefSource( sourceid, data, tuple(components), extras, xmlnode=node )
+        idrefsource = IDRefSource( sourceid, data, tuple(components), extras, xmlnode=node )
+        collada.addId(sourceid, idrefsource)
+        return idrefsource
 
     def __str__(self): return '<IDRefSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
@@ -448,7 +452,9 @@ class NameSource(Source):
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
-        return NameSource( sourceid, data, tuple(components), extras, xmlnode=node )
+        namesource = NameSource( sourceid, data, tuple(components), extras, xmlnode=node )
+        collada.addId(sourceid, namesource)
+        return namesource
 
     def __str__(self): return '<NameSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)

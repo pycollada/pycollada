@@ -19,6 +19,7 @@ from .asset import Asset
 from .extra import Extra
 from .articulated_system import InstanceArticulatedSystem
 from .kinematics_model import InstanceKinematicsModel
+from .NewParam import NewParam
 
 # class CommonSidrefOrParam(DaeObject):
 #     def __init__(self,param=None,sidref=None,xmlnode=None):
@@ -116,7 +117,7 @@ class BindJointAxis(DaeObject):
             self.xmlnode.append(self.value)
     
 class InstanceKinematicsScene(DaeObject):
-    def __init__(self,kscene=None, url=None, sid=None, name=None, asset=None, extras=None, bind_kinematics_models=None, bind_joint_axes=None, xmlnode=None):
+    def __init__(self,kscene=None, url=None, sid=None, name=None, asset=None, extras=None, newparams=None, bind_kinematics_models=None, bind_joint_axes=None, xmlnode=None):
         self.kscene = kscene
         self.url = url
         self.sid = sid
@@ -125,6 +126,7 @@ class InstanceKinematicsScene(DaeObject):
         self.asset = asset
         if extras is not None:
             self.extras = extras
+        self.newparams = newparams if newparams else []
         self.bind_kinematics_models = []
         if bind_kinematics_models is not None:
             self.bind_kinematics_models = bind_kinematics_models
@@ -159,7 +161,10 @@ class InstanceKinematicsScene(DaeObject):
             elif subnode.tag == tag('bind_joint_axis'):
                 bind_joint_axes.append(BindJointAxis.load(collada,localscope,subnode))
         extras = Extra.loadextras(collada, node)
-        return InstanceKinematicsScene(kscene,url,sid,name,asset,extras,bind_kinematics_models, bind_joint_axes, xmlnode=node)
+        newparams = NewParam.loadnewparams(collada, node)
+        inst_kscene = InstanceKinematicsScene(kscene,url,sid,name,asset,extras,newparams,bind_kinematics_models, bind_joint_axes, xmlnode=node)
+        collada.addSid(sid, inst_kscene)
+        return inst_kscene
     
     def save(self, recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -218,7 +223,9 @@ class KinematicsScene(DaeObject):
             elif subnode.tag == tag('instance_articulated_system'):
                 instance_articulated_systems.append(InstanceArticulatedSystem.load(collada, {}, subnode))
         extras = Extra.loadextras(collada, node)
-        return KinematicsScene(id, name, instance_kinematics_models, instance_articulated_systems, extras, xmlnode=node)
+        kscene = KinematicsScene(id, name, instance_kinematics_models, instance_articulated_systems, extras, xmlnode=node)
+        collada.addId(id, kscene)
+        return kscene
 
     def save(self,recurse=True):
         if self.id is not None:

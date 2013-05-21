@@ -75,7 +75,9 @@ class TranslateTransform(Transform):
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 3:
             raise DaeMalformedError("Translate node requires three float values")
-        return TranslateTransform(floats[0], floats[1], floats[2], sid, node)
+        ttransform = TranslateTransform(floats[0], floats[1], floats[2], sid, node)
+        collada.addSid(sid, ttransform)
+        return ttransform
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -132,7 +134,9 @@ class RotateTransform(Transform):
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 4:
             raise DaeMalformedError("Rotate node requires four float values")
-        return RotateTransform(floats[0], floats[1], floats[2], floats[3], sid, node)
+        rtransform = RotateTransform(floats[0], floats[1], floats[2], floats[3], sid, node)
+        collada.addSid(sid, rtransform)
+        return rtransform
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -188,7 +192,9 @@ class ScaleTransform(Transform):
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 3:
             raise DaeMalformedError("Scale node requires three float values")
-        return ScaleTransform(floats[0], floats[1], floats[2], sid, node)
+        stransform = ScaleTransform(floats[0], floats[1], floats[2], sid, node)
+        collada.addSid(sid, stransform)
+        return stransform
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -232,7 +238,9 @@ class MatrixTransform(Transform):
     def load(collada, node):
         sid=node.get('sid')
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
-        return MatrixTransform(floats, sid, node)
+        mtransform = MatrixTransform(floats, sid, node)
+        collada.addSid(sid, mtransform)
+        return mtransform
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -297,7 +305,9 @@ class LookAtTransform(Transform):
         floats = numpy.fromstring(node.text, dtype=get_number_dtype(), sep=' ')
         if len(floats) != 9:
             raise DaeMalformedError("Lookat node requires 9 float values")
-        return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], sid, node)
+        latransform = LookAtTransform(floats[0:3], floats[3:6], floats[6:9], sid, node)
+        collada.addSid(sid, latransform)
+        return latransform
     
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""

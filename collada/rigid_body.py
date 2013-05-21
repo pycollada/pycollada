@@ -57,7 +57,9 @@ class InstanceRigidBody(object):
         name=node.get('name')
         extras = Extra.loadextras(collada, node)
         techniques = Technique.loadtechniques(collada, node)
-        return InstanceRigidBody(rigid_body, body, target, sid, name, techniques, extras, node)
+        inst_rigid_body = InstanceRigidBody(rigid_body, body, target, sid, name, techniques, extras, node)
+        collada.addSid(sid, inst_rigid_body)
+        return inst_rigid_body
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -146,7 +148,10 @@ class RigidBody(DaeObject):
                         shapes.append(subnode2)
         techniques = Technique.loadtechniques(collada, node)
         extras = Extra.loadextras(collada, node)
-        return RigidBody(sid, id, name, dynamic, mass, mass_frame, inertia, physics_materials, shapes, techniques, extras, xmlnode=node)
+        rigid_body = RigidBody(sid, id, name, dynamic, mass, mass_frame, inertia, physics_materials, shapes, techniques, extras, xmlnode=node)
+        collada.addId(id, rigid_body)
+        collada.addSid(sid, rigid_body)
+        return rigid_body
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

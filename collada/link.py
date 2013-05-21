@@ -106,6 +106,7 @@ class Link(DaeObject):
             elif subnode.tag == tag('rotate'):
                 transformnodes.append(RotateTransform.load(collada,subnode))
         node = Link(sid, name, transformnodes, attachments, xmlnode=node )
+        collada.addSid(sid, node)
         return node
 
     def save(self,recurse=True):

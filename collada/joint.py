@@ -50,6 +50,8 @@ class Joint(DaeObject):
         name = node.get("name")
         extras = Extra.loadextras(collada, node)
         node = Joint(id, sid, name, extras, xmlnode=node )
+        collada.addId(id, node)
+        collada.addSid(sid, node)
         return node
 
     def save(self, recurse=True):

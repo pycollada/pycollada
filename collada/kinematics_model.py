@@ -20,9 +20,10 @@ from .technique import Technique
 from .asset import Asset
 from .link import Link
 from .joint import Joint
+from .NewParam import NewParam
 
 class InstanceKinematicsModel(DaeObject):
-    def __init__(self,kmodel=None, url=None, sid=None, name=None, extras = None, xmlnode=None):
+    def __init__(self,kmodel=None, url=None, sid=None, name=None, extras = None, newparams=None, xmlnode=None):
         self.kmodel = kmodel
         self.url = url
         self.sid = sid
@@ -30,7 +31,9 @@ class InstanceKinematicsModel(DaeObject):
         self.extras = []
         if extras is not None:
             self.extras = extras
-            
+
+        self.newparams = newparams if newparams else []
+
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
@@ -48,7 +51,10 @@ class InstanceKinematicsModel(DaeObject):
                 kmodel = collada.kinematics_models.get(url[1:])
                 # don't raise an exception if asystem is None
         extras = Extra.loadextras(collada, node)
-        return InstanceKinematicsModel(kmodel, url, sid, name, extras, xmlnode=node)
+        newparams = NewParam.loadnewparams(collada, node)
+        inst_kmodel = InstanceKinematicsModel(kmodel, url, sid, name, extras, newparams, xmlnode=node)
+        collada.addSid(sid, inst_kmodel)
+        return inst_kmodel
     
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -135,7 +141,9 @@ class KinematicsModel(DaeObject):
                 asset = Asset.load(collada, localscope, subnode)
         techniques = Technique.loadtechniques(collada, node)
         extras = Extra.loadextras(collada, node)
-        return KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
+        kmodel = KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
+        collada.addId(id, kmodel)
+        return kmodel
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

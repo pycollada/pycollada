@@ -120,6 +120,9 @@ class Collada(object):
           :class:`common.DaeSaveValidationError` exception will be thrown.
         """
 
+        self.ids_map = {}
+        self.sids_map = {}
+
         self.errors = []
         """List of :class:`common.common.DaeError` objects representing errors encountered while loading collada file"""
         self.assetInfo = None
@@ -250,6 +253,12 @@ class Collada(object):
         self._loadPhysicsScenes()
         self._loadKinematicsScenes()
         self._loadDefaultScene()
+
+    def addId(self, id, daeObject):
+        self.ids_map[id] = daeObject
+
+    def addSid(self, sid, daeObject):
+        self.sids_map[sid] = daeObject
 
     def _setIndexedList(self, propname, data):
         setattr(self, propname, IndexedList(data, ('id',)))

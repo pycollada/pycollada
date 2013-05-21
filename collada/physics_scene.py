@@ -43,7 +43,9 @@ class InstancePhysicsScene(DaeObject):
         sid = node.get('sid')
         name = node.get('name')
         extras = Extra.loadextras(collada, node)
-        return InstancePhysicsScene(pscene,url,sid,name,extras,xmlnode=node)
+        inst_pscene = InstancePhysicsScene(pscene,url,sid,name,extras,xmlnode=node)
+        collada.addSid(sid, inst_pscene)
+        return inst_pscene
     
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
@@ -110,7 +112,9 @@ class PhysicsScene(DaeObject):
                 pass
         extras = Extra.loadextras(collada, node)
         techniques = Technique.loadtechniques(collada, node)
-        return PhysicsScene(id, name, instance_physics_models, asset, technique_common, techniques, extras, xmlnode=node)
+        pscene = PhysicsScene(id, name, instance_physics_models, asset, technique_common, techniques, extras, xmlnode=node)
+        collada.addId(id, pscene)
+        return pscene
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

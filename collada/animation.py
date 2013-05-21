@@ -52,6 +52,7 @@ class Animation(DaeObject):
                 collada.handleError(ex)
 
         anim = Animation(id, name, sourcebyid, children, node)
+        collada.addId(id, anim)
         return anim
 
     def __str__(self): return '<Animation id=%s, children=%d>' % (self.id, len(self.children))

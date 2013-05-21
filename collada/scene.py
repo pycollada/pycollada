@@ -199,7 +199,10 @@ class Node(SceneNode):
                 collada.handleError(ex)
 
         extras = Extra.loadextras(collada, node)
-        return Node(id, sid, name, type, layer, children, transforms, extras, xmlnode=node)
+        node = Node(id, sid, name, type, layer, children, transforms, extras, xmlnode=node)
+        collada.addId(id, node)
+        collada.addSid(sid, node)
+        return node
 
     def __str__(self):
         return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
@@ -256,7 +259,9 @@ class NodeNode(Node):
             if not referred_node:
                 referred_node = collada.nodes.get(url[1:])
         extras = Extra.loadextras(collada, node)
-        return NodeNode(referred_node, sid, name, url, proxy, extras, xmlnode=node)
+        nodenode = NodeNode(referred_node, sid, name, url, proxy, extras, xmlnode=node)
+        collada.addSid(sid, nodenode)
+        return nodenode
 
     def save(self, recurse=True):
         """Saves the node node back to :attr:`xmlnode`"""
@@ -748,7 +753,9 @@ class Scene(DaeObject):
             for nodenode, ex in tried_loading:
                 raise DaeBrokenRefError(ex.msg)
         extras = Extra.loadextras(collada, node)
-        return Scene(id, nodes, extras, xmlnode=node, collada=collada)
+        scene = Scene(id, nodes, extras, xmlnode=node, collada=collada)
+        collada.addId(id, scene)
+        return scene
 
     def save(self,recurse=True):
         """Saves the scene back to :attr:`xmlnode`"""

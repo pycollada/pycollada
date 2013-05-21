@@ -58,7 +58,9 @@ class InstanceArticulatedSystem(DaeObject):
                 asystem = collada.articulated_systems.get(url[1:])
                 # don't raise an exception if asystem is None
         extras = Extra.loadextras(collada, node)
-        return InstanceArticulatedSystem(asystem, url, sid, name, newparams, setparams, extras, xmlnode=node)
+        inst_asystem = InstanceArticulatedSystem(asystem, url, sid, name, newparams, setparams, extras, xmlnode=node)
+        collada.addSid(sid, inst_asystem)
+        return inst_asystem
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -258,7 +260,9 @@ class ArticulatedSystem(DaeObject):
         if assetnode is not None:
             asset = Asset.load(collada,localscope,assetnode)
         extras = Extra.loadextras(collada, node)
-        return ArticulatedSystem(id, name, kinematics, motion, asset, extras, xmlnode=node )
+        asystem = ArticulatedSystem(id, name, kinematics, motion, asset, extras, xmlnode=node )
+        collada.addId(id, asystem)
+        return asystem
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""

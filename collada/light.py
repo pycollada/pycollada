@@ -103,7 +103,10 @@ class DirectionalLight(Light):
         except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
         extras = Extra.loadextras(collada, node)
-        return DirectionalLight(node.get('id'), color, extras, xmlnode = node)
+        id = node.get('id')
+        dlight = DirectionalLight(id, color, extras, xmlnode = node)
+        collada.addId(id, dlight)
+        return dlight
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
@@ -182,7 +185,10 @@ class AmbientLight(Light):
         except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
         extras = Extra.loadextras(collada, node)
-        return AmbientLight(node.get('id'), color, extras, xmlnode = node)
+        id = node.get('id')
+        amblight = AmbientLight(id, color, extras, xmlnode = node)
+        collada.addId(id, amblight)
+        return amblight
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
@@ -309,8 +315,11 @@ class PointLight(Light):
             raise DaeMalformedError('Corrupted values in light definition')
         
         extras = Extra.loadextras(collada, node)
-        return PointLight(node.get('id'), color, constant_att, linear_att,
-                quad_att, zfar, extras, xmlnode = node)
+        id = node.get('id')
+        plight = PointLight(id, color, constant_att, linear_att,
+                            quad_att, zfar, extras, xmlnode = node)
+        collada.addId(id, plight)
+        return plight
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.
@@ -444,8 +453,11 @@ class SpotLight(Light):
             raise DaeMalformedError('Corrupted values in spot light definition')
         
         extras = Extra.loadextras(collada, node)
-        return SpotLight(node.get('id'), color, constant_att, linear_att,
-                quad_att, falloff_ang, falloff_exp, extras, xmlnode = node)
+        id = node.get('id')
+        spotlight = SpotLight(id, color, constant_att, linear_att,
+                              quad_att, falloff_ang, falloff_exp, extras, xmlnode = node)
+        collada.addId(id, spotlight)
+        return spotlight
 
     def bind(self, matrix):
         """Binds this light to a transform matrix.

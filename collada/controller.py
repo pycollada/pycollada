@@ -312,6 +312,8 @@ class Morph(Controller):
         """Create a morph instance
 
         :Parameters:
+          id
+            FIXME
           source_geometry
             The source geometry (Geometry)
           targets
@@ -352,6 +354,10 @@ class Morph(Controller):
 
     @staticmethod
     def load( collada, localscope, morphnode, controllernode ):
+        id = controllernode.get('id')
+        if id is None:
+            raise DaeMalformedError('Controller node requires an ID')
+
         baseid = morphnode.get('source')
         if len(baseid) < 2 or baseid[0] != '#' or \
                 not baseid[1:] in collada.geometries:
@@ -397,7 +403,9 @@ class Morph(Controller):
             target_list.append((collada.geometries[target], weight[0]))
 
         extras = Extra.loadextras(collada, controllernode)
-        return Morph(basegeom, target_list, extras, controllernode)
+        morph = Morph(id, basegeom, target_list, extras, controllernode)
+        collada.addId(id, morph)
+        return morph
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

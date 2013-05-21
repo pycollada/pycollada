@@ -10,6 +10,8 @@
 #                                                                  #
 ####################################################################
 
+# FIXME: i think that Camera should have an id, but PerspectiveCamera and OrthographicCamera should not
+
 """Contains objects for representing cameras"""
 
 import numpy
@@ -173,8 +175,10 @@ class PerspectiveCamera(Camera):
             aspect_ratio = None
 
         extras = Extra.loadextras(collada, node)
-        return PerspectiveCamera(id, znear, zfar, xfov=xfov, yfov=yfov,
-                aspect_ratio=aspect_ratio, extras=extras, xmlnode=node)
+        perspective = PerspectiveCamera(id, znear, zfar, xfov=xfov, yfov=yfov,
+                                        aspect_ratio=aspect_ratio, extras=extras, xmlnode=node)
+        collada.addId(id, perspective)
+        return perspective
 
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.
@@ -325,8 +329,10 @@ class OrthographicCamera(Camera):
         if xmag is not None and ymag is not None and aspect_ratio is not None:
             aspect_ratio = None
         extras = Extra.loadextras(collada, node)
-        return OrthographicCamera(id, znear, zfar, xmag=xmag, ymag=ymag,
-                aspect_ratio=aspect_ratio, extras=extras, xmlnode=node)
+        orthographic = OrthographicCamera(id, znear, zfar, xmag=xmag, ymag=ymag,
+                                          aspect_ratio=aspect_ratio, extras=extras, xmlnode=node)
+        collada.addId(id, orthographic)
+        return orthographic
 
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.

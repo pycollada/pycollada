@@ -63,7 +63,9 @@ class Extra(DaeObject):
                 technique_common = subnode
             elif subnode.tag == tag('technique'):
                 techniques.append(Technique.load(collada,localscope,subnode))
-        return Extra(id,name,type,asset,technique_common,techniques,xmlnode=node)
+        extra = Extra(id,name,type,asset,technique_common,techniques,xmlnode=node)
+        collada.addId(id, extra)
+        return extra
 
     def save(self,recurse=True):
         if self.id is not None:

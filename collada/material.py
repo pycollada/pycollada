@@ -158,7 +158,9 @@ class CImage(DaeObject):
         if initnode is None: raise DaeIncompleteError('Image has no file path')
         path = initnode.text
         extras = Extra.loadextras(collada, node)
-        return CImage(id, path, collada, extras, xmlnode = node)
+        cimage = CImage(id, path, collada, extras, xmlnode = node)
+        collada.addId(id, cimage)
+        return cimage
 
     def save(self, recurse=True):
         """Saves the image back to :attr:`xmlnode`. Only the :attr:`id` attribute is saved.
@@ -239,7 +241,9 @@ class Surface(DaeObject):
             img = collada.images.get(imgid)
         if img is None: raise DaeBrokenRefError("Missing image '%s' in surface '%s'" % (imgid, id))
         extras = Extra.loadextras(collada, node)
-        return Surface(id, img, format, extras, xmlnode=node)
+        surface = Surface(id, img, format, extras, xmlnode=node)
+        collada.addId(id, surface)
+        return surface
 
     def save(self, recurse=True):
         """Saves the surface data back to :attr:`xmlnode`"""
@@ -325,11 +329,13 @@ class Sampler2D(DaeObject):
         else: magfilter = magnode.text
 
         surfaceid = sourcenode.text
-        id = node.get('sid')
+        id = node.get('sid')   # FIXME: ???
         surface = localscope.get(surfaceid)
         if surface is None or type(surface) != Surface: raise DaeBrokenRefError('Missing surface ' + surfaceid)
         extras = Extra.loadextras(collada, node)
-        return Sampler2D(id, surface, minfilter, magfilter, extras, xmlnode=node)
+        sampler2d = Sampler2D(id, surface, minfilter, magfilter, extras, xmlnode=node)
+        collada.addId(id, sampler2d)
+        return sampler2d
 
     def save(self, recurse=True):
         """Saves the sampler data back to :attr:`xmlnode`"""
@@ -670,7 +676,9 @@ class Effect(DaeObject):
             except ValueError:
                 pass
         extras = Extra.loadextras(collada, node)
-        return Effect(id, params, shadingtype, bumpmap, double_sided, extras=extras, **props)
+        effect = Effect(id, params, shadingtype, bumpmap, double_sided, extras=extras, **props)
+        collada.addId(id, effect)
+        return effect
 
     @staticmethod
     def _loadShadingParam( collada, localscope, node ):
@@ -894,7 +902,9 @@ class Material(DaeObject):
             raise DaeBrokenRefError('Effect not found: '+effectid)
 
         extras = Extra.loadextras(collada, node)
-        return Material(matid, matname, effect, extras, xmlnode=node)
+        material = Material(matid, matname, effect, extras, xmlnode=node)
+        collada.addId(matid, material)
+        return material
 
     def save(self, recurse=True):
         """Saves the material data back to :attr:`xmlnode`"""
