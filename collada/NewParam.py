@@ -29,9 +29,10 @@ class NewParam(DaeObject):
         print 'newparam_nodes is', newparam_nodes
         return [NewParam.load(collada, {}, None, newparam_node) for newparam_node in newparam_nodes]
 
+    # FIXME: does not handle cycles!
     def resolve(self):
-        if type(self.value) == SIDREF:
-            return None # FIXME
-        else:
-            return self.value
+        newparam = self
+        while type(newparam) == SIDREF:
+            newparam = self.value.resolve()
+        return newparam.value
 
