@@ -15,8 +15,8 @@ class NewParam(DaeObject):
             if child.tag == tag('float') or child.tag == tag('int') or child.tag == tag('bool'):
                 value = child.text
                 break
-            elif child.tag == 'SIDREF':
-                value = SIDREF.load(collada, localscape, scoped_node_for_sids, child)
+            elif child.tag == tag('SIDREF'):
+                value = SIDREF.load(collada, localscope, scoped_node_for_sids, child)
                 break
         newparam = NewParam(sid, value, node)
         collada.addSid(sid, newparam)
