@@ -18,6 +18,7 @@ from .kinematics_model import InstanceKinematicsModel
 from .extra import Extra
 from .technique import Technique
 from .asset import Asset
+from .NewParam import NewParam
 
 class InstanceArticulatedSystem(DaeObject):
     def __init__(self,asystem=None, url=None, sid=None, name=None, newparams=None, setparams=None, extras=None, xmlnode=None):
@@ -51,7 +52,7 @@ class InstanceArticulatedSystem(DaeObject):
         url=node.get('url')
         sid=node.get('sid')
         name=node.get('name')
-        newparams = node.findall(tag('newparam'))
+        newparams = NewParam.loadnewparams(collada, node)
         setparams = node.findall(tag('sewparam'))
         if url is not None:
             if url.startswith('#'): # inside this doc, so search for it
@@ -77,7 +78,7 @@ class InstanceArticulatedSystem(DaeObject):
         for oldnode in self.xmlnode.findall(tag('newparam')) + self.xmlnode.findall(tag('sewparam')):
             self.xmlnode.remove(oldnode)
         for newparam in self.newparams:
-            self.xmlnode.append(newparam)
+            self.xmlnode.append(newparam.xmlnode)
         for setparam in self.setparams:
             self.xmlnode.append(setparam)
 
