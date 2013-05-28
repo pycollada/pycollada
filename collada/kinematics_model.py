@@ -56,6 +56,9 @@ class InstanceKinematicsModel(DaeObject):
         collada.addSid(sid, inst_kmodel)
         return inst_kmodel
 
+    def getchildren(self):
+        return self.extras + self.newparams
+
     # FIXME: needs to save the newparams?
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -145,6 +148,10 @@ class KinematicsModel(DaeObject):
         kmodel = KinematicsModel(id, name, links, joints, formulas, asset, techniques, extras, xmlnode=node )
         collada.addId(id, kmodel)
         return kmodel
+
+    def getchildren(self):
+        assets = [ self.asset ] if self.asset is not None else []
+        return self.links + self.joints + self.formulas + self.techniques + self.extras + assets
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

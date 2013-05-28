@@ -82,6 +82,9 @@ class DirectionalLight(Light):
                 )
             , id=self.id, name=self.id)
 
+    def getchildren(self):
+        return self.extras
+
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -163,6 +166,9 @@ class AmbientLight(Light):
                     )
                 )
             , id=self.id, name=self.id)
+
+    def getchildren(self):
+        return self.extras
 
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""
@@ -273,6 +279,9 @@ class PointLight(Light):
             self.xmlnode = E.light(
                 E.technique_common(pnode)
             , id=self.id, name=self.id)
+
+    def getchildren(self):
+        return self.extras
 
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""
@@ -407,6 +416,9 @@ class SpotLight(Light):
             self.xmlnode = E.light(
                 E.technique_common(pnode)
             , id=self.id, name=self.id)
+
+    def getchildren(self):
+        return self.extras
 
     def save(self):
         """Saves the light's properties back to :attr:`xmlnode`"""

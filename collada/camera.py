@@ -134,6 +134,9 @@ class PerspectiveCamera(Camera):
             raise DaeMalformedError("Received invalid combination of xfov (%s), yfov (%s), and aspect_ratio (%s)" %
                     (repr(self.xfov), repr(self.yfov), repr(self.aspect_ratio)))
 
+    def getchildren(self):
+        return self.extras
+
     def save(self):
         """Saves the perspective camera's properties back to xmlnode"""
         self._checkValidParams()
@@ -288,6 +291,9 @@ class OrthographicCamera(Camera):
             raise DaeMalformedError("Received invalid combination of xmag (%s), ymag (%s), and aspect_ratio (%s)" %
                     (repr(self.xmag), repr(self.ymag), repr(self.aspect_ratio)))
 
+    def getchildren(self):
+        return self.extras
+
     def save(self):
         """Saves the orthographic camera's properties back to xmlnode"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -350,6 +356,9 @@ class OrthographicCamera(Camera):
 
     def __repr__(self):
         return str(self)
+
+# FIXME: i don't give getchildren() to BoundCamera or its subclasses at all (as these don't derive from
+#        from DaeObject, even)
 
 class BoundCamera(object):
     """Base class for bound cameras"""

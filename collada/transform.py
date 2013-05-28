@@ -33,6 +33,9 @@ def makeRotationMatrix(x, y, z, angle):
 class Transform(DaeObject):
     """Base class for all transformation types"""
 
+    def getchildren(self):
+        return []
+
     def save(self):
         pass
 

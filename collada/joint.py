@@ -54,6 +54,9 @@ class Joint(DaeObject):
         collada.addSid(sid, node)
         return node
 
+    def getchildren(self):
+        return self.extras
+
     def save(self, recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)
         if self.id is not None:

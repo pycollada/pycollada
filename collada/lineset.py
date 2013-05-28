@@ -182,6 +182,10 @@ class LineSet(primitive.Primitive):
         """Create a bound line set from this line set, transform and material mapping"""
         return BoundLineSet( self, matrix, materialnodebysymbol)
 
+    # FIXME: not sure if this is right
+    def getchildren(self):
+        return []
+
     def __str__(self):
         return '<LineSet length=%d>' % len(self)
 

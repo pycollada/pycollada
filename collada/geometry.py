@@ -229,6 +229,10 @@ class Geometry(DaeObject):
         collada.addId(id, geom)
         return geom
 
+    # FIXME: NOTE: primitives are not direct children of the node -- they are grandchildren
+    def getchildren(self):
+        return self.extras + self.primitives
+
     def save(self, recurse=True):
         """Saves the geometry back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)

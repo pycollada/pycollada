@@ -61,6 +61,9 @@ class InstanceRigidBody(object):
         collada.addSid(sid, inst_rigid_body)
         return inst_rigid_body
 
+    def getchildren(self):
+        return self.extras + self.techniques
+
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -152,6 +155,9 @@ class RigidBody(DaeObject):
         collada.addId(id, rigid_body)
         collada.addSid(sid, rigid_body)
         return rigid_body
+
+    def getchildren(self):
+        return self.techniques + self.extras
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

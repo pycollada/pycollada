@@ -55,6 +55,11 @@ class Attachment(DaeObject):
         node = Attachment(attachmenttype, joint, link, transformnodes, xmlnode=node)
         return node
 
+    # FIXME: joint not handled
+    def getchildren(self):
+        links = [ self.link ] if self.link is not None else []
+        return self.transformnodes + links
+
     def save(self,recurse=True):
         self.xmlnode.clear()
         self.xmlnode.set('joint', self.joint)
@@ -108,6 +113,9 @@ class Link(DaeObject):
         node = Link(sid, name, transformnodes, attachments, xmlnode=node )
         collada.addSid(sid, node)
         return node
+
+    def getchildren(self):
+        return self.transformnodes + self.attachments
 
     def save(self,recurse=True):
         self.xmlnode.clear()

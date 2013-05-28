@@ -46,6 +46,9 @@ class InstancePhysicsScene(DaeObject):
         inst_pscene = InstancePhysicsScene(pscene,url,sid,name,extras,xmlnode=node)
         collada.addSid(sid, inst_pscene)
         return inst_pscene
+
+    def getchildren(self):
+        return self.extras
     
     def save(self):
         """Saves the info back to :attr:`xmlnode`"""
@@ -115,6 +118,10 @@ class PhysicsScene(DaeObject):
         pscene = PhysicsScene(id, name, instance_physics_models, asset, technique_common, techniques, extras, xmlnode=node)
         collada.addId(id, pscene)
         return pscene
+
+    # FIXME: skips technique_common
+    def getchildren(self):
+        return self.instance_physics_models + self.extras + self.techniques
 
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)

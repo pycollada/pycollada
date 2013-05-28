@@ -95,6 +95,10 @@ class Polygons(polylist.Polylist):
         """Create a bound polygons from this polygons, transform and material mapping"""
         return BoundPolygons( self, matrix, materialnodebysymbol )
 
+    # FIXME: this may be wrong
+    def getchildren(self):
+	return []
+
     def __str__(self):
         return '<Polygons length=%d>' % len(self)
 

@@ -63,6 +63,11 @@ class InstanceArticulatedSystem(DaeObject):
         collada.addSid(sid, inst_asystem)
         return inst_asystem
 
+    # FIXME: this leaves out setparams (because we don't have a class for them yet) and binds (because we don't
+    #        track them)
+    def getchildren(self):
+        return self.newparams + self.extras
+
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -129,6 +134,9 @@ class Kinematics(DaeObject):
         techniques = Technique.loadtechniques(collada,node)
         return Kinematics(instance_kinematics_models,axisinfos,techniques, extras,xmlnode=node)
 
+    def getchildren(self):
+        return self.instance_kinematics_models + self.techniques + self.extras
+
     def save(self,recurse=True):
         """Saves the kinematics node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -185,6 +193,10 @@ class Motion(DaeObject):
                         # parse <speed>, <acceleration>, <deceleration>, <jerk>?
         extras = Extra.loadextras(collada, node)
         return Motion(instance_articulated_system,axisinfos,extras, xmlnode=node)
+
+    def getchildren(self):
+        iasystems = [ self.instance_articulated_system ] if self.instance_articulated_system is not None else []
+        return self.extras + iasystems
 
     def save(self,recurse=True):
         """Saves the motion node back to :attr:`xmlnode`"""
@@ -264,6 +276,13 @@ class ArticulatedSystem(DaeObject):
         asystem = ArticulatedSystem(id, name, kinematics, motion, asset, extras, xmlnode=node )
         collada.addId(id, asystem)
         return asystem
+
+    def getchildren(self):
+        children = []
+        for c in [self.kinematics, self.motion, self.asset]:
+            if c:
+                children.append(c)
+        return children + self.extras
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""

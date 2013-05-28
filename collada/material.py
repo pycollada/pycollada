@@ -84,6 +84,10 @@ class CImage(DaeObject):
                 E.init_from(path)
             , id=self.id, name=self.id)
 
+
+    def getchildren(self):
+	return self.extras
+
     def getData(self):
         if self._data is None:
             try: self._data = self.collada.getFileData( self.path )
@@ -245,6 +249,9 @@ class Surface(DaeObject):
         collada.addId(id, surface)
         return surface
 
+    def getchildren(self):
+	return self.extras
+
     def save(self, recurse=True):
         """Saves the surface data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -337,6 +344,9 @@ class Sampler2D(DaeObject):
         collada.addId(id, sampler2d)
         return sampler2d
 
+    def getchildren(self):
+	return self.extras
+
     def save(self, recurse=True):
         """Saves the sampler data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -410,6 +420,9 @@ class Map(DaeObject):
             raise err
         extras = Extra.loadextras(collada, node)
         return Map(sampler, texcoord, extras, xmlnode = node)
+
+    def getchildren(self):
+	return self.extras
 
     def save(self, recurse=True):
         """Saves the map back to :attr:`xmlnode`"""
@@ -722,6 +735,10 @@ class Effect(DaeObject):
                         propval.append(1.0)
                     setattr(self, prop, tuple(propval))
 
+    def getchildren(self):
+	bumpmaps = [ self.bumpmap ] if self.bumpmap is not None else []
+	return self.params + bumpmaps + self.extras
+
     def save(self, recurse=True):
         """Saves the effect back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -905,6 +922,9 @@ class Material(DaeObject):
         material = Material(matid, matname, effect, extras, xmlnode=node)
         collada.addId(matid, material)
         return material
+
+    def getchildren(self):
+	return self.extras + [ self.effect ]
 
     def save(self, recurse=True):
         """Saves the material data back to :attr:`xmlnode`"""

@@ -100,6 +100,10 @@ class DaeObject(object):
         """
         raise Exception('Not implemented')
 
+    def getchildren(self):
+        raise Exception('Not implemented')
+        #return self.extraneous_children
+
     def save(self,recurse=True):
         """Put all the data to the internal xml node (xmlnode) so it can be serialized.
         :param recurse: if True, will call save on the child nodes, otherwise will only save info pertaining to this node

@@ -115,6 +115,9 @@ class Node(SceneNode):
             self.xmlnode = E.node(id=self.id, name=self.id)
             self.save(0)
 
+    def getchildren(self):
+	return self.children + self.transforms + self.extras
+
     def objects(self, tipo, matrix=None):
         """Iterate through all objects under this node that match `tipo`.
         The objects will be bound and transformed via the scene transformations.
@@ -263,6 +266,9 @@ class NodeNode(Node):
         collada.addSid(sid, nodenode)
         return nodenode
 
+    def getchildren(self):
+	return self.extras
+
     def save(self, recurse=True):
         """Saves the node node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -352,6 +358,10 @@ class GeometryNode(SceneNode):
         extras = Extra.loadextras(collada, node)
         return GeometryNode( geometry, materials, extras, xmlnode=node)
 
+    # FIXME: materials (instance_material tags) are actually great grandchildren, not children
+    def getchildren(self):
+	return self.materials + self.extras
+
     def save(self, recurse=True):
         """Saves the geometry node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -424,6 +434,10 @@ class ControllerNode(SceneNode):
             bindnode.append( technode )
             self.xmlnode.append( bindnode )
             for mat in materials: technode.append( mat.xmlnode )
+
+    # FIXME: materials (instance_material tags) are actually great grandchildren, not children
+    def getchildren(self):
+	return self.materials + self.extras
 
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.controller.BoundController` if ``tipo=='controller'``"""
@@ -517,6 +531,10 @@ class MaterialNode(SceneNode):
         extras = Extra.loadextras(collada, node)
         return MaterialNode(node.get('symbol'), target, inputs, extras, xmlnode = node)
 
+    # FIXME: inputs do not get used here
+    def getchildren(self):
+	return self.extras
+
     def objects(self):
         pass
 
@@ -568,6 +586,9 @@ class CameraNode(SceneNode):
         else:
             self.xmlnode = E.instance_camera(url="#%s"%camera.id)
 
+    def getchildren(self):
+	return self.extras
+
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.camera.BoundCamera` if ``tipo=='camera'``"""
         if tipo == 'camera':
@@ -618,6 +639,9 @@ class LightNode(SceneNode):
             """ElementTree representation of the light node."""
         else:
             self.xmlnode = E.instance_light(url="#%s"%light.id)
+
+    def getchildren(self):
+	return self.extras
 
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.light.BoundLight` if ``tipo=='light'``"""
@@ -698,6 +722,9 @@ class Scene(DaeObject):
             self.xmlnode = E.visual_scene(id=self.id)
             for node in nodes:
                 self.xmlnode.append( node.xmlnode )
+
+    def getchildren(self):
+	return self.nodes + self.extras
 
     def objects(self, tipo):
         """Iterate through all objects in the scene that match `tipo`.

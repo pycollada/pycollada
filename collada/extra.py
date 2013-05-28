@@ -67,6 +67,13 @@ class Extra(DaeObject):
         collada.addId(id, extra)
         return extra
 
+    def getchildren(self):
+        children = []
+        for c in [self.asset, self.technique_common]:
+            if c is not None:
+                children.append(c)
+        return children + self.techniques
+
     def save(self,recurse=True):
         if self.id is not None:
             self.xmlnode.set('id', self.id)

@@ -94,6 +94,13 @@ class Contributor(DaeObject):
         return Contributor(author=author, authoring_tool=authoring_tool,
                            comments=comments, copyright=copyright, source_data=source_data, xmlnode=node)
 
+    def getchildren(self):
+        children = []
+        for c in [self.author, self.authoring_tool, self.comments, self.copyright, self.source_data]:
+            if c is not None:
+                children.append(c)
+        return children
+
     def save(self,recurse=True):
         """Saves the contributor info back to :attr:`xmlnode`"""
         _correctValInNode(self.xmlnode, 'author', self.author)
@@ -193,6 +200,13 @@ class Asset(DaeObject):
         if self.unitmeter is not None and self.unitname is not None:
             self.xmlnode.append(E.unit(name=self.unitname, meter=float_format_func()(self.unitmeter)))
         self.xmlnode.append(E.up_axis(self.upaxis))
+
+    def getchildren(self):
+        children = []
+        for c in [self.title, self.subject, self.revision, self.keywords]:
+            if c is not None:
+                children.append(c)
+        return children + contributors
 
     def save(self,recurse=True):
         """Saves the asset info back to :attr:`xmlnode`"""

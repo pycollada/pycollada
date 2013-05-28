@@ -292,6 +292,10 @@ class Polylist(primitive.Primitive):
         """Create a bound polylist from this polylist, transform and material mapping"""
         return BoundPolylist( self, matrix, materialnodebysymbol)
 
+    # FIXME: this may be wrong
+    def getchildren(self):
+        return []
+
     def __str__(self):
         return '<Polylist length=%d>' % len(self)
 

@@ -57,6 +57,10 @@ class BindKinematicsModel(DaeObject):
         sidref = node.find(tag('SIDREF'))
         return BindKinematicsModel(scenenode, noderef, param,sidref,xmlnode=node)
 
+    # FIXME: this should probably be implemented really
+    def getchildren(self):
+        return []
+
     # FIXME: needs to save the newparams?
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -97,6 +101,10 @@ class BindJointAxis(DaeObject):
         axis = node.find(tag('axis'))
         value = node.find(tag('value'))
         return BindJointAxis(scenenode, targetref,axis, value,xmlnode=node)
+
+    # FIXME: this should probably be implemented really
+    def getchildren(self):
+        return []
 
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
@@ -166,6 +174,10 @@ class InstanceKinematicsScene(DaeObject):
         inst_kscene = InstanceKinematicsScene(kscene,url,sid,name,asset,extras,newparams,bind_kinematics_models, bind_joint_axes, xmlnode=node)
         collada.addSid(sid, inst_kscene)
         return inst_kscene
+
+    def getchildren(self):
+        assets = [ self.asset ] if self.asset else []
+        return self.extras + self.newparams + self.bind_kinematics_models + self.bind_joint_axis + assets
     
     def save(self, recurse=True):
         """Saves the info back to :attr:`xmlnode`"""

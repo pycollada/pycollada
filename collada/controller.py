@@ -174,6 +174,10 @@ class Skin(Controller):
         """Create a bound morph from this one, transform and material mapping"""
         return BoundSkin(self, matrix, materialnodebysymbol)
 
+    # FIXME: i'm punting on this for now
+    def getchildren(self):
+        return []
+
     @staticmethod
     def load( collada, localscope, skinnode, controllernode ):
         if len(localscope) < 3:
@@ -258,6 +262,7 @@ class Skin(Controller):
                 weight_source, weight_joint_source, vcounts, index, offsets,
                 geometry, controllernode, skinnode)
 
+# FIXME: i don't handle the Bound* classes at all
 
 class BoundSkin(BoundController):
     """A skin bound to a transform matrix and materials mapping."""
@@ -347,6 +352,10 @@ class Morph(Controller):
 
     def __getitem__(self, i):
         return self.target_list[i]
+
+    # FIXME: i'm punting on this for now
+    def getchildren(self):
+        return []
 
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound morph from this one, transform and material mapping"""

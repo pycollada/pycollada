@@ -29,6 +29,11 @@ class NewParam(DaeObject):
         print 'newparam_nodes is', newparam_nodes
         return [NewParam.load(collada, {}, None, newparam_node) for newparam_node in newparam_nodes]
 
+    # FIXME: should this return [] if self.value is not a DaeObject (e.g. a float)?
+    #        or, should we make DaeObjects for floats and such?
+    def getchildren(self):
+        return [ self.value ]
+
     # FIXME: does not handle cycles!
     def resolve(self):
         newparam = self

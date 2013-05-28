@@ -156,6 +156,9 @@ class FloatSource(Source):
 
     def __getitem__(self, i): return self.data[i]
 
+    def getchildren(self):
+        return self.extras
+
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
         technique_common = self.xmlnode.find(tag('technique_common'))
@@ -287,6 +290,9 @@ class IDRefSource(Source):
 
     def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
 
+    def getchildren(self):
+        return self.extras
+
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
         technique_common = self.xmlnode.find(tag('technique_common'))
@@ -402,6 +408,9 @@ class NameSource(Source):
     def __len__(self): return len(self.data)
 
     def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
+
+    def getchildren(self):
+        return self.extras
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""

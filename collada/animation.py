@@ -55,5 +55,8 @@ class Animation(DaeObject):
         collada.addId(id, anim)
         return anim
 
+    def getchildren(self):
+        return self.children
+
     def __str__(self): return '<Animation id=%s, children=%d>' % (self.id, len(self.children))
     def __repr__(self): return str(self)
