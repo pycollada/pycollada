@@ -593,6 +593,44 @@ class Collada(object):
             except DaeError as ex:
                 self.handleError(ex)
 
+
+    # requires len(sids_list) >= 1
+    def _resolvePartialSidPath(self, root_nodes, sids_list):
+        sid = sids_list[0]
+
+        nodes_to_search = list(root_nodes)
+        while len(nodes_to_search) > 0:
+
+            # BFS
+            partial_sid_node = None
+            while len(nodes_to_search) > 0:
+                node = nodes_to_search.pop(0)
+                if node.xmlnode.get('sid') == sid:   # FIXME: don't use the xmlnode
+                    partial_sid_node = node
+                    break
+                else:
+                    nodes_to_search.extend(node.getchildren())
+
+            if partial_sid_node is None:
+                return None
+            elif len(sids_list) == 1:
+                return partial_sid_node
+            else:
+                full_sid_node = self._resolvePartialSidPath(partial_sid_node.getchildren(), sids_list[1:])
+                if full_sid_node is not None:
+                    return full_sid_node
+        return None
+
+    def resolveSidPath(self, full_sid_path):
+        id_and_sids = full_sid_path.split('/')
+        root_node   = self.ids_map.get(id_and_sids[0],None)
+        if not root_node:
+            return None
+        if len(id_and_sids) == 1:
+            return root_node
+
+        nodes_to_search = [root_node]
+        return self._resolvePartialSidPath([root_node], id_and_sids[1:])
     def save(self, recurse=True):
         """Saves the collada document back to :attr:`xmlnode`"""
         libraries = [(self.geometries, 'library_geometries'),
