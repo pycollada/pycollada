@@ -202,11 +202,7 @@ class Asset(DaeObject):
         self.xmlnode.append(E.up_axis(self.upaxis))
 
     def getchildren(self):
-        children = []
-        for c in [self.title, self.subject, self.revision, self.keywords]:
-            if c is not None:
-                children.append(c)
-        return children + contributors
+        return self.contributors
 
     def save(self,recurse=True):
         """Saves the asset info back to :attr:`xmlnode`"""
