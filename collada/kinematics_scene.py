@@ -47,6 +47,7 @@ class BindKinematicsModel(DaeObject):
         else:
             self.xmlnode = E.bind_kinematics_model()
             self.save(0)
+
     @staticmethod
     def load( collada, localscope, node ):
         noderef = node.get('node')
@@ -227,6 +228,9 @@ class KinematicsScene(DaeObject):
         kscene = KinematicsScene(id, name, instance_kinematics_models, instance_articulated_systems, extras, xmlnode=node)
         collada.addId(id, kscene)
         return kscene
+
+    def getchildren(self):
+        return self.instance_kinematics_models + self.instance_articulated_systems + self.extras
 
     def save(self,recurse=True):
         if self.id is not None:
