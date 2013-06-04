@@ -194,6 +194,9 @@ class Asset(DaeObject):
             self.xmlnode.append(E.unit(name=self.unitname, meter=float_format_func()(self.unitmeter)))
         self.xmlnode.append(E.up_axis(self.upaxis))
 
+    def getchildren(self):
+        return self.contributors
+
     def save(self,recurse=True):
         """Saves the asset info back to :attr:`xmlnode`"""
         self._recreateXmlNode()
