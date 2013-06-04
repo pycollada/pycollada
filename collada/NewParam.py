@@ -32,7 +32,10 @@ class NewParam(DaeObject):
     # FIXME: should this return [] if self.value is not a DaeObject (e.g. a float)?
     #        or, should we make DaeObjects for floats and such?
     def getchildren(self):
-        return [ self.value ]
+        if isinstance(self.value, SIDREF):
+            return [ self.value ]
+        else:
+            return []
 
     # FIXME: does not handle cycles!
     def resolve(self):
