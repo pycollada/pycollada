@@ -616,6 +616,7 @@ class Collada(object):
             elif len(sids_list) == 1:
                 return partial_sid_node
             else:
+
                 # switch to the element pointed to by the url, if we can...
                 url = partial_sid_node.xmlnode.get('url')
                 if url is not None:
@@ -625,6 +626,7 @@ class Collada(object):
                         if full_sid_node is not None:
                             return full_sid_node
 
+                # ...otherwise, fall back to the non-switched element.
                 full_sid_node = self._resolvePartialSidPath(partial_sid_node.getchildren(), sids_list[1:])
                 if full_sid_node is not None:
                     return full_sid_node
