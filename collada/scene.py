@@ -212,7 +212,7 @@ class Node(SceneNode):
 
 
 class NodeNode(Node):
-    """Represents a node being instantiated in a scene, as defined in the collada <instande_node> tag."""
+    """Represents a node being instantiated in a scene, as defined in the collada <instance_node> tag."""
 
     def __init__(self, node, sid=None, name=None, url=None, proxy=None, extras=None, xmlnode=None):
         """Creates a node node
