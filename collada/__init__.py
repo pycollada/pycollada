@@ -632,6 +632,9 @@ class Collada(object):
                     return full_sid_node
         return None
 
+    def getObjectFromId(self,id):
+        return self.ids_map.get(id,None)
+
     def resolveSidPath(self, full_sid_path):
         id_and_sids = full_sid_path.split('/')
         root_node   = self.ids_map.get(id_and_sids[0],None)
