@@ -261,6 +261,12 @@ class Collada(object):
     def addIdWithSuffix(self, id, suffix, daeObject):
         self.ids_with_suffixes_map[id+suffix] = daeObject
 
+    def getNodeForId(self, id, use_suffix=False):
+        if use_suffix:
+            return self.ids_with_suffixes_map.get(id, None)
+        else:
+            return self.ids_map.get(id, None)
+
     # FIXME: this is getting called with sid==None a bunch of times!
     def addSid(self, sid, daeObject):
         if self.sids_map.has_key(sid):
