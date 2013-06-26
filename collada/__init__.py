@@ -121,6 +121,7 @@ class Collada(object):
         """
 
         self.ids_map = {}
+        self.ids_with_suffixes_map = {}
         self.sids_map = {}
 
         self.errors = []
@@ -256,6 +257,9 @@ class Collada(object):
 
     def addId(self, id, daeObject):
         self.ids_map[id] = daeObject
+
+    def addIdWithSuffix(self, id, suffix, daeObject):
+        self.ids_with_suffixes_map[id+suffix] = daeObject
 
     # FIXME: this is getting called with sid==None a bunch of times!
     def addSid(self, sid, daeObject):
