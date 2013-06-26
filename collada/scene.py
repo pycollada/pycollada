@@ -288,7 +288,7 @@ class NodeNode(Node):
         return nodenode
 
     def getchildren(self):
-	return self.extras
+	return (self.node.getchildren() if self.node is not None else []) + self.extras
 
     def save(self, recurse=True):
         """Saves the node node back to :attr:`xmlnode`"""
