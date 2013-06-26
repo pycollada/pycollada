@@ -217,7 +217,7 @@ class Node(SceneNode):
 class NodeNode(Node):
     """Represents a node being instantiated in a scene, as defined in the collada <instance_node> tag."""
 
-    def __init__(self, node, sid=None, name=None, url=None, proxy=None, extras=None, xmlnode=None):
+    def __init__(self, collada, node, sid=None, idsuffix=None, name=None, url=None, proxy=None, extras=None, xmlnode=None):
         """Creates a node node
 
         :param collada.scene.Node node:
@@ -226,9 +226,11 @@ class NodeNode(Node):
           When loaded, the xmlnode it comes from
 
         """
-        self.node = node
+        self.collada = collada
+        self._node = node
         """An object of type :class:`collada.scene.Node` representing the node to bind in the scene"""
         self.sid=sid
+        self.idsuffix=idsuffix
         self.name=name
         self.url=url
         self.proxy=proxy
@@ -247,8 +249,16 @@ class NodeNode(Node):
             yield obj
 
     id = property(lambda s: s.node.id if s.node is not None else None)
+    id_with_suffix = property(lambda s: ((s.id + s.idsuffix) if s.idsuffix is not None else s.id) if s.id is not None else None)
     children = property(lambda s: s.node.children)
     matrix = property(lambda s: s.node.matrix)
+
+    def _getnode(self):
+        if self._node is None:
+            if self.url.startswith('#'):
+                self._node = self.collada.getNodeForId(url[1:])
+        return self._node
+    node = property(_getnode)
 
     @staticmethod
     def load( collada, node, localscope ):
@@ -261,9 +271,20 @@ class NodeNode(Node):
             referred_node = localscope.get(url[1:])
             if not referred_node:
                 referred_node = collada.nodes.get(url[1:])
+                if not referred_node:
+                    referred_node = collada.getNodeForId(url[1:])
         extras = Extra.loadextras(collada, node)
-        nodenode = NodeNode(referred_node, sid, name, url, proxy, extras, xmlnode=node)
+        idsuffix_extras = [extra for extra in extras if extra.type == 'idsuffix']
+        idsuffix = idsuffix_extras[0].name if len(idsuffix_extras) > 0 else None
+        nodenode = NodeNode(collada, referred_node, sid, idsuffix, name, url, proxy, extras, xmlnode=node)
         collada.addSid(sid, nodenode)
+
+        if nodenode.id is not None:
+            if idsuffix is not None:
+                collada.addIdWithSuffix(nodenode.id, idsuffix, nodenode)
+            else:
+                collada.addId(nodenode.id, nodenode)
+
         return nodenode
 
     def getchildren(self):
