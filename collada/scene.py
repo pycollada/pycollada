@@ -280,10 +280,7 @@ class NodeNode(Node):
         collada.addSid(sid, nodenode)
 
         if nodenode.id is not None:
-            if idsuffix is not None:
-                collada.addIdWithSuffix(nodenode.id, idsuffix, nodenode)
-            else:
-                collada.addId(nodenode.id, nodenode)
+            collada.addId(nodenode.id + (idsuffix if idsuffix is not None else ''), nodenode)
 
         return nodenode
 

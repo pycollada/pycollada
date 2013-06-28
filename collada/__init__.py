@@ -121,7 +121,6 @@ class Collada(object):
         """
 
         self.ids_map = {}
-        self.ids_with_suffixes_map = {}
         self.sids_map = {}
 
         self.errors = []
@@ -258,14 +257,8 @@ class Collada(object):
     def addId(self, id, daeObject):
         self.ids_map[id] = daeObject
 
-    def addIdWithSuffix(self, id, suffix, daeObject):
-        self.ids_with_suffixes_map[id+suffix] = daeObject
-
-    def getNodeForId(self, id, use_suffix=False):
-        if use_suffix:
-            return self.ids_with_suffixes_map.get(id, None)
-        else:
-            return self.ids_map.get(id, None)
+    def getNodeForId(self, id):
+        return self.ids_map.get(id, None)
 
     # FIXME: this is getting called with sid==None a bunch of times!
     def addSid(self, sid, daeObject):
