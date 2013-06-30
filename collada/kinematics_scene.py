@@ -19,7 +19,7 @@ from .asset import Asset
 from .extra import Extra
 from .articulated_system import InstanceArticulatedSystem
 from .kinematics_model import InstanceKinematicsModel
-from .NewParam import NewParam
+from .newparam import NewParam
 
 # class CommonSidrefOrParam(DaeObject):
 #     def __init__(self,param=None,sidref=None,xmlnode=None):

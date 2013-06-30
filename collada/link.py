@@ -18,12 +18,12 @@ from .transform import TranslateTransform, RotateTransform
 
 class Attachment(DaeObject):
     """A class containing the data coming from a COLLADA <attachment_full> tag"""
-    def __init__(self, attachmenttype=None, joint=None, link=None, transformnodes=None, xmlnode=None):
+    def __init__(self, attachmenttype=None, jointsid=None, link=None, transformnodes=None, xmlnode=None):
         """
         :param attachmenttype: one of full, start, or end
         """
         self.attachmenttype=attachmenttype
-        self.joint=joint
+        self.jointsid=jointsid
         self.link = link
         self.transformnodes = []
         if transformnodes is not None:
@@ -42,7 +42,7 @@ class Attachment(DaeObject):
         
     @staticmethod
     def load( collada, localscope, node, attachmenttype ):
-        joint = node.get("joint")
+        jointsid = node.get("joint")
         link = None
         transformnodes=[]
         for subnode in node:
@@ -52,17 +52,16 @@ class Attachment(DaeObject):
                 transformnodes.append(TranslateTransform.load(collada,subnode))
             elif subnode.tag == tag('rotate'):
                 transformnodes.append(RotateTransform.load(collada,subnode))
-        node = Attachment(attachmenttype, joint, link, transformnodes, xmlnode=node)
+        node = Attachment(attachmenttype, jointsid, link, transformnodes, xmlnode=node)
         return node
-
-    # FIXME: joint not handled
+    
     def getchildren(self):
         links = [ self.link ] if self.link is not None else []
         return self.transformnodes + links
 
     def save(self,recurse=True):
         self.xmlnode.clear()
-        self.xmlnode.set('joint', self.joint)
+        self.xmlnode.set('joint', self.jointsid)
         for node in self.transformnodes:
             if recurse:
                 node.save()

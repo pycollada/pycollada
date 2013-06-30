@@ -1,5 +1,5 @@
 from .common import DaeObject, tag
-from .SIDREF import SIDREF
+from .sidref import SIDREF
 
 class NewParam(DaeObject):
     def __init__(self, sid, value, xmlnode):
@@ -37,13 +37,13 @@ class NewParam(DaeObject):
         else:
             return []
 
-    # FIXME: does not handle cycles!
-    def resolve(self):
-        newparam = self
-        while type(newparam) == SIDREF or type(newparam) == NewParam:
-            if type(newparam) == SIDREF:
-                newparam = newparam.resolve()
-            else:
-                newparam = newparam.value
-        return newparam
+    # this should not exist since newparam should not continue resolving after the first SIDREF
+    # def resolve(self):
+    #     newparam = self
+    #     while isinstance(newparam, SIDREF) or isinstance(newparam, NewParam):
+    #         if isinstance(newparam, SIDREF):
+    #             newparam = newparam.resolve()
+    #         else:
+    #             newparam = newparam.value
+    #     return newparam
 

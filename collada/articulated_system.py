@@ -18,7 +18,7 @@ from .kinematics_model import InstanceKinematicsModel
 from .extra import Extra
 from .technique import Technique
 from .asset import Asset
-from .NewParam import NewParam
+from .newparam import NewParam
 
 class InstanceArticulatedSystem(DaeObject):
     def __init__(self,asystem=None, url=None, sid=None, name=None, newparams=None, setparams=None, extras=None, xmlnode=None):

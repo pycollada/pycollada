@@ -20,7 +20,7 @@ from .technique import Technique
 from .asset import Asset
 from .link import Link
 from .joint import Joint
-from .NewParam import NewParam
+from .newparam import NewParam
 
 class InstanceKinematicsModel(DaeObject):
     def __init__(self,kmodel=None, url=None, sid=None, name=None, extras = None, newparams=None, xmlnode=None):

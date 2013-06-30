@@ -596,6 +596,15 @@ class Collada(object):
             except DaeError as ex:
                 self.handleError(ex)
 
+    # # modifies nodes_to_search
+    # def _performBFSForSid(self, nodes_to_search, sid):
+    #     while len(nodes_to_search) > 0:
+    #         node = nodes_to_search.pop(0)
+    #         if node.xmlnode.get('sid') == sid:   # FIXME: don't use the xmlnode
+    #             return node
+    #         else:
+    #             nodes_to_search.append(node.getchildren())
+    #     return None
 
     # requires len(sids_list) >= 1
     def _resolvePartialSidPath(self, root_nodes, sids_list):
@@ -648,6 +657,28 @@ class Collada(object):
 
         nodes_to_search = [root_node]
         return self._resolvePartialSidPath([root_node], id_and_sids[1:])
+
+    def resolveSidPath_early_FIXME_REMOVE_ME(self, sid):
+        id_and_sids = sid.split('/')
+        root_node   = self.ids_map.get(id_and_sids[0],None)
+        if not root_node:
+            return None
+
+        nodes_to_search = [root_node]
+        node_with_sid   = root_node
+        for sid in id_and_sids[1:]:
+            node_with_sid = None
+            while len(nodes_to_search) > 0:
+                node = nodes_to_search.pop(0)
+                if node.xmlnode.get('sid') == sid:   # FIXME: don't use the xmlnode
+                    node_with_sid = node
+                    break
+            if not node_with_sid:
+                return None
+            nodes_to_search.extend(node_with_sid.getchildren())
+
+        return node_with_sid
+
     def save(self, recurse=True):
         """Saves the collada document back to :attr:`xmlnode`"""
         libraries = [(self.geometries, 'library_geometries'),
