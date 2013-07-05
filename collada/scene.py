@@ -256,7 +256,7 @@ class NodeNode(Node):
     def _getnode(self):
         if self._node is None:
             if self.url.startswith('#'):
-                self._node = self.collada.getNodeForId(url[1:])
+                self._node = self.collada.getNodeForId(self.url[1:])
         return self._node
     node = property(_getnode)
 
