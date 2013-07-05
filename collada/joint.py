@@ -19,7 +19,7 @@ from .extra import Extra
 def _loadValuesOfPrismaticOrRevolute( collada, localscope, node ):
     sid = node.get('sid')
     axis_node = node.find(tag('axis'))
-    if axis_node is None:
+    if axis_node is not None:
         axis_text = axis_node.text
     else:
         axis_text = None
