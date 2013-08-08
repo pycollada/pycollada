@@ -26,7 +26,6 @@ class NewParam(DaeObject):
     def loadnewparams(collada, xmlnode):
         """returns all newparams from children of node"""
         newparam_nodes = xmlnode.findall(tag('newparam')) or []
-        print 'newparam_nodes is', newparam_nodes
         return [NewParam.load(collada, {}, None, newparam_node) for newparam_node in newparam_nodes]
 
     # FIXME: should this return [] if self.value is not a DaeObject (e.g. a float)?

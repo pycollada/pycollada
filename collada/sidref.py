@@ -22,10 +22,8 @@ class SIDREF(DaeObject):
 
         prev_node = node
         for sid in id_and_sids[1:]:
-            print 'searching for',sid
             (best_sid_node,best_chain_length) = (None,None)
             for sid_node in self.data.sids_map.get(sid,[]):
-                print 'found',sid_node
                 sid_pn_xmlnode = sid_node.xmlnode
                 chain_length = 0
                 while sid_pn_xmlnode and sid_pn_xmlnode != prev_node.xmlnode:
