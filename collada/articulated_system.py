@@ -80,9 +80,11 @@ class InstanceArticulatedSystem(DaeObject):
             self.xmlnode.attrib.pop('url',None)
         save_attribute(self.xmlnode,'sid',self.sid)
         save_attribute(self.xmlnode,'name',self.name)
-        for oldnode in self.xmlnode.findall(tag('newparam')) + self.xmlnode.findall(tag('sewparam')):
+        for oldnode in self.xmlnode.findall(tag('newparam')) + self.xmlnode.findall(tag('setparam')):
             self.xmlnode.remove(oldnode)
         for newparam in self.newparams:
+            if recurse:
+                newparam.save(recurse)
             self.xmlnode.append(newparam.xmlnode)
         for setparam in self.setparams:
             self.xmlnode.append(setparam)
