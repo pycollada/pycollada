@@ -1,3 +1,4 @@
+import copy
 from .common import DaeObject
 
 # FIXME: only works when the targets are newparams
@@ -7,6 +8,11 @@ class SIDREF(DaeObject):
         self.value = value
         self.scoped_node_for_sids = scoped_node_for_sids
         self.xmlnode = xmlnode
+
+    def __deepcopy__(self, memodict):
+        obj = SIDREF(self.data, copy.deepcopy(self.value), copy.deepcopy(self.scoped_node_for_sids), copy.deepcopy(self.xmlnode))
+        obj.__class__ = self.__class__
+        return obj
 
     @staticmethod
     def load( collada, localscope, scoped_node_for_sids, node ):
