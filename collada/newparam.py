@@ -35,9 +35,14 @@ class NewParam(DaeObject):
         for oldnode in self.xmlnode.getchildren():
             self.xmlnode.remove(oldnode)
         if self.value is not None:
-            if recurse:
-                self.value.save(recurse)
-            self.xmlnode.append(self.value.xmlnode)
+            if hasattr(self.value,'save'):
+                if recurse:
+                    # depending on the value type, this might be a pycollada object or not
+                    self.value.save(recurse)
+                self.xmlnode.append(self.value.xmlnode)
+            else:
+                # set text directory
+                self.xmlnode.text = str(self.value)
             
     # FIXME: should this return [] if self.value is not a DaeObject (e.g. a float)?
     #        or, should we make DaeObjects for floats and such?
