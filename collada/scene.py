@@ -31,6 +31,7 @@ from .common import DaeError, DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import toUnitVec
 from .xmlutil import etree as ElementTree
+from .xmlutil import UnquoteSafe
 from .extra import Extra
 from .transform import Transform, TranslateTransform, RotateTransform, ScaleTransform, MatrixTransform, LookAtTransform
 
@@ -265,7 +266,8 @@ class NodeNode(Node):
         referred_node=None
         sid = node.get("sid")
         name = node.get("name")
-        url = node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         proxy = node.get('proxy')
         if url.startswith('#'):
             referred_node = localscope.get(url[1:])
@@ -365,7 +367,8 @@ class GeometryNode(SceneNode):
 
     @staticmethod
     def load( collada, node ):
-        url = node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in geometry instance %s' % url)
         geometry = collada.geometries.get(url[1:])
         if not geometry: raise DaeBrokenRefError('Geometry %s not found in library'%url)
@@ -468,7 +471,8 @@ class ControllerNode(SceneNode):
 
     @staticmethod
     def load( collada, node ):
-        url = node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in controller instance %s' % url)
         controller = collada.controllers.get(url[1:])
         if not controller: raise DaeBrokenRefError('Controller %s not found in library'%url)
@@ -615,7 +619,8 @@ class CameraNode(SceneNode):
 
     @staticmethod
     def load( collada, node ):
-        url = node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in camera instance %s' % url)
         camera = collada.cameras.get(url[1:])
         if not camera: raise DaeBrokenRefError('Camera %s not found in library'%url)
@@ -669,7 +674,8 @@ class LightNode(SceneNode):
 
     @staticmethod
     def load( collada, node ):
-        url = node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in light instance %s' % url)
         light = collada.lights.get(url[1:])
         if not light: raise DaeBrokenRefError('Light %s not found in library'%url)

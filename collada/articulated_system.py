@@ -14,6 +14,7 @@ import copy
 from .common import DaeObject, E, tag, save_attribute
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
+from .xmlutil import UnquoteSafe
 from .kinematics_model import InstanceKinematicsModel
 from .extra import Extra
 from .technique import Technique
@@ -49,7 +50,8 @@ class InstanceArticulatedSystem(DaeObject):
     @staticmethod
     def load( collada, localscope, node ):
         asystem=None
-        url=node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         sid=node.get('sid')
         name=node.get('name')
         newparams = NewParam.loadnewparams(collada, node)

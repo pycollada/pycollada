@@ -14,6 +14,7 @@
 from .common import DaeObject, E, tag, save_attribute, save_child_object
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
+from .xmlutil import UnquoteSafe
 from .physics_model import InstancePhysicsModel
 from .extra import Extra
 from .technique import Technique
@@ -37,7 +38,8 @@ class InstancePhysicsScene(DaeObject):
     @staticmethod
     def load( collada, localscope, node ):
         pscene=None
-        url = node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         if url.startswith('#'):
             pscene = collada.physics_scenes.get(url[1:])
         sid = node.get('sid')

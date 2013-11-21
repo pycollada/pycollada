@@ -47,7 +47,7 @@ from .common import DaeError, DaeObject, DaeIncompleteError, \
 from .util import basestring, BytesIO
 from .util import IndexedList
 from .xmlutil import etree as ElementTree
-from .xmlutil import writeXML, get_collada_version, _set_version
+from .xmlutil import writeXML, get_collada_version, _set_version, UnquoteSafe
 from .xmlutil import VERSION_1_4_1, VERSION_1_4, VERSION_1_5_0, VERSION_1_5
 from .xmlutil import DEFAULT_VERSION
 
@@ -574,12 +574,13 @@ class Collada(object):
         node = self.xmlnode.find('%s/%s' % (tag('scene'), tag('instance_visual_scene')))
         try:
             if node != None:
-                sceneid = node.get('url')
-                if not sceneid.startswith('#'):
-                    raise DaeMalformedError('Malformed default scene reference to %s: '%sceneid)
-                self.scene = self.scenes.get(sceneid[1:])
+                # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+                sceneurl = UnquoteSafe(node.get('url'))
+                if not sceneurl.startswith('#'):
+                    raise DaeMalformedError('Malformed default scene reference to %s: '%sceneurl)
+                self.scene = self.scenes.get(sceneurl[1:])
                 if not self.scene:
-                    raise DaeBrokenRefError('Default scene %s not found' % sceneid)
+                    raise DaeBrokenRefError('Default scene %s not found' % sceneurl)
         except DaeError as ex:
             self.handleError(ex)
         node = self.xmlnode.find('%s/%s' % (tag('scene'), tag('instance_kinematics_scene')))

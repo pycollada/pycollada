@@ -15,6 +15,7 @@ import copy
 from .common import DaeObject, E, tag, save_attribute, save_child_object
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
+from .xmlutil import UnquoteSafe
 from .asset import Asset
 from .extra import Extra
 from .articulated_system import InstanceArticulatedSystem
@@ -152,7 +153,8 @@ class InstanceKinematicsScene(DaeObject):
     @staticmethod
     def load( collada, localscope, node ):
         kscene=None
-        url = node.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        url=UnquoteSafe(node.get('url'))
         if url.startswith('#'):
             kscene = collada.kinematics_scenes.get(url[1:])
         sid = node.get('sid')

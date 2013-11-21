@@ -156,3 +156,14 @@ def _set_version(version):
         etree._namespace_map[get_collada_ns()] = None
     elif not HAVE_LXML:
         etree.register_namespace('', get_collada_ns())
+
+# need this for URI decoding
+try:
+    from urllib import unquote
+    def UnquoteSafe(s):
+        if s is not None:
+            return unquote(s)
+        return None
+except ImportError:
+    def UnquoteSafe(s):
+        return s

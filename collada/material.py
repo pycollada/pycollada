@@ -27,6 +27,7 @@ from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import falmostEqual, StringIO
 from .xmlutil import etree as ElementTree
+from .xmlutil import UnquoteSafe
 from .extra import Extra
 
 try:
@@ -909,14 +910,15 @@ class Material(DaeObject):
 
         effnode = node.find( tag('instance_effect'))
         if effnode is None: raise DaeIncompleteError('No effect inside material')
-        effectid = effnode.get('url')
+        # according to http://www.w3.org/TR/2001/WD-charmod-20010126/#sec-URIs, URIs in XML are always %-encoded, therefore
+        effecturl = UnquoteSafe(effnode.get('url'))
 
-        if not effectid.startswith('#'):
-            raise DaeMalformedError('Corrupted effect reference in material %s' % effectid)
+        if not effecturl.startswith('#'):
+            raise DaeMalformedError('Corrupted effect reference in material %s' % effecturl)
 
-        effect = collada.effects.get(effectid[1:])
+        effect = collada.effects.get(effecturl[1:])
         if not effect:
-            raise DaeBrokenRefError('Effect not found: '+effectid)
+            raise DaeBrokenRefError('Effect not found: '+effecturl)
 
         extras = Extra.loadextras(collada, node)
         material = Material(matid, matname, effect, extras, xmlnode=node)
