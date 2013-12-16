@@ -52,9 +52,9 @@ class InstancePhysicsScene(DaeObject):
     def getchildren(self):
         return self.extras
     
-    def save(self):
+    def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
-        Extra.saveextras(self.xmlnode,self.extras)
+        Extra.saveextras(self.xmlnode,self.extras,recurse)
         # prioritize saving the url rather than self.kscene in order to account for external references
         if self.url is not None:
             self.xmlnode.set('url',self.url)
@@ -64,7 +64,7 @@ class InstancePhysicsScene(DaeObject):
             self.xmlnode.attrib.pop('url',None)
         save_attribute(self.xmlnode,'sid',self.sid)
         save_attribute(self.xmlnode,'name',self.name)
-
+        
 class PhysicsScene(DaeObject):
     """A class containing the data coming from a COLLADA <physics_scene> tag"""
     def __init__(self, id, name, instance_physics_models=None, asset = None, technique_common=None, techniques=None, extras=None, xmlnode=None):
@@ -126,7 +126,7 @@ class PhysicsScene(DaeObject):
         return self.instance_physics_models + self.extras + self.techniques
 
     def save(self,recurse=True):
-        Extra.saveextras(self.xmlnode,self.extras)
+        Extra.saveextras(self.xmlnode,self.extras,recurse)
         Technique.savetechniques(self.xmlnode,self.techniques)
         technique_common = self.xmlnode.find(tag('technique_common'))
         if technique_common is None:

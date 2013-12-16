@@ -39,7 +39,7 @@ class InstancePhysicsModel(DaeObject):
             
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
-        Extra.saveextras(self.xmlnode,self.extras)
+        Extra.saveextras(self.xmlnode,self.extras,recurse)
         # prioritize saving the url rather than self.kscene in order to account for external references
         if self.url is not None:
             self.xmlnode.set('url',self.url)
@@ -59,6 +59,13 @@ class InstancePhysicsModel(DaeObject):
             self.xmlnode.set('parent',self.parent)
         else:
             self.xmlnode.attrib.pop('parent')
+        oldnodes = self.xmlnode.findall(tag('instance_rigid_body'))
+        for oldnode in oldnodes:
+            self.xmlnode.remove(oldnode)    
+        for instance_rigid_body in self.instance_rigid_bodies:
+            if recurse:
+                instance_rigid_body.save(recurse)
+            self.xmlnode.append(instance_rigid_body.xmlnode)
             
     @staticmethod
     def load( collada, localscope, node ):
@@ -150,7 +157,7 @@ class PhysicsModel(DaeObject):
         return self.instance_physics_models + self.extras
 
     def save(self, recurse=True):
-        Extra.saveextras(self.xmlnode,self.extras)
+        Extra.saveextras(self.xmlnode,self.extras,recurse)
         oldnodes = self.xmlnode.findall(tag('instance_physics_model'))+self.xmlnode.findall(tag('rigid_body'))
         for oldnode in oldnodes:
             self.xmlnode.remove(oldnode)    

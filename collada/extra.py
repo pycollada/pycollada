@@ -116,12 +116,13 @@ class Extra(DaeObject):
         return extras
 
     @staticmethod
-    def saveextras(xmlnode,extras):
+    def saveextras(xmlnode,extras,recurse=True):
         """saves extras to children of node"""
         # remove all <extra> tags and add the new ones
         for oldnode in xmlnode.findall(tag('extra')):
             xmlnode.remove(oldnode)
         for extra in extras:
-            extra.save()
+            if recurse:
+                extra.save(recurse)
             xmlnode.append(extra.xmlnode)
-
+        
