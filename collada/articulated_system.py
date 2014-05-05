@@ -6,12 +6,12 @@
 # IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
 #                                                                  #
 # THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
-# by Jeff Terrace and contributors                                 #
+# by Jeff Terrace, Rosen Diankov, and contributors                 #
 #                                                                  #
 ####################################################################
 """Contains objects for representing an articulated system."""
 import copy
-from .common import DaeObject, E, tag, save_attribute
+from .common import DaeObject, E, tag, save_attribute, CommonParam, CommonFloat, CommonBool, CommonInt
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
 from .xmlutil import UnquoteSafe
@@ -65,8 +65,7 @@ class InstanceArticulatedSystem(DaeObject):
         collada.addSid(sid, inst_asystem)
         return inst_asystem
 
-    # FIXME: this leaves out setparams (because we don't have a class for them yet) and binds (because we don't
-    #        track them)
+    # FIXME: this leaves out setparams (because we don't have a class for them yet) and binds (because we don't track them)
     def getchildren(self):
         return self.newparams + self.extras
 
@@ -91,6 +90,143 @@ class InstanceArticulatedSystem(DaeObject):
         for setparam in self.setparams:
             self.xmlnode.append(setparam)
 
+class KinematicsAxisInfo(DaeObject):
+    """A class containing the data coming from a COLLADA <kinematics>/<axis_info> tag
+    """
+    def __init__(self, sid=None, name=None, axis=None, active=None, locked=None, index=None, limits_min=None, limits_max=None, newparams=None, formulas=None, xmlnode=None):
+        self.sid = sid
+        self.name = name
+        self.axis = axis
+        self.active = active
+        self.locked = locked
+        self.index = index
+        self.limits_min = limits_min
+        self.limits_max = limits_max
+        self.newparams = []
+        if newparams is not None:
+            self.newparams = newparams
+        self.formulas = []
+        if formulas is not None:
+            self.formulas = formulas
+            
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the geometry."""
+        else:
+            self.xmlnode = E.axis_info()
+            self.save(0)
+            
+    @staticmethod
+    def load(collada, localscope, node):
+        sid = node.get('sid')
+        active=None
+        locked=None
+        index=None
+        limits_min=None
+        limits_max=None
+        newparams = NewParam.loadnewparams(collada, node)
+        formulas=[]
+        for subnode in node:
+            if subnode.tag == tag('active'):
+                if len(subnode) == 1:
+                    if subnode[0].tag == tag('param'):
+                        active = CommonParam.load(collada, {}, subnode[0])
+                    elif subnode[0].tag == tag('bool'):
+                        active = CommonBool.load(collada, {}, subnode[0])
+            elif subnode.tag == tag('locked'):
+                if len(subnode) == 1:
+                    if subnode[0].tag == tag('param'):
+                        locked = CommonParam.load(collada, {}, subnode[0])
+                    elif subnode[0].tag == tag('bool'):
+                        locked = CommonBool.load(collada, {}, subnode[0])
+            elif subnode.tag == tag('index'):
+                if len(subnode) == 1:
+                    if subnode[0].tag == tag('param'):
+                        index = CommonParam.load(collada, {}, subnode[0])
+                    elif subnode[0].tag == tag('int'):
+                        index = CommonInt.load(collada, {}, subnode[0])
+            elif subnode.tag == tag('limits'):
+                xmlmin = subnode.find(tag('min'))
+                if xmlmin is not None:
+                    if len(xmlmin) == 1:
+                        if xmlmin[0].tag == tag('param'):
+                            limits_min = CommonParam.load(collada, {}, xmlmin[0])
+                        elif subnode[0].tag == tag('float'):
+                            limits_min = CommonFloat.load(collada, {}, xmlmin[0])            
+                xmlmax = subnode.find(tag('max'))
+                if xmlmax is not None:
+                    if len(xmlmax) == 1:
+                        if xmlmax[0].tag == tag('param'):
+                            limits_max = CommonParam.load(collada, {}, xmlmax[0])
+                        elif subnode[0].tag == tag('float'):
+                            limits_max = CommonFloat.load(collada, {}, xmlmax[0])
+                            
+        axisinfo = KinematicsAxisInfo(sid, node.get('name'), node.get('axis'), active, locked, index, limits_min, limits_max, newparams, formulas, xmlnode=node)
+        collada.addSid(sid, axisinfo)
+        return axisinfo
+    
+    def getchildren(self):
+        return self.newparams
+    
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        save_attribute(self.xmlnode,'sid',self.sid)
+        save_attribute(self.xmlnode,'name',self.name)
+        save_attribute(self.xmlnode,'axis',self.axis)
+        
+        for previouschild in xmlnode.findall(tag('active')):
+            xmlnode.remove(previouschild)
+        if self.active is not None:
+            if recurse:
+                self.active.save(recurse)
+            xmlactive = E.active()
+            xmlactive.append(self.active.xmlnode)
+            self.xmlnode.append(xmlactive)
+
+        for previouschild in xmlnode.findall(tag('locked')):
+            xmlnode.remove(previouschild)
+        if self.locked is not None:
+            if recurse:
+                self.locked.save(recurse)
+            xmllocked = E.locked()
+            xmllocked.append(self.locked.xmlnode)
+            self.xmlnode.append(xmllocked)
+
+        for previouschild in xmlnode.findall(tag('index')):
+            xmlnode.remove(previouschild)
+        if self.index is not None:
+            if recurse:
+                self.index.save(recurse)
+            xmlindex = E.index()
+            xmlindex.append(self.index.xmlnode)
+            self.xmlnode.append(xmlindex)
+
+        for previouschild in xmlnode.findall(tag('limits')):
+            xmlnode.remove(previouschild)
+        if self.limits_min is not None or self.limits_max is not None:
+            if recurse:
+                if self.limits_min is not None:
+                    self.limits_min.save(recurse)
+                if self.limits_max is not None:
+                    self.limits_max.save(recurse)
+            xmllimits = E.limits()
+            if self.limits_min is not None:
+                xmllimits_min = E.min()
+                xmllimits_min.append(self.limits_min.xmlnode)
+                xmllimits.append(xmllimits_min)
+            if self.limits_max is not None:
+                xmllimits_max = E.max()
+                xmllimits_max.append(self.limits_max.xmlnode)
+                xmllimits.append(xmllimits_max)
+            self.xmlnode.append(xmllimits)
+            
+        for oldnode in self.xmlnode.findall(tag('newparam')):
+            self.xmlnode.remove(oldnode)
+        for newparam in self.newparams:
+            if recurse:
+                newparam.save(recurse)
+            self.xmlnode.append(newparam.xmlnode)
+    
 class Kinematics(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics> tag"""
     def __init__(self, instance_kinematics_models=None,axisinfos=None,techniques=None, extras=None, xmlnode=None):
@@ -132,15 +268,14 @@ class Kinematics(DaeObject):
             elif subnode.tag == tag('technique_common'):
                 for subsubnode in subnode:
                     if subsubnode.tag == tag('axis_info'):
-                        axisinfos.append(subsubnode)
-                        # parse <limits>?
+                        axisinfos.append(KinematicsAxisInfo.load(collada, {}, subsubnode))
         extras = Extra.loadextras(collada, node)
         techniques = Technique.loadtechniques(collada,node)
-        return Kinematics(instance_kinematics_models,axisinfos,techniques, extras,xmlnode=node)
+        return Kinematics(instance_kinematics_models,axisinfos,techniques, extras, xmlnode=node)
 
     def getchildren(self):
-        return self.instance_kinematics_models + self.techniques + self.extras
-
+        return self.instance_kinematics_models + self.techniques + self.extras + self.axisinfos
+    
     def save(self,recurse=True):
         """Saves the kinematics node back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -156,7 +291,130 @@ class Kinematics(DaeObject):
             self.xmlnode.append(technique_common)
         technique_common.clear()
         for axisinfo in self.axisinfos:
-            technique_common.append(axisinfo)        
+            if recurse:
+                axisinfo.save(recursive)
+            technique_common.append(axisinfo.xmlnode)
+
+class MotionAxisInfo(DaeObject):
+    """A class containing the data coming from a COLLADA <motion>/<axis_info> tag
+    :param newparams: list of xml nodes for <newparam> tag
+    :param setparams: list of xml nodes for <setparam> tag
+    """
+    def __init__(self, sid=None, name=None, axis=None, speed=None, acceleration=None, deceleration=None, jerk=None, newparams=None, setparams=None, xmlnode=None):
+        self.sid = sid
+        self.name = name
+        self.axis = axis
+        self.speed = speed
+        self.acceleration = acceleration
+        self.deceleration = deceleration
+        self.jerk = jerk
+        self.newparams = []
+        if newparams is not None:
+            self.newparams = newparams
+        self.setparams = []
+        if setparams is not None:
+            self.setparams = setparams
+        
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+            """ElementTree representation of the geometry."""
+        else:
+            self.xmlnode = E.axis_info()
+            self.save(0)
+        
+    @staticmethod
+    def load(collada, localscope, node):
+        sid = node.get('sid')
+        speed=None
+        acceleration=None
+        deceleration=None
+        jerk=None
+        newparams = NewParam.loadnewparams(collada, node)
+        setparams = node.findall(tag('sewparam'))
+        for subnode in node:
+            if subnode.tag == tag('speed'):
+                if len(subnode) == 1:
+                    if subnode[0].tag == tag('param'):
+                        speed = CommonParam.load(collada, {}, subnode[0])
+                    elif subnode[0].tag == tag('float'):
+                        speed = CommonFloat.load(collada, {}, subnode[0])
+            elif subnode.tag == tag('acceleration'):
+                if len(subnode) == 1:
+                    if subnode[0].tag == tag('param'):
+                        acceleration = CommonParam.load(collada, {}, subnode[0])
+                    elif subnode[0].tag == tag('float'):
+                        acceleration = CommonFloat.load(collada, {}, subnode[0])
+            elif subnode.tag == tag('deceleration'):
+                if len(subnode) == 1:
+                    if subnode[0].tag == tag('param'):
+                        deceleration = CommonParam.load(collada, {}, subnode[0])
+                    elif subnode[0].tag == tag('float'):
+                        deceleration = CommonFloat.load(collada, {}, subnode[0])
+            elif subnode.tag == tag('jerk'):
+                if len(subnode) == 1:
+                    if subnode[0].tag == tag('param'):
+                        jerk = CommonParam.load(collada, {}, subnode[0])
+                    elif subnode[0].tag == tag('float'):
+                        jerk = CommonFloat.load(collada, {}, subnode[0])
+        axisinfo = MotionAxisInfo(sid, node.get('name'), node.get('axis'), speed, acceleration, deceleration, jerk, newparams, setparams, xmlnode=node)
+        collada.addSid(sid, axisinfo)
+        return axisinfo
+    
+    # FIXME: this leaves out setparams (because we don't have a class for them yet) and binds (because we don't track them)
+    def getchildren(self):
+        return self.newparams
+    
+    def save(self,recurse=True):
+        """Saves the info back to :attr:`xmlnode`"""
+        save_attribute(self.xmlnode,'sid',self.sid)
+        save_attribute(self.xmlnode,'name',self.name)
+        save_attribute(self.xmlnode,'axis',self.axis)
+        
+        for previouschild in xmlnode.findall(tag('speed')):
+            xmlnode.remove(previouschild)
+        if self.speed is not None:
+            if recurse:
+                self.speed.save(recurse)
+            xmlspeed = E.speed()
+            xmlspeed.append(self.speed.xmlnode)
+            self.xmlnode.append(xmlspeed)
+
+        for previouschild in xmlnode.findall(tag('acceleration')):
+            xmlnode.remove(previouschild)
+        if self.acceleration is not None:
+            if recurse:
+                self.acceleration.save(recurse)
+            xmlacceleration = E.acceleration()
+            xmlacceleration.append(self.acceleration.xmlnode)
+            self.xmlnode.append(xmlacceleration)
+
+        for previouschild in xmlnode.findall(tag('deceleration')):
+            xmlnode.remove(previouschild)
+        if self.deceleration is not None:
+            if recurse:
+                self.deceleration.save(recurse)
+            xmldeceleration = E.deceleration()
+            xmldeceleration.append(self.deceleration.xmlnode)
+            self.xmlnode.append(xmldeceleration)
+
+        for previouschild in xmlnode.findall(tag('jerk')):
+            xmlnode.remove(previouschild)
+        if self.jerk is not None:
+            if recurse:
+                self.jerk.save(recurse)
+            xmljerk = E.jerk()
+            xmljerk.append(self.jerk.xmlnode)
+            self.xmlnode.append(xmljerk)
+            
+        for oldnode in self.xmlnode.findall(tag('newparam')) + self.xmlnode.findall(tag('setparam')):
+            self.xmlnode.remove(oldnode)
+        for newparam in self.newparams:
+            if recurse:
+                newparam.save(recurse)
+            self.xmlnode.append(newparam.xmlnode)
+        for setparam in self.setparams:
+            self.xmlnode.append(setparam)    
+    
 
 class Motion(DaeObject):
     """A class containing the data coming from a COLLADA <motion> tag"""
@@ -193,8 +451,7 @@ class Motion(DaeObject):
             elif subnode.tag == tag('technique_common'):
                 for subsubnode in subnode:
                     if subsubnode.tag == tag('axis_info'):
-                        axisinfos.append(subsubnode)
-                        # parse <speed>, <acceleration>, <deceleration>, <jerk>?
+                        axisinfos.append(MotionAxisInfo.load(collada, {}, subsubnode))
         extras = Extra.loadextras(collada, node)
         return Motion(instance_articulated_system,axisinfos,extras, xmlnode=node)
 

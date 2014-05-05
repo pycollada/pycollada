@@ -141,3 +141,80 @@ class DaeSaveValidationError(DaeError):
     """Raised when XML validation fails when saving."""
     pass
 
+
+class CommonFloat(DaeObject):
+    """A class containing the data coming from a COLLADA <float>
+    """
+    value = None
+    def __init__(self, value=None, xmlnode=None):
+        self.value = float(value)
+        if self.xmlnode is not None:
+            self.xmlnode = xmlnode
+        else:
+            self.xmlnode = E.float()
+            self.save(0)
+
+    @staticmethod
+    def load(collada, localscope, node):
+        return CommonFloat(float(node.text), node)
+        
+    def save(self,recurse=True):
+        self.xmlnode.text = '%.15e'%self.value
+    
+
+class CommonInt(DaeObject):
+    """A class containing the data coming from a COLLADA <int>
+    """
+    value = None
+    def __init__(self, value=None, xmlnode=None):
+        self.value = int(value)
+        if self.xmlnode is not None:
+            self.xmlnode = xmlnode
+        else:
+            self.xmlnode = E.int()
+            self.save(0)
+
+    @staticmethod
+    def load(collada, localscope, node):
+        return CommonInt(int(node.text), node)
+
+    def save(self,recurse=True):
+        self.xmlnode.text = '%d'%self.value
+
+class CommonBool(DaeObject):
+    """A class containing the data coming from a COLLADA <bool>
+    """
+    value = None
+    def __init__(self, value=None, xmlnode=None):
+        self.value = bool(value)
+        if self.xmlnode is not None:
+            self.xmlnode = xmlnode
+        else:
+            self.xmlnode = E.bool()
+            self.save(0)
+
+    @staticmethod
+    def load(collada, localscope, node):
+        return CommonBool(bool(node.text), node)
+    
+    def save(self,recurse=True):
+        self.xmlnode.text = 'true' if self.value else 'false'
+
+class CommonParam(DaeObject):
+    """A class containing the data coming from a COLLADA <param>
+    """
+    value = None
+    def __init__(self, value=None, xmlnode=None):
+        self.value = str(value)
+        if self.xmlnode is not None:
+            self.xmlnode = xmlnode
+        else:
+            self.xmlnode = E.param()
+            self.save(0)
+            
+    @staticmethod
+    def load(collada, localscope, node):
+        return CommonParam(str(node.text), node)
+    
+    def save(self,recurse=True):
+        self.xmlnode.text = self.value

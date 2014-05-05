@@ -255,17 +255,19 @@ class Collada(object):
         self._loadDefaultScene()
 
     def addId(self, id, daeObject):
-        self.ids_map[id] = daeObject
+        if id is not None:
+            self.ids_map[id] = daeObject
 
     def getNodeForId(self, id):
         return self.ids_map.get(id, None)
 
     # FIXME: this is getting called with sid==None a bunch of times!
     def addSid(self, sid, daeObject):
-        if self.sids_map.has_key(sid):
-            self.sids_map[sid].append(daeObject)
-        else:
-            self.sids_map[sid] = [daeObject]
+        if sid is not None and daeObject is not None:
+            if self.sids_map.has_key(sid):
+                self.sids_map[sid].append(daeObject)
+            else:
+                self.sids_map[sid] = [daeObject]
 
     def _setIndexedList(self, propname, data):
         setattr(self, propname, IndexedList(data, ('id',)))

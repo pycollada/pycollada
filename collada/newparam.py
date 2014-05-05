@@ -1,4 +1,15 @@
-from .common import DaeObject, tag
+####################################################################
+#                                                                  #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
+# USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
+# GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
+# IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
+#                                                                  #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace, Rosen Diankov, and contributors                 #
+#                                                                  #
+####################################################################
+from .common import DaeObject, tag, CommonFloat, CommonInt, CommonBool
 from .sidref import SIDREF
 
 class NewParam(DaeObject):
@@ -12,8 +23,14 @@ class NewParam(DaeObject):
         sid = node.get('sid')
         value = None
         for child in node.getchildren():
-            if child.tag == tag('float') or child.tag == tag('int') or child.tag == tag('bool'):
-                value = child.text
+            if child.tag == tag('float'):
+                value = CommonFloat.load(collada, {}, child)
+                break
+            elif child.tag == tag('int'):
+                value = CommonInt.load(collada, {}, child)
+                break
+            elif child.tag == tag('bool'):
+                value = CommonBool.load(collada, {}, child)
                 break
             elif child.tag == tag('SIDREF'):
                 value = SIDREF.load(collada, localscope, scoped_node_for_sids, child)
@@ -35,30 +52,11 @@ class NewParam(DaeObject):
         for oldnode in self.xmlnode.getchildren():
             self.xmlnode.remove(oldnode)
         if self.value is not None:
-            if hasattr(self.value,'save'):
-                if recurse:
-                    # depending on the value type, this might be a pycollada object or not
-                    self.value.save(recurse)
-                self.xmlnode.append(self.value.xmlnode)
-            else:
-                # set text directory
-                self.xmlnode.text = str(self.value)
+            if recurse:
+                # depending on the value type, this might be a pycollada object or not
+                self.value.save(recurse)
+            self.xmlnode.append(self.value.xmlnode)
             
-    # FIXME: should this return [] if self.value is not a DaeObject (e.g. a float)?
-    #        or, should we make DaeObjects for floats and such?
     def getchildren(self):
-        if isinstance(self.value, SIDREF):
-            return [ self.value ]
-        else:
-            return []
-
-    # this should not exist since newparam should not continue resolving after the first SIDREF
-    # def resolve(self):
-    #     newparam = self
-    #     while isinstance(newparam, SIDREF) or isinstance(newparam, NewParam):
-    #         if isinstance(newparam, SIDREF):
-    #             newparam = newparam.resolve()
-    #         else:
-    #             newparam = newparam.value
-    #     return newparam
+        return [self.value] if self.value is not None else []
 

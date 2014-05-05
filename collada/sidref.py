@@ -1,3 +1,14 @@
+####################################################################
+#                                                                  #
+# THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
+# USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     #
+# GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE #
+# IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
+#                                                                  #
+# THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
+# by Jeff Terrace, Rosen Diankov, and contributors                 #
+#                                                                  #
+####################################################################
 import copy
 from .common import DaeObject
 
@@ -32,10 +43,10 @@ class SIDREF(DaeObject):
             for sid_node in self.data.sids_map.get(sid,[]):
                 sid_pn_xmlnode = sid_node.xmlnode
                 chain_length = 0
-                while sid_pn_xmlnode and sid_pn_xmlnode != prev_node.xmlnode:
+                while sid_pn_xmlnode is not None and sid_pn_xmlnode != prev_node.xmlnode:
                     chain_length += 1
                     sid_pn_xmlnode = sid_pn_xmlnode.getparent()
-                if sid_pn_xmlnode and (not best_sid_node or chain_length < best_chain_length):
+                if sid_pn_xmlnode is not None and (not best_sid_node or chain_length < best_chain_length):
                     (best_sid_node,best_chain_length) = (sid_node,chain_length)
 
             if not best_sid_node:

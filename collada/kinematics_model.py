@@ -6,7 +6,7 @@
 # IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       #
 #                                                                  #
 # THE pycollada SOURCE CODE IS (C) COPYRIGHT 2011                  #
-# by Jeff Terrace and contributors                                 #
+# by Jeff Terrace, Rosen Diankov, and contributors                 #
 #                                                                  #
 ####################################################################
 """Contains objects for representing a kinematics model."""
