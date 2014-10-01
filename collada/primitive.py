@@ -173,7 +173,7 @@ class Primitive(DaeObject):
     def getInputList(self):
         """Gets a :class:`collada.source.InputList` representing the inputs from a primitive"""
         inpl = InputList()
-        for (key, tupes) in self.sources.iteritems():
+        for (key, tupes) in self.sources.items():
             for (offset, semantic, source, set, srcobj) in tupes:
                 inpl.addInput(offset, semantic, source, set)
         return inpl

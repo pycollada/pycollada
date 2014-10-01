@@ -46,6 +46,10 @@ class TestCollada(unittest.TestCase):
         self.assertEqual(len(mesh.nodes), 0)
         self.assertIn('VisualSceneNode', mesh.scenes)
 
+        triset = mesh.geometries[0].primitives[0]
+        input_list = triset.getInputList().getList()
+        self.assertEqual(3, len(input_list))
+
         self.assertIsNotNone(str(list(mesh.scene.objects('geometry'))))
         self.assertIsNotNone(str(list(mesh.scene.objects('light'))))
         self.assertIsNotNone(str(list(mesh.scene.objects('camera'))))
