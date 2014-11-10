@@ -370,7 +370,8 @@ class MotionAxisInfo(DaeObject):
         save_attribute(self.xmlnode,'sid',self.sid)
         save_attribute(self.xmlnode,'name',self.name)
         save_attribute(self.xmlnode,'axis',self.axis)
-        
+
+        xmlnode = self.xmlnode
         for previouschild in xmlnode.findall(tag('speed')):
             xmlnode.remove(previouschild)
         if self.speed is not None:
@@ -476,7 +477,9 @@ class Motion(DaeObject):
             self.xmlnode.append(technique_common)
         technique_common.clear()
         for axisinfo in self.axisinfos:
-            technique_common.append(axisinfo)
+            if recurse:
+                axisinfo.save(recurse)
+            technique_common.append(axisinfo.xmlnode)
 
 class ArticulatedSystem(DaeObject):
     """A class containing the data coming from a COLLADA <articulated_system> tag"""
