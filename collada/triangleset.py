@@ -301,14 +301,14 @@ class TriangleSet(primitive.Primitive):
         self._texbinormal_indexset = (numpy.arange(len(self._vertex_index) * 3,
             dtype=self._vertex_index.dtype),)
         self._texbinormal_indexset[0].shape = (len(self._vertex_index), 3)
-
+        
     # FIXME: this disregards the material
     def getchildren(self):
-	return []
-
+        return []
+    
     def __str__(self):
         return '<TriangleSet length=%d>' % len(self)
-
+    
     def __repr__(self):
         return str(self)
 
