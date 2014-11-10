@@ -264,7 +264,7 @@ class Collada(object):
     # FIXME: this is getting called with sid==None a bunch of times!
     def addSid(self, sid, daeObject):
         if sid is not None and daeObject is not None:
-            if self.sids_map.has_key(sid):
+            if sid in self.sids_map:
                 self.sids_map[sid].append(daeObject)
             else:
                 self.sids_map[sid] = [daeObject]
