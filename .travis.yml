@@ -1,16 +1,21 @@
 language: python
 
 env:
-  # Using numpy from github due to numpy issue #1857
-  - DEPS="git+git://github.com/numpy/numpy.git@dba98cc1"
-  - DEPS="git+git://github.com/numpy/numpy.git@dba98cc1 lxml"
+  - DEPS=""
+  - DEPS="lxml"
 
 python:
   - 2.6
   - 2.7
   - 3.2
+  - 3.3
+  - 3.4
 
 install:
+  # temporary workaround for numpy failing in virtualenv
+  # https://github.com/travis-ci/travis-cookbooks/issues/48#issuecomment-10843018
+  - export PYTHONIOENCODING=UTF8 # just in case
+  - pip install numpy
   - pip install $DEPS
   - python setup.py install
 

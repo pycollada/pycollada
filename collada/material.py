@@ -31,7 +31,7 @@ from .xmlutil import UnquoteSafe
 from .extra import Extra
 
 try:
-    import Image as pil
+    from PIL import Image as pil
 except:
     pil = None
 
@@ -667,7 +667,7 @@ class Effect(DaeObject):
                 except DaeUnsupportedError as ex:
                     props[key] = None
                     collada.handleError(ex) # Give the chance to ignore error and load the rest
-                
+
                 if key == 'transparent' and key in props and props[key] is not None:
                     opaque_mode = pnode.get('opaque')
                     if opaque_mode is not None and opaque_mode == OPAQUE_MODE.RGB_ZERO:
@@ -947,4 +947,3 @@ class Material(DaeObject):
 
     def __repr__(self):
         return str(self)
-

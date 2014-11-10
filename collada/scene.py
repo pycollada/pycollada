@@ -132,7 +132,7 @@ class Node(SceneNode):
         :rtype: generator that yields the type specified
 
         """
-        if matrix != None: M = numpy.dot( matrix, self.matrix )
+        if not matrix is None: M = numpy.dot( matrix, self.matrix )
         else: M = self.matrix
         for node in self.children:
             for obj in node.objects(tipo, M):
