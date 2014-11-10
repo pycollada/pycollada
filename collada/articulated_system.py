@@ -151,14 +151,14 @@ class KinematicsAxisInfo(DaeObject):
                     if len(xmlmin) == 1:
                         if xmlmin[0].tag == tag('param'):
                             limits_min = CommonParam.load(collada, {}, xmlmin[0])
-                        elif subnode[0].tag == tag('float'):
+                        elif xmlmin[0].tag == tag('float'):
                             limits_min = CommonFloat.load(collada, {}, xmlmin[0])            
                 xmlmax = subnode.find(tag('max'))
                 if xmlmax is not None:
                     if len(xmlmax) == 1:
                         if xmlmax[0].tag == tag('param'):
                             limits_max = CommonParam.load(collada, {}, xmlmax[0])
-                        elif subnode[0].tag == tag('float'):
+                        elif xmlmax[0].tag == tag('float'):
                             limits_max = CommonFloat.load(collada, {}, xmlmax[0])
                             
         axisinfo = KinematicsAxisInfo(sid, node.get('name'), node.get('axis'), active, locked, index, limits_min, limits_max, newparams, formulas, xmlnode=node)
@@ -173,7 +173,8 @@ class KinematicsAxisInfo(DaeObject):
         save_attribute(self.xmlnode,'sid',self.sid)
         save_attribute(self.xmlnode,'name',self.name)
         save_attribute(self.xmlnode,'axis',self.axis)
-        
+
+        xmlnode = self.xmlnode
         for previouschild in xmlnode.findall(tag('active')):
             xmlnode.remove(previouschild)
         if self.active is not None:
