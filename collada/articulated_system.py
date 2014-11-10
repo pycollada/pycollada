@@ -293,7 +293,7 @@ class Kinematics(DaeObject):
         technique_common.clear()
         for axisinfo in self.axisinfos:
             if recurse:
-                axisinfo.save(recursive)
+                axisinfo.save(recurse)
             technique_common.append(axisinfo.xmlnode)
 
 class MotionAxisInfo(DaeObject):
