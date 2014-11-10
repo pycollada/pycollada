@@ -87,8 +87,8 @@ class CImage(DaeObject):
 
 
     def getchildren(self):
-	return self.extras
-
+        return self.extras
+    
     def getData(self):
         if self._data is None:
             try: self._data = self.collada.getFileData( self.path )
@@ -251,8 +251,8 @@ class Surface(DaeObject):
         return surface
 
     def getchildren(self):
-	return self.extras
-
+        return self.extras
+    
     def save(self, recurse=True):
         """Saves the surface data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -346,8 +346,8 @@ class Sampler2D(DaeObject):
         return sampler2d
 
     def getchildren(self):
-	return self.extras
-
+        return self.extras
+    
     def save(self, recurse=True):
         """Saves the sampler data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -423,8 +423,8 @@ class Map(DaeObject):
         return Map(sampler, texcoord, extras, xmlnode = node)
 
     def getchildren(self):
-	return self.extras
-
+        return self.extras
+    
     def save(self, recurse=True):
         """Saves the map back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -737,9 +737,9 @@ class Effect(DaeObject):
                     setattr(self, prop, tuple(propval))
 
     def getchildren(self):
-	bumpmaps = [ self.bumpmap ] if self.bumpmap is not None else []
-	return self.params + bumpmaps + self.extras
-
+        bumpmaps = [ self.bumpmap ] if self.bumpmap is not None else []
+        return self.params + bumpmaps + self.extras
+    
     def save(self, recurse=True):
         """Saves the effect back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -926,8 +926,8 @@ class Material(DaeObject):
         return material
 
     def getchildren(self):
-	return self.extras + [ self.effect ]
-
+        return self.extras + [ self.effect ]
+    
     def save(self, recurse=True):
         """Saves the material data back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
