@@ -31,7 +31,7 @@ class TestGeometry(unittest.TestCase):
         del geometry.sourceById[floatsource.id]
         geometry.save()
 
-        loaded_geometry = collada.geometry.Geometry.load(collada, {}, fromstring(tostring(geometry.xmlnode)))
+        loaded_geometry = collada.geometry.Geometry.load(self.dummy, {}, fromstring(tostring(geometry.xmlnode)))
         self.assertEqual(loaded_geometry.id, "geometry1")
         self.assertEqual(loaded_geometry.name, "yourgeometry")
         self.assertEqual(len(loaded_geometry.primitives), 0)
