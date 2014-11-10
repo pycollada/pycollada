@@ -295,7 +295,7 @@ class Polylist(primitive.Primitive):
     # FIXME: this may be wrong
     def getchildren(self):
         return []
-
+    
     def __str__(self):
         return '<Polylist length=%d>' % len(self)
 

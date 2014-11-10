@@ -97,8 +97,8 @@ class Polygons(polylist.Polylist):
 
     # FIXME: this may be wrong
     def getchildren(self):
-	return []
-
+        return []
+    
     def __str__(self):
         return '<Polygons length=%d>' % len(self)
 
