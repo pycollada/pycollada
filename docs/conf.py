@@ -205,7 +205,7 @@ autodoc_member_order = 'bysource'
 #autosummary_generate = True
 
 if on_rtd:
-    from unittest.mock import MagicMock
+    from mock import Mock as MagicMock
     class Mock(MagicMock):
         @classmethod
         def __getattr__(cls, name):
