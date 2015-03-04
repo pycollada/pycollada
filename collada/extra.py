@@ -48,6 +48,11 @@ class Extra(DaeObject):
             self.xmlnode = E.extra()
             self.save(0)
 
+    def objects(self, tipo, matrix=None):
+        if tipo == 'extra':
+            for e in self.xmlnode.findall(tag(tipo)):
+                yield e
+
     @staticmethod
     def load( collada, localscope, node ):
         id=node.get('id')
