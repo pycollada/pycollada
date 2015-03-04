@@ -411,7 +411,7 @@ class Map(DaeObject):
         sampler = localscope.get(samplerid)
         #Check for the sampler ID as the texture ID because some exporters suck
         if sampler is None:
-            for s2d in localscope.itervalues():
+            for s2d in localscope.values():
                 if type(s2d) is Sampler2D:
                     if s2d.surface.image.id == samplerid:
                         sampler = s2d
@@ -636,6 +636,26 @@ class Effect(DaeObject):
                 if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
                     localscope[paramid] = [float(v) for v in floatnode.text.split()]
         tecnode = profilenode.find( tag('technique') )
+
+        for paramnode in tecnode.findall( tag('newparam') ):
+            if paramnode.find( tag('surface') ) is not None:
+                param = Surface.load(collada, localscope, paramnode)
+                params.append(param)
+                localscope[param.id] = param
+            elif paramnode.find( tag('sampler2D') ) is not None:                
+                param = Sampler2D.load(collada, localscope, paramnode)
+                params.append(param)
+                localscope[param.id] = param
+            else:
+                floatnode = paramnode.find( tag('float') )
+                if floatnode is None: floatnode = paramnode.find( tag('float2') )
+                if floatnode is None: floatnode = paramnode.find( tag('float3') )
+                if floatnode is None: floatnode = paramnode.find( tag('float4') )
+                paramid = paramnode.get('sid')
+                if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
+                    localscope[paramid] = [float(v) for v in floatnode.text.split()]
+                
+        
         shadnode = None
         for shad in Effect.shaders:
             shadnode = tecnode.find(tag(shad))
