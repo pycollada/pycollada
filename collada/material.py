@@ -598,6 +598,27 @@ class Effect(DaeObject):
 
 
     @staticmethod
+    def getEffectParameters(collada, parentnode, localscope, params):
+
+        for paramnode in parentnode.findall( tag('newparam') ):
+            if paramnode.find( tag('surface') ) is not None:
+                param = Surface.load(collada, localscope, paramnode)
+                params.append(param)
+                localscope[param.id] = param
+            elif paramnode.find( tag('sampler2D') ) is not None:                
+                param = Sampler2D.load(collada, localscope, paramnode)
+                params.append(param)
+                localscope[param.id] = param
+            else:
+                floatnode = paramnode.find( tag('float') )
+                if floatnode is None: floatnode = paramnode.find( tag('float2') )
+                if floatnode is None: floatnode = paramnode.find( tag('float3') )
+                if floatnode is None: floatnode = paramnode.find( tag('float4') )
+                paramid = paramnode.get('sid')
+                if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
+                    localscope[paramid] = [float(v) for v in floatnode.text.split()]
+
+    @staticmethod
     def load(collada, localscope, node):
         localscope = {} # we have our own scope, shadow it
         params = []
@@ -618,43 +639,11 @@ class Effect(DaeObject):
                 uniquenum += 1
             collada.images.append(local_image)
             
-        for paramnode in profilenode.findall( tag('newparam') ):
-            if paramnode.find( tag('surface') ) is not None:
-                param = Surface.load(collada, localscope, paramnode)
-                params.append(param)
-                localscope[param.id] = param
-            elif paramnode.find( tag('sampler2D') ) is not None:
-                param = Sampler2D.load(collada, localscope, paramnode)
-                params.append(param)
-                localscope[param.id] = param
-            else:
-                floatnode = paramnode.find( tag('float') )
-                if floatnode is None: floatnode = paramnode.find( tag('float2') )
-                if floatnode is None: floatnode = paramnode.find( tag('float3') )
-                if floatnode is None: floatnode = paramnode.find( tag('float4') )
-                paramid = paramnode.get('sid')
-                if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
-                    localscope[paramid] = [float(v) for v in floatnode.text.split()]
+        Effect.getEffectParameters(collada, profilenode, localscope, params)
+         
         tecnode = profilenode.find( tag('technique') )
-
-        for paramnode in tecnode.findall( tag('newparam') ):
-            if paramnode.find( tag('surface') ) is not None:
-                param = Surface.load(collada, localscope, paramnode)
-                params.append(param)
-                localscope[param.id] = param
-            elif paramnode.find( tag('sampler2D') ) is not None:                
-                param = Sampler2D.load(collada, localscope, paramnode)
-                params.append(param)
-                localscope[param.id] = param
-            else:
-                floatnode = paramnode.find( tag('float') )
-                if floatnode is None: floatnode = paramnode.find( tag('float2') )
-                if floatnode is None: floatnode = paramnode.find( tag('float3') )
-                if floatnode is None: floatnode = paramnode.find( tag('float4') )
-                paramid = paramnode.get('sid')
-                if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
-                    localscope[paramid] = [float(v) for v in floatnode.text.split()]
-                
+        
+        Effect.getEffectParameters(collada, tecnode, localscope, params)
         
         shadnode = None
         for shad in Effect.shaders:
