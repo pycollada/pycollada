@@ -294,7 +294,7 @@ class IDRefSource(Source):
         else:
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted IDREF array')
-        data = numpy.array( values, dtype=numpy.string_ )
+        data = numpy.array( values, dtype=numpy.unicode_ )
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
@@ -393,7 +393,7 @@ class NameSource(Source):
         else:
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted Name array')
-        data = numpy.array( values, dtype=numpy.string_ )
+        data = numpy.array( values, dtype=numpy.unicode_ )
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
