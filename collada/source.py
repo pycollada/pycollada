@@ -15,7 +15,7 @@
 import numpy
 
 from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError
+from collada.common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from collada.xmlutil import etree as ElementTree
 
 class InputList(object):
