@@ -286,8 +286,19 @@ class Collada(object):
                     for geomnode in libnode.findall(tag('geometry')):
                         if geomnode.find(tag('mesh')) is None:
                             continue
+
+                        lib_nodenames = self.xmlnode.find(tag('library_nodes'))
+                        for nodename in lib_nodenames.findall(tag('node')):
+                            instance = nodename.find(tag('instance_geometry'))
+                            url = instance.get('url')
+                            if url[1:] == geomnode.get('id'):
+                                name = nodename.get('name')
+                                break
+                        else:
+                            name = ''
+
                         try:
-                            G = geometry.Geometry.load(self, {}, geomnode)
+                            G = geometry.Geometry.load(self, {}, geomnode, name)
                         except DaeError as ex:
                             self.handleError(ex)
                         else:
