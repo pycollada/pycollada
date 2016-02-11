@@ -287,15 +287,16 @@ class Collada(object):
                         if geomnode.find(tag('mesh')) is None:
                             continue
 
+                        name = ''
                         lib_nodenames = self.xmlnode.find(tag('library_nodes'))
-                        for nodename in lib_nodenames.findall(tag('node')):
-                            instance = nodename.find(tag('instance_geometry'))
-                            url = instance.get('url')
-                            if url[1:] == geomnode.get('id'):
-                                name = nodename.get('name')
-                                break
-                        else:
-                            name = ''
+                        if lib_nodenames is not None:
+                            for nodename in lib_nodenames.findall(tag('node')):
+                                instance = nodename.find(tag('instance_geometry'))
+                                if instance is not None:
+                                    url = instance.get('url')
+                                    if url[1:] == geomnode.get('id'):
+                                        name = nodename.get('name')
+                                        break
 
                         try:
                             G = geometry.Geometry.load(self, {}, geomnode, name)
@@ -523,7 +524,7 @@ class Collada(object):
 
         if self.validator is not None:
             if not self.validator.validate(self.xmlnode):
-                raise DaeSaveValidationError("Validation error when saving: " + 
+                raise DaeSaveValidationError("Validation error when saving: " +
                         self.validator.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
 
     def write(self, fp):
