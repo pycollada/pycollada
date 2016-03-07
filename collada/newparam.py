@@ -9,15 +9,19 @@
 # by Jeff Terrace, Rosen Diankov, and contributors                 #
 #                                                                  #
 ####################################################################
-from .common import DaeObject, tag, CommonFloat, CommonInt, CommonBool
+from .common import DaeObject, E, tag, CommonFloat, CommonInt, CommonBool
 from .sidref import SIDREF
 
 class NewParam(DaeObject):
-    def __init__(self, sid, value, xmlnode):
+    def __init__(self, sid, value, xmlnode=None):
         self.sid = sid
         self.value = value
-        self.xmlnode = xmlnode
-
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+        else:
+            self.xmlnode = E.newparam()
+            self.save(0)
+    
     @staticmethod
     def load( collada, localscope, scoped_node_for_sids, node ):
         sid = node.get('sid')

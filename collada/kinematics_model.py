@@ -24,7 +24,11 @@ from .joint import Joint
 from .newparam import NewParam
 
 class InstanceKinematicsModel(DaeObject):
-    def __init__(self,kmodel=None, url=None, sid=None, name=None, extras = None, newparams=None, xmlnode=None):
+    def __init__(self,kmodel=None, url=None, sid=None, name=None, extras = None, newparams=None, setparams=None, xmlnode=None):
+        """
+        :param newparams: list of xml nodes for <newparam> tag
+        :param setparams: list of xml nodes for <setparam> tag
+        """
         self.kmodel = kmodel
         self.url = url
         self.sid = sid
@@ -32,9 +36,12 @@ class InstanceKinematicsModel(DaeObject):
         self.extras = []
         if extras is not None:
             self.extras = extras
-
+        
         self.newparams = newparams if newparams else []
-
+        self.setparams = []
+        if setparams is not None:
+            self.setparams = setparams
+        
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
@@ -54,14 +61,14 @@ class InstanceKinematicsModel(DaeObject):
                 # don't raise an exception if asystem is None
         extras = Extra.loadextras(collada, node)
         newparams = NewParam.loadnewparams(collada, node)
-        inst_kmodel = InstanceKinematicsModel(kmodel, url, sid, name, extras, newparams, xmlnode=node)
+        setparams = node.findall(tag('sewparam'))
+        inst_kmodel = InstanceKinematicsModel(kmodel, url, sid, name, extras, newparams, setparams, xmlnode=node)
         collada.addSid(sid, inst_kmodel)
         return inst_kmodel
 
     def getchildren(self):
         return self.extras + self.newparams
-
-    # FIXME: needs to save the newparams?
+    
     def save(self,recurse=True):
         """Saves the info back to :attr:`xmlnode`"""
         Extra.saveextras(self.xmlnode,self.extras)
@@ -74,7 +81,15 @@ class InstanceKinematicsModel(DaeObject):
             self.xmlnode.attrib.pop('url',None)
         save_attribute(self.xmlnode,'sid',self.sid)
         save_attribute(self.xmlnode,'name',self.name)
-            
+        for oldnode in self.xmlnode.findall(tag('newparam')) + self.xmlnode.findall(tag('setparam')):
+            self.xmlnode.remove(oldnode)
+        for newparam in self.newparams:
+            if recurse:
+                newparam.save(recurse)
+            self.xmlnode.append(newparam.xmlnode)
+        for setparam in self.setparams:
+            self.xmlnode.append(setparam)
+    
 class KinematicsModel(DaeObject):
     """A class containing the data coming from a COLLADA <kinematics_model> tag"""
     def __init__(self, id, name, links=None, joints=None, formulas=None, asset = None, techniques=None, extras=None, xmlnode=None):

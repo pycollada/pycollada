@@ -37,7 +37,7 @@ class InstanceRigidBody(object):
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
-            self.xmlnode = E.instance_articulated_system()   # FIXME: not E.instance_rigid_body() ???
+            self.xmlnode = E.instance_rigid_body()   # FIXME: not E.instance_rigid_body() ???
             self.save(0)
 
     @staticmethod
