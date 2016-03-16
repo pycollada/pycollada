@@ -10,4 +10,5 @@ Authors (Ordered by date of first contribution)
 * Ole Laursen
 * Andrey Nechypurenko (andreynech AT gmail.com)
 * Guohui Xiao (xiao AT kr.tuwien.ac.at)
+* Hannes Gräuler (graeuler AT geoplex.de)
 

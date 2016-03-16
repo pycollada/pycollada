@@ -25,7 +25,7 @@ import numpy
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
-from collada.util import falmostEqual, StringIO
+from collada.util import falmostEqual, BytesIO
 from collada.xmlutil import etree as ElementTree
 
 try:
@@ -98,7 +98,7 @@ class CImage(DaeObject):
                 self._pilimage = 'failed'
                 return None
             try:
-                self._pilimage = pil.open( StringIO(data) )
+                self._pilimage = pil.open( BytesIO(data) )
                 self._pilimage.load()
             except IOError as ex:
                 self._pilimage = 'failed'
