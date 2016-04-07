@@ -10,29 +10,36 @@
 #                                                                  #
 ####################################################################
 import copy
-from .common import DaeObject
+from .common import DaeObject, E
 
 # FIXME: only works when the targets are newparams
 class SIDREF(DaeObject):
-    def __init__(self, data, value, scoped_node_for_sids, xmlnode):
+    def __init__(self, data, value, scoped_node_for_sids, xmlnode=None):
         self.data = data   # the Collada object
         self.value = value
         self.scoped_node_for_sids = scoped_node_for_sids
-        self.xmlnode = xmlnode
-
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
+        else:
+            self.xmlnode = E.SIDREF()
+            self.save(0)
+        
     def __deepcopy__(self, memodict):
         obj = SIDREF(self.data, copy.deepcopy(self.value), copy.deepcopy(self.scoped_node_for_sids), copy.deepcopy(self.xmlnode))
         obj.__class__ = self.__class__
         return obj
-
+    
     @staticmethod
     def load( collada, localscope, scoped_node_for_sids, node ):
         value = node.text
         return SIDREF(collada, value, scoped_node_for_sids, node)
-
+    
+    def save(self, recurse=True):
+        self.xmlnode.text = self.value
+    
     def getchildren(self):
         return []
-
+    
     def resolve(self):
         id_and_sids = self.value.split('/')
         node = self.data.ids_map.get(id_and_sids[0],None)

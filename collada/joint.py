@@ -20,28 +20,26 @@ def _loadValuesOfPrismaticOrRevolute( collada, localscope, node ):
     sid = node.get('sid')
     axis_node = node.find(tag('axis'))
     if axis_node is not None:
-        axis_text = axis_node.text
+        axis_values = [float(s) for s in axis_node.text.split()]
     else:
-        axis_text = None
-    min_text = None
-    max_text = None
+        axis_values = None
+    min_limit = None
+    max_limit = None
     limits_node = node.find(tag('limits'))
     if limits_node is None:
         min_node = limits_node.find(tag('min'))
         if min_node is not None:
-            min_text = min_node.text
+            min_limit = float(min_node.text)
         max_node = limits_node.find(tag('max'))
         if max_node is not None:
-            max_text = max_node.text
-
-    return (sid, axis_text, min_text, max_text)
+            max_limit = float(max_node.text)
+    return (sid, axis_values, min_limit, max_limit)
 
 class Prismatic(DaeObject):
     """A class containing the data coming from a COLLADA <prismatic> tag"""
     def __init__(self, sid, axis=None, min_limit=None, max_limit=None, xmlnode=None):
         """Create <prismatic>
-
-        FIXME
+        
         """
         self.sid = sid
         self.axis = axis
@@ -57,15 +55,33 @@ class Prismatic(DaeObject):
     # NOTE: ignoring sids for axis, min, and max
     def getchildren(self):
         return []
-
+    
     # NOTE: ignoring sids for axis, min, and max
     @staticmethod
     def load( collada, localscope, node ):
-        (sid, axis_text, min_text, max_text) = _loadValuesOfPrismaticOrRevolute(collada, localscope, node)
-        node = Prismatic(sid, axis=axis_text, min_limit=min_text, max_limit=max_text, xmlnode=node)
+        (sid, axis_values, min_limit, max_limit) = _loadValuesOfPrismaticOrRevolute(collada, localscope, node)
+        node = Prismatic(sid, axis=axis_values, min_limit=min_limit, max_limit=max_limit, xmlnode=node)
         collada.addSid(sid, node)
         return node
-
+    
+    def save(self,recurse=True):
+        self.xmlnode.clear()
+        self.xmlnode.set('sid', self.sid)
+        if self.axis is not None:
+            xmlaxis = E.axis()
+            xmlaxis.text = ' '.join(['%.15f'%f for f in self.axis])
+            self.xmlnode.append(xmlaxis)
+        
+        if self.min_limit is not None and self.max_limit is not None:
+            xmllimits = E.limits()
+            xmlmin = E.min()
+            xmlmin.text = '%.15f'%self.min_limit
+            xmllimits.append(xmlmin)
+            xmlmax = E.max()
+            xmlmax.text = '%.15f'%self.max_limit
+            xmllimits.append(xmlmax)
+            self.xmlnode.append(xmllimits)
+        
 class Revolute(DaeObject):
     """A class containing the data coming from a COLLADA <revolute> tag"""
     def __init__(self, sid, axis=None, min_limit=None, max_limit=None, xmlnode=None):
@@ -95,7 +111,25 @@ class Revolute(DaeObject):
         node = Revolute(sid, axis=axis_text, min_limit=min_text, max_limit=max_text, xmlnode=node)
         collada.addSid(sid, node)
         return node
-
+    
+    def save(self,recurse=True):
+        self.xmlnode.clear()
+        self.xmlnode.set('sid', self.sid)
+        if self.axis is not None:
+            xmlaxis = E.axis()
+            xmlaxis.text = ' '.join(['%.15f'%f for f in self.axis])
+            self.xmlnode.append(xmlaxis)
+        
+        if self.min_limit is not None and self.max_limit is not None:
+            xmllimits = E.limits()
+            xmlmin = E.min()
+            xmlmin.text = '%.15f'%self.min_limit
+            xmllimits.append(xmlmin)
+            xmlmax = E.max()
+            xmlmax.text = '%.15f'%self.max_limit
+            xmllimits.append(xmlmax)
+            self.xmlnode.append(xmllimits)
+    
 class Joint(DaeObject):
     """A class containing the data coming from a COLLADA <joint> tag"""
     def __init__(self, id, sid, name, prismatics=None, revolutes=None, extras=None, xmlnode=None):
@@ -150,6 +184,7 @@ class Joint(DaeObject):
         return self.extras + self.prismatics + self.revolutes
 
     def save(self, recurse=True):
+        self.xmlnode.clear()
         Extra.saveextras(self.xmlnode,self.extras)
         if self.id is not None:
             self.xmlnode.set('id',self.id)
@@ -163,3 +198,14 @@ class Joint(DaeObject):
             self.xmlnode.set('name',self.name)
         else:
             self.xmlnode.attrib.pop('name',None)
+        
+        for prismatic in self.prismatics:
+            if recurse:
+                prismatic.save()
+            self.xmlnode.append(prismatic.xmlnode)
+        
+        for revolute in self.revolutes:
+            if recurse:
+                revolute.save()
+            self.xmlnode.append(revolute.xmlnode)
+        
