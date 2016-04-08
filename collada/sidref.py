@@ -42,24 +42,24 @@ class SIDREF(DaeObject):
     
     def resolve(self):
         id_and_sids = self.value.split('/')
-        node = self.data.ids_map.get(id_and_sids[0],None)
+        node = self.data.ids_map.get(id_and_sids[0], None)
+
+        # use breath first search to look for the shallowest node with matching sid
+        def _searchforsid(rootnode, sid):
+            searchqueue = [rootnode]
+            while len(searchqueue) > 0:
+                node = searchqueue.pop(0)
+                if node.xmlnode is not None and node.xmlnode.get('sid') == sid:
+                    return node
+                searchqueue.extend(node.getchildren())
+            return None
 
         prev_node = node
         for sid in id_and_sids[1:]:
-            (best_sid_node,best_chain_length) = (None,None)
-            for sid_node in self.data.sids_map.get(sid,[]):
-                sid_pn_xmlnode = sid_node.xmlnode
-                chain_length = 0
-                while sid_pn_xmlnode is not None and sid_pn_xmlnode != prev_node.xmlnode:
-                    chain_length += 1
-                    sid_pn_xmlnode = sid_pn_xmlnode.getparent()
-                if sid_pn_xmlnode is not None and (not best_sid_node or chain_length < best_chain_length):
-                    (best_sid_node,best_chain_length) = (sid_node,chain_length)
-
+            best_sid_node = _searchforsid(prev_node, sid)
             if not best_sid_node:
                 # FIXME: throw an error
                 return None
-
 
             # FIXME: better not to use xmlnode
             if best_sid_node.xmlnode.attrib.has_key('url'):
