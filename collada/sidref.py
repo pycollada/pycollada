@@ -49,7 +49,7 @@ class SIDREF(DaeObject):
 
             # pycollada node should have sid implemented, don't look at xmlnode since it might not be saved
             if getattr(node, 'sid', None) == sid:
-                return none
+                return node
 
             searchqueue.extend(node.getchildren())
         return None

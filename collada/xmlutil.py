@@ -16,12 +16,25 @@ COLLADA_NAMESPACES = {
 get_collada_ns = lambda: COLLADA_NAMESPACES[_COLLADA_VERSION]
 get_collada_version = lambda: _COLLADA_VERSION
 
-HAVE_LXML = False
+# Experimental results show that lxml (3.3.6, 3.6.0) is not thread safe regardless of how it or libxml2 is compiled. So unfortunately this means that highly multithreaded applications should use the more stable xml library rather than lxml
+
+TRY_LXML = True # if True, then try importing lxml first to see if it is usable
+HAVE_LXML = False # if True, then setup the system using LXML
 
 try:
-    from lxml import etree
-    HAVE_LXML = True
-except ImportError:
+    if __pycollada_force_standardxml__: # set by the user importing pycollada
+        TRY_LXML = False
+except:
+    pass
+
+if TRY_LXML:
+    try:
+        from lxml import etree
+        HAVE_LXML = True
+    except ImportError:
+        pass
+
+if not HAVE_LXML: # lxml is not configured, so use regularxml
     from xml.etree import ElementTree as etree
 
 ET = etree
