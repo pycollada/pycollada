@@ -598,59 +598,58 @@ class Collada(object):
                 self.ipscenes.append(physics_scene.InstancePhysicsScene.load(self,{},node))
             except DaeError as ex:
                 self.handleError(ex)
-
-    # # modifies nodes_to_search
-    # def _performBFSForSid(self, nodes_to_search, sid):
-    #     while len(nodes_to_search) > 0:
-    #         node = nodes_to_search.pop(0)
-    #         if node.xmlnode.get('sid') == sid:   # FIXME: don't use the xmlnode
-    #             return node
-    #         else:
-    #             nodes_to_search.append(node.getchildren())
-    #     return None
-
-    # requires len(sids_list) >= 1
+    
     def _resolvePartialSidPath(self, root_nodes, sids_list):
+        """resolves the node matching sids_list that come from any of the root_nodes
+        requires len(sids_list) >= 1
+        
+        :return: (final node, path from its root node)
+        """
         sid = sids_list[0]
-
-        nodes_to_search = list(root_nodes)
+        nodes_to_search = [[root_node, []] for root_node in root_nodes]
         while len(nodes_to_search) > 0:
-
+            
             # BFS
-            partial_sid_node = None
+            partial_sid_nodepath = None
             while len(nodes_to_search) > 0:
-                node = nodes_to_search.pop(0)
-                if node.xmlnode.get('sid') == sid:   # FIXME: don't use the xmlnode
-                    partial_sid_node = node
+                node,path = nodes_to_search.pop(0)
+                if getattr(node, 'sid', None) == sid:
+                    partial_sid_nodepath = (node, path)
                     break
                 else:
-                    nodes_to_search.extend(node.getchildren())
-
-            if partial_sid_node is None:
+                    nodes_to_search.extend([ [child, path+[node]] for child in node.getchildren()])
+            
+            if partial_sid_nodepath is None:
                 return None
+            
             elif len(sids_list) == 1:
-                return partial_sid_node
+                return partial_sid_nodepath
+            
             else:
-
                 # switch to the element pointed to by the url, if we can...
-                url = partial_sid_node.xmlnode.get('url')
+                url = getattr(partial_sid_nodepath[0], 'url', None)
                 if url is not None:
                     switched_node = self.ids_map.get(url.lstrip('#'),None)
                     if switched_node:
-                        full_sid_node = self._resolvePartialSidPath(switched_node.getchildren(), sids_list[1:])
-                        if full_sid_node is not None:
-                            return full_sid_node
-
+                        full_sid_nodepath = self._resolvePartialSidPath(switched_node.getchildren(), sids_list[1:])
+                        if full_sid_nodepath is not None:
+                            return full_sid_node[0], partial_sid_nodepath[1]+full_sid_nodepath[1]
+                
                 # ...otherwise, fall back to the non-switched element.
-                full_sid_node = self._resolvePartialSidPath(partial_sid_node.getchildren(), sids_list[1:])
-                if full_sid_node is not None:
-                    return full_sid_node
+                full_sid_nodepath = self._resolvePartialSidPath(partial_sid_nodepath[0].getchildren(), sids_list[1:])
+                if full_sid_nodepath is not None:
+                    return full_sid_nodepath[0], partial_sid_nodepath[1]+full_sid_nodepath[1]
+                
         return None
-
+    
     def getObjectFromId(self,id):
         return self.ids_map.get(id,None)
-
-    def resolveSidPath(self, full_sid_path):
+    
+    def resolveSidPath(self, full_sid_path, returnpath=False):
+        """resolves the ID/SID1/SID2.. path and returns the final node along with the path from ID to the final node
+        
+        :param returnpath: if True, then will return the path as the second parameter. By default is False
+        """
         id_and_sids = full_sid_path.split('/')
         root_node   = self.ids_map.get(id_and_sids[0],None)
         if not root_node:
@@ -659,29 +658,16 @@ class Collada(object):
             return root_node
 
         nodes_to_search = [root_node]
-        return self._resolvePartialSidPath([root_node], id_and_sids[1:])
-
-    def resolveSidPath_early_FIXME_REMOVE_ME(self, sid):
-        id_and_sids = sid.split('/')
-        root_node   = self.ids_map.get(id_and_sids[0],None)
-        if not root_node:
+        nodepath = self._resolvePartialSidPath([root_node], id_and_sids[1:])
+        if returnpath:
+            return nodepath
+        
+        elif nodepath is not None:
+            return nodepath[0]
+        
+        else:
             return None
-
-        nodes_to_search = [root_node]
-        node_with_sid   = root_node
-        for sid in id_and_sids[1:]:
-            node_with_sid = None
-            while len(nodes_to_search) > 0:
-                node = nodes_to_search.pop(0)
-                if node.xmlnode.get('sid') == sid:   # FIXME: don't use the xmlnode
-                    node_with_sid = node
-                    break
-            if not node_with_sid:
-                return None
-            nodes_to_search.extend(node_with_sid.getchildren())
-
-        return node_with_sid
-
+    
     def save(self, recurse=True):
         """Saves the collada document back to :attr:`xmlnode`"""
         libraries = [(self.geometries, 'library_geometries'),

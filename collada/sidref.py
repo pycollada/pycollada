@@ -53,7 +53,7 @@ class SIDREF(DaeObject):
 
             searchqueue.extend(node.getchildren())
         return None
-
+    
     def resolve(self):
         id_and_sids = self.value.split('/')        
         node = self.data.ids_map.get(id_and_sids[0],None)
