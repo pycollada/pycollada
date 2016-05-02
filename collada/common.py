@@ -195,7 +195,7 @@ class CommonBool(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        return CommonBool(bool(node.text), node)
+        return CommonBool(node.text == 'true', node)
     
     def save(self,recurse=True):
         self.xmlnode.text = 'true' if self.value else 'false'
