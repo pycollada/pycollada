@@ -160,7 +160,9 @@ class CommonFloat(DaeObject):
         
     def save(self,recurse=True):
         self.xmlnode.text = '%.15e'%self.value
-    
+
+    def getchildren(self):
+        return []
 
 class CommonInt(DaeObject):
     """A class containing the data coming from a COLLADA <int>
@@ -181,6 +183,9 @@ class CommonInt(DaeObject):
     def save(self,recurse=True):
         self.xmlnode.text = '%d'%self.value
 
+    def getchildren(self):
+        return []
+
 class CommonBool(DaeObject):
     """A class containing the data coming from a COLLADA <bool>
     """
@@ -199,6 +204,9 @@ class CommonBool(DaeObject):
     
     def save(self,recurse=True):
         self.xmlnode.text = 'true' if self.value else 'false'
+
+    def getchildren(self):
+        return []
 
 class CommonParam(DaeObject):
     """A class containing the data coming from a COLLADA <param>

@@ -467,7 +467,7 @@ class Motion(DaeObject):
         ias = self.xmlnode.find(tag('instance_articulated_system'))
         if ias is not None:
             self.xmlnode.remove(ias)
-        elif self.instance_articulated_system is not None:
+        if self.instance_articulated_system is not None:
             if recurse:
                 self.instance_articulated_system.save(recurse)
             self.xmlnode.append(self.instance_articulated_system.xmlnode)
