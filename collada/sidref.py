@@ -46,7 +46,9 @@ class SIDREF(DaeObject):
         searchqueue = [rootnode]
         while len(searchqueue) > 0:
             node = searchqueue.pop(0)
-
+            if node is None:
+                continue
+            
             # pycollada node should have sid implemented, don't look at xmlnode since it might not be saved
             if getattr(node, 'sid', None) == sid:
                 return node
