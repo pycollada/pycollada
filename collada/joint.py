@@ -97,7 +97,7 @@ class Revolute(DaeObject):
         if xmlnode != None:
             self.xmlnode = xmlnode
         else:
-            self.xmlnode = E.prismatic()
+            self.xmlnode = E.revolute()
             self.save(0)
 
     # NOTE: ignoring sids for axis, min, and max
