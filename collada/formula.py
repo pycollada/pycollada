@@ -95,7 +95,7 @@ class Formula(DaeObject):
 
         if xmlnode is not None:
             self.xmlnode = xmlnode
-            """ElementTree representation of the geometry."""
+
         else:
             self.xmlnode = E.formula()
             self.save(False)
@@ -104,7 +104,7 @@ class Formula(DaeObject):
     def load(collada, localscope, node):
         id = node.get("id")
         sid = node.get("sid")
-
+        target = Target.load(collada, localscope, node)
         equation_nodes = node.find(tag('technique'))
         equations = [Equation.load(collada, localscope, enode) for enode in equation_nodes]
         node = Formula(id, sid, target,
@@ -132,16 +132,13 @@ class Formula(DaeObject):
             self.xmlnode.attrib.pop('sid', None)
 
         if self.target is not None:
-            targetnode = ElementTree.Element(tag('target'))
-            paramnode = ElementTree.Element(tag('param'))
-            paramnode.text = self.target
-            targetnode.append(ElementTree.Element(tag('param')))
-            self.xmlnode.append(targetnode)
+            self.xmlnode.append(self.target.xmlnode)
 
-
+        techniquenode = ElementTree.Element(tag('technique'))
         for equation in self.euqations:
             if recurse:
                 equation.save()
-            self.xmlnode.append(equation.xmlnode)
+            techniquenode.append(equation.xmlnode)
+        self.xmlnode.append(techniquenode)
 
 
