@@ -153,14 +153,12 @@ class KinematicsModel(DaeObject):
                     if subnode2.tag == tag('link'):
                         links.append(Link.load(collada, localscope, subnode2))
                     elif subnode2.tag == tag('formula'):
-                        pass
+                        formulas.append(Formula.load(collada, localscope, subnode2))
                     elif subnode2.tag == tag('joint'):
                         joints.append(Joint.load(collada,localscope, subnode2))
                     elif subnode2.tag == tag('instance_joint'):
                         pass
                         #joints.append(Joint.load(collada,localscope, subnode2))
-                    elif subnode2.tag == tag('formula'):
-                        formulas.append(Formula.load(collada, localscope, subnode2))
 
             elif subnode.tag == tag('asset'):
                 asset = Asset.load(collada, localscope, subnode)
