@@ -26,7 +26,7 @@ def _loadValuesOfPrismaticOrRevolute( collada, localscope, node ):
     min_limit = None
     max_limit = None
     limits_node = node.find(tag('limits'))
-    if limits_node is None:
+    if limits_node is not None:
         min_node = limits_node.find(tag('min'))
         if min_node is not None:
             min_limit = float(min_node.text)
