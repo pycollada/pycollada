@@ -62,7 +62,7 @@ class Equation(DaeObject):
         if math is not None:
             self.math = math
 
-        self.mathxmlstring = _replace(ElementTree.tostring(self.math), {'\t':'', '\n':'', 'ns0:':'', ':ns0':''})
+        self.mathxmlstring = _replace(ElementTree.tostring(self.math), {'\t':'', '\n':''})
         if mathxmlstring is not None:
             self.mathxmlstring = mathxmlstring
 
