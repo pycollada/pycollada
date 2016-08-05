@@ -14,9 +14,22 @@
 from .common import DaeObject, E, tag
 from .common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
 from .xmlutil import etree as ElementTree
+import re
+
+MATHML_URL = 'http://www.w3.org/1998/Math/MathML'
+
+def mathtag(text):
+    return str(ElementTree.QName(MATHML_URL, text))
+
+def _replace(text, patterndict):
+    rx = re.compile('|'.join(map(re.escape, patterndict)))
+
+    def one_xlat(match):
+        return patterndict[match.group(0)]
+
+    return rx.sub(one_xlat, text)
 
 class Target(DaeObject):
-
     def __init__(self, target, xmlnode=None):
         self.target = target
 
@@ -42,12 +55,16 @@ class Target(DaeObject):
 
 
 class Equation(DaeObject):
-    def __init__(self, type, math=None, xmlnode=None):
+    def __init__(self, type, math=None, mathxmlstring=None, xmlnode=None):
         self.type = type
 
-        self.math = ElementTree()
+        self.math = ElementTree.Element(mathtag('math'))
         if math is not None:
             self.math = math
+
+        self.mathxmlstring = _replace(ElementTree.tostring(self.math), {'\t':'', '\n':'', 'ns0:':'', ':ns0':''})
+        if mathxmlstring is not None:
+            self.mathxmlstring = mathxmlstring
 
         if xmlnode is not None:
             self.xmlnode = xmlnode
@@ -58,17 +75,20 @@ class Equation(DaeObject):
     @staticmethod
     def load(collada, localscope, node):
         type = node.get('type')
-        math = node.find(tag('math'))
-        node = Equation(type, math, xmlnode=node)
+        math = node.find(mathtag('math'))
+        node = Equation(type, math=math, xmlnode=node)
         return node
 
-    def save(self,recurse=True):
+    def save(self, recurse=True):
         """
-        Don't know how to save mimic equation yet
+        Currently not support equation editing
         :param recurse:
         :return:
         """
-        pass
+        self.xmlnode.clear()
+        self.xmlnode.set('type', self.type)
+        self.math = ElementTree.fromstring(self.mathxmlstring)
+        self.xmlnode.append(self.math)
 
 class Formula(DaeObject):
     def __init__(self, id, sid, target, equations=None, positioneqs=None, velocityeqs=None, accelerateeqs=None, xmlnode=None):
@@ -135,10 +155,9 @@ class Formula(DaeObject):
             self.xmlnode.append(self.target.xmlnode)
 
         techniquenode = ElementTree.Element(tag('technique'))
-        for equation in self.euqations:
+        techniquenode.set('profile', 'OpenRAVE')
+        for equation in self.equations:
             if recurse:
                 equation.save()
             techniquenode.append(equation.xmlnode)
         self.xmlnode.append(techniquenode)
-
-
