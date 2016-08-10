@@ -55,9 +55,9 @@ class Target(DaeObject):
 
 
 class Equation(DaeObject):
-    def __init__(self, type, math=None, mathxmlstring=None, xmlnode=None):
-        self.type = type
-
+    def __init__(self, eqtype, target=None, math=None, mathxmlstring=None, xmlnode=None):
+        self.eqtype = eqtype
+        self.target = target
         self.math = ElementTree.Element(mathtag('math'))
         if math is not None:
             self.math = math
@@ -74,9 +74,10 @@ class Equation(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        type = node.get('type')
+        eqtype = node.get('type')
+        target = node.get('target', '')
         math = node.find(mathtag('math'))
-        node = Equation(type, math=math, xmlnode=node)
+        node = Equation(eqtype, target=target, math=math, xmlnode=node)
         return node
 
     def save(self, recurse=True):
@@ -86,7 +87,9 @@ class Equation(DaeObject):
         :return:
         """
         self.xmlnode.clear()
-        self.xmlnode.set('type', self.type)
+        self.xmlnode.set('type', self.eqtype)
+        if self.target is not None and len(self.target) != 0 and self.eqtype != 'position':
+            self.xmlnode.set('target', self.target)
         self.math = ElementTree.fromstring(self.mathxmlstring)
         self.xmlnode.append(self.math)
 
@@ -129,9 +132,9 @@ class Formula(DaeObject):
         equations = [Equation.load(collada, localscope, enode) for enode in equation_nodes]
         node = Formula(id, sid, target,
                        equations=equations,
-                       positioneqs=filter(lambda x: x.type == 'position', equations),
-                       velocityeqs=filter(lambda x: x.type == 'first_partial', equations),
-                       accelerateeqs=filter(lambda x: x.type == 'second_partial', equations), xmlnode=node)
+                       positioneqs=filter(lambda x: x.eqtype == 'position', equations),
+                       velocityeqs=filter(lambda x: x.eqtype == 'first_partial', equations),
+                       accelerateeqs=filter(lambda x: x.eqtype == 'second_partial', equations), xmlnode=node)
         collada.addId(id, node)
         collada.addSid(sid, node)
         return node
