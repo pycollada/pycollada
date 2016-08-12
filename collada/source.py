@@ -14,9 +14,9 @@
 
 import numpy
 
-from .common import DaeObject, E, tag, get_number_dtype, float_format_func
-from .common import DaeIncompleteError, DaeUnsupportedError, DaeMalformedError
-from .extra import Extra
+from collada.common import DaeObject, E, tag
+from collada.common import DaeIncompleteError, DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError
+from collada.xmlutil import etree as ElementTree
 
 class InputList(object):
     """Used for defining input sources to a geometry."""
@@ -68,7 +68,7 @@ class InputList(object):
         retlist = []
         for inplist in self.inputs.values():
             for inp in inplist:
-                retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
+                 retlist.append((inp.offset, inp.semantic, inp.source, inp.set))
         return retlist
 
     def __str__(self): return '<InputList>'
@@ -105,7 +105,7 @@ class FloatSource(Source):
     item in the source array.
     """
 
-    def __init__(self, id, data, components, extras=None, xmlnode=None):
+    def __init__(self, id, data, components, xmlnode=None):
         """Create a float source instance.
 
         :param str id:
@@ -120,23 +120,20 @@ class FloatSource(Source):
           When loaded, the xmlnode it comes from.
 
         """
+
         self.id = id
         """The unique string identifier for the source"""
         self.data = data
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data.shape = (-1, len(components) )
         self.components = components
-        self.extras = []
-        if extras is not None:
-            self.extras = extras
-            
         """Tuple of strings describing the semantic of the data, e.g. ``('X','Y','Z')``"""
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
         else:
             self.data.shape = (-1,)
-            txtdata = ' '.join(map(float_format_func(), self.data.tolist() ))
+            txtdata = ' '.join(map(str, self.data.tolist() ))
             rawlen = len( self.data )
             self.data.shape = (-1, len(self.components) )
             acclen = len( self.data )
@@ -156,20 +153,11 @@ class FloatSource(Source):
 
     def __getitem__(self, i): return self.data[i]
 
-    def getchildren(self):
-        return self.extras
-
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        technique_common = self.xmlnode.find(tag('technique_common'))
-        if technique_common is None:
-            technique_common = E.technique_common()
-            self.xmlnode.append(technique_common)
-        technique_common.clear()
-        Extra.saveextras(technique_common,self.extras)
         self.data.shape = (-1,)
 
-        txtdata = ' '.join(map(float_format_func(), self.data.tolist()))
+        txtdata = ' '.join(map(lambda x: '%.7g'%x , self.data.tolist()))
 
         rawlen = len( self.data )
         self.data.shape = (-1, len(self.components) )
@@ -178,10 +166,7 @@ class FloatSource(Source):
         node.text = txtdata
         node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
-        node = technique_common.find(tag('accessor'))
-        if node is None:
-            node = E.accessor()
-            technique_common.append(node)
+        node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
         node.clear()
         node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
@@ -196,17 +181,12 @@ class FloatSource(Source):
         arraynode = node.find(tag('float_array'))
         if arraynode is None: raise DaeIncompleteError('No float_array in source node')
         if arraynode.text is None:
-            data = numpy.array([], dtype=get_number_dtype())
+            data = numpy.array([], dtype=numpy.float32)
         else:
-            try: data = numpy.fromstring(arraynode.text, dtype=get_number_dtype(), sep=' ')
+            try: data = numpy.fromstring(arraynode.text, dtype=numpy.float32, sep=' ')
             except ValueError: raise DaeMalformedError('Corrupted float array')
         data[numpy.isnan(data)] = 0
 
-        technique_common = node.find(tag('technique_common'))
-        extras = None
-        if technique_common is not None:
-            extras = Extra.loadextras(collada, technique_common)
-        
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
@@ -217,12 +197,9 @@ class FloatSource(Source):
             components = ['S', 'T']
             data.shape = (-1, 3)
             #remove 3d texcoord dimension because we don't support it
-            #TODO
-            data = numpy.array(zip(data[:,0], data[:,1]),dtype=get_number_dtype())
+            data = numpy.delete(data, -1, 1)
             data.shape = (-1)
-        fsource = FloatSource( sourceid, data, tuple(components), extras, xmlnode=node )
-        collada.addId(sourceid, fsource)
-        return fsource
+        return FloatSource( sourceid, data, tuple(components), xmlnode=node )
 
     def __str__(self): return '<FloatSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
@@ -238,7 +215,7 @@ class IDRefSource(Source):
 
     """
 
-    def __init__(self, id, data, components, extras=None, xmlnode=None):
+    def __init__(self, id, data, components, xmlnode=None):
         """Create an id ref source instance.
 
         :param str id:
@@ -260,10 +237,6 @@ class IDRefSource(Source):
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data.shape = (-1, len(components) )
         self.components = components
-        self.extras = []
-        if extras is not None:
-            self.extras = extras
-
         """Tuple of strings describing the semantic of the data, e.g. ``('MORPH_TARGET')``"""
         if xmlnode != None:
             self.xmlnode = xmlnode
@@ -290,18 +263,8 @@ class IDRefSource(Source):
 
     def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
 
-    def getchildren(self):
-        return self.extras
-
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        technique_common = self.xmlnode.find(tag('technique_common'))
-        if technique_common is None:
-            technique_common = E.technique_common()
-            self.xmlnode.append(technique_common)
-        technique_common.clear()
-        Extra.saveextras(technique_common,self.extras)
-
         self.data.shape = (-1,)
         txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
@@ -312,10 +275,7 @@ class IDRefSource(Source):
         node.text = txtdata
         node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
-        node = technique_common.find(tag('accessor'))
-        if node is None:
-            node = E.accessor()
-            technique_common.append(node)
+        node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
         node.clear()
         node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
@@ -334,14 +294,11 @@ class IDRefSource(Source):
         else:
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted IDREF array')
-        data = numpy.array( values, dtype=numpy.string_ )
+        data = numpy.array( values, dtype=numpy.unicode_ )
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
-        extras = Extra.loadextras(collada, node)
-        idrefsource = IDRefSource( sourceid, data, tuple(components), extras, xmlnode=node )
-        collada.addId(sourceid, idrefsource)
-        return idrefsource
+        return IDRefSource( sourceid, data, tuple(components), xmlnode=node )
 
     def __str__(self): return '<IDRefSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
@@ -357,7 +314,7 @@ class NameSource(Source):
 
     """
 
-    def __init__(self, id, data, components, extras=None, xmlnode=None):
+    def __init__(self, id, data, components, xmlnode=None):
         """Create a name source instance.
 
         :param str id:
@@ -380,10 +337,6 @@ class NameSource(Source):
         self.data.shape = (-1, len(components) )
         self.components = components
         """Tuple of strings describing the semantic of the data, e.g. ``('JOINT')``"""
-        self.extras = []
-        if extras is not None:
-            self.extras = extras
-
         if xmlnode != None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
@@ -409,18 +362,8 @@ class NameSource(Source):
 
     def __getitem__(self, i): return self.data[i][0] if len(self.data[i])==1 else self.data[i]
 
-    def getchildren(self):
-        return self.extras
-
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        technique_common = self.xmlnode.find(tag('technique_common'))
-        if technique_common is None:
-            technique_common = E.technique_common()
-            self.xmlnode.append(technique_common)
-        technique_common.clear()
-        Extra.saveextras(technique_common,self.extras)
-
         self.data.shape = (-1,)
         txtdata = ' '.join(map(str, self.data.tolist() ))
         rawlen = len( self.data )
@@ -431,10 +374,7 @@ class NameSource(Source):
         node.text = txtdata
         node.set('count', str(rawlen))
         node.set('id', self.id+'-array' )
-        node = technique_common.find(tag('accessor'))
-        if node is None:
-            node = E.accessor()
-            technique_common.append(node)
+        node = self.xmlnode.find('%s/%s'%(tag('technique_common'), tag('accessor')))
         node.clear()
         node.set('count', str(acclen))
         node.set('source', '#'+self.id+'-array')
@@ -453,17 +393,11 @@ class NameSource(Source):
         else:
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted Name array')
-        data = numpy.array( values, dtype=numpy.string_ )
-        technique_common = node.find(tag('technique_common'))
-        extras=None
-        if technique_common is not None:
-            extras = Extra.loadextras(collada, technique_common)
+        data = numpy.array( values, dtype=numpy.unicode_ )
         paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
-        namesource = NameSource( sourceid, data, tuple(components), extras, xmlnode=node )
-        collada.addId(sourceid, namesource)
-        return namesource
+        return NameSource( sourceid, data, tuple(components), xmlnode=node )
 
     def __str__(self): return '<NameSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)

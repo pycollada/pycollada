@@ -11,7 +11,10 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import os
+import sys
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -200,3 +203,13 @@ autoclass_content = 'class'
 autodoc_default_flags = ['members', 'show-inheritance', 'inherited-members']
 autodoc_member_order = 'bysource'
 #autosummary_generate = True
+
+if on_rtd:
+    from mock import Mock as MagicMock
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls, name):
+            return Mock()
+
+    MOCK_MODULES = ['numpy']
+    sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)

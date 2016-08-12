@@ -8,7 +8,7 @@ Authors (Ordered by date of first contribution)
 * Dusan Maliarik
 * Ewen Cheslack-Postava
 * Ole Laursen
-* Rosen Diankov (rosen.diankov AT gmail.com)
-  * collada 1.5 support
 * Andrey Nechypurenko (andreynech AT gmail.com)
 * Guohui Xiao (xiao AT kr.tuwien.ac.at)
+* Hannes Gräuler (graeuler AT geoplex.de)
+
