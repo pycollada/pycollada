@@ -138,14 +138,18 @@ class Node(SceneNode):
             for obj in node.objects(tipo, M):
                 yield obj
 
-    def save(self,recurse=True):
+    def save(self,recurse=True, doclear=False):
         """Saves the geometry back to :attr:`xmlnode`. Also updates
+        
+        :param doclear: if True, will clear the xmlnode before appending anything on it. This will make sure transforms are appended first before any children
         :attr:`matrix` if :attr:`transforms` has been modified."""
+        if doclear:
+            self.xmlnode.clear()
         Extra.saveextras(self.xmlnode,self.extras)
         self.matrix = numpy.identity(4, dtype=get_number_dtype())
         for t in self.transforms:
             self.matrix = numpy.dot(self.matrix, t.matrix)
-
+        
         if recurse:
             for child in self.children:
                 child.save(recurse)
