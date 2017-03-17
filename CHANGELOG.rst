@@ -1,6 +1,29 @@
 pycollada Changelog
 ===================
 
+0.5 (2017-03-16)
+----------------
+
+New Features
+^^^^^^^^^^^^
+* Added function to get effect properties from underneath the technique tag.
+* Add example how to visualize DAE file using OpenGL API.
+
+Bug Fixes
+^^^^^^^^^
+* Fix Python 3 image loading.
+* Fix missing import.
+* changed string_ to unicode_ for numpy string array parsers.
+* changed itervalues() to values() for compatibility with python3.
+* Change iteritems() to items() in getInputList. Add test. Fixes #40.
+* Fixing conversion from unsupported texcoord. input.
+* use 'from PIL import Image' instead of 'import Image'.
+* Fix case where getitem is called before normal indices are set up.
+* Fixed shader compilation error. Old GLSL compilers do not like precision statement.
+* Apply patch to fix ctypes-usage issue.
+* Convert some Windows-style files to Unix format (linebreaks).
+* Fix the bug with relative path to default dae file.
+
 0.4 (2012-07-31)
 ----------------
 
