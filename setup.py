@@ -6,13 +6,12 @@ install_requires = []
 try: import numpy
 except ImportError: install_requires.append('numpy')
 
-if sys.version_info[0] > 2:
-    install_requires.append('python-dateutil>=2.0')
-else:
+install_requires.append('python-dateutil>=2.2')
+
+if sys.version_info[0] < 3:
     import unittest
     if not hasattr(unittest.TestCase, "assertIsNone"):
         install_requires.append('unittest2')
-    install_requires.append('python-dateutil==1.5')
 
 setup(
     name = "pycollada",
