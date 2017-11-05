@@ -91,11 +91,12 @@ class TestGeometry(unittest.TestCase):
                         4,13,6,14,0,12,6,14,2,15,3,16,7,17,5,18,3,16,5,18,1,19,5,20,7,21,6,22,5,20,6,22,4,23])
         triangleset = geometry.createTriangleSet(indices, input_list, "cubematerial")
         self.assertIsNotNone(str(triangleset))
-        geometry.primitives.append(triangleset)
-        geometry.save()
 
         loaded_triangleset = collada.triangleset.TriangleSet.load(self.dummy, geometry.sourceById, fromstring(tostring(triangleset.xmlnode)))
         self.assertEqual(len(loaded_triangleset), 12)
+
+        geometry.primitives.append(triangleset)
+        geometry.save()
 
         loaded_geometry = collada.geometry.Geometry.load(self.dummy, {}, fromstring(tostring(geometry.xmlnode)))
         self.assertEqual(len(loaded_geometry.primitives), 1)
