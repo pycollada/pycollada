@@ -211,7 +211,7 @@ class Geometry(DaeObject):
         for subnode in meshnode:
             if subnode.tag == tag('polylist'):
                 _primitives.append( polylist.Polylist.load( collada, sourcebyid, subnode ) )
-            elif subnode.tag == tag('triangles'):
+            elif subnode.tag in (tag('triangles'), tag('tristrips'), tag('trifans')):
                 _primitives.append( triangleset.TriangleSet.load( collada, sourcebyid, subnode ) )
             elif subnode.tag == tag('lines'):
                 _primitives.append( lineset.LineSet.load( collada, sourcebyid, subnode ) )
