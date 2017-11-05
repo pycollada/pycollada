@@ -33,6 +33,9 @@ try:
 except:
     pil = None
 
+# internally used constant
+_FAILED = 'failed'
+
 
 class DaeMissingSampler2D(Exception):
     """Raised when a <texture> tag references a texture without a sampler."""
@@ -88,41 +91,41 @@ class CImage(DaeObject):
         return self._data
 
     def getImage(self):
-        if pil is None or self._pilimage == 'failed':
+        if pil is None or self._pilimage is _FAILED:
             return None
         if self._pilimage:
             return self._pilimage
         else:
             data = self.getData()
             if not data:
-                self._pilimage = 'failed'
+                self._pilimage = _FAILED
                 return None
             try:
                 self._pilimage = pil.open( BytesIO(data) )
                 self._pilimage.load()
             except IOError as ex:
-                self._pilimage = 'failed'
+                self._pilimage = _FAILED
                 return None
             return self._pilimage
 
     def getUintArray(self):
-        if self._uintarray == 'failed': return None
-        if self._uintarray != None: return self._uintarray
+        if self._uintarray is _FAILED: return None
+        if self._uintarray is not None: return self._uintarray
         img = self.getImage()
         if not img:
-            self._uintarray = 'failed'
+            self._uintarray = _FAILED
             return None
         nchan = len(img.mode)
-        self._uintarray = numpy.fromstring(img.tostring(), dtype=numpy.uint8)
+        self._uintarray = numpy.fromstring(img.tobytes(), dtype=numpy.uint8)
         self._uintarray.shape = (img.size[1], img.size[0], nchan)
         return self._uintarray
 
     def getFloatArray(self):
-        if self._floatarray == 'failed': return None
-        if self._floatarray != None: return self._floatarray
+        if self._floatarray is _FAILED: return None
+        if self._floatarray is not None: return self._floatarray
         array = self.getUintArray()
         if array is None:
-            self._floatarray = 'failed'
+            self._floatarray = _FAILED
             return None
         self._floatarray = numpy.asarray( array, dtype=numpy.float32)
         self._floatarray *= 1.0/255.0
