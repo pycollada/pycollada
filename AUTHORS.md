@@ -11,4 +11,5 @@ Authors (Ordered by date of first contribution)
 * Andrey Nechypurenko (andreynech AT gmail.com)
 * Guohui Xiao (xiao AT kr.tuwien.ac.at)
 * Hannes Gräuler (graeuler AT geoplex.de)
+* Thomas Holder (speleo3)
 
