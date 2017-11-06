@@ -332,5 +332,17 @@ class TestCollada(unittest.TestCase):
         self.assertIsInstance(mesh.nodes, collada.util.IndexedList)
         self.assertIsInstance(mesh.scenes, collada.util.IndexedList)
 
+    def test_collada_tristrips(self):
+        f = os.path.join(self.datadir, "tristrips.dae")
+        mesh = collada.Collada(f, validate_output=True)
+        triangles = mesh.geometries[0].primitives[0]
+        self.assertEqual(20, len(triangles))
+
+    def test_collada_trifans(self):
+        f = os.path.join(self.datadir, "trifans.dae")
+        mesh = collada.Collada(f, validate_output=True)
+        triangles = mesh.geometries[0].primitives[0]
+        self.assertEqual(6, len(triangles))
+
 if __name__ == '__main__':
     unittest.main()

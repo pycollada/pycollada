@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Thomas Holder</author>
+    </contributor>
+    <created>2017-11-06T07:54:44</created>
+    <modified>2017-11-06T07:54:44</modified>
+  </asset>
+  <library_geometries>
+    <geometry id="geom0">
+      <mesh>
+        <source id="geom0-mesh-positions">
+          <float_array id="geom0-mesh-positions-array" count="21">0.0 0.0 0.0 -2.0 0.0 0.0 -1.0 2.0 0.0 1.0 2.0 0.0 2.0 0.0 0.0 1.0 -2.0 0.0 -1.0 -2.0 0.0</float_array>
+          <technique_common>
+            <accessor source="#geom0-mesh-positions-array" count="7" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom0-mesh-normals">
+          <float_array id="geom0-mesh-normals-array" count="3">0.0 0.0 1.0</float_array>
+          <technique_common>
+            <accessor source="#geom0-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="geom0-mesh-vertices">
+          <input semantic="POSITION" source="#geom0-mesh-positions"/>
+        </vertices>
+        <trifans count="1" material="geom0-material">
+          <input offset="0" semantic="VERTEX" source="#geom0-mesh-vertices"/>
+          <input offset="1" semantic="NORMAL" source="#geom0-mesh-normals"/>
+          <p>0 0 1 0 2 0 3 0 4 0 5 0 6 0 1 0</p>
+        </trifans>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="scene" name="scene">
+      <node>
+        <instance_geometry url="#geom0" />
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#scene"/>
+  </scene>
+</COLLADA>
