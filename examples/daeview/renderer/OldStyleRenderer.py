@@ -1,10 +1,14 @@
 #!/usr/bin/env python
+
+from __future__ import print_function
+from __future__ import absolute_import
+
 import collada
 import numpy
 import pyglet
 from pyglet.gl import *
 import ctypes
-import glutils
+from . import glutils
 
 
 class OldStyleRenderer: 
@@ -36,14 +40,14 @@ class OldStyleRenderer:
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 
         # create one display list
-        print 'Creating display list...'
-        print 'It could take some time. Please be patient :-) .'
+        print('Creating display list...')
+        print('It could take some time. Please be patient :-) .')
         self.displist = glGenLists(1)
         # compile the display list, store a triangle in it
         glNewList(self.displist, GL_COMPILE)
         self.drawPrimitives()
         glEndList()
-        print 'done. Ready to render.'
+        print('done. Ready to render.')
 
     def drawPrimitives(self):
         glBegin(GL_TRIANGLES)
@@ -69,7 +73,7 @@ class OldStyleRenderer:
                             img = colladaimage.pilimage
                             if img: # can read and PIL available
                                 # See if we already have texture for this image
-                                if self.textures.has_key(colladaimage.id):
+                                if colladaimage.id in self.textures:
                                     tex_id = self.textures[colladaimage.id]
                                 else:
                                     # If not - create new texture
@@ -98,8 +102,8 @@ class OldStyleRenderer:
 
                                     self.textures[colladaimage.id] = tex_id
                             else:
-                                print '  %s = Texture %s: (not available)'%(
-                                    prop, colladaimage.id)
+                                print('  %s = Texture %s: (not available)'%(
+                                    prop, colladaimage.id))
                         else:
                             if prop == 'diffuse' and value is not None:
                                 diff_color = (GLfloat * 4)(*value)
@@ -117,7 +121,7 @@ class OldStyleRenderer:
                     elif prim_type == 'BoundPolylist':
                         triangles = prim.triangleset()
                     else:
-                        print 'Unsupported mesh used:', prim_type
+                        print('Unsupported mesh used:', prim_type)
                         triangles = []
 
                     if tex_id is not None:
@@ -186,5 +190,5 @@ class OldStyleRenderer:
 
 
     def cleanup(self):
-        print 'Renderer cleaning up'
+        print('Renderer cleaning up')
         glDeleteLists(self.displist, 1)

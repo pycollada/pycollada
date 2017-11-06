@@ -8,6 +8,11 @@
 from pyglet.gl import *
 import ctypes
 
+def _as_bytes(s):
+	if isinstance(s, bytes):
+		return s
+	return s.encode('utf-8')
+
 class Shader:
 	# vert, frag and geom take arrays of source strings
 	# the arrays will be concattenated into one string by OpenGL
@@ -38,6 +43,7 @@ class Shader:
 
 		# convert the source strings into a ctypes pointer-to-char array, and upload them
 		# this is deep, dark, dangerous black magick - don't try stuff like this at home!
+		strings = [_as_bytes(s) for s in strings]
 		src = (ctypes.c_char_p * count)(*strings)
 		glShaderSource(shader, count, ctypes.cast(ctypes.pointer(src),
 			       ctypes.POINTER(ctypes.POINTER(ctypes.c_char))), None)
@@ -58,7 +64,7 @@ class Shader:
 			# retrieve the log text
 			glGetShaderInfoLog(shader, temp, None, buffer)
 			# print the log to the console
-			print buffer.value
+			print(buffer.value)
 		else:
 			# all is well, so attach the shader to the program
 			glAttachShader(self.handle, shader);
@@ -80,7 +86,7 @@ class Shader:
 			# retrieve the log text
 			glGetProgramInfoLog(self.handle, temp, None, buffer)
 			# print the log to the console
-			print buffer.value
+			print(buffer.value)
 		else:
 			# all is well, so we are linked
 			self.linked = True
@@ -97,6 +103,7 @@ class Shader:
 	# upload a floating point uniform
 	# this program must be currently bound
 	def uniformf(self, name, *vals):
+		name = _as_bytes(name)
 		# check there are 1-4 values
 		if len(vals) in range(1, 5):
 			# select the correct function
@@ -110,6 +117,7 @@ class Shader:
 	# upload an integer uniform
 	# this program must be currently bound
 	def uniformi(self, name, *vals):
+		name = _as_bytes(name)
 		# check there are 1-4 values
 		if len(vals) in range(1, 5):
 			# select the correct function
