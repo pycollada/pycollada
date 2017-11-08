@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+from __future__ import print_function
+from __future__ import absolute_import
+
 import collada
 import numpy
 
@@ -7,11 +11,11 @@ from pyglet.gl import *
 
 import ctypes
 
-import glutils
-from glutils import VecF
-import shader
-from shader import Shader
-import shaders
+from . import glutils
+from .glutils import VecF
+from . import shader
+from .shader import Shader
+from . import shaders
 
 
 class GLSLRenderer: 
@@ -45,30 +49,30 @@ class GLSLRenderer:
         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, VecF(0.1, 0.1, 0.1, 1.0))
         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 50)
 
-        print 'Running with OpenGL version:', glutils.getOpenGLVersion()
-        print 'Initializing shaders...'
+        print('Running with OpenGL version:', glutils.getOpenGLVersion())
+        print('Initializing shaders...')
         #(vert, frag) = shaders.ADSPhong
         (vert, frag) = shaders.simplePhong
         prog = Shader(vert, frag)
-        print '  phong'
+        print('  phong')
         self.shaders['phong'] = prog
         (vert, frag) = shaders.pointLightDiff
         prog = Shader(vert, frag)
         self.shaders['lambert'] = prog
-        print '  lambert'
+        print('  lambert')
         self.shaders['blinn'] = prog
-        print '  blinn'
+        print('  blinn')
         (vert, frag) = shaders.flatShader
         prog = Shader(vert, frag)
         self.shaders['constant'] = prog
-        print '  constant'
+        print('  constant')
         (vert, frag) = shaders.texturePhong
         prog = Shader(vert, frag)
         self.shaders['texture'] = prog
-        print '  texture'
-        print '  done.'
+        print('  texture')
+        print('  done.')
 
-        print 'Creating GL buffer objects for geometry...'
+        print('Creating GL buffer objects for geometry...')
         if self.dae.scene is not None:
             for geom in self.dae.scene.objects('geometry'):
                 for prim in geom.primitives():
@@ -93,18 +97,18 @@ class GLSLRenderer:
                             if img: # can read and PIL available
                                 shader_prog = self.shaders['texture']
                                 # See if we already have texture for this image
-                                if self.textures.has_key(colladaimage.id):
+                                if colladaimage.id in self.textures:
                                     tex_id = self.textures[colladaimage.id]
                                 else:
                                     # If not - create new texture
                                     try:
                                         # get image meta-data
                                         # (dimensions) and data
-                                        (ix, iy, tex_data) = (img.size[0], img.size[1], img.tostring("raw", "RGBA", 0, -1))
-                                    except SystemError:
+                                        (ix, iy, tex_data) = (img.size[0], img.size[1], img.tobytes("raw", "RGBA", 0, -1))
+                                    except (SystemError, ValueError):
                                         # has no alpha channel,
                                         # synthesize one
-                                        (ix, iy, tex_data) = (img.size[0], img.size[1], img.tostring("raw", "RGBX", 0, -1))
+                                        (ix, iy, tex_data) = (img.size[0], img.size[1], img.tobytes("raw", "RGBX", 0, -1))
                                     # generate a texture ID
                                     tid = GLuint()
                                     glGenTextures(1, ctypes.byref(tid))
@@ -121,8 +125,8 @@ class GLSLRenderer:
 
                                     self.textures[colladaimage.id] = tex_id
                             else:
-                                print '  %s = Texture %s: (not available)'%(
-                                    prop, colladaimage.id)
+                                print('  %s = Texture %s: (not available)'%(
+                                    prop, colladaimage.id))
                         else:
                             if prop == 'diffuse' and value is not None:
                                 diff_color = value
@@ -140,7 +144,7 @@ class GLSLRenderer:
                     elif prim_type == 'BoundPolylist':
                         triangles = prim.triangleset()
                     else:
-                        print 'Unsupported mesh used:', prim_type
+                        print('Unsupported mesh used:', prim_type)
                         triangles = None
 
                     if triangles is not None:
@@ -208,7 +212,7 @@ class GLSLRenderer:
                         self.batch_list.append(
                             (batch, shader_prog, tex_id, diff_color, 
                              spec_color, amb_color, shininess))
-        print 'done. Ready to render.'
+        print('done. Ready to render.')
 
     def render(self, rotate_x, rotate_y, rotate_z):
         """Render batches created during class initialization"""
@@ -260,4 +264,4 @@ class GLSLRenderer:
 
 
     def cleanup(self):
-        print 'Renderer cleaning up'
+        print('Renderer cleaning up')
