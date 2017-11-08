@@ -194,17 +194,33 @@ class TriangleSet(primitive.Primitive):
 
     @staticmethod
     def load( collada, localscope, node ):
-        indexnode = node.find(tag('p'))
-        if indexnode is None: raise DaeIncompleteError('Missing index in triangle set')
+        indexnodes = node.findall(tag('p'))
+        if not indexnodes: raise DaeIncompleteError('Missing index in triangle set')
 
         source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
 
-        try:
+        def parse_p(indexnode):
             if indexnode.text is None:
                 index = numpy.array([], dtype=numpy.int32)
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
             index[numpy.isnan(index)] = 0
+            return index
+
+        indexlist = []
+        extendfunc = _indexExtendFunctions[node.tag]
+        max_offset = max(input[0] for input_type_array in source_array.values()
+                         for input in input_type_array)
+
+        try:
+            for indexnode in indexnodes:
+                index = parse_p(indexnode)
+                if extendfunc is None:
+                    break
+
+                extendfunc(indexlist, index.reshape((-1, max_offset + 1)))
+            else:
+                index = numpy.array(indexlist, dtype=numpy.int32)
         except:
             raise DaeMalformedError('Corrupted index in triangleset')
 
@@ -397,3 +413,31 @@ class BoundTriangleSet(primitive.BoundPrimitive):
     def __repr__(self):
         return str(self)
 
+
+def _extendFromStrip(indexlist, index):
+    """Convert triangle strip indices to triangle indices
+
+    :param list indexlist:
+      flat triangles index list to append items to
+    :param numpy.ndarray index:
+      (#vertices, #inputs) shaped index array
+    """
+    for i in xrange(len(index) - 2):
+        if i % 2 == 0:
+            # clockwise
+            indexlist.extend(index[i:i + 3].flat)
+        else:
+            # counterclockwise
+            indexlist.extend(index[i + 2:i - 1:-1].flat)
+
+def _extendFromFan(indexlist, index):
+    """Convert triangle fan indices to triangle indices
+    """
+    for i in xrange(1, len(index) - 1):
+        indexlist.extend(index[[0, i, i + 1]].flat)
+
+_indexExtendFunctions = {
+    tag('tristrips'): _extendFromStrip,
+    tag('trifans'): _extendFromFan,
+    tag('triangles'): None,
+}
