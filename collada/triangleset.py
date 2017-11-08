@@ -220,7 +220,7 @@ class TriangleSet(primitive.Primitive):
 
                 extendfunc(indexlist, index.reshape((-1, max_offset + 1)))
             else:
-                index = numpy.array(indexlist, dtype=numpy.int32)
+                index = numpy.concatenate(indexlist)
         except:
             raise DaeMalformedError('Corrupted index in triangleset')
 
@@ -418,23 +418,23 @@ def _extendFromStrip(indexlist, index):
     """Convert triangle strip indices to triangle indices
 
     :param list indexlist:
-      flat triangles index list to append items to
+      list to append 1-dimensional index arrays to
     :param numpy.ndarray index:
       (#vertices, #inputs) shaped index array
     """
-    for i in xrange(len(index) - 2):
-        if i % 2 == 0:
-            # clockwise
-            indexlist.extend(index[i:i + 3].flat)
-        else:
-            # counterclockwise
-            indexlist.extend(index[i + 2:i - 1:-1].flat)
+    cw_ = (index[0:-2:2], index[1:-1:2], index[2::2])
+    ccw = (index[2:-1:2], index[1:-2:2], index[3::2])
+    indexlist.append(numpy.swapaxes(cw_, 0, 1).reshape(-1))
+    indexlist.append(numpy.swapaxes(ccw, 0, 1).reshape(-1))
 
 def _extendFromFan(indexlist, index):
     """Convert triangle fan indices to triangle indices
     """
-    for i in xrange(1, len(index) - 1):
-        indexlist.extend(index[[0, i, i + 1]].flat)
+    c = numpy.concatenate((
+        numpy.repeat(index[:1], len(index) - 2, 0),
+        index[1:-1],
+        index[2:]), 1)
+    indexlist.append(c.reshape(-1))
 
 _indexExtendFunctions = {
     tag('tristrips'): _extendFromStrip,
