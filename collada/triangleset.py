@@ -422,10 +422,10 @@ def _extendFromStrip(indexlist, index):
     :param numpy.ndarray index:
       (#vertices, #inputs) shaped index array
     """
-    cw_ = (index[0:-2:2], index[1:-1:2], index[2::2])
-    ccw = (index[2:-1:2], index[1:-2:2], index[3::2])
-    indexlist.append(numpy.swapaxes(cw_, 0, 1).reshape(-1))
-    indexlist.append(numpy.swapaxes(ccw, 0, 1).reshape(-1))
+    cw_ = numpy.array([index[0:-2:2], index[1:-1:2], index[2::2]])
+    ccw = numpy.array([index[2:-1:2], index[1:-2:2], index[3::2]])
+    indexlist.append(cw_.swapaxes(0, 1).ravel())
+    indexlist.append(ccw.swapaxes(0, 1).ravel())
 
 def _extendFromFan(indexlist, index):
     """Convert triangle fan indices to triangle indices
