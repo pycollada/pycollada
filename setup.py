@@ -15,7 +15,7 @@ if sys.version_info[0] < 3:
 
 setup(
     name = "pycollada",
-    version = "0.5",
+    version = "0.6",
     description = "python library for reading and writing collada documents",
     author = "Jeff Terrace and contributors",
     author_email = 'jterrace@gmail.com',

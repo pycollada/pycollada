@@ -1,6 +1,23 @@
 pycollada Changelog
 ===================
 
+0.6 (2017-11-19)
+----------------
+
+New Features
+^^^^^^^^^^^^
+* tristrips and trifans are now supported.
+* Add support for Python 3.6
+
+Bug Fixes
+^^^^^^^^^
+* Fix python-dateutil dependency setup.
+* Fix flaky test (#61).
+
+Backwards Compatibility Notes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* Drop support for Python 2.6 and 3.2.
+
 0.5 (2017-03-16)
 ----------------
 
