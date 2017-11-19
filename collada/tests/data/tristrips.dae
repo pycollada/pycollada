@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Thomas Holder</author>
+      <authoring_tool>PyMOL 2.0.4</authoring_tool>
+    </contributor>
+    <created>2017-11-06T07:54:44</created>
+    <modified>2017-11-06T07:54:44</modified>
+  </asset>
+  <library_geometries>
+    <geometry id="geom0">
+      <mesh>
+        <source id="geom0-mesh-positions">
+          <float_array id="geom0-mesh-positions-array" count="90">0.5257 0.0 0.8507 0.0 0.8507 0.5257 -0.5257 0.0 0.8507 -0.8507 0.5257 0.0 -0.8507 -0.5257 0.0 -0.5257 0.0 -0.8507 0.0 -0.8507 -0.5257 0.5257 0.0 -0.8507 0.8507 -0.5257 0.0 0.8507 0.5257 0.0 0.5257 0.0 0.8507 0.0 0.8507 0.5257 0.5257 0.0 0.8507 -0.5257 0.0 0.8507 0.0 -0.8507 0.5257 -0.8507 -0.5257 0.0 0.0 -0.8507 -0.5257 0.5257 0.0 -0.8507 -0.5257 0.0 -0.8507 0.0 0.8507 -0.5257 -0.8507 0.5257 0.0 0.0 0.8507 0.5257 0.0 0.8507 0.5257 0.8507 0.5257 0.0 0.0 0.8507 -0.5257 0.5257 0.0 -0.8507 0.0 -0.8507 -0.5257 0.8507 -0.5257 0.0 0.0 -0.8507 0.5257 0.5257 0.0 0.8507 </float_array>
+          <technique_common>
+            <accessor source="#geom0-mesh-positions-array" count="30" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom0-mesh-normals">
+          <float_array id="geom0-mesh-normals-array" count="90">0.5257 0.0 0.8507 0.0 0.8507 0.5257 -0.5257 0.0 0.8507 -0.8507 0.5257 0.0 -0.8507 -0.5257 0.0 -0.5257 0.0 -0.8507 0.0 -0.8507 -0.5257 0.5257 0.0 -0.8507 0.8507 -0.5257 0.0 0.8507 0.5257 0.0 0.5257 0.0 0.8507 0.0 0.8507 0.5257 0.5257 0.0 0.8507 -0.5257 0.0 0.8507 0.0 -0.8507 0.5257 -0.8507 -0.5257 0.0 0.0 -0.8507 -0.5257 0.5257 0.0 -0.8507 -0.5257 0.0 -0.8507 0.0 0.8507 -0.5257 -0.8507 0.5257 0.0 0.0 0.8507 0.5257 0.0 0.8507 0.5257 0.8507 0.5257 0.0 0.0 0.8507 -0.5257 0.5257 0.0 -0.8507 0.0 -0.8507 -0.5257 0.8507 -0.5257 0.0 0.0 -0.8507 0.5257 0.5257 0.0 0.8507 </float_array>
+          <technique_common>
+            <accessor source="#geom0-mesh-normals-array" count="30" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="geom0-mesh-colors">
+          <float_array id="geom0-mesh-colors-array" count="3">0.0 0.0 1.0</float_array>
+          <technique_common>
+            <accessor source="#geom0-mesh-colors-array" count="1" stride="3">
+              <param name="R" type="float"/>
+              <param name="G" type="float"/>
+              <param name="B" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="geom0-mesh-vertices">
+          <input semantic="POSITION" source="#geom0-mesh-positions"/>
+        </vertices>
+        <tristrips count="5" material="geom0-material">
+          <input offset="0" semantic="VERTEX" source="#geom0-mesh-vertices"/>
+          <input offset="1" semantic="NORMAL" source="#geom0-mesh-normals"/>
+          <input offset="2" semantic="COLOR" source="#geom0-mesh-colors"/>
+          <p>0 0 0 1 1 0 2 2 0 3 3 0 4 4 0 5 5 0 6 6 0 7 7 0 8 8 0 9 9 0 10 10 0 11 11 0 </p>
+          <p>12 12 0 13 13 0 14 14 0 15 15 0 16 16 0 </p>
+          <p>17 17 0 18 18 0 19 19 0 20 20 0 21 21 0 </p>
+          <p>22 22 0 23 23 0 24 24 0 25 25 0 </p>
+          <p>26 26 0 27 27 0 28 28 0 29 29 0 </p>
+        </tristrips>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="scene" name="scene">
+      <node>
+        <instance_geometry url="#geom0" />
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#scene"/>
+  </scene>
+</COLLADA>
