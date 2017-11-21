@@ -1,5 +1,45 @@
-Changelog
-=========
+pycollada Changelog
+===================
+
+0.6 (2017-11-19)
+----------------
+
+New Features
+^^^^^^^^^^^^
+* tristrips and trifans are now supported.
+* Add support for Python 3.6
+
+Bug Fixes
+^^^^^^^^^
+* Fix python-dateutil dependency setup.
+* Fix flaky test (#61).
+
+Backwards Compatibility Notes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* Drop support for Python 2.6 and 3.2.
+
+0.5 (2017-03-16)
+----------------
+
+New Features
+^^^^^^^^^^^^
+* Added function to get effect properties from underneath the technique tag.
+* Add example how to visualize DAE file using OpenGL API.
+
+Bug Fixes
+^^^^^^^^^
+* Fix Python 3 image loading.
+* Fix missing import.
+* changed string_ to unicode_ for numpy string array parsers.
+* changed itervalues() to values() for compatibility with python3.
+* Change iteritems() to items() in getInputList. Add test. Fixes #40.
+* Fixing conversion from unsupported texcoord. input.
+* use 'from PIL import Image' instead of 'import Image'.
+* Fix case where getitem is called before normal indices are set up.
+* Fixed shader compilation error. Old GLSL compilers do not like precision statement.
+* Apply patch to fix ctypes-usage issue.
+* Convert some Windows-style files to Unix format (linebreaks).
+* Fix the bug with relative path to default dae file.
 
 0.4 (2012-07-31)
 ----------------
@@ -66,6 +106,7 @@ Bug Fixes
 * Fixed bug where a triangles xml node would try to set an attribute to None
 * Fixed bug in handling joints that influence 0 vertices
 
+
 0.2.2 (2011-05-03)
 ------------------
 * Changed the way instance_node is handled to actually maintain the mapping so it's not lost when saving
@@ -86,7 +127,7 @@ Bug Fixes
 
 0.2.1 (2011-04-15)
 ------------------
-* Fixed bug with saving existing files that didn't have some library\_ tags.
+* Fixed bug with saving existing files that didn't have some library_ tags.
 
 0.2 (2011-04-15)
 ----------------
