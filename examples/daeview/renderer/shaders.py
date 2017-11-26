@@ -1,6 +1,6 @@
 ######################################################################
 # Flat Shader
-# This shader applies the given model view matrix to the verticies, 
+# This shader applies the given model view matrix to the vertices, 
 # and uses a uniform color value.
 flatShader = (['''
 uniform mat4 mvpMatrix;
