@@ -176,7 +176,7 @@ class GLSLRenderer:
                             # understand enough how texture
                             # coordinates and corresponding indexes
                             # are related to the vertices and vertex
-                            # indicies here, but this is what I found
+                            # indices here, but this is what I found
                             # to work. Feel free to improve the way
                             # texture coordinates (uv) are collected
                             # for batch.add_indexed() invocation.

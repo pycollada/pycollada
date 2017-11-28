@@ -240,7 +240,7 @@ class Collada(object):
     def _getFileFromZip(self, fname):
         """Return the binary data of an auxiliary file from a zip archive as a string."""
         if not self.zfile:
-            raise DaeBrokenRefError('Trying to load an auxiliar file %s but we are not reading from a zip'%fname)
+            raise DaeBrokenRefError('Trying to load an auxiliary file %s but we are not reading from a zip'%fname)
         basepath = posixpath.dirname(self.filename)
         aux_path = posixpath.normpath(posixpath.join(basepath, fname))
         if aux_path not in self.zfile.namelist():
@@ -250,7 +250,7 @@ class Collada(object):
     def _getFileFromDisk(self, fname):
         """Return the binary data of an auxiliary file from the local disk relative to the file path loaded."""
         if self.zfile:
-            raise DaeBrokenRefError('Trying to load an auxiliar file %s from disk but we are reading from a zip file'%fname)
+            raise DaeBrokenRefError('Trying to load an auxiliary file %s from disk but we are reading from a zip file'%fname)
         basepath = os.path.dirname(self.filename)
         aux_path = os.path.normpath(os.path.join(basepath, fname))
         if not os.path.exists(aux_path):

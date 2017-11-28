@@ -74,7 +74,7 @@ else:
     E = ElementMaker()
     
     if etree.VERSION[0:3] == '1.2':
-        #in etree < 1.3, this is a workaround for supressing prefixes
+        #in etree < 1.3, this is a workaround for suppressing prefixes
         
         def fixtag(tag, namespaces):
             import string

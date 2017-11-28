@@ -827,9 +827,9 @@ class ExtraNode(SceneNode):
 
 
 def loadNode( collada, node, localscope ):
-    """Generic scene node loading from a xml `node` and a `collada` object.
+    """Generic scene node loading from an xml `node` and a `collada` object.
 
-    Knowing the supported nodes, create the appropiate class for the given node
+    Knowing the supported nodes, create the appropriate class for the given node
     and return it.
 
     """
