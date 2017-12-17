@@ -24,6 +24,10 @@ class TestLineset(unittest.TestCase):
         with self.assertRaisesRegex(DaeIncompleteError, "requires vertex"):
             collada.lineset.LineSet({"a": []}, None, None)
 
+        # Adding an input list with vertex defined, but empty should raise an error.
+        with self.assertRaisesRegex(DaeIncompleteError, "requires vertex"):
+            collada.lineset.LineSet({'VERTEX': []}, None, None)
+
     def test_empty_lineset_saving(self):
         linefloats = [1,1,-1, 1,-1,-1, -1,-0.9999998,-1, -0.9999997,1,-1, 1,0.9999995,1, 0.9999994,-1.000001,1]
         linefloatsrc = collada.source.FloatSource("mylinevertsource", numpy.array(linefloats), ('X', 'Y', 'Z'))

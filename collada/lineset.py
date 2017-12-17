@@ -68,7 +68,7 @@ class LineSet(primitive.Primitive):
         """
 
         if len(sources) == 0: raise DaeIncompleteError('A line set needs at least one input for vertex positions')
-        if not 'VERTEX' in sources: raise DaeIncompleteError('Line set requires vertex input')
+        if len(sources.get('VERTEX', [])) == 0: raise DaeIncompleteError('Line set requires vertex input')
 
         #find max offset
         max_offset = max([ max([input[0] for input in input_type_array])
