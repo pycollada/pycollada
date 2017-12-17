@@ -15,7 +15,7 @@
 import numpy
 
 from collada import primitive
-from collada.util import toUnitVec, checkSource
+from collada.util import toUnitVec, checkSource, xrange
 from collada.common import E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
