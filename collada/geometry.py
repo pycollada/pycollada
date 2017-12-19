@@ -168,9 +168,8 @@ class Geometry(DaeObject):
         return polygons.Polygons(inputdict, materialid, indices)
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load( collada, localscope, node, name='' ):
         id = node.get("id") or ""
-        name = node.get("name") or ""
         meshnode = node.find(tag('mesh'))
         if meshnode is None: raise DaeUnsupportedError('Unknown geometry node')
         sourcebyid = {}
