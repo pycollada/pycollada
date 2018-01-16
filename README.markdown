@@ -17,7 +17,7 @@ information.
 
 ## Projects using pycollada
 
-* [FreeCAD COLLADA Import/Export](http://sourceforge.net/apps/mediawiki/free-cad/index.php?title=Main_Page)
+* [FreeCAD COLLADA Import/Export](https://www.freecadweb.org/)
 * [Blender COLLADA Importer](https://github.com/skrat/bpycollada)
 * [Meshtool](https://github.com/pycollada/meshtool)
 * [SceneJS COLLADA Import](https://github.com/xeolabs/scenejs-pycollada)
