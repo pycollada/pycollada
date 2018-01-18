@@ -267,7 +267,7 @@ class Polylist(primitive.Primitive):
         if vcountnode is None: raise DaeIncompleteError('Missing vcount in polylist')
 
         try:
-            if vcountnode.text is None:
+            if vcountnode.text is None or vcountnode.text.isspace():
                 vcounts = numpy.array([], dtype=numpy.int32)
             else:
                 vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
@@ -278,7 +278,7 @@ class Polylist(primitive.Primitive):
         all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
 
         try:
-            if indexnode.text is None:
+            if indexnode.text is None or indexnode.text.isspace():
                 index = numpy.array([], dtype=numpy.int32)
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')

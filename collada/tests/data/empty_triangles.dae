@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <library_geometries>
+    <geometry id="geom0">
+      <mesh>
+        <source id="geom0-vtx">
+          <float_array id="geom0-vtx-array" count="0"></float_array>
+          <technique_common>
+            <accessor source="#geom0-vtx-array" count="0" stride="0">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="geom0-mesh-vertices">
+          <input semantic="POSITION" source="#geom0-vtx"/>
+        </vertices>
+        	<triangles count="0" material="geom0-material">
+		  <input semantic="VERTEX" source="#geom0-mesh-vertices" offset="0" />
+	      <input semantic="TEXCOORD" source="#geom0-vtx" offset="1" set="0" />
+          <input semantic="NORMAL" source="#geom0-vtx" offset="2" />
+          <p>                           </p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="scene" name="scene">
+      <node>
+        <instance_geometry url="#geom0" />
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#scene"/>
+  </scene>
+</COLLADA>
