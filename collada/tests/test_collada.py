@@ -344,5 +344,11 @@ class TestCollada(unittest.TestCase):
         triangles = mesh.geometries[0].primitives[0]
         self.assertEqual(6, len(triangles))
 
+    def test_collada_empty_triangles(self):
+        f = os.path.join(self.datadir, "empty_triangles.dae")
+        mesh = collada.Collada(f, validate_output=True)
+        triangles = mesh.geometries[0].primitives[0]
+        self.assertEqual(0, len(triangles))
+
 if __name__ == '__main__':
     unittest.main()

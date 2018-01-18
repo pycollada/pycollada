@@ -167,7 +167,7 @@ class LineSet(primitive.Primitive):
         source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
 
         try:
-            if indexnode.text is None:
+            if indexnode.text is None or indexnode.text.isspace():
                 index = numpy.array([],  dtype=numpy.int32)
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
