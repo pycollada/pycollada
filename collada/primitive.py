@@ -28,6 +28,9 @@ class Primitive(DaeObject):
     normal = property( lambda s: s._normal, doc=
     """Read-only numpy.array of size Nx3 where N is the number of normal values in the
     primitive's normal source array.""" )
+    color = property( lambda s: s._color, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of color values in the
+    primitive's color source array.""" )
     texcoordset = property( lambda s: s._texcoordset, doc=
     """Read-only tuple of texture coordinate arrays. Each value is a numpy.array of size
     Nx2 where N is the number of texture coordinates in the primitive's source array.""" )
@@ -46,6 +49,10 @@ class Primitive(DaeObject):
     """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
     To get the actual normal values, one can use this array to select into the normals
     array, e.g. ``normal[normal_index]``.""" )
+    color_index = property( lambda s: s._color_index, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
+    To get the actual color values, one can use this array to select into the colors
+    array, e.g. ``color[color_index]``.""" )
     texcoord_indexset = property( lambda s: s._texcoord_indexset, doc=
     """Read-only tuple of texture coordinate index arrays. Each value is a numpy.array of size
     Nx2 where N is the number of vertices in the primitive. To get the actual texture
@@ -107,6 +114,7 @@ class Primitive(DaeObject):
 
         vertex_inputs = []
         normal_inputs = []
+        color_inputs = []
         texcoord_inputs = []
         textangent_inputs = []
         texbinormal_inputs = []
@@ -198,6 +206,10 @@ class BoundPrimitive(object):
     """Read-only numpy.array of size Nx3 where N is the number of normal values in the
     primitive's normal source array. The values will be transformed according to the
     bound transformation matrix.""" )
+    color = property( lambda s: s._color, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of color values in the
+    primitive's color source array. The values will be transformed according to the
+    bound transformation matrix.""" )
     texcoordset = property( lambda s: s._texcoordset, doc=
     """Read-only tuple of texture coordinate arrays. Each value is a numpy.array of size
     Nx2 where N is the number of texture coordinates in the primitive's source array. The
@@ -211,6 +223,11 @@ class BoundPrimitive(object):
     """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
     To get the actual normal values, one can use this array to select into the normals
     array, e.g. ``normal[normal_index]``. The values will be transformed according to the
+    bound transformation matrix.""" )
+    color_index = property( lambda s: s._color_index, doc=
+    """Read-only numpy.array of size Nx3 where N is the number of vertices in the primitive.
+    To get the actual color values, one can use this array to select into the colors
+    array, e.g. ``color[color_index]``. The values will be transformed according to the
     bound transformation matrix.""" )
     texcoord_indexset = property( lambda s: s._texcoord_indexset, doc=
     """Read-only tuple of texture coordinate index arrays. Each value is a numpy.array of size

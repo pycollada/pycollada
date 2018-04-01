@@ -32,6 +32,8 @@ class Polygon(object):
         """A (N, 3) float array containing the points in the polygon."""
         self.normals = normals
         """A (N, 3) float array with the normals for points in the polygon. Can be None."""
+        self.colors = colors
+        """A (N, 3) float array with the colors for points in the polygon. Can be None."""
         self.texcoords = texcoords
         """A tuple where entries are numpy float arrays of size (N, 2) containing
         the texture coordinates for the points in the polygon for each texture
@@ -46,6 +48,9 @@ class Polygon(object):
            of the N points in the polygon."""
         self.normal_indices = normal_indices
         """A (N,) int array containing the indices for the normals of
+           the N points in the polygon"""
+        self.color_indices = color_indices
+        """A (N,) int array containing the indices for the colors of
            the N points in the polygon"""
         self.texcoord_indices = texcoord_indices
         """A (N,2) int array with texture coordinate indexes for the
@@ -80,6 +85,19 @@ class Polygon(object):
                     self.normal_indices[0],
                     self.normal_indices[i+1],
                     self.normal_indices[i+2]
+                    ], dtype=numpy.float32)
+
+            if self.colors is None:
+                tri_colors = None
+                color_indices = None
+            else:
+                tri_colors = numpy.array([
+                    self.colors[0], self.colors[i+1], self.colors[i+2]
+                    ], dtype=numpy.float32)
+                color_indices = numpy.array([
+                    self.color_indices[0],
+                    self.color_indices[i+1],
+                    self.color_indices[i+2]
                     ], dtype=numpy.float32)
 
             tri_texcoords = []
@@ -166,6 +184,16 @@ class Polylist(primitive.Primitive):
             self._normal = None
             self._normal_index = None
             self.maxnormalindex = -1
+
+        if 'COLOR' in sources and len(sources['COLOR']) > 0 and len(self.index) > 0:
+            self._color = sources['COLOR'][0][4].data
+            self._color_index = self.index[:,sources['COLOR'][0][0]]
+            self.maxcolorindex = numpy.max( self._color_index )
+            checkSource(sources['COLOR'][0][4], ('X', 'Y', 'Z'), self.maxcolorindex)
+        else:
+            self._color = None
+            self._color_index = None
+            self.maxcolorindex = -1
 
         if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 \
                 and len(self.index) > 0:
@@ -313,6 +341,7 @@ class BoundPolylist(primitive.BoundPrimitive):
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if pl._vertex is None else numpy.asarray(pl._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if pl._normal is None else numpy.asarray(pl._normal * M[:3,:3])
+        self._color = pl._color
         self._texcoordset = pl._texcoordset
         matnode = materialnodebysymbol.get( pl.material )
         if matnode:
@@ -323,6 +352,7 @@ class BoundPolylist(primitive.BoundPrimitive):
         self.nvertices = pl.nvertices
         self._vertex_index = pl._vertex_index
         self._normal_index = pl._normal_index
+        self._color_index = pl._color_index
         self._texcoord_indexset = pl._texcoord_indexset
         self.polyindex = pl.polyindex
         self.npolygons = pl.npolygons
@@ -383,4 +413,3 @@ class BoundPolylist(primitive.BoundPrimitive):
 
     def __repr__(self):
         return str(self)
-

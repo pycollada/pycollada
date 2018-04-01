@@ -33,6 +33,8 @@ class Triangle(object):
         self.normals = normals
         """A (3, 3) float array with the normals for points in the triangle.
         If the triangle didn't have normals, they will be computed."""
+        self.colors = colors
+        """A (3, 3) float array with the colors for points in the triangle."""
         self.texcoords = texcoords
         """A tuple with (3, 2) float arrays with the texture coordinates
           for the points in the triangle"""
@@ -47,6 +49,9 @@ class Triangle(object):
         self.normal_indices = normal_indices
         """A (3,) int array with normal indexes of the 3 vertices in
            the normal array"""
+        self.color_indices = color_indices
+        """A (3,) int array with color indexes of the 3 vertices in
+           the color array"""
         self.texcoord_indices = texcoord_indices
         """A (3,2) int array with texture coordinate indexes of the 3
            vertices in the texcoord array."""
@@ -117,6 +122,16 @@ class TriangleSet(primitive.Primitive):
             self._normal = None
             self._normal_index = None
             self.maxnormalindex = -1
+
+        if 'COLOR' in sources and len(sources['COLOR']) > 0 and len(self.index) > 0:
+            self._color = sources['COLOR'][0][4].data
+            self._color_index = self.index[:,:, sources['COLOR'][0][0]]
+            self.maxcolorindex = numpy.max( self._color_index )
+            checkSource(sources['COLOR'][0][4], ('R', 'G', 'B'), self.maxcolorindex)
+        else:
+            self._color = None
+            self._color_index = None
+            self.maxcolorindex = -1
 
         if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
@@ -339,6 +354,7 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if ts.vertex is None else numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
         self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3,:3])
+        self._color = ts._color
         self._texcoordset = ts._texcoordset
         self._textangentset = ts._textangentset
         self._texbinormalset = ts._texbinormalset
@@ -350,6 +366,7 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         self.index = ts.index
         self._vertex_index = ts._vertex_index
         self._normal_index = ts._normal_index
+        self._color_index = ts._color_index
         self._texcoord_indexset = ts._texcoord_indexset
         self._textangent_indexset = ts._textangent_indexset
         self._texbinormal_indexset = ts._texbinormal_indexset
