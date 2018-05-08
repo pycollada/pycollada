@@ -1,12 +1,10 @@
 import sys
 from setuptools import find_packages, setup
 
-install_requires = []
+install_requires = ['python-dateutil>=2.2']
 
 try: import numpy
 except ImportError: install_requires.append('numpy')
-
-install_requires.append('python-dateutil>=2.2')
 
 if sys.version_info[0] < 3:
     import unittest
