@@ -132,7 +132,8 @@ class PhysicsScene(DaeObject):
         if technique_common is None:
             technique_common = E.technique_common()
             self.xmlnode.append(technique_common)
-        technique_common.clear()
+        # do not clear since do not have a collada library technique_common, and using xmlnode directly
+        #technique_common.clear()
         
         oldnodes = self.xmlnode.findall(tag('instance_physics_model'))
         for node in oldnodes:
