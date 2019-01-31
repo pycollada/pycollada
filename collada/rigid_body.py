@@ -175,6 +175,12 @@ class RigidBody(DaeObject):
             #technique_common.append(obj.xmlnode)
         if self.mass is not None:
             technique_common.append(self.mass)
+        if self.mass_frame is not None:
+            technique_common.append(self.mass_frame)
+        if self.dynamic is not None:
+            technique_common.append(self.dynamic)
+        if self.inertia is not None:
+            technique_common.append(self.inertia)
         #save_child_object(technique_common, tag('dynamic'), self.dynamic, recurse)
         #save_child_object(technique_common, tag('mass'), self.mass, recurse)
         #save_child_object(technique_common, tag('mass_frame'), self.mass_frame, recurse)
