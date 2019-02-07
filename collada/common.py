@@ -65,7 +65,19 @@ def save_child_object(xmlnode,tag, childobject, recurse=True):
         if recurse:
             childobject.save(recurse)
         xmlnode.append(childobject.xmlnode)
-    
+
+def save_child_xmlobject(xmlnode,tag, xmlchildobject):
+    """Saves the XML node as a child of xmlnode with tag. 
+    If xmlnode already contains such a child, removes it and adds a new one.
+
+    :param childobject: derived from DaeObject. If childobject is None, will remove any children with the same tag from xmlnode
+    :param recurse: if true, will call childobject.save, otherwise will not
+    """
+    for previouschild in xmlnode.findall(tag):
+        xmlnode.remove(previouschild)
+    if xmlchildobject is not None:
+        xmlnode.append(xmlchildobject)
+
 class DaeObject(object):
     """This class is the abstract interface to all collada objects.
 

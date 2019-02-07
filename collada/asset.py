@@ -16,13 +16,12 @@ import numpy
 import datetime
 import dateutil.parser
 
-from .common import DaeObject, E, tag, float_format_func
+from .common import DaeObject, E, tag, float_format_func, save_child_xmlobject
 from .common import DaeIncompleteError, DaeBrokenRefError, \
         DaeMalformedError, DaeUnsupportedError
 from .util import _correctValInNode
 from .xmlutil import etree as ElementTree
-
-
+        
 class UP_AXIS:
     """The up-axis of the collada document."""
     X_UP = 'X_UP'
@@ -116,7 +115,7 @@ class Asset(DaeObject):
     """Defines asset-management information"""
 
     def __init__(self, created=None, modified=None, title=None, subject=None, revision=None,
-               keywords=None, unitname=None, unitmeter=None, upaxis=None, contributors=None, xmlnode=None):
+                 keywords=None, unitname=None, unitmeter=None, upaxis=None, contributors=None, extras=None, xmlnode=None):
         """Create a new set of information about an asset
 
         :param datetime.datetime created:
@@ -177,37 +176,44 @@ class Asset(DaeObject):
         self.contributors = contributors
         """A list of instances of :class:`collada.asset.Contributor`"""
 
+        self.extras = []
+        if extras is not None:
+            self.extras = extras
+            
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the asset."""
         else:
             self._recreateXmlNode()
-
-    def _recreateXmlNode(self):
-        self.xmlnode = E.asset()
-        for contributor in self.contributors:
-            self.xmlnode.append(contributor.xmlnode)
-        self.xmlnode.append(E.created(self.created.isoformat()))
-        if self.keywords is not None:
-            self.xmlnode.append(E.keywords(self.keywords))
-        self.xmlnode.append(E.modified(self.modified.isoformat()))
-        if self.revision is not None:
-            self.xmlnode.append(E.revision(self.revision))
-        if self.subject is not None:
-            self.xmlnode.append(E.subject(self.subject))
-        if self.title is not None:
-            self.xmlnode.append(E.title(self.title))
-        if self.unitmeter is not None and self.unitname is not None:
-            self.xmlnode.append(E.unit(name=self.unitname, meter=float_format_func()(self.unitmeter)))
-        self.xmlnode.append(E.up_axis(self.upaxis))
-
+    
     def getchildren(self):
-        return self.contributors
-
+        return self.contributors + self.extras
+    
     def save(self,recurse=True):
         """Saves the asset info back to :attr:`xmlnode`"""
-        self._recreateXmlNode()
-
+        from . import extra
+        extra.Extra.saveextras(self.xmlnode,self.extras)
+        _correctValInNode(self.xmlnode, 'keywords',self.keywords)
+        _correctValInNode(self.xmlnode, 'created',self.created.isoformat())
+        _correctValInNode(self.xmlnode, 'modified',self.modified.isoformat())
+        _correctValInNode(self.xmlnode, 'revision',self.revision)
+        _correctValInNode(self.xmlnode, 'subject',self.subject)
+        _correctValInNode(self.xmlnode, 'title',self.title)
+        _correctValInNode(self.xmlnode, 'up_axis',self.upaxis)
+        
+        if self.unitmeter is not None and self.unitname is not None:
+            save_child_xmlobject(self.xmlnode, 'unit', E.unit(name=self.unitname, meter=float_format_func()(self.unitmeter)))
+        else:
+            save_child_xmlobject(self.xmlnode, 'unit', None)
+        
+        oldnodes = self.xmlnode.findall(tag('contributor'))
+        for oldnode in oldnodes:
+            self.xmlnode.remove(oldnode)
+        for contributor in self.contributors:
+            if recurse:
+                contributor.save(recursve)
+            self.xmlnode.append(contributor.xmlnode)
+    
     @staticmethod
     def load(collada, localscope, node):
         contributornodes = node.findall( tag('contributor') )
@@ -255,10 +261,13 @@ class Asset(DaeObject):
                     upaxis == UP_AXIS.Z_UP):
                 upaxis = None
 
+        from . import extra
+        extras = extra.Extra.loadextras(collada, node)
+        
         return Asset(created=created, modified=modified, title=title,
                 subject=subject, revision=revision, keywords=keywords,
                 unitname=unitname, unitmeter=unitmeter, upaxis=upaxis,
-                contributors=contributors, xmlnode=node)
+                contributors=contributors, extras=extras, xmlnode=node)
 
     def __str__(self):
         return '<Asset title=%s>' % (str(self.title),)

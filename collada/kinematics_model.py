@@ -175,15 +175,15 @@ class KinematicsModel(DaeObject):
     def save(self,recurse=True):
         Extra.saveextras(self.xmlnode,self.extras)
         Technique.savetechniques(self.xmlnode,self.techniques)
-        technique_common = self.xmlnode.find(tag('technique_common'))
-        if technique_common is None:
-            technique_common = E.technique_common(tag('technique_common'))
-            self.xmlnode.append(technique_common)
-        technique_common.clear()
+        xmltechnique_common = self.xmlnode.find(tag('technique_common'))
+        if xmltechnique_common is None:
+            xmltechnique_common = E.technique_common(tag('technique_common'))
+            self.xmlnode.append(xmltechnique_common)
+        xmltechnique_common.clear()
         for obj in self.links + self.joints + self.formulas:
             if recurse:
                 obj.save(recurse)
-            technique_common.append(obj.xmlnode)
+            xmltechnique_common.append(obj.xmlnode)
         
         save_child_object(self.xmlnode, tag('asset'), self.asset, recurse)
         save_attribute(self.xmlnode,'id',self.id)
