@@ -206,12 +206,23 @@ class Collada(object):
         except ElementTree.ParseError as e:
             raise DaeMalformedError("XML Parsing Error: %s" % e)
 
+        # if we can't get the current namespace
+        # the tagger from above will use a hardcoded default
         try:
-            namespace = next(iter(self.xmlnode.getroot().nsmap.values()))
+            # get the root node, same for both etree and lxml
+            xml_root = self.xmlnode.getroot()
+            if hasattr(xml_root, 'nsmap'):
+                # lxml has an nsmap
+                # use the first value in the namespace map
+                namespace = next(iter(xml_root.nsmap.values()))
+            elif hasattr(xml_root, 'tag'):
+                # for xml.etree we need to extract ns from root tag
+                namespace = xml_root.tag.split('}')[0].lstrip('{')
+            # create a tagging function using the extracted namespace
             self.tag = tagger(namespace)
         except BaseException:
-            # couldn't extract namespace, so tagger will use default
-            pass
+            # failed to extract a namespace, using default
+            traceback.print_exc()
 
         # functions which will load various things into collada object
         loaders = [self._loadAssetInfo,
@@ -226,7 +237,6 @@ class Collada(object):
                    self._loadNodes,
                    self._loadScenes,
                    self._loadDefaultScene]
-
         # wrap each loader so if we fail to load something
         # we still can return a mostly successful result
         for loader in loaders:
