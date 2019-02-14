@@ -3,9 +3,36 @@ from collada.xmlutil import etree, ElementMaker, COLLADA_NS
 E = ElementMaker(namespace=COLLADA_NS, nsmap={None: COLLADA_NS})
 
 
-def tag(text):
-    return str(etree.QName(COLLADA_NS, text))
+def tag(text, namespace=None):
+    """
+    Tag a text key with the collada namespace, by default:
+    '{http://www.collada.org/2005/11/COLLADASchema}'
 
+    :param string text:
+      The text to be tagged, i.e. 'geometry'
+    :param string namespace:
+      The namespace to tag with (not including brackets)
+      Will use default namespace if None is passed
+    """
+    if namespace is None:
+        namespace = COLLADA_NS
+    return str(etree.QName(namespace, text))
+
+
+def tagger(namespace=None):
+    """
+    A cloture, or function that returns a function.
+    Returned function tags using a specified namespace.
+    
+    :param string namespace:
+      The XML namespace to use to tag elements
+
+    :return:
+      tag() function
+    """
+    def tag(text):
+        return str(etree.QName(namespace, text))
+    return tag
 
 class DaeObject(object):
     """This class is the abstract interface to all collada objects.

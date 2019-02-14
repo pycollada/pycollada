@@ -83,8 +83,10 @@ class TriangleSet(primitive.Primitive):
         creating a geometry instance.
         """
 
-        if len(sources) == 0: raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
-        if not 'VERTEX' in sources: raise DaeIncompleteError('Triangle set requires vertex input')
+        if len(sources) == 0:
+            raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
+        if not 'VERTEX' in sources:
+            raise DaeIncompleteError('Triangle set requires vertex input')
 
         max_offset = max([ max([input[0] for input in input_type_array])
                           for input_type_array in sources.values()
@@ -194,10 +196,10 @@ class TriangleSet(primitive.Primitive):
 
     @staticmethod
     def load( collada, localscope, node ):
-        indexnodes = node.findall(tag('p'))
+        indexnodes = node.findall(collada.tag('p'))
         if not indexnodes: raise DaeIncompleteError('Missing index in triangle set')
 
-        source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
+        source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
 
         def parse_p(indexnode):
             if indexnode.text is None or indexnode.text.isspace():
@@ -208,7 +210,10 @@ class TriangleSet(primitive.Primitive):
             return index
 
         indexlist = []
-        extendfunc = _indexExtendFunctions[node.tag]
+        tag_bare = node.tag.split('}')[-1]
+         
+        extendfunc = _indexExtendFunctions[tag_bare]
+        
         max_offset = max(input[0] for input_type_array in source_array.values()
                          for input in input_type_array)
 
@@ -437,7 +442,7 @@ def _extendFromFan(indexlist, index):
     indexlist.append(c.reshape(-1))
 
 _indexExtendFunctions = {
-    tag('tristrips'): _extendFromStrip,
-    tag('trifans'): _extendFromFan,
-    tag('triangles'): None,
+    'tristrips': _extendFromStrip,
+    'trifans': _extendFromFan,
+    'triangles': None,
 }

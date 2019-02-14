@@ -527,7 +527,7 @@ class GeometryNode(SceneNode):
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in geometry instance %s' % url)
         geometry = collada.geometries.get(url[1:])
         if not geometry: raise DaeBrokenRefError('Geometry %s not found in library'%url)
-        matnodes = node.findall('%s/%s/%s'%( tag('bind_material'), tag('technique_common'), tag('instance_material') ) )
+        matnodes = node.findall('%s/%s/%s'%( collada.tag('bind_material'), collada.tag('technique_common'), collada.tag('instance_material') ) )
         materials = []
         for matnode in matnodes:
             materials.append( MaterialNode.load(collada, matnode) )
@@ -593,9 +593,9 @@ class ControllerNode(SceneNode):
             self.xmlnode = xmlnode
             """ElementTree representation of the controller node."""
         else:
-            self.xmlnode = ElementTree.Element( tag('instance_controller') )
-            bindnode = ElementTree.Element( tag('bind_material') )
-            technode = ElementTree.Element( tag('technique_common') )
+            self.xmlnode = ElementTree.Element( collada.tag('instance_controller') )
+            bindnode = ElementTree.Element( collada.tag('bind_material') )
+            technode = ElementTree.Element( collada.tag('technique_common') )
             bindnode.append( technode )
             self.xmlnode.append( bindnode )
             for mat in materials: technode.append( mat.xmlnode )
@@ -615,7 +615,7 @@ class ControllerNode(SceneNode):
         if not url.startswith('#'): raise DaeMalformedError('Invalid url in controller instance %s' % url)
         controller = collada.controllers.get(url[1:])
         if not controller: raise DaeBrokenRefError('Controller %s not found in library'%url)
-        matnodes = node.findall('%s/%s/%s'%( tag('bind_material'), tag('technique_common'), tag('instance_material') ) )
+        matnodes = node.findall('%s/%s/%s'%( collada.tag('bind_material'), collada.tag('technique_common'), collada.tag('instance_material') ) )
         materials = []
         for matnode in matnodes:
             materials.append( MaterialNode.load(collada, matnode) )
@@ -676,7 +676,7 @@ class MaterialNode(SceneNode):
     @staticmethod
     def load(collada, node):
         inputs = []
-        for inputnode in node.findall( tag('bind_vertex_input') ):
+        for inputnode in node.findall( collada.tag('bind_vertex_input') ):
             inputs.append( ( inputnode.get('semantic'), inputnode.get('input_semantic'), inputnode.get('input_set') ) )
         targetid = node.get('target')
         if not targetid.startswith('#'): raise DaeMalformedError('Incorrect target id in material '+targetid)
@@ -833,20 +833,20 @@ def loadNode( collada, node, localscope ):
     and return it.
 
     """
-    if node.tag == tag('node'): return Node.load(collada, node, localscope)
-    elif node.tag == tag('translate'): return TranslateTransform.load(collada, node)
-    elif node.tag == tag('rotate'): return RotateTransform.load(collada, node)
-    elif node.tag == tag('scale'): return ScaleTransform.load(collada, node)
-    elif node.tag == tag('matrix'): return MatrixTransform.load(collada, node)
-    elif node.tag == tag('lookat'): return LookAtTransform.load(collada, node)
-    elif node.tag == tag('instance_geometry'): return GeometryNode.load(collada, node)
-    elif node.tag == tag('instance_camera'): return CameraNode.load(collada, node)
-    elif node.tag == tag('instance_light'): return LightNode.load(collada, node)
-    elif node.tag == tag('instance_controller'): return ControllerNode.load(collada, node)
-    elif node.tag == tag('instance_node'): return NodeNode.load(collada, node, localscope)
-    elif node.tag == tag('extra'):
+    if node.tag == collada.tag('node'): return Node.load(collada, node, localscope)
+    elif node.tag == collada.tag('translate'): return TranslateTransform.load(collada, node)
+    elif node.tag == collada.tag('rotate'): return RotateTransform.load(collada, node)
+    elif node.tag == collada.tag('scale'): return ScaleTransform.load(collada, node)
+    elif node.tag == collada.tag('matrix'): return MatrixTransform.load(collada, node)
+    elif node.tag == collada.tag('lookat'): return LookAtTransform.load(collada, node)
+    elif node.tag == collada.tag('instance_geometry'): return GeometryNode.load(collada, node)
+    elif node.tag == collada.tag('instance_camera'): return CameraNode.load(collada, node)
+    elif node.tag == collada.tag('instance_light'): return LightNode.load(collada, node)
+    elif node.tag == collada.tag('instance_controller'): return ControllerNode.load(collada, node)
+    elif node.tag == collada.tag('instance_node'): return NodeNode.load(collada, node, localscope)
+    elif node.tag == collada.tag('extra'):
         return ExtraNode.load(collada, node)
-    elif node.tag == tag('asset'):
+    elif node.tag == collada.tag('asset'):
         return None
     else: raise DaeUnsupportedError('Unknown scene node %s' % str(node.tag))
 
@@ -903,7 +903,7 @@ class Scene(DaeObject):
         tried_loading = []
         succeeded = False
         localscope = {}
-        for nodenode in node.findall(tag('node')):
+        for nodenode in node.findall(collada.tag('node')):
             try:
                 N = loadNode(collada, nodenode, localscope)
             except DaeInstanceNotLoadedError as ex:

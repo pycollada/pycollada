@@ -80,19 +80,20 @@ class Source(DaeObject):
     @staticmethod
     def load(collada, localscope, node):
         sourceid = node.get('id')
-        arraynode = node.find(tag('float_array'))
+        arraynode = node.find(collada.tag('float_array'))
         if not arraynode is None:
             return FloatSource.load(collada, localscope, node)
 
-        arraynode = node.find(tag('IDREF_array'))
+        arraynode = node.find(collada.tag('IDREF_array'))
         if not arraynode is None:
             return IDRefSource.load(collada, localscope, node)
 
-        arraynode = node.find(tag('Name_array'))
+        arraynode = node.find(collada.tag('Name_array'))
         if not arraynode is None:
             return NameSource.load(collada, localscope, node)
 
-        if arraynode is None: raise DaeIncompleteError('No array found in source %s' % sourceid)
+        if arraynode is None:
+            raise DaeIncompleteError('No array found in source %s' % sourceid)
 
 
 class FloatSource(Source):
@@ -178,7 +179,7 @@ class FloatSource(Source):
     @staticmethod
     def load( collada, localscope, node ):
         sourceid = node.get('id')
-        arraynode = node.find(tag('float_array'))
+        arraynode = node.find(collada.tag('float_array'))
         if arraynode is None: raise DaeIncompleteError('No float_array in source node')
         if arraynode.text is None or arraynode.text.isspace():
             data = numpy.array([], dtype=numpy.float32)
@@ -187,7 +188,7 @@ class FloatSource(Source):
             except ValueError: raise DaeMalformedError('Corrupted float array')
         data[numpy.isnan(data)] = 0
 
-        paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
+        paramnodes = node.findall('%s/%s/%s'%(collada.tag('technique_common'), collada.tag('accessor'), collada.tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
         if len(components) == 2 and components[0] == 'U' and components[1] == 'V':
@@ -295,7 +296,7 @@ class IDRefSource(Source):
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted IDREF array')
         data = numpy.array( values, dtype=numpy.unicode_ )
-        paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
+        paramnodes = node.findall('%s/%s/%s'%(collada.tag('technique_common'), collada.tag('accessor'), collada.tag('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
         return IDRefSource( sourceid, data, tuple(components), xmlnode=node )
@@ -394,7 +395,8 @@ class NameSource(Source):
             try: values = [v for v in arraynode.text.split()]
             except ValueError: raise DaeMalformedError('Corrupted Name array')
         data = numpy.array( values, dtype=numpy.unicode_ )
-        paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag('param')))
+        paramnodes = node.findall('%s/%s/%s'%(tag('technique_common'), tag('accessor'), tag
+                                              ('param')))
         if not paramnodes: raise DaeIncompleteError('No accessor info in source node')
         components = [ param.get('name') for param in paramnodes ]
         return NameSource( sourceid, data, tuple(components), xmlnode=node )

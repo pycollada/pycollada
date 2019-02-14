@@ -35,7 +35,7 @@ from collada import geometry
 from collada import light
 from collada import material
 from collada import scene
-from collada.common import E, tag
+from collada.common import E, tagger, tag
 from collada.common import DaeError, DaeObject, DaeIncompleteError, \
     DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
     DaeSaveValidationError
@@ -123,6 +123,9 @@ class Collada(object):
         self.scene = None
         """The default scene. This is either an instance of :class:`collada.scene.Scene` or `None`."""
 
+        # a function which will apply the namespace
+        self.tag = tag
+
         if validate_output and schema:
             self.validator = schema.ColladaValidator()
         else:
@@ -203,18 +206,34 @@ class Collada(object):
         except ElementTree.ParseError as e:
             raise DaeMalformedError("XML Parsing Error: %s" % e)
 
-        self._loadAssetInfo()
-        self._loadImages()
-        self._loadEffects()
-        self._loadMaterials()
-        self._loadAnimations()
-        self._loadGeometry()
-        self._loadControllers()
-        self._loadLights()
-        self._loadCameras()
-        self._loadNodes()
-        self._loadScenes()
-        self._loadDefaultScene()
+        try:
+            namespace = next(iter(self.xmlnode.getroot().nsmap.values()))
+            self.tag = tagger(namespace)
+        except BaseException:
+            # couldn't extract namespace, so tagger will use default
+            pass
+
+        # functions which will load various things into collada object
+        loaders = [self._loadAssetInfo,
+                   self._loadImages,
+                   self._loadEffects,
+                   self._loadMaterials,
+                   self._loadAnimations,
+                   self._loadGeometry,
+                   self._loadControllers,
+                   self._loadLights,
+                   self._loadCameras,
+                   self._loadNodes,
+                   self._loadScenes,
+                   self._loadDefaultScene]
+
+        # wrap each loader so if we fail to load something
+        # we still can return a mostly successful result
+        for loader in loaders:
+            try:
+                loader()
+            except BaseException:
+                traceback.print_exc()
 
     def _setIndexedList(self, propname, data):
         setattr(self, propname, IndexedList(data, ('id',)))
@@ -271,7 +290,7 @@ class Collada(object):
 
     def _loadAssetInfo(self):
         """Load information in <asset> tag"""
-        assetnode = self.xmlnode.find(tag('asset'))
+        assetnode = self.xmlnode.find(self.tag('asset'))
         if assetnode is not None:
             self.assetInfo = asset.Asset.load(self, {}, assetnode)
         else:
@@ -279,12 +298,12 @@ class Collada(object):
 
     def _loadGeometry(self):
         """Load geometry library."""
-        libnodes = self.xmlnode.findall(tag('library_geometries'))
+        libnodes = self.xmlnode.findall(self.tag('library_geometries'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for geomnode in libnode.findall(tag('geometry')):
-                        if geomnode.find(tag('mesh')) is None:
+                    for geomnode in libnode.findall(self.tag('geometry')):
+                        if geomnode.find(self.tag('mesh')) is None:
                             continue
                         try:
                             G = geometry.Geometry.load(self, {}, geomnode)
@@ -295,13 +314,13 @@ class Collada(object):
 
     def _loadControllers(self):
         """Load controller library."""
-        libnodes = self.xmlnode.findall(tag('library_controllers'))
+        libnodes = self.xmlnode.findall(self.tag('library_controllers'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for controlnode in libnode.findall(tag('controller')):
-                        if controlnode.find(tag('skin')) is None \
-                                and controlnode.find(tag('morph')) is None:
+                    for controlnode in libnode.findall(self.tag('controller')):
+                        if controlnode.find(self.tag('skin')) is None \
+                                and controlnode.find(self.tag('morph')) is None:
                             continue
                         try:
                             C = controller.Controller.load(self, {}, controlnode)
@@ -312,11 +331,11 @@ class Collada(object):
 
     def _loadAnimations(self):
         """Load animation library."""
-        libnodes = self.xmlnode.findall(tag('library_animations'))
+        libnodes = self.xmlnode.findall(self.tag('library_animations'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for animnode in libnode.findall(tag('animation')):
+                    for animnode in libnode.findall(self.tag('animation')):
                         try:
                             A = animation.Animation.load(self, {}, animnode)
                         except DaeError as ex:
@@ -326,11 +345,11 @@ class Collada(object):
 
     def _loadLights(self):
         """Load light library."""
-        libnodes = self.xmlnode.findall(tag('library_lights'))
+        libnodes = self.xmlnode.findall(self.tag('library_lights'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for lightnode in libnode.findall(tag('light')):
+                    for lightnode in libnode.findall(self.tag('light')):
                         try:
                             lig = light.Light.load(self, {}, lightnode)
                         except DaeError as ex:
@@ -340,11 +359,11 @@ class Collada(object):
 
     def _loadCameras(self):
         """Load camera library."""
-        libnodes = self.xmlnode.findall(tag('library_cameras'))
+        libnodes = self.xmlnode.findall(self.tag('library_cameras'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for cameranode in libnode.findall(tag('camera')):
+                    for cameranode in libnode.findall(self.tag('camera')):
                         try:
                             cam = camera.Camera.load(self, {}, cameranode)
                         except DaeError as ex:
@@ -354,11 +373,11 @@ class Collada(object):
 
     def _loadImages(self):
         """Load image library."""
-        libnodes = self.xmlnode.findall(tag('library_images'))
+        libnodes = self.xmlnode.findall(self.tag('library_images'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for imgnode in libnode.findall(tag('image')):
+                    for imgnode in libnode.findall(self.tag('image')):
                         try:
                             img = material.CImage.load(self, {}, imgnode)
                         except DaeError as ex:
@@ -368,11 +387,11 @@ class Collada(object):
 
     def _loadEffects(self):
         """Load effect library."""
-        libnodes = self.xmlnode.findall(tag('library_effects'))
+        libnodes = self.xmlnode.findall(self.tag('library_effects'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for effectnode in libnode.findall(tag('effect')):
+                    for effectnode in libnode.findall(self.tag('effect')):
                         try:
                             effect = material.Effect.load(self, {}, effectnode)
                         except DaeError as ex:
@@ -382,11 +401,11 @@ class Collada(object):
 
     def _loadMaterials(self):
         """Load material library."""
-        libnodes = self.xmlnode.findall(tag('library_materials'))
+        libnodes = self.xmlnode.findall(self.tag('library_materials'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for materialnode in libnode.findall(tag('material')):
+                    for materialnode in libnode.findall(self.tag('material')):
                         try:
                             mat = material.Material.load(self, {}, materialnode)
                         except DaeError as ex:
@@ -395,13 +414,13 @@ class Collada(object):
                             self.materials.append(mat)
 
     def _loadNodes(self):
-        libnodes = self.xmlnode.findall(tag('library_nodes'))
+        libnodes = self.xmlnode.findall(self.tag('library_nodes'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
                     tried_loading = []
                     succeeded = False
-                    for node in libnode.findall(tag('node')):
+                    for node in libnode.findall(self.tag('node')):
                         try:
                             N = scene.loadNode(self, node, {})
                         except scene.DaeInstanceNotLoadedError as ex:
@@ -433,11 +452,11 @@ class Collada(object):
 
     def _loadScenes(self):
         """Load scene library."""
-        libnodes = self.xmlnode.findall(tag('library_visual_scenes'))
+        libnodes = self.xmlnode.findall(self.tag('library_visual_scenes'))
         if libnodes is not None:
             for libnode in libnodes:
                 if libnode is not None:
-                    for scenenode in libnode.findall(tag('visual_scene')):
+                    for scenenode in libnode.findall(self.tag('visual_scene')):
                         try:
                             S = scene.Scene.load(self, scenenode)
                         except DaeError as ex:
@@ -447,7 +466,7 @@ class Collada(object):
 
     def _loadDefaultScene(self):
         """Loads the default scene from <scene> tag in the root node."""
-        node = self.xmlnode.find('%s/%s' % (tag('scene'), tag('instance_visual_scene')))
+        node = self.xmlnode.find('%s/%s' % (self.tag('scene'), self.tag('instance_visual_scene')))
         try:
             if node != None:
                 sceneid = node.get('url')
@@ -472,23 +491,23 @@ class Collada(object):
                      (self.scenes, 'library_visual_scenes')]
 
         self.assetInfo.save()
-        assetnode = self.xmlnode.getroot().find(tag('asset'))
+        assetnode = self.xmlnode.getroot().find(self.tag('asset'))
         if assetnode is not None:
             self.xmlnode.getroot().remove(assetnode)
         self.xmlnode.getroot().insert(0, self.assetInfo.xmlnode)
 
         library_loc = 0
         for i, node in enumerate(self.xmlnode.getroot()):
-            if node.tag == tag('asset'):
+            if node.tag == self.tag('asset'):
                 library_loc = i+1
 
         for arr, name in libraries:
-            node = self.xmlnode.find( tag(name) )
+            node = self.xmlnode.find( self.tag(name) )
             if node is None:
                 if len(arr) == 0:
                     continue
                 self.xmlnode.getroot().insert(library_loc, E(name))
-                node = self.xmlnode.find( tag(name) )
+                node = self.xmlnode.find( self.tag(name) )
             elif node is not None and len(arr) == 0:
                 self.xmlnode.getroot().remove(node)
                 continue
@@ -502,7 +521,7 @@ class Collada(object):
                 if n not in xmlnodes:
                     node.remove(n)
 
-        scenenode = self.xmlnode.find(tag('scene'))
+        scenenode = self.xmlnode.find(self.tag('scene'))
         scenenode.clear()
         if self.scene is not None:
             sceneid = self.scene.id
