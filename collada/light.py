@@ -26,17 +26,17 @@ class Light(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        tecnode = node.find( tag('technique_common') )
+        tecnode = node.find( collada.tag('technique_common') )
         if tecnode is None or len(tecnode) == 0:
             raise DaeIncompleteError('Missing common technique in light')
         lightnode = tecnode[0]
-        if lightnode.tag == tag('directional'):
+        if lightnode.tag == collada.tag('directional'):
             return DirectionalLight.load( collada, localscope, node )
-        elif lightnode.tag == tag('point'):
+        elif lightnode.tag == collada.tag('point'):
             return PointLight.load( collada, localscope, node )
-        elif lightnode.tag == tag('ambient'):
+        elif lightnode.tag == collada.tag('ambient'):
             return AmbientLight.load( collada, localscope, node )
-        elif lightnode.tag == tag('spot'):
+        elif lightnode.tag == collada.tag('spot'):
             return SpotLight.load( collada, localscope, node )
         else:
             raise DaeUnsupportedError('Unrecognized light type: %s'%lightnode.tag)
@@ -90,8 +90,8 @@ class DirectionalLight(Light):
 
     @staticmethod
     def load(collada, localscope, node):
-        colornode = node.find( '%s/%s/%s'%(tag('technique_common'),tag('directional'),
-                                           tag('color') ) )
+        colornode = node.find( '%s/%s/%s'%(collada.tag('technique_common'),collada.tag('directional'),
+                                           collada.tag('color') ) )
         if colornode is None:
             raise DaeIncompleteError('Missing color for directional light')
         try:
@@ -163,8 +163,8 @@ class AmbientLight(Light):
 
     @staticmethod
     def load(collada, localscope, node):
-        colornode = node.find('%s/%s/%s' % (tag('technique_common'),
-            tag('ambient'), tag('color')))
+        colornode = node.find('%s/%s/%s' % (collada.tag('technique_common'),
+            collada.tag('ambient'), collada.tag('color')))
         if colornode is None:
             raise DaeIncompleteError('Missing color for ambient light')
         try:
@@ -258,7 +258,7 @@ class PointLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'),tag('point')) )
+        pnode = self.xmlnode.find( '%s/%s'%(tag('technique_common'), tag('point')) )
         colornode = pnode.find( tag('color') )
         colornode.text = ' '.join(map(str, self.color ) )
         _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
@@ -268,8 +268,8 @@ class PointLight(Light):
 
     @staticmethod
     def load(collada, localscope, node):
-        pnode = node.find('%s/%s' % (tag('technique_common'), tag('point')))
-        colornode = pnode.find( tag('color') )
+        pnode = node.find('%s/%s' % (collada.tag('technique_common'), collada.tag('point')))
+        colornode = pnode.find( collada.tag('color') )
         if colornode is None:
             raise DaeIncompleteError('Missing color for point light')
         try:
@@ -277,10 +277,10 @@ class PointLight(Light):
         except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in light definition')
         constant_att = linear_att = quad_att = zfar = None
-        qattnode = pnode.find( tag('quadratic_attenuation') )
-        cattnode = pnode.find( tag('constant_attenuation') )
-        lattnode = pnode.find( tag('linear_attenuation') )
-        zfarnode = pnode.find( tag('zfar') )
+        qattnode = pnode.find( collada.tag('quadratic_attenuation') )
+        cattnode = pnode.find( collada.tag('constant_attenuation') )
+        lattnode = pnode.find( collada.tag('linear_attenuation') )
+        zfarnode = pnode.find( collada.tag('zfar') )
         try:
             if cattnode is not None:
                 constant_att = float(cattnode.text)
@@ -394,8 +394,8 @@ class SpotLight(Light):
 
     @staticmethod
     def load(collada, localscope, node):
-        pnode = node.find( '%s/%s'%(tag('technique_common'),tag('spot')) )
-        colornode = pnode.find( tag('color') )
+        pnode = node.find( '%s/%s'%(collada.tag('technique_common'),collada.tag('spot')) )
+        colornode = pnode.find( collada.tag('color') )
         if colornode is None:
             raise DaeIncompleteError('Missing color for spot light')
         try:
@@ -403,11 +403,11 @@ class SpotLight(Light):
         except ValueError as ex:
             raise DaeMalformedError('Corrupted color values in spot light definition')
         constant_att = linear_att = quad_att = falloff_ang = falloff_exp = None
-        cattnode = pnode.find( tag('constant_attenuation') )
-        lattnode = pnode.find( tag('linear_attenuation') )
-        qattnode = pnode.find( tag('quadratic_attenuation') )
-        fangnode = pnode.find( tag('falloff_angle') )
-        fexpnode = pnode.find( tag('falloff_exponent') )
+        cattnode = pnode.find( collada.tag('constant_attenuation') )
+        lattnode = pnode.find( collada.tag('linear_attenuation') )
+        qattnode = pnode.find( collada.tag('quadratic_attenuation') )
+        fangnode = pnode.find( collada.tag('falloff_angle') )
+        fexpnode = pnode.find( collada.tag('falloff_exponent') )
         try:
             if cattnode is not None:
                 constant_att = float(cattnode.text)

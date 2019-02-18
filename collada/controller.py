@@ -33,20 +33,20 @@ class Controller(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        controller = node.find(tag('skin'))
+        controller = node.find(collada.tag('skin'))
         if controller is None:
-            controller = node.find(tag('morph'))
+            controller = node.find(collada.tag('morph'))
         if controller is None: raise DaeUnsupportedError('Unknown controller node')
 
         sourcebyid = {}
         sources = []
-        sourcenodes = node.findall('%s/%s'%(controller.tag, tag('source')))
+        sourcenodes = node.findall('%s/%s'%(controller.tag, collada.tag('source')))
         for sourcenode in sourcenodes:
             ch = source.Source.load(collada, {}, sourcenode)
             sources.append(ch)
             sourcebyid[ch.id] = ch
 
-        if controller.tag == tag('skin'):
+        if controller.tag == collada.tag('skin'):
             return Skin.load(collada, sourcebyid, controller, node)
         else:
             return Morph.load(collada, sourcebyid, controller, node)
@@ -187,7 +187,7 @@ class Skin(Controller):
             raise DaeBrokenRefError('Source geometry for skin node not found')
         geometry = collada.geometries[geometry_source[1:]]
 
-        bind_shape_mat = skinnode.find(tag('bind_shape_matrix'))
+        bind_shape_mat = skinnode.find(collada.tag('bind_shape_matrix'))
         if bind_shape_mat is None:
             bind_shape_mat = numpy.identity(4, dtype=numpy.float32)
             bind_shape_mat.shape = (-1,)
@@ -198,7 +198,7 @@ class Skin(Controller):
                 raise DaeMalformedError('Corrupted bind shape matrix in skin')
             bind_shape_mat = numpy.array( values, dtype=numpy.float32 )
 
-        inputnodes = skinnode.findall('%s/%s'%(tag('joints'), tag('input')))
+        inputnodes = skinnode.findall('%s/%s'%(collada.tag('joints'), collada.tag('input')))
         if inputnodes is None or len(inputnodes) < 2:
             raise DaeIncompleteError("Not enough inputs in skin joints")
 
@@ -217,16 +217,16 @@ class Skin(Controller):
             elif i[0] == 'INV_BIND_MATRIX':
                 matrix_source = i[1][1:]
 
-        weightsnode = skinnode.find(tag('vertex_weights'))
+        weightsnode = skinnode.find(collada.tag('vertex_weights'))
         if weightsnode is None:
             raise DaeIncompleteError("No vertex_weights found in skin")
-        indexnode = weightsnode.find(tag('v'))
+        indexnode = weightsnode.find(collada.tag('v'))
         if indexnode is None:
             raise DaeIncompleteError('Missing indices in skin vertex weights')
-        vcountnode = weightsnode.find(tag('vcount'))
+        vcountnode = weightsnode.find(collada.tag('vcount'))
         if vcountnode is None:
             raise DaeIncompleteError('Missing vcount in skin vertex weights')
-        inputnodes = weightsnode.findall(tag('input'))
+        inputnodes = weightsnode.findall(collada.tag('input'))
 
         try:
             index = numpy.array([float(v)
@@ -357,7 +357,7 @@ class Morph(Controller):
         if not (method == 'NORMALIZED' or method == 'RELATIVE'):
             raise DaeMalformedError("Morph method must be either NORMALIZED or RELATIVE. Found '%s'" % method)
 
-        inputnodes = morphnode.findall('%s/%s'%(tag('targets'), tag('input')))
+        inputnodes = morphnode.findall('%s/%s'%(collada.tag('targets'), collada.tag('input')))
         if inputnodes is None or len(inputnodes) < 2:
             raise DaeIncompleteError("Not enough inputs in a morph")
 

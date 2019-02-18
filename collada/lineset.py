@@ -161,10 +161,10 @@ class LineSet(primitive.Primitive):
 
     @staticmethod
     def load( collada, localscope, node ):
-        indexnode = node.find(tag('p'))
+        indexnode = node.find(collada.tag('p'))
         if indexnode is None: raise DaeIncompleteError('Missing index in line set')
 
-        source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
+        source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
 
         try:
             if indexnode.text is None or indexnode.text.isspace():

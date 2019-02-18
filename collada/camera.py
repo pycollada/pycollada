@@ -25,13 +25,13 @@ class Camera(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        tecnode = node.find('%s/%s' % (tag('optics'),tag('technique_common')))
+        tecnode = node.find('%s/%s' % (collada.tag('optics'),collada.tag('technique_common')))
         if tecnode is None or len(tecnode) == 0:
             raise DaeIncompleteError('Missing common technique in camera')
         camnode = tecnode[0]
-        if camnode.tag == tag('perspective'):
+        if camnode.tag == collada.tag('perspective'):
             return PerspectiveCamera.load(collada, localscope, node)
-        elif camnode.tag == tag('orthographic'):
+        elif camnode.tag == collada.tag('orthographic'):
             return OrthographicCamera.load(collada, localscope, node)
         else:
             raise DaeUnsupportedError('Unrecognized camera type: %s' % camnode.tag)
@@ -137,17 +137,17 @@ class PerspectiveCamera(Camera):
 
     @staticmethod
     def load(collada, localscope, node):
-        persnode = node.find( '%s/%s/%s'%(tag('optics'),tag('technique_common'),
-            tag('perspective') ))
+        persnode = node.find( '%s/%s/%s'%(collada.tag('optics'),collada.tag('technique_common'),
+            collada.tag('perspective') ))
 
         if persnode is None:
             raise DaeIncompleteError('Missing perspective for camera definition')
 
-        xfov = persnode.find( tag('xfov') )
-        yfov = persnode.find( tag('yfov') )
-        aspect_ratio = persnode.find( tag('aspect_ratio') )
-        znearnode = persnode.find( tag('znear') )
-        zfarnode = persnode.find( tag('zfar') )
+        xfov = persnode.find( collada.tag('xfov') )
+        yfov = persnode.find( collada.tag('yfov') )
+        aspect_ratio = persnode.find( collada.tag('aspect_ratio') )
+        znearnode = persnode.find( collada.tag('znear') )
+        zfarnode = persnode.find( collada.tag('zfar') )
         id = node.get('id', '')
 
         try:
@@ -285,17 +285,17 @@ class OrthographicCamera(Camera):
     @staticmethod
     def load(collada, localscope, node):
         orthonode = node.find('%s/%s/%s' % (
-            tag('optics'),
-            tag('technique_common'),
-            tag('orthographic')))
+            collada.tag('optics'),
+            collada.tag('technique_common'),
+            collada.tag('orthographic')))
 
         if orthonode is None: raise DaeIncompleteError('Missing orthographic for camera definition')
 
-        xmag = orthonode.find( tag('xmag') )
-        ymag = orthonode.find( tag('ymag') )
-        aspect_ratio = orthonode.find( tag('aspect_ratio') )
-        znearnode = orthonode.find( tag('znear') )
-        zfarnode = orthonode.find( tag('zfar') )
+        xmag = orthonode.find( collada.tag('xmag') )
+        ymag = orthonode.find( collada.tag('ymag') )
+        aspect_ratio = orthonode.find( collada.tag('aspect_ratio') )
+        znearnode = orthonode.find( collada.tag('znear') )
+        zfarnode = orthonode.find( collada.tag('zfar') )
         id = node.get('id', '')
 
         try:

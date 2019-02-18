@@ -36,13 +36,13 @@ class Animation(DaeObject):
 
         sourcebyid = localscope
         sources = []
-        sourcenodes = node.findall(tag('source'))
+        sourcenodes = node.findall(collada.tag('source'))
         for sourcenode in sourcenodes:
             ch = source.Source.load(collada, {}, sourcenode)
             sources.append(ch)
             sourcebyid[ch.id] = ch
 
-        child_nodes = node.findall(tag('animation'))
+        child_nodes = node.findall(collada.tag('animation'))
         children = []
         for child in child_nodes:
             try:
