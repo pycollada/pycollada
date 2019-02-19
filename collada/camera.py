@@ -163,7 +163,7 @@ class PerspectiveCamera(Camera):
             raise DaeMalformedError('Corrupted float values in camera definition')
 
         #There are some exporters that incorrectly output all three of these.
-        # Worse, they actually got the caculation of aspect_ratio wrong!
+        # Worse, they actually got the calculation of aspect_ratio wrong!
         # So instead of failing to load, let's just add one more hack because of terrible exporters
         if xfov is not None and yfov is not None and aspect_ratio is not None:
             aspect_ratio = None
@@ -311,7 +311,7 @@ class OrthographicCamera(Camera):
             raise DaeMalformedError('Corrupted float values in camera definition')
 
         #There are some exporters that incorrectly output all three of these.
-        # Worse, they actually got the caculation of aspect_ratio wrong!
+        # Worse, they actually got the calculation of aspect_ratio wrong!
         # So instead of failing to load, let's just add one more hack because of terrible exporters
         if xmag is not None and ymag is not None and aspect_ratio is not None:
             aspect_ratio = None
