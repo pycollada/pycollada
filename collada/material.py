@@ -581,8 +581,7 @@ class Effect(DaeObject):
         id = node.get('id')
         profilenode = node.find( collada.tag('profile_COMMON') )
         if profilenode is None:
-            return
-            # raise DaeUnsupportedError('Found effect with profile other than profile_COMMON')
+            raise DaeUnsupportedError('Found effect with profile other than profile_COMMON')
 
         #<image> can be local to a material instead of global in <library_images>
         for imgnode in profilenode.findall( collada.tag('image') ):

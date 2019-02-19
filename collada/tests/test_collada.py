@@ -360,14 +360,18 @@ class TestCollada(unittest.TestCase):
         This test file has namespace:
         http://www.collada.org/2008/03/COLLADASchema
         """
-        # a 1.5 spec zipped collada file with a different namespace
-        f = os.path.join(self.datadir, "wam.zae")
-        mesh = collada.Collada(f, validate_output=True)
 
-        # scene should have 8 geometries
-        self.assertEqual(len(mesh.geometries), 8)
-        # scene should have one root node
-        self.assertEquals(len(mesh.scene.nodes), 1)
+        # a 1.5 spec collada file with a different namespace
+        # check both the zipped ("zae") and plain text ("dae") versions
+        for name in ['wam.zae', 'wam.dae']:
+            # full path to test file
+            file_name = os.path.join(self.datadir, name)
+            # load the scene
+            mesh = collada.Collada(file_name, validate_output=True)
+            # scene should have 8 geometries
+            self.assertEqual(len(mesh.geometries), 8)
+            # scene should have one root node
+            self.assertEquals(len(mesh.scene.nodes), 1)
 
 if __name__ == '__main__':
     unittest.main()

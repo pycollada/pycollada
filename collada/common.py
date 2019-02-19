@@ -21,7 +21,7 @@ def tag(text, namespace=None):
 
 def tagger(namespace=None):
     """
-    A cloture, or function that returns a function.
+    A closure, or function that returns a function.
     Returned function tags using a specified namespace.
     
     :param string namespace:
