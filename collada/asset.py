@@ -211,7 +211,7 @@ class Asset(DaeObject):
             self.xmlnode.remove(oldnode)
         for contributor in self.contributors:
             if recurse:
-                contributor.save(recursve)
+                contributor.save(recurse)
             self.xmlnode.append(contributor.xmlnode)
     
     @staticmethod
