@@ -22,13 +22,13 @@ from pkg_resources import resource_string
 
 # get a copy of the XML schema
 # resource_string returns bytes so decode into string
-COLLADA_SCHEMA_1_4_1 = resource_string(
+COLLADA_SCHEMA_1_4_1 = str(resource_string(
     'collada',
-    'resources/schema-1.4.1.xml').decode('utf-8')
+    'resources/schema-1.4.1.xml').decode('utf-8'))
 
-XML_XSD = resource_string(
+XML_XSD = str(resource_string(
     'collada',
-    'resources/xsd.xml').decode('utf-8')
+    'resources/xsd.xml').decode('utf-8'))
 
 class ColladaResolver(lxml.etree.Resolver):
     """COLLADA XML Resolver. If a known URL referenced

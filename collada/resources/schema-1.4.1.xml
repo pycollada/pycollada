@@ -546,7 +546,7 @@
             <xs:annotation>
                 <xs:documentation>
                 The url attribute refers to resource to instantiate. This may refer to a local resource using a
-                relative URL fragment identifier that begins with the “#” character. The url attribute may refer
+                relative URL fragment identifier that begins with the "#" character. The url attribute may refer
                 to an external resource using an absolute or relative URL.
                 </xs:documentation>
             </xs:annotation>
@@ -799,7 +799,7 @@
                         <xs:annotation>
                             <xs:documentation>
                             The minInclusive attribute indicates the smallest integer value that can be contained in
-                            the array. The default value is –2147483648. Optional attribute.
+                            the array. The default value is -2147483648. Optional attribute.
                             </xs:documentation>
                         </xs:annotation>
                     </xs:attribute>
@@ -1948,7 +1948,7 @@
                                     <xs:documentation>
                                     The directional element declares the parameters required to describe a directional light source.
                                     A directional light is one that lights everything from the same direction, regardless of location.
-                                    The light’s default direction vector in local coordinates is [0,0,-1], pointing down the -Z axis.
+                                    The light's default direction vector in local coordinates is [0,0,-1], pointing down the -Z axis.
                                     The actual direction of the light is defined by the transform of the node where the light is
                                     instantiated.
                                     </xs:documentation>
@@ -2020,7 +2020,7 @@
                                     the spot light source in a cone shape. The intensity of the light is attenuated as the radiation
                                     angle increases away from the direction of the light source. The intensity of a spot light source
                                     is also attenuated as the distance to the light source increases. The position of the light is
-                                    defined by the transform of the node in which it is instantiated. The light’s default direction
+                                    defined by the transform of the node in which it is instantiated. The light's default direction
                                     vector in local coordinates is [0,0,-1], pointing down the -Z axis. The actual direction of the
                                     light is defined by the transform of the node where the light is instantiated.
                                     </xs:documentation>
@@ -2163,7 +2163,7 @@
         <xs:annotation>
             <xs:documentation>
             The camera element declares a view into the scene hierarchy or scene graph. The camera contains
-            elements that describe the camera’s optics and imager.
+            elements that describe the camera's optics and imager.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
@@ -2390,7 +2390,7 @@
         <xs:annotation>
             <xs:documentation>
             The animation element categorizes the declaration of animation information. The animation
-            hierarchy contains elements that describe the animation’s key-frame data and sampler functions,
+            hierarchy contains elements that describe the animation's key-frame data and sampler functions,
             ordered in such a way to group together animations that should be executed together.
             </xs:documentation>
         </xs:annotation>
@@ -2728,7 +2728,7 @@
                                 <xs:annotation>
                                     <xs:documentation>
                                     The v element describes which bones and attributes are associated with each vertex.  An index
-                                    of –1 into the array of joints refers to the bind shape.  Weights should be normalized before use.
+                                    of -1 into the array of joints refers to the bind shape.  Weights should be normalized before use.
                                     The v element must occur zero or one times.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -2956,7 +2956,7 @@
                             <xs:annotation>
                                 <xs:documentation>
                                 The meter attribute specifies the measurement with respect to the meter. The default
-                                value for the meter attribute is “1.0”.
+                                value for the meter attribute is "1.0".
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
@@ -2964,7 +2964,7 @@
                             <xs:annotation>
                                 <xs:documentation>
                                 The name attribute specifies the name of the unit. The default value for the name
-                                attribute is “meter”.
+                                attribute is "meter".
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
@@ -3035,7 +3035,7 @@
             <xs:appinfo>enable-xmlns</xs:appinfo>
             <xs:documentation>
             The technique element declares the information used to process some portion of the content. Each
-            technique conforms to an associated profile. Techniques generally act as a “switch”. If more than
+            technique conforms to an associated profile. Techniques generally act as a "switch". If more than
             one is present for a particular portion of content, on import, one or the other is picked, but
             usually not both. Selection should be based on which profile the importing application can support.
             Techniques contain application data and programs, making them assets that can be managed as a unit.
@@ -3191,7 +3191,7 @@
             <xs:attribute name="type" type="NodeType" default="NODE">
                 <xs:annotation>
                     <xs:documentation>
-                    The type attribute indicates the type of the node element. The default value is “NODE”.
+                    The type attribute indicates the type of the node element. The default value is "NODE".
                     Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3200,8 +3200,8 @@
                 <xs:annotation>
                     <xs:documentation>
                     The layer attribute indicates the names of the layers to which this node belongs.  For example,
-                    a value of “foreground glowing” indicates that this node belongs to both the ‘foreground’ layer
-                    and the ‘glowing’ layer.  The default value is empty, indicating that the node doesn’t belong to
+                    a value of "foreground glowing" indicates that this node belongs to both the 'foreground' layer
+                    and the 'glowing' layer.  The default value is empty, indicating that the node doesn't belong to
                     any layer.  Optional attribute.
                     </xs:documentation>
                 </xs:annotation>
@@ -3409,7 +3409,7 @@
                 <xs:annotation>
                     <xs:documentation>
                     The url attribute refers to resource. This may refer to a local resource using a relative
-                    URL fragment identifier that begins with the “#” character. The url attribute may refer to an
+                    URL fragment identifier that begins with the "#" character. The url attribute may refer to an
                     external resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -3494,7 +3494,7 @@
                 <xs:annotation>
                     <xs:documentation>
                     The url attribute refers to resource.  This may refer to a local resource using a relative URL
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
+                    fragment identifier that begins with the "#" character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -3551,7 +3551,7 @@
                 <xs:annotation>
                     <xs:documentation>
                     The url attribute refers to resource.  This may refer to a local resource using a relative URL
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
+                    fragment identifier that begins with the "#" character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -3606,7 +3606,7 @@
                             <xs:annotation>
                                 <xs:documentation>
                                 The target attribute specifies the location of the value to bind to the specified semantic.
-                                This text string is a path-name following a simple syntax described in the “Addressing Syntax”
+                                This text string is a path-name following a simple syntax described in the "Addressing Syntax"
                                 section.
                                 </xs:documentation>
                             </xs:annotation>
@@ -3738,7 +3738,7 @@
                 <xs:annotation>
                     <xs:documentation>
                     The url attribute refers to resource.  This may refer to a local resource using a relative URL
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
+                    fragment identifier that begins with the "#" character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                     </xs:documentation>
                 </xs:annotation>
@@ -5357,7 +5357,7 @@
             <xs:annotation>
                 <xs:documentation>
                     The url attribute refers to resource.  This may refer to a local resource using a relative URL
-                    fragment identifier that begins with the “#” character. The url attribute may refer to an external
+                    fragment identifier that begins with the "#" character. The url attribute may refer to an external
                     resource using an absolute or relative URL.
                 </xs:documentation>
             </xs:annotation>
@@ -9899,7 +9899,7 @@
                 <xs:element name="equation" type="float4">
                     <xs:annotation>
                         <xs:documentation>
-                        4 float values that represent the coefficients for the plane’s equation:    Ax + By + Cz + D = 0
+                        4 float values that represent the coefficients for the plane's equation:    Ax + By + Cz + D = 0
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
@@ -10099,7 +10099,7 @@
             The definition of the convex_mesh element is identical to the mesh element with the exception that
             instead of a complete description (source, vertices, polygons etc.), it may simply point to another
             geometry to derive its shape. The latter case means that the convex hull of that geometry should
-            be computed and is indicated by the optional “convex_hull_of” attribute.
+            be computed and is indicated by the optional "convex_hull_of" attribute.
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
@@ -10401,7 +10401,7 @@
                                 <xs:annotation>
                                     <xs:documentation>
                                     Defines the center and orientation of mass of the rigid-body relative to the local origin of the
-                                    “root” shape.This makes the off-diagonal elements of the inertia tensor (products of inertia) all
+                                    "root" shape.This makes the off-diagonal elements of the inertia tensor (products of inertia) all
                                     0 and allows us to just store the diagonal elements (moments of inertia).
                                     </xs:documentation>
                                 </xs:annotation>
@@ -10415,7 +10415,7 @@
                             <xs:element name="inertia" type="TargetableFloat3" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    float3 – The diagonal elements of the inertia tensor (moments of inertia), which is represented
+                                    float3 - The diagonal elements of the inertia tensor (moments of inertia), which is represented
                                     in the local frame of the center of mass. See above.
                                     </xs:documentation>
                                 </xs:annotation>
@@ -10656,7 +10656,7 @@
                         <xs:attribute name="rigid_body" type="xs:anyURI">
                             <xs:annotation>
                                 <xs:documentation>
-                                The “rigid_body” attribute is a relative reference to a rigid-body within the same
+                                The "rigid_body" attribute is a relative reference to a rigid-body within the same
                                 physics_model.
                                 </xs:documentation>
                             </xs:annotation>
@@ -10696,7 +10696,7 @@
                         <xs:attribute name="rigid_body" type="xs:anyURI">
                             <xs:annotation>
                                 <xs:documentation>
-                                The “rigid_body” attribute is a relative reference to a rigid-body within the same physics_model.
+                                The "rigid_body" attribute is a relative reference to a rigid-body within the same physics_model.
                                 </xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
@@ -10714,7 +10714,7 @@
                             <xs:element name="enabled" default="true" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    If false, the constraint doesn’t exert any force or influence on the rigid bodies.
+                                    If false, the constraint doesn't exert any force or influence on the rigid bodies.
                                     </xs:documentation>
                                 </xs:annotation>
                                 <xs:complexType>
@@ -10766,7 +10766,7 @@
                                             <xs:annotation>
                                                 <xs:documentation>
                                                 The swing_cone_and_twist element describes the angular limits along each rotation axis in degrees.
-                                                The the X and Y limits describe a “swing cone” and the Z limits describe the “twist angle” range
+                                                The the X and Y limits describe a "swing cone" and the Z limits describe the "twist angle" range
                                                 </xs:documentation>
                                             </xs:annotation>
                                             <xs:complexType>
@@ -10819,7 +10819,7 @@
                             <xs:element name="spring" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>
-                                    Spring, based on distance (“LINEAR”) or angle (“ANGULAR”).
+                                    Spring, based on distance ("LINEAR") or angle ("ANGULAR").
                                     </xs:documentation>
                                 </xs:annotation>
                                 <xs:complexType>
