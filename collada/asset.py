@@ -81,11 +81,11 @@ class Contributor(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        author = node.find( tag('author') )
-        authoring_tool = node.find( tag('authoring_tool') )
-        comments = node.find( tag('comments') )
-        copyright = node.find( tag('copyright') )
-        source_data = node.find( tag('source_data') )
+        author = node.find(collada.tag('author') )
+        authoring_tool = node.find(collada.tag('authoring_tool') )
+        comments = node.find(collada.tag('comments') )
+        copyright = node.find(collada.tag('copyright') )
+        source_data = node.find(collada.tag('source_data') )
         if author is not None: author = author.text
         if authoring_tool is not None: authoring_tool = authoring_tool.text
         if comments is not None: comments = comments.text
@@ -200,34 +200,34 @@ class Asset(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        contributornodes = node.findall( tag('contributor') )
+        contributornodes = node.findall(collada.tag('contributor') )
         contributors = []
         for contributornode in contributornodes:
             contributors.append(Contributor.load(collada, localscope, contributornode))
 
-        created = node.find( tag('created') )
+        created = node.find(collada.tag('created') )
         if created is not None:
             try: created = dateutil.parser.parse(created.text)
             except: created = None
 
-        keywords = node.find( tag('keywords') )
+        keywords = node.find(collada.tag('keywords') )
         if keywords is not None: keywords = keywords.text
 
-        modified = node.find( tag('modified') )
+        modified = node.find(collada.tag('modified') )
         if modified is not None:
             try: modified = dateutil.parser.parse(modified.text)
             except: modified = None
 
-        revision = node.find( tag('revision') )
+        revision = node.find(collada.tag('revision') )
         if revision is not None: revision = revision.text
 
-        subject = node.find( tag('subject') )
+        subject = node.find(collada.tag('subject') )
         if subject is not None: subject = subject.text
 
-        title = node.find( tag('title') )
+        title = node.find(collada.tag('title') )
         if title is not None: title = title.text
 
-        unitnode = node.find( tag('unit') )
+        unitnode = node.find(collada.tag('unit') )
         if unitnode is not None:
             unitname = unitnode.get('name')
             try: unitmeter = float(unitnode.get('meter'))
@@ -238,7 +238,7 @@ class Asset(DaeObject):
             unitname = None
             unitmeter = None
 
-        upaxis = node.find( tag('up_axis') )
+        upaxis = node.find(collada.tag('up_axis') )
         if upaxis is not None:
             upaxis = upaxis.text
             if not(upaxis == UP_AXIS.X_UP or upaxis == UP_AXIS.Y_UP or \

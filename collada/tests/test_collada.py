@@ -350,5 +350,28 @@ class TestCollada(unittest.TestCase):
         triangles = mesh.geometries[0].primitives[0]
         self.assertEqual(0, len(triangles))
 
+    def test_namespace(self):
+        """
+        Test loading a file with a different namespace.
+
+        Default namespace is:
+        http://www.collada.org/2005/11/COLLADASchema
+
+        This test file has namespace:
+        http://www.collada.org/2008/03/COLLADASchema
+        """
+
+        # a 1.5 spec collada file with a different namespace
+        # check both the zipped ("zae") and plain text ("dae") versions
+        for name in ['wam.zae', 'wam.dae']:
+            # full path to test file
+            file_name = os.path.join(self.datadir, name)
+            # load the scene
+            mesh = collada.Collada(file_name, validate_output=True)
+            # scene should have 8 geometries
+            self.assertEqual(len(mesh.geometries), 8)
+            # scene should have one root node
+            self.assertEquals(len(mesh.scene.nodes), 1)
+
 if __name__ == '__main__':
     unittest.main()

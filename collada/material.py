@@ -152,7 +152,7 @@ class CImage(DaeObject):
     @staticmethod
     def load( collada, localspace, node ):
         id = node.get('id')
-        initnode = node.find( tag('init_from') )
+        initnode = node.find( collada.tag('init_from') )
         if initnode is None: raise DaeIncompleteError('Image has no file path')
         path = initnode.text
         return CImage(id, path, collada, xmlnode = node)
@@ -215,12 +215,12 @@ class Surface(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        surfacenode = node.find( tag('surface') )
+        surfacenode = node.find( collada.tag('surface') )
         if surfacenode is None: raise DaeIncompleteError('No surface found in newparam')
         if surfacenode.get('type') != '2D': raise DaeMalformedError('Hard to imagine a non-2D surface, isn\'t it?')
-        initnode = surfacenode.find( tag('init_from') )
+        initnode = surfacenode.find( collada.tag('init_from') )
         if initnode is None: raise DaeIncompleteError('No init image found in surface')
-        formatnode = surfacenode.find( tag('format') )
+        formatnode = surfacenode.find( collada.tag('format') )
         if formatnode is None: format = None
         else: format = formatnode.text
         imgid = initnode.text
@@ -299,14 +299,14 @@ class Sampler2D(DaeObject):
 
     @staticmethod
     def load( collada, localscope, node ):
-        samplernode = node.find( tag('sampler2D') )
+        samplernode = node.find( collada.tag('sampler2D') )
         if samplernode is None: raise DaeIncompleteError('No sampler found in newparam')
-        sourcenode = samplernode.find( tag('source') )
+        sourcenode = samplernode.find( collada.tag('source') )
         if sourcenode is None: raise DaeIncompleteError('No source found in sampler')
-        minnode = samplernode.find( tag('minfilter') )
+        minnode = samplernode.find( collada.tag('minfilter') )
         if minnode is None: minfilter = None
         else: minfilter = minnode.text
-        magnode = samplernode.find( tag('magfilter') )
+        magnode = samplernode.find( collada.tag('magfilter') )
         if magnode is None: magfilter = None
         else: magfilter = magnode.text
 
@@ -553,20 +553,23 @@ class Effect(DaeObject):
     @staticmethod
     def getEffectParameters(collada, parentnode, localscope, params):
 
-        for paramnode in parentnode.findall( tag('newparam') ):
-            if paramnode.find( tag('surface') ) is not None:
+        for paramnode in parentnode.findall( collada.tag('newparam') ):
+            if paramnode.find( collada.tag('surface') ) is not None:
                 param = Surface.load(collada, localscope, paramnode)
                 params.append(param)
                 localscope[param.id] = param
-            elif paramnode.find( tag('sampler2D') ) is not None:                
+            elif paramnode.find( collada.tag('sampler2D') ) is not None:                
                 param = Sampler2D.load(collada, localscope, paramnode)
                 params.append(param)
                 localscope[param.id] = param
             else:
-                floatnode = paramnode.find( tag('float') )
-                if floatnode is None: floatnode = paramnode.find( tag('float2') )
-                if floatnode is None: floatnode = paramnode.find( tag('float3') )
-                if floatnode is None: floatnode = paramnode.find( tag('float4') )
+                floatnode = paramnode.find( collada.tag('float') )
+                if floatnode is None:
+                    floatnode = paramnode.find( collada.tag('float2') )
+                if floatnode is None:
+                    floatnode = paramnode.find( collada.tag('float3') )
+                if floatnode is None:
+                    floatnode = paramnode.find( collada.tag('float4') )
                 paramid = paramnode.get('sid')
                 if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
                     localscope[paramid] = [float(v) for v in floatnode.text.split()]
@@ -576,12 +579,12 @@ class Effect(DaeObject):
         localscope = {} # we have our own scope, shadow it
         params = []
         id = node.get('id')
-        profilenode = node.find( tag('profile_COMMON') )
+        profilenode = node.find( collada.tag('profile_COMMON') )
         if profilenode is None:
             raise DaeUnsupportedError('Found effect with profile other than profile_COMMON')
 
         #<image> can be local to a material instead of global in <library_images>
-        for imgnode in profilenode.findall( tag('image') ):
+        for imgnode in profilenode.findall( collada.tag('image') ):
             local_image = CImage.load(collada, localscope, imgnode)
             localscope[local_image.id] = local_image
 
@@ -594,20 +597,20 @@ class Effect(DaeObject):
 
         Effect.getEffectParameters(collada, profilenode, localscope, params)
         
-        tecnode = profilenode.find( tag('technique') )
+        tecnode = profilenode.find( collada.tag('technique') )
         
         Effect.getEffectParameters(collada, tecnode, localscope, params)
         
         shadnode = None
         for shad in Effect.shaders:
-            shadnode = tecnode.find(tag(shad))
+            shadnode = tecnode.find(collada.tag(shad))
             shadingtype = shad
             if not shadnode is None:
                 break
         if shadnode is None: raise DaeIncompleteError('No material properties found in effect')
         props = {}
         for key in Effect.supported:
-            pnode = shadnode.find( tag(key) )
+            pnode = shadnode.find( collada.tag(key) )
             if pnode is None: props[key] = None
             else:
                 try: props[key] = Effect._loadShadingParam(collada, localscope, pnode)
@@ -636,13 +639,13 @@ class Effect(DaeObject):
                         props['opaque_mode'] = OPAQUE_MODE.RGB_ZERO
         props['xmlnode'] = node
 
-        bumpnode = node.find('.//%s//%s' % (tag('extra'), tag('texture')))
+        bumpnode = node.find('.//%s//%s' % (collada.tag('extra'), collada.tag('texture')))
         if bumpnode is not None:
             bumpmap =  Map.load(collada, localscope, bumpnode)
         else:
             bumpmap = None
 
-        double_sided_node = node.find('.//%s//%s' % (tag('extra'), tag('double_sided')))
+        double_sided_node = node.find('.//%s//%s' % (collada.tag('extra'), collada.tag('double_sided')))
         double_sided = False
         if double_sided_node is not None and double_sided_node.text is not None:
             try:
@@ -659,20 +662,20 @@ class Effect(DaeObject):
         children = node.getchildren()
         if not children: raise DaeIncompleteError('Incorrect effect shading parameter '+node.tag)
         vnode = children[0]
-        if vnode.tag == tag('color'):
+        if vnode.tag == collada.tag('color'):
             try:
                 value = tuple([ float(v) for v in vnode.text.split() ])
             except ValueError as ex:
                 raise DaeMalformedError('Corrupted color definition in effect '+id)
             except IndexError as ex:
                 raise DaeMalformedError('Corrupted color definition in effect '+id)
-        elif vnode.tag == tag('float'):
+        elif vnode.tag == collada.tag('float'):
             try: value = float(vnode.text)
             except ValueError as ex:
                 raise DaeMalformedError('Corrupted float definition in effect '+id)
-        elif vnode.tag == tag('texture'):
+        elif vnode.tag == collada.tag('texture'):
             value = Map.load(collada, localscope, vnode)
-        elif vnode.tag == tag('param'):
+        elif vnode.tag == collada.tag('param'):
             refid = vnode.get('ref')
             if refid is not None and refid in localscope:
                 value = localscope[refid]
@@ -859,7 +862,7 @@ class Material(DaeObject):
         matid = node.get('id')
         matname = node.get('name')
 
-        effnode = node.find( tag('instance_effect'))
+        effnode = node.find( collada.tag('instance_effect'))
         if effnode is None: raise DaeIncompleteError('No effect inside material')
         effectid = effnode.get('url')
 

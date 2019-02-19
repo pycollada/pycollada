@@ -261,9 +261,9 @@ class Polylist(primitive.Primitive):
 
     @staticmethod
     def load( collada, localscope, node ):
-        indexnode = node.find(tag('p'))
+        indexnode = node.find(collada.tag('p'))
         if indexnode is None: raise DaeIncompleteError('Missing index in polylist')
-        vcountnode = node.find(tag('vcount'))
+        vcountnode = node.find(collada.tag('vcount'))
         if vcountnode is None: raise DaeIncompleteError('Missing vcount in polylist')
 
         try:
@@ -275,7 +275,7 @@ class Polylist(primitive.Primitive):
         except ValueError as ex:
             raise DaeMalformedError('Corrupted vcounts in polylist')
 
-        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(tag('input')))
+        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
 
         try:
             if indexnode.text is None or indexnode.text.isspace():
