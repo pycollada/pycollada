@@ -74,7 +74,12 @@ class Collada(object):
     scenes = property( lambda s: s._scenes, lambda s,v: s._setIndexedList('_scenes', v), doc="""
     A list of :class:`collada.scene.Scene` objects. Can also be indexed by id""" )
 
-    def __init__(self, filename=None, ignore=None, aux_file_loader=None, zip_filename=None, validate_output=False):
+    def __init__(self,
+                 filename=None,
+                 ignore=None,
+                 aux_file_loader=None,
+                 zip_filename=None,
+                 validate_output=False):
         """Load collada data from filename or file like object.
 
         :param filename:
@@ -225,25 +230,18 @@ class Collada(object):
             traceback.print_exc()
 
         # functions which will load various things into collada object
-        loaders = [self._loadAssetInfo,
-                   self._loadImages,
-                   self._loadEffects,
-                   self._loadMaterials,
-                   self._loadAnimations,
-                   self._loadGeometry,
-                   self._loadControllers,
-                   self._loadLights,
-                   self._loadCameras,
-                   self._loadNodes,
-                   self._loadScenes,
-                   self._loadDefaultScene]
-        # wrap each loader so if we fail to load something
-        # we still can return a mostly successful result
-        for loader in loaders:
-            try:
-                loader()
-            except BaseException:
-                traceback.print_exc()
+        self._loadAssetInfo()
+        self._loadImages()
+        self._loadEffects()
+        self._loadMaterials()
+        self._loadAnimations()
+        self._loadGeometry()
+        self._loadControllers()
+        self._loadLights()
+        self._loadCameras()
+        self._loadNodes()
+        self._loadScenes()
+        self._loadDefaultScene()
 
     def _setIndexedList(self, propname, data):
         setattr(self, propname, IndexedList(data, ('id',)))
