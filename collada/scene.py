@@ -368,6 +368,8 @@ class Node(SceneNode):
         :rtype: generator that yields the type specified
 
         """
+        if isinstance(matrix, numpy.ndarray):
+            matrix = matrix.any()
         if not matrix is None: M = numpy.dot( matrix, self.matrix )
         else: M = self.matrix
         for node in self.children:
