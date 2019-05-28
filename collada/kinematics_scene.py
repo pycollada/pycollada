@@ -147,7 +147,7 @@ class InstanceKinematicsScene(DaeObject):
         if xmlnode is not None:
             self.xmlnode = xmlnode
         else:
-            self.xmlnode = E.instance_kinematics_model()
+            self.xmlnode = E.instance_kinematics_scene()
             self.save(0)
 
     @staticmethod
