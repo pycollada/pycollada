@@ -184,7 +184,7 @@ class Asset(DaeObject):
             self.xmlnode = xmlnode
             """ElementTree representation of the asset."""
         else:
-            self._recreateXmlNode()
+            self.xmlnode = E.asset()
     
     def getchildren(self):
         return self.contributors + self.extras
