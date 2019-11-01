@@ -1,7 +1,7 @@
 # pycollada
 
 pycollada is a python module for creating, editing and loading
-[COLLADA](http://www.collada.org/), which is a COLLAborative Design Activity
+[COLLADA](https://www.khronos.org/collada/), which is a COLLAborative Design Activity
 for establishing an interchange file format for interactive 3D applications.
 
 The library allows you to load a COLLADA file and interact with it as a python
