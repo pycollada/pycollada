@@ -27,5 +27,5 @@ setup(
     url = "http://pycollada.readthedocs.org/",
     test_suite = "collada.tests",
     packages = find_packages(),
-    package_data={'pycollada': ['resources/*.xml']}
+    package_data={'collada': ['resources/*.xml']}
 )
