@@ -178,4 +178,17 @@ Releasing
 
    Add this to docs/changelog.rst.
 
-2. Tag version:
+1. Update setup.py to change version to new version.
+
+1. Commit changes.
+
+1. Tag version:
+
+       git tag v0.x HEAD
+       git push --tags
+
+
+1. Build source distribution:
+
+       python setup.py sdist
+       twine upload dist/pycollada-0.7.tar.gz -u user -p "pass"
