@@ -172,23 +172,25 @@ Bug Fixes
 Releasing
 #########
 
-1. Generate log:
+#. Generate log:
 
        git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"* %s"
 
    Add this to docs/changelog.rst.
 
-1. Update setup.py to change version to new version.
+#. Update setup.py to change version to new version.
 
-1. Commit changes.
+#. Update docs/conf.py to change version string to new version.
 
-1. Tag version:
+#. Commit changes.
+
+#. Tag version:
 
        git tag v0.x HEAD
        git push --tags
 
 
-1. Build source distribution:
+#. Build source distribution:
 
        python setup.py sdist
        twine upload dist/pycollada-0.7.tar.gz -u user -p "pass"
