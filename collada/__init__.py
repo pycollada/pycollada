@@ -27,25 +27,29 @@ import types
 import zipfile
 from datetime import datetime
 
-from collada import animation
-from collada import asset
-from collada import camera
-from collada import controller
-from collada import geometry
-from collada import light
-from collada import material
-from collada import scene
-from collada.common import E, tagger, tag
-from collada.common import DaeError, DaeObject, DaeIncompleteError, \
-    DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
-    DaeSaveValidationError
-from collada.util import basestring, BytesIO
-from collada.util import IndexedList
-from collada.xmlutil import etree as ElementTree
-from collada.xmlutil import writeXML
+from . import animation
+from . import asset
+from . import camera
+from . import controller
+from . import geometry
+from . import light
+from . import material
+from . import scene
+from .common import E, tagger, tag
+from .common import (DaeError,
+                     DaeObject,
+                     DaeIncompleteError,
+                     DaeBrokenRefError,
+                     DaeMalformedError,
+                     DaeUnsupportedError,
+                     DaeSaveValidationError)
+from .util import basestring, BytesIO
+from .util import IndexedList
+from .xmlutil import etree as ElementTree
+from .xmlutil import writeXML
 
 try:
-    from collada import schema
+    from . import schema
 except ImportError: # no lxml
     schema = None
 

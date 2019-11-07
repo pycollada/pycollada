@@ -19,10 +19,10 @@ install:
   # temporary workaround for numpy failing in virtualenv
   # https://github.com/travis-ci/travis-cookbooks/issues/48#issuecomment-10843018
   - export PYTHONIOENCODING=UTF8 # just in case
-  - pip install numpy
+  - pip install numpy pytest
   # only install deps if the $DEPS variable is not empty
   # -z returns true on empty string
   - if [[ ! -z "$DEPS" ]]; then pip install $DEPS; fi;
   - python setup.py install
 
-script: python collada
+script: pytest tests
