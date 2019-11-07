@@ -17,9 +17,6 @@ collada file, and some exceptions that are raised in case the input
 file is not what is expected.
 
 """
-
-__version__ = "0.4.1"
-
 import os.path
 import posixpath
 import traceback
@@ -47,6 +44,7 @@ from .util import basestring, BytesIO
 from .util import IndexedList
 from .xmlutil import etree as ElementTree
 from .xmlutil import writeXML
+from .version import __version__
 
 try:
     from . import schema
