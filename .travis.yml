@@ -17,9 +17,6 @@ python:
   - 3.8
 
 install:
-  # temporary workaround for numpy failing in virtualenv
-  # https://github.com/travis-ci/travis-cookbooks/issues/48#issuecomment-10843018
-  - export PYTHONIOENCODING=UTF8 # just in case
   - pip install numpy
   # only install deps if the $DEPS variable is not empty
   # -z returns true on empty string
