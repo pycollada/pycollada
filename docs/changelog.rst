@@ -180,7 +180,7 @@ Bug Fixes
 Releasing
 #########
 
-#. Generate log:
+#. Generate log::
 
        git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"* %s"
 
