@@ -136,7 +136,7 @@ class RotateTransform(Transform):
         :param float z:
           z coordinate
         :param float angle:
-          angle of rotation, in radians
+          angle of rotation, in degrees
         :param xmlnode:
            When loaded, the xmlnode it comes from
 
@@ -148,7 +148,7 @@ class RotateTransform(Transform):
         self.z = z
         """z coordinate"""
         self.angle = angle
-        """angle of rotation, in radians"""
+        """angle of rotation, in degrees"""
         self.matrix = makeRotationMatrix(x, y, z, angle*numpy.pi/180.0)
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         self.xmlnode = xmlnode
