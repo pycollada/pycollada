@@ -229,7 +229,7 @@ class Geometry(DaeObject):
         for src in self.sourceById.values():
             if isinstance(src, source.Source):
                 src.save()
-                if src.xmlnode not in meshnode.getchildren():
+                if src.xmlnode not in meshnode:
                     meshnode.insert(0, src.xmlnode)
 
         deletenodes = []
@@ -291,12 +291,12 @@ class Geometry(DaeObject):
         for prim in self.primitives:
             if type(prim) is triangleset.TriangleSet and prim.xmlnode.tag != tag('triangles'):
                 prim._recreateXmlNode()
-            if prim.xmlnode not in meshnode.getchildren():
+            if prim.xmlnode not in meshnode:
                 meshnode.append(prim.xmlnode)
 
         deletenodes = []
         primnodes = [prim.xmlnode for prim in self.primitives]
-        for child in meshnode.getchildren():
+        for child in meshnode:
             if child.tag != tag('vertices') and child.tag != tag('source') and child not in primnodes:
                 deletenodes.append(child)
         for d in deletenodes:
