@@ -659,7 +659,7 @@ class Effect(DaeObject):
     @staticmethod
     def _loadShadingParam( collada, localscope, node ):
         """Load from the node a definition for a material property."""
-        children = node.getchildren()
+        children = list(node)
         if not children: raise DaeIncompleteError('Incorrect effect shading parameter '+node.tag)
         vnode = children[0]
         if vnode.tag == collada.tag('color'):
@@ -710,7 +710,7 @@ class Effect(DaeObject):
 
         for param in self.params:
             param.save()
-            if param.xmlnode not in profilenode.getchildren():
+            if param.xmlnode not in profilenode:
                 profilenode.insert(list(profilenode).index(tecnode),
                         param.xmlnode)
 
