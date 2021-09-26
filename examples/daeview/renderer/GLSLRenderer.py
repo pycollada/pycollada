@@ -207,7 +207,7 @@ class GLSLRenderer:
                                               ('v3f/static', vertices),
                                               ('n3f/static', normals))
 
-                        # Append the batch with supplimentary
+                        # Append the batch with supplementary
                         # information to the batch list
                         self.batch_list.append(
                             (batch, shader_prog, tex_id, diff_color, 
