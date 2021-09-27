@@ -15,7 +15,7 @@ def _as_bytes(s):
 
 class Shader:
 	# vert, frag and geom take arrays of source strings
-	# the arrays will be concattenated into one string by OpenGL
+	# the arrays will be concatenated into one string by OpenGL
 	def __init__(self, vert = [], frag = [], geom = []):
 		# create the program handle
 		self.handle = glCreateProgram()
@@ -132,7 +132,7 @@ class Shader:
 	# works with matrices stored as lists,
 	# as well as euclid matrices
 	def uniform_matrixf(self, name, mat):
-		# obtian the uniform location
+		# obtain the uniform location
 		loc = glGetUniformLocation(self.Handle, name)
 		# uplaod the 4x4 floating point matrix
 		glUniformMatrix4fv(loc, 1, False, (c_float * 16)(*mat))
