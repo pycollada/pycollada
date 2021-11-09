@@ -683,7 +683,7 @@ class Effect(DaeObject):
                 return None
         else:
             raise DaeUnsupportedError('Unknown shading param definition ' + \
-                    vnode.tag)
+                    str(vnode.tag))
         return value
 
     def _fixColorValues(self):
