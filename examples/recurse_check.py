@@ -52,7 +52,7 @@ def main():
     
     for c in collada_files:
         (root, leaf) = os.path.split(c)
-        print "'%s'..." % leaf,
+        print("'%s'..." % leaf,)
         sys.stdout.flush()
      
         start_time = time.time()
@@ -62,7 +62,7 @@ def main():
                 ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError])
             
             if len(col.errors) > 0:
-                print "WARNINGS:", len(col.errors)
+                print("WARNINGS:", len(col.errors))
                 file_warning_count += 1
                 err_names = [type(e).__name__ for e in col.errors]
                 unique = set(err_names)
@@ -71,12 +71,12 @@ def main():
                     for e, ct in type_cts:
                         for err in col.errors:
                             if type(err).__name__ == e:
-                                print "   %s" % str(err)
+                                print("   %s" % str(err))
                                 break
                         if ct > 1:
-                            print "   %s: %d additional warnings of this type" % (e, ct-1)
+                            print("   %s: %d additional warnings of this type" % (e, ct-1))
             else:
-                print "SUCCESS"
+                print("SUCCESS")
                 file_success_count += 1
                 
             #do some sanity checks looping through result
@@ -87,28 +87,28 @@ def main():
                 for cam in col.scene.objects('camera'):
                     assert(cam.original.id)
         except (KeyboardInterrupt, SystemExit):
-            print
+            print()
             sys.exit("Keyboard interrupt. Exiting.")
         except:
-            print "ERROR"
+            print("ERROR")
             file_error_count += 1
             if args.show_errors:
-                print
+                print()
                 traceback.print_exc()
-                print
+                print()
             
         end_time = time.time()
         if args.show_time:
-            print "   Loaded in %.3f seconds" % (end_time-start_time)
+            print("   Loaded in %.3f seconds" % (end_time-start_time))
 
     if args.show_summary:
-        print
-        print
-        print "Summary"
-        print "======="
-        print "Files loaded successfully: %d" % file_success_count
-        print "Files with warnings: %d" % file_warning_count
-        print "Files with errors: %d" % file_error_count
+        print()
+        print()
+        print("Summary")
+        print("=======")
+        print("Files loaded successfully: %d" % file_success_count)
+        print("Files with warnings: %d" % file_warning_count)
+        print("Files with errors: %d" % file_error_count)
             
 if __name__ == "__main__":
     main()
