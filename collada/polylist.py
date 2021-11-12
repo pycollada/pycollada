@@ -117,7 +117,7 @@ class Polylist(primitive.Primitive):
     instance using :meth:`collada.geometry.Geometry.createPolylist`.
 
     * If ``P`` is an instance of :class:`collada.polylist.Polylist`, then ``len(P)``
-      returns the number of polygons in the set. ``P[i]`` returns the i\ :sup:`th`
+      returns the number of polygons in the set. ``P[i]`` returns the i\\ :sup:`th`
       polygon in the set.
     """
 
@@ -303,7 +303,7 @@ class BoundPolylist(primitive.BoundPrimitive):
     """A polylist bound to a transform matrix and materials mapping.
 
     * If ``P`` is an instance of :class:`collada.polylist.BoundPolylist`, then ``len(P)``
-      returns the number of polygons in the set. ``P[i]`` returns the i\ :sup:`th`
+      returns the number of polygons in the set. ``P[i]`` returns the i\\ :sup:`th`
       polygon in the set.
     """
 

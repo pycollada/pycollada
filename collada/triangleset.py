@@ -73,7 +73,7 @@ class TriangleSet(primitive.Primitive):
     * The TriangleSet object is read-only. To modify a TriangleSet, create a new
       instance using :meth:`collada.geometry.Geometry.createTriangleSet`.
     * If ``T`` is an instance of :class:`collada.triangleset.TriangleSet`, then ``len(T)``
-      returns the number of triangles in the set. ``T[i]`` returns the i\ :sup:`th`
+      returns the number of triangles in the set. ``T[i]`` returns the i\\ :sup:`th`
       triangle in the set.
     """
 
@@ -334,7 +334,7 @@ class BoundTriangleSet(primitive.BoundPrimitive):
     """A triangle set bound to a transform matrix and materials mapping.
 
     * If ``T`` is an instance of :class:`collada.triangleset.BoundTriangleSet`, then ``len(T)``
-      returns the number of triangles in the set. ``T[i]`` returns the i\ :sup:`th`
+      returns the number of triangles in the set. ``T[i]`` returns the i\\ :sup:`th`
       triangle in the set.
     """
 

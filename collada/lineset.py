@@ -58,7 +58,7 @@ class LineSet(primitive.Primitive):
     instance using :meth:`collada.geometry.Geometry.createLineSet`.
 
     * If ``L`` is an instance of :class:`collada.lineset.LineSet`, then ``len(L)``
-      returns the number of lines in the set. ``L[i]`` returns the i\ :sup:`th`
+      returns the number of lines in the set. ``L[i]`` returns the i\\ :sup:`th`
       line in the set."""
 
     def __init__(self, sources, material, index, xmlnode=None):
@@ -193,7 +193,7 @@ class BoundLineSet(primitive.BoundPrimitive):
     """A line set bound to a transform matrix and materials mapping.
 
     * If ``bs`` is an instance of :class:`collada.lineset.BoundLineSet`, ``len(bs)``
-      returns the number of lines in the set and ``bs[i]`` returns the i\ :superscript:`th`
+      returns the number of lines in the set and ``bs[i]`` returns the i\\ :superscript:`th`
       line in the set.
 
     """

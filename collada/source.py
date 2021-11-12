@@ -102,7 +102,7 @@ class FloatSource(Source):
 
     If ``f`` is an instance of :class:`collada.source.FloatSource`, then
     ``len(f)`` is the length of the shaped source. ``len(f)*len(f.components)``
-    would give you the number of values in the source. ``f[i]`` is the i\ :sup:`th`
+    would give you the number of values in the source. ``f[i]`` is the i\\ :sup:`th`
     item in the source array.
     """
 
@@ -211,7 +211,7 @@ class IDRefSource(Source):
 
     If ``r`` is an instance of :class:`collada.source.IDRefSource`, then
     ``len(r)`` is the length of the shaped source. ``len(r)*len(r.components)``
-    would give you the number of values in the source. ``r[i]`` is the i\ :sup:`th`
+    would give you the number of values in the source. ``r[i]`` is the i\\ :sup:`th`
     item in the source array.
 
     """
@@ -310,7 +310,7 @@ class NameSource(Source):
 
     If ``n`` is an instance of :class:`collada.source.NameSource`, then
     ``len(n)`` is the length of the shaped source. ``len(n)*len(n.components)``
-    would give you the number of values in the source. ``n[i]`` is the i\ :sup:`th`
+    would give you the number of values in the source. ``n[i]`` is the i\\ :sup:`th`
     item in the source array.
 
     """

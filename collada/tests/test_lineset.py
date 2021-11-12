@@ -17,16 +17,19 @@ class TestLineset(unittest.TestCase):
 
     def test_lineset_construction(self):
         # An empty sources dict should raise an exception.
-        with self.assertRaisesRegex(DaeIncompleteError, "at least one"):
+        with self.assertRaises(DaeIncompleteError) as e:
             collada.lineset.LineSet({}, None, None)
+        self.assertIn("at least one", e.exception.msg)
 
         # As should passing one without VERTEX defined as a key.
-        with self.assertRaisesRegex(DaeIncompleteError, "requires vertex"):
+        with self.assertRaises(DaeIncompleteError) as e:
             collada.lineset.LineSet({"a": []}, None, None)
+        self.assertIn("requires vertex", e.exception.msg)
 
         # Adding an input list with vertex defined, but empty should raise an error.
-        with self.assertRaisesRegex(DaeIncompleteError, "requires vertex"):
+        with self.assertRaises(DaeIncompleteError) as e:
             collada.lineset.LineSet({'VERTEX': []}, None, None)
+        self.assertIn("requires vertex", e.exception.msg)
 
     def test_empty_lineset_saving(self):
         linefloats = [1,1,-1, 1,-1,-1, -1,-0.9999998,-1, -0.9999997,1,-1, 1,0.9999995,1, 0.9999994,-1.000001,1]
