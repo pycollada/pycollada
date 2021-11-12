@@ -214,13 +214,13 @@ class IndexedList(list):
         for ind in xrange(i, j):
             _del(_get(ind))
         # add new indexing
-        if isinstance(newList, IndexedList):
-            self._index.update(newList._index)
+        if isinstance(newItems, IndexedList):
+            self._index.update(newItems._index)
         else:
-            for obj in newList:
+            for obj in newItems:
                 _add(obj)
         # replace items
-        return list.__setslice__(self, i, j, newList)
+        return list.__setslice__(self, i, j, newItems)
 
     def append(self, obj):
         self._addindex(obj)

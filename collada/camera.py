@@ -12,12 +12,11 @@
 
 """Contains objects for representing cameras"""
 
-import numpy
-
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-        DaeMalformedError
-from collada.xmlutil import etree as ElementTree
+from collada.common import DaeIncompleteError
+from collada.common import DaeMalformedError
+from collada.common import DaeObject
+from collada.common import DaeUnsupportedError
+from collada.common import E
 
 
 class Camera(DaeObject):
