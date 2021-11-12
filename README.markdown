@@ -13,7 +13,7 @@ You can get help at the [pycollada mailing list](https://groups.google.com/d/for
 See the [pycollada Documentation](http://pycollada.readthedocs.org/) for more
 information.
 
-[![Build Status](https://travis-ci.org/pycollada/pycollada.svg?branch=master)](https://travis-ci.org/pycollada/pycollada)
+![Build Status](https://github.com/pycollada/pycollada/actions/workflows/python-package.yml/badge.svg)
 
 ## Projects using pycollada
 
