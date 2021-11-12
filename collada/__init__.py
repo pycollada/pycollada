@@ -165,15 +165,16 @@ class Collada(object):
             self.assetInfo = asset.Asset()
             return
 
+        strdata = None
         if isinstance(filename, basestring):
-            fdata = open(filename, 'rb')
+            with open(filename, 'rb') as f:
+                strdata = f.read()
             self.filename = filename
             self.getFileData = self._getFileFromDisk
         else:
-            fdata = filename # assume it is a file like object
+            strdata = filename.read() # assume it is a file like object
             self.filename = None
             self.getFileData = self._nullGetFile
-        strdata = fdata.read()
 
         try:
             self.zfile = zipfile.ZipFile(BytesIO(strdata), 'r')
