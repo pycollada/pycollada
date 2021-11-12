@@ -1,8 +1,27 @@
 pycollada Changelog
 ###################
 
+0.7.2 (2021-12-12)
+******************
+
+Bug Fixes
+=========
+* Properly close files in constructor.
+* Fix some warnings.
+* Make examples python3 compatible.
+* DaeUnsupportedError fails due to missing cast
+* docs: Fix a few typos
+* removed redundancy in unit normals and reformatted
+* Remove deprecated ElementTree...getchildren() method calls
+* Fix angle units documentation in RotateTransform.
+
+New Features
+============
+* Convert from Travis CI to Github Actions.
+
+
 0.7.1 (2020-01-23)
-==================
+******************
 
 Bug Fixes
 =========
