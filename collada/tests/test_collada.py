@@ -371,7 +371,7 @@ class TestCollada(unittest.TestCase):
             # scene should have 8 geometries
             self.assertEqual(len(mesh.geometries), 8)
             # scene should have one root node
-            self.assertEquals(len(mesh.scene.nodes), 1)
+            self.assertEqual(len(mesh.scene.nodes), 1)
 
 if __name__ == '__main__':
     unittest.main()

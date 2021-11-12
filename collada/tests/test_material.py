@@ -104,7 +104,7 @@ class TestMaterial(unittest.TestCase):
     def test_cimage_data_loading(self):
         data_dir = os.path.join(os.path.dirname(os.path.realpath( __file__ )), "data")
         texture_file_path = os.path.join(data_dir, "duckCM.tga")
-        self.failUnless(os.path.isfile(texture_file_path), "Could not find data/duckCM.tga file for testing")
+        self.assertTrue(os.path.isfile(texture_file_path), "Could not find data/duckCM.tga file for testing")
 
         texdata = open(texture_file_path, 'rb').read()
         self.assertEqual(len(texdata), 786476)
