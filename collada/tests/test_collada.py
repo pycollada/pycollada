@@ -350,6 +350,12 @@ class TestCollada(unittest.TestCase):
         triangles = mesh.geometries[0].primitives[0]
         self.assertEqual(0, len(triangles))
 
+    def test_collada_empty_triangles_with_multiple_ns(self):
+        f = os.path.join(self.datadir, "empty_triangles_with_multiple_ns.dae")
+        mesh = collada.Collada(f, validate_output=True)
+        triangles = mesh.geometries[0].primitives[0]
+        self.assertEqual(0, len(triangles))
+
     def test_namespace(self):
         """
         Test loading a file with a different namespace.
