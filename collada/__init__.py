@@ -215,15 +215,11 @@ class Collada(object):
         # if we can't get the current namespace
         # the tagger from above will use a hardcoded default
         try:
-            # get the root node, same for both etree and lxml
+            # get the root node (whose tag is assumed to be COLLADA),
+            # and extract ns from its tag
             xml_root = self.xmlnode.getroot()
-            if hasattr(xml_root, 'nsmap'):
-                # lxml has an nsmap
-                # use the first value in the namespace map
-                namespace = next(iter(xml_root.nsmap.values()))
-            elif hasattr(xml_root, 'tag'):
-                # for xml.etree we need to extract ns from root tag
-                namespace = xml_root.tag.split('}')[0].lstrip('{')
+            namespace = xml_root.tag.split('}')[0].lstrip('{')
+
             # create a tagging function using the extracted namespace
             self.tag = tagger(namespace)
         except BaseException:
