@@ -134,6 +134,6 @@ class Shader:
 	def uniform_matrixf(self, name, mat):
 		# obtain the uniform location
 		loc = glGetUniformLocation(self.Handle, name)
-		# uplaod the 4x4 floating point matrix
+		# upload the 4x4 floating point matrix
 		glUniformMatrix4fv(loc, 1, False, (c_float * 16)(*mat))
 

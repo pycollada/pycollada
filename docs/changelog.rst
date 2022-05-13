@@ -140,7 +140,7 @@ Bug Fixes
 * Fixed bugs in IndexedList from Issue #13
 * Fixed a bug where using the same map twice in an effect would cause incorrrect output
 * Changed geometry export to delete any sources in the vertices tag that no longer exist
-* Changed library output to not output emtpy library nodes so validator doesn't complain
+* Changed library output to not output empty library nodes so validator doesn't complain
 * Add same checks in scene loading that was done in library_nodes loading so that if nodes are not found yet while loading, it will keep trying
 * Changed the way library_nodes is loaded so that if a referenced node from instance_node is not loaded yet, it will keep trying
 * Fixed bug where a triangles xml node would try to set an attribute to None
@@ -193,7 +193,7 @@ Bug Fixes
 * Multiple texture coordinate channels
 * Phong and Lambert Materials
 * Texture support using PIL
-* Scene suppport for geometry, material and camera instances
+* Scene support for geometry, material and camera instances
 * Transforms (matrix, rotate, scale, translate)
 
 Releasing

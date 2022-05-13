@@ -2,7 +2,7 @@ Creating A Collada Object
 =========================
 
 In this section, we outline how to create a collada document from scratch.
-First, let's create an empy collada document::
+First, let's create an empty collada document::
 
     >>> from collada import *
     >>> mesh = Collada()
