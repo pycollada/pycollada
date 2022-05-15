@@ -19,7 +19,7 @@ to understand. OldStyleRenderer works fine on Windows but throws error
 on Linux and OSX. So please feel free to experiment and find out which
 one works for you.
 
-To switch between two renderes, just comment/uncomment corresponding
+To switch between two renderers, just comment/uncomment corresponding
 code at line 64-65 in daeview.py. For example, to use
 OldStyleRenderer:
   #daerender = renderer.GLSLRenderer(collada_file)
