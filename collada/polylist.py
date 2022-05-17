@@ -189,8 +189,9 @@ class Polylist(primitive.Primitive):
             txtindices = ' '.join(map(str, self.indices.flatten().tolist()))
             acclen = len(self.indices)
 
-            self.xmlnode = E.polylist(count=str(self.npolygons),
-                    material=self.material)
+            self.xmlnode = E.polylist(count=str(self.npolygons))
+            if self.material is not None:
+                self.xmlnode.set('material', self.material)
 
             all_inputs = []
             for semantic_list in self.sources.values():

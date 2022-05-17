@@ -96,7 +96,7 @@ class Geometry(DaeObject):
             if len(self.id) > 0: self.xmlnode.set("id", self.id)
             if len(self.name) > 0: self.xmlnode.set("name", self.name)
 
-    def createLineSet(self, indices, inputlist, materialid):
+    def createLineSet(self, indices, inputlist, materialid=None):
         """Create a set of lines for use in this geometry instance.
 
         :param numpy.array indices:
@@ -113,7 +113,7 @@ class Geometry(DaeObject):
         inputdict = primitive.Primitive._getInputsFromList(self.collada, self.sourceById, inputlist.getList())
         return lineset.LineSet(inputdict, materialid, indices)
 
-    def createTriangleSet(self, indices, inputlist, materialid):
+    def createTriangleSet(self, indices, inputlist, materialid=None):
         """Create a set of triangles for use in this geometry instance.
 
         :param numpy.array indices:
@@ -130,7 +130,7 @@ class Geometry(DaeObject):
         inputdict = primitive.Primitive._getInputsFromList(self.collada, self.sourceById, inputlist.getList())
         return triangleset.TriangleSet(inputdict, materialid, indices)
 
-    def createPolylist(self, indices, vcounts, inputlist, materialid):
+    def createPolylist(self, indices, vcounts, inputlist, materialid=None):
         """Create a polylist for use with this geometry instance.
 
         :param numpy.array indices:
@@ -150,7 +150,7 @@ class Geometry(DaeObject):
         inputdict = primitive.Primitive._getInputsFromList(self.collada, self.sourceById, inputlist.getList())
         return polylist.Polylist(inputdict, materialid, indices, vcounts)
 
-    def createPolygons(self, indices, inputlist, materialid):
+    def createPolygons(self, indices, inputlist, materialid=None):
         """Create a polygons for use with this geometry instance.
 
         :param numpy.array indices:
