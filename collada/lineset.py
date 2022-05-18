@@ -129,8 +129,9 @@ class LineSet(primitive.Primitive):
             txtindices = ' '.join(map(str, self.index.tolist()))
             self.index.shape = (-1, 2, self.nindices)
 
-            self.xmlnode = E.lines(count=str(self.nlines),
-                    material=self.material)
+            self.xmlnode = E.lines(count=str(self.nlines))
+            if self.material is not None:
+                self.xmlnode.set('material', self.material)
 
             all_inputs = []
             for semantic_list in self.sources.values():

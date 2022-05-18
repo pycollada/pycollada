@@ -61,7 +61,9 @@ class Polygons(polylist.Polylist):
         else:
             acclen = len(polygons)
 
-            self.xmlnode = E.polygons(count=str(acclen), material=self.material)
+            self.xmlnode = E.polygons(count=str(acclen))
+            if self.material is not None:
+                self.xmlnode.set('material', self.material)
 
             all_inputs = []
             for semantic_list in self.sources.values():
