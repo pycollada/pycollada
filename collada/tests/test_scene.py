@@ -184,7 +184,7 @@ class TestScene(unittest.TestCase):
 
         yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)), {})
         self.assertEqual(yournode.id, 'yournode')
-        self.assertEqual(yournode.name, None)
+        self.assertEqual(yournode.name, 'mynode')
         self.assertEqual(len(yournode.children), 2)
         self.assertEqual(len(yournode.transforms), 2)
         self.assertEqual(yournode.children[0].id, 'myemptynode')
