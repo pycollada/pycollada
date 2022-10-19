@@ -334,10 +334,7 @@ class Node(SceneNode):
         """
         self.id = id
         """The unique string identifier for the node"""
-        if name is not None: 
-            self.name = name
-        else
-            self.name = id
+        self.name = id if name is None else name
         """The optional string node name (not required to be unique)for the node, by default set to the id value"""
         self.children = []
         """A list of child nodes of this node. This can contain any
@@ -430,7 +427,7 @@ class Node(SceneNode):
             except DaeError as ex:
                 collada.handleError(ex)
 
-        return Node(id, children, transforms, xmlnode=node, name)
+        return Node(id, children, transforms, xmlnode=node, name=name)
 
     def __str__(self):
         return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
