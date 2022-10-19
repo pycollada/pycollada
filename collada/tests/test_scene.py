@@ -169,6 +169,7 @@ class TestScene(unittest.TestCase):
         scale = collada.scene.ScaleTransform(0.1, 0.2, 0.3)
         mynode = collada.scene.Node('mynode', children=[myemptynode], transforms=[rotate, scale])
         self.assertEqual(mynode.id, 'mynode')
+        self.assertEqual(mynode.name, 'mynode')
         self.assertEqual(mynode.children[0], myemptynode)
         self.assertEqual(mynode.transforms[0], rotate)
         self.assertEqual(mynode.transforms[1], scale)
@@ -183,6 +184,26 @@ class TestScene(unittest.TestCase):
 
         yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)), {})
         self.assertEqual(yournode.id, 'yournode')
+        self.assertEqual(yournode.name, 'yournode')
+        self.assertEqual(len(yournode.children), 2)
+        self.assertEqual(len(yournode.transforms), 2)
+        self.assertEqual(yournode.children[0].id, 'myemptynode')
+        self.assertEqual(yournode.children[1].id, 'youremptynode')
+        self.assertTrue(type(yournode.transforms[0]) is collada.scene.ScaleTransform)
+        self.assertTrue(type(yournode.transforms[1]) is collada.scene.TranslateTransform)
+
+        translate = collada.scene.TranslateTransform(0.1, 0.2, 0.3)
+        mynode.transforms.append(translate)
+        mynode.transforms.pop(0)
+        youremptynode = collada.scene.Node('youremptynode')
+        mynode.children.append(youremptynode)
+        mynode.id = 'yournode'
+        mynode.name = 'yourname'
+        mynode.save()
+
+        yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)), {})
+        self.assertEqual(yournode.id, 'yournode')
+        self.assertEqual(yournode.name, 'yourname')
         self.assertEqual(len(yournode.children), 2)
         self.assertEqual(len(yournode.transforms), 2)
         self.assertEqual(yournode.children[0].id, 'myemptynode')
