@@ -314,7 +314,7 @@ class Node(SceneNode):
     Contains the list of transformations effecting the node as well as any children.
     """
 
-    def __init__(self, id, children=None, transforms=None, xmlnode=None):
+    def __init__(self, id, children=None, transforms=None, xmlnode=None, name=None):
         """Create a node in the scene graph.
 
         :param str id:
@@ -327,10 +327,15 @@ class Node(SceneNode):
           contain any object that inherits from :class:`collada.scene.Transform`
         :param xmlnode:
           When loaded, the xmlnode it comes from
+        :param name:
+          If given, sets the node name property, if missing (None) then then
+          node name property is set from the id value (if not None)
 
         """
         self.id = id
         """The unique string identifier for the node"""
+        self.name = id if name is None else name
+        """The optional string node name (not required to be unique)for the node, by default set to the id value"""
         self.children = []
         """A list of child nodes of this node. This can contain any
           object that inherits from :class:`collada.scene.SceneNode`"""
@@ -353,7 +358,7 @@ class Node(SceneNode):
             self.xmlnode = xmlnode
             """ElementTree representation of the transform."""
         else:
-            self.xmlnode = E.node(id=self.id, name=self.id)
+            self.xmlnode = E.node(id=self.id, name=self.name)
             for t in self.transforms:
                 self.xmlnode.append(t.xmlnode)
             for c in self.children:
@@ -390,7 +395,9 @@ class Node(SceneNode):
 
         if self.id is not None:
             self.xmlnode.set('id', self.id)
-            self.xmlnode.set('name', self.id)
+        if self.name is not None:
+            self.xmlnode.set('name', self.name)
+            
         for t in self.transforms:
             if t.xmlnode not in self.xmlnode:
                 self.xmlnode.append(t.xmlnode)
@@ -406,6 +413,7 @@ class Node(SceneNode):
     @staticmethod
     def load( collada, node, localscope ):
         id = node.get('id')
+        name = node.get('name')
         children = []
         transforms = []
 
@@ -419,7 +427,7 @@ class Node(SceneNode):
             except DaeError as ex:
                 collada.handleError(ex)
 
-        return Node(id, children, transforms, xmlnode=node)
+        return Node(id, children, transforms, xmlnode=node, name=name)
 
     def __str__(self):
         return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
