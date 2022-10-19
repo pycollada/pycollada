@@ -204,12 +204,6 @@ class TestScene(unittest.TestCase):
         yournode = collada.scene.Node.load(self.dummy, fromstring(tostring(mynode.xmlnode)), {})
         self.assertEqual(yournode.id, 'yournode')
         self.assertEqual(yournode.name, 'yourname')
-        self.assertEqual(len(yournode.children), 2)
-        self.assertEqual(len(yournode.transforms), 2)
-        self.assertEqual(yournode.children[0].id, 'myemptynode')
-        self.assertEqual(yournode.children[1].id, 'youremptynode')
-        self.assertTrue(type(yournode.transforms[0]) is collada.scene.ScaleTransform)
-        self.assertTrue(type(yournode.transforms[1]) is collada.scene.TranslateTransform)
         
         myemptynode = collada.scene.Node('myemptynode')
         rotate = collada.scene.RotateTransform(0.1, 0.2, 0.3, 90)
