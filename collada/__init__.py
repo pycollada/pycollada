@@ -245,7 +245,10 @@ class Collada(object):
 
     def handleError(self, error):
         self.errors.append(error)
-        if not type(error) in self.maskedErrors:
+        # use `isinstance` to check this error which will
+        # correctly identify subclasses, i.e. if `DaeError`
+        # is passed as the ignore it will ignore everything
+        if not any(isinstance(error, mask) for mask in self.maskedErrors):
             raise
 
     def ignoreErrors(self, *args):

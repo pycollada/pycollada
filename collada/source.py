@@ -126,6 +126,8 @@ class FloatSource(Source):
         """The unique string identifier for the source"""
         self.data = data
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
+        if data.size != len(components):
+            raise DaeMalformedError('data doesn\'t match components!')
         self.data.shape = (-1, len(components) )
         self.components = components
         """Tuple of strings describing the semantic of the data, e.g. ``('X','Y','Z')``"""
@@ -201,6 +203,7 @@ class FloatSource(Source):
             data = numpy.delete(data, -1, 1)
             data.shape = (-1)
         return FloatSource( sourceid, data, tuple(components), xmlnode=node )
+
 
     def __str__(self): return '<FloatSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)
