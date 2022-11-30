@@ -202,7 +202,6 @@ class Collada(object):
         if aux_file_loader is not None:
             self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
-        ElementTree.XMLParser()
         try:
             self.xmlnode = ElementTree.ElementTree(element=None,
                                                    file=BytesIO(data))

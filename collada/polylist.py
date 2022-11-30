@@ -188,7 +188,6 @@ class Polylist(primitive.Primitive):
             """ElementTree representation of the line set."""
         else:
             txtindices = ' '.join(map(str, self.indices.flatten().tolist()))
-            len(self.indices)
 
             self.xmlnode = E.polylist(count=str(self.npolygons))
             if self.material is not None:

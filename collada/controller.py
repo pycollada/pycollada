@@ -303,7 +303,6 @@ class BoundSkinPrimitive(object):
 
     def shapes(self):
         for shape in self.primitive.shapes():
-            shape.indices
             yield shape
 
 

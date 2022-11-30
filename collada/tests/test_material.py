@@ -125,8 +125,6 @@ class TestMaterial(unittest.TestCase):
 
             numpy_uints = cimage.uintarray
             self.assertTupleEqual(numpy_uints.shape, (512, 512, 3))
-
-            cimage.floatarray
             self.assertTupleEqual(numpy_uints.shape, (512, 512, 3))
 
     def test_surface_saving(self):

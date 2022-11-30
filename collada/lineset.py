@@ -126,7 +126,6 @@ class LineSet(primitive.Primitive):
             """ElementTree representation of the line set."""
         else:
             self.index.shape = (-1)
-            len(self.index)
             txtindices = ' '.join(map(str, self.index.tolist()))
             self.index.shape = (-1, 2, self.nindices)
 

@@ -55,7 +55,7 @@ class SceneNode(DaeObject):
         :param str tipo:
           A string for the desired object type. This can be one of 'geometry',
           'camera', 'light', or 'controller'.
-        :param numpy.matrix matrix:
+        :param numpy.array matrix:
           An optional transformation matrix
 
         :rtype: generator that yields the type specified
@@ -373,7 +373,7 @@ class Node(SceneNode):
         :param str tipo:
           A string for the desired object type. This can be one of 'geometry',
           'camera', 'light', or 'controller'.
-        :param numpy.matrix matrix:
+        :param numpy.array matrix:
           An optional transformation matrix
 
         :rtype: generator that yields the type specified
