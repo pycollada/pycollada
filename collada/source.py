@@ -124,9 +124,17 @@ class FloatSource(Source):
 
         self.id = id
         """The unique string identifier for the source"""
-        self.data = data
+
+        # check that the passed data is reshapable
+        if (data.size % len(components)) != 0:
+            raise DaeMalformedError(
+                'data.size `{}` isn\'t reshapable into `(-1, {})`!'.format(
+                    data.size,
+                    len(components)))
+
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
-        self.data.shape = (-1, len(components) )
+        self.data = data.reshape((-1, len(components)))
+
         self.components = components
         """Tuple of strings describing the semantic of the data, e.g. ``('X','Y','Z')``"""
         if xmlnode != None:
@@ -201,6 +209,7 @@ class FloatSource(Source):
             data = numpy.delete(data, -1, 1)
             data.shape = (-1)
         return FloatSource( sourceid, data, tuple(components), xmlnode=node )
+
 
     def __str__(self): return '<FloatSource size=%d>' % (len(self),)
     def __repr__(self): return str(self)

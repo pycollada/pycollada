@@ -666,9 +666,9 @@ class Effect(DaeObject):
             try:
                 value = tuple([ float(v) for v in vnode.text.split() ])
             except ValueError as ex:
-                raise DaeMalformedError('Corrupted color definition in effect '+id)
+                raise DaeMalformedError('Corrupted color definition in effect `{}`'.format(id))
             except IndexError as ex:
-                raise DaeMalformedError('Corrupted color definition in effect '+id)
+                raise DaeMalformedError('Corrupted color definition in effect `{}`'.format(id))
         elif vnode.tag == collada.tag('float'):
             try: value = float(vnode.text)
             except ValueError as ex:
