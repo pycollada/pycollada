@@ -17,12 +17,11 @@
 import numpy
 
 from collada import source
-from collada.common import DaeObject, tag
+from collada.common import DaeObject
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-        DaeMalformedError, DaeUnsupportedError
+    DaeMalformedError, DaeUnsupportedError
 from collada.geometry import Geometry
 from collada.util import checkSource
-from collada.xmlutil import etree as ElementTree
 
 
 class Controller(DaeObject):
@@ -32,15 +31,16 @@ class Controller(DaeObject):
         pass
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load(collada, localscope, node):
         controller = node.find(collada.tag('skin'))
         if controller is None:
             controller = node.find(collada.tag('morph'))
-        if controller is None: raise DaeUnsupportedError('Unknown controller node')
+        if controller is None:
+            raise DaeUnsupportedError('Unknown controller node')
 
         sourcebyid = {}
         sources = []
-        sourcenodes = node.findall('%s/%s'%(controller.tag, collada.tag('source')))
+        sourcenodes = node.findall('%s/%s' % (controller.tag, collada.tag('source')))
         for sourcenode in sourcenodes:
             ch = source.Source.load(collada, {}, sourcenode)
             sources.append(ch)
@@ -51,8 +51,10 @@ class Controller(DaeObject):
         else:
             return Morph.load(collada, sourcebyid, controller, node)
 
-class BoundController( object ):
+
+class BoundController(object):
     """Base class for a controller bound to a transform matrix and materials mapping."""
+
 
 class Skin(Controller):
     """Class containing data collada holds in the <skin> tag"""
@@ -104,7 +106,7 @@ class Skin(Controller):
         self.skin_node = skin_node
         self.xmlnode = controller_node
 
-        if not type(self.geometry) is Geometry:
+        if not isinstance(self.geometry, Geometry):
             raise DaeMalformedError('Invalid reference geometry in skin')
 
         self.id = controller_node.get('id')
@@ -115,28 +117,28 @@ class Skin(Controller):
 
         if len(bind_shape_matrix) != 16:
             raise DaeMalformedError('Corrupted bind shape matrix in skin')
-        self.bind_shape_matrix.shape = (4,4)
+        self.bind_shape_matrix.shape = (4, 4)
 
-        if not(joint_source in sourcebyid and joint_matrix_source in sourcebyid):
+        if not (joint_source in sourcebyid and joint_matrix_source in sourcebyid):
             raise DaeBrokenRefError("Input in joints not found")
-        if not(type(sourcebyid[joint_source]) is source.NameSource or type(sourcebyid[joint_source]) is source.IDRefSource):
+        if not (isinstance(sourcebyid[joint_source], source.NameSource) or isinstance(sourcebyid[joint_source], source.IDRefSource)):
             raise DaeIncompleteError("Could not find joint name input for skin")
-        if not type(sourcebyid[joint_matrix_source]) is source.FloatSource:
+        if not isinstance(sourcebyid[joint_matrix_source], source.FloatSource):
             raise DaeIncompleteError("Could not find joint matrix source for skin")
         joint_names = [j for j in sourcebyid[joint_source]]
         joint_matrices = sourcebyid[joint_matrix_source].data
-        joint_matrices.shape = (-1,4,4)
+        joint_matrices.shape = (-1, 4, 4)
         if len(joint_names) != len(joint_matrices):
             raise DaeMalformedError("Skin joint and matrix inputs must be same length")
         self.joint_matrices = {}
-        for n,m in zip(joint_names, joint_matrices):
+        for n, m in zip(joint_names, joint_matrices):
             self.joint_matrices[n] = m
 
-        if not(weight_source in sourcebyid and weight_joint_source in sourcebyid):
+        if not (weight_source in sourcebyid and weight_joint_source in sourcebyid):
             raise DaeBrokenRefError("Weights input in joints not found")
-        if not type(sourcebyid[weight_source]) is source.FloatSource:
+        if not isinstance(sourcebyid[weight_source], source.FloatSource):
             raise DaeIncompleteError("Could not find weight inputs for skin")
-        if not(type(sourcebyid[weight_joint_source]) is source.NameSource or type(sourcebyid[weight_joint_source]) is source.IDRefSource):
+        if not (isinstance(sourcebyid[weight_joint_source], source.NameSource) or isinstance(sourcebyid[weight_joint_source], source.IDRefSource)):
             raise DaeIncompleteError("Could not find weight joint source input for skin")
         self.weights = sourcebyid[weight_source]
         self.weight_joints = sourcebyid[weight_joint_source]
@@ -145,22 +147,22 @@ class Skin(Controller):
             newshape = []
             at = 0
             for ct in self.vcounts:
-                this_set = self.vertex_weight_index[self.nindices*at:self.nindices*(at+ct)]
+                this_set = self.vertex_weight_index[self.nindices * at:self.nindices * (at + ct)]
                 this_set.shape = (ct, self.nindices)
                 newshape.append(numpy.array(this_set))
-                at+=ct
+                at += ct
             self.index = newshape
-        except:
+        except BaseException:
             raise DaeMalformedError('Corrupted vcounts or index in skin weights')
 
         try:
             self.joint_index = [influence[:, self.offsets[0]] for influence in self.index]
             self.weight_index = [influence[:, self.offsets[1]] for influence in self.index]
-        except:
+        except BaseException:
             raise DaeMalformedError('Corrupted joint or weight index in skin')
 
-        self.max_joint_index = numpy.max( [numpy.max(joint) if len(joint) > 0 else 0 for joint in self.joint_index] )
-        self.max_weight_index = numpy.max( [numpy.max(weight) if len(weight) > 0 else 0 for weight in self.weight_index] )
+        self.max_joint_index = numpy.max([numpy.max(joint) if len(joint) > 0 else 0 for joint in self.joint_index])
+        self.max_weight_index = numpy.max([numpy.max(weight) if len(weight) > 0 else 0 for weight in self.weight_index])
         checkSource(self.weight_joints, ('JOINT',), self.max_joint_index)
         checkSource(self.weights, ('WEIGHT',), self.max_weight_index)
 
@@ -175,7 +177,7 @@ class Skin(Controller):
         return BoundSkin(self, matrix, materialnodebysymbol)
 
     @staticmethod
-    def load( collada, localscope, skinnode, controllernode ):
+    def load(collada, localscope, skinnode, controllernode):
         if len(localscope) < 3:
             raise DaeMalformedError('Not enough sources in skin')
 
@@ -193,25 +195,25 @@ class Skin(Controller):
             bind_shape_mat.shape = (-1,)
         else:
             try:
-                values = [ float(v) for v in bind_shape_mat.text.split()]
+                values = [float(v) for v in bind_shape_mat.text.split()]
             except ValueError:
                 raise DaeMalformedError('Corrupted bind shape matrix in skin')
-            bind_shape_mat = numpy.array( values, dtype=numpy.float32 )
+            bind_shape_mat = numpy.array(values, dtype=numpy.float32)
 
-        inputnodes = skinnode.findall('%s/%s'%(collada.tag('joints'), collada.tag('input')))
+        inputnodes = skinnode.findall('%s/%s' % (collada.tag('joints'), collada.tag('input')))
         if inputnodes is None or len(inputnodes) < 2:
             raise DaeIncompleteError("Not enough inputs in skin joints")
 
         try:
             inputs = [(i.get('semantic'), i.get('source')) for i in inputnodes]
-        except ValueError as ex:
+        except ValueError:
             raise DaeMalformedError('Corrupted inputs in skin')
 
         joint_source = None
         matrix_source = None
         for i in inputs:
             if len(i[1]) < 2 or i[1][0] != '#':
-                raise DaeBrokenRefError('Input in skin node %s not found'%i[1])
+                raise DaeBrokenRefError('Input in skin node %s not found' % i[1])
             if i[0] == 'JOINT':
                 joint_source = i[1][1:]
             elif i[0] == 'INV_BIND_MATRIX':
@@ -230,12 +232,12 @@ class Skin(Controller):
 
         try:
             index = numpy.array([float(v)
-                for v in indexnode.text.split()], dtype=numpy.int32)
+                                 for v in indexnode.text.split()], dtype=numpy.int32)
             vcounts = numpy.array([int(v)
-                for v in vcountnode.text.split()], dtype=numpy.int32)
+                                   for v in vcountnode.text.split()], dtype=numpy.int32)
             inputs = [(i.get('semantic'), i.get('source'), int(i.get('offset')))
-                           for i in inputnodes]
-        except ValueError as ex:
+                      for i in inputnodes]
+        except ValueError:
             raise DaeMalformedError('Corrupted index or offsets in skin vertex weights')
 
         weight_joint_source = None
@@ -255,8 +257,8 @@ class Skin(Controller):
             raise DaeMalformedError('Not enough inputs for vertex weights in skin')
 
         return Skin(localscope, bind_shape_mat, joint_source, matrix_source,
-                weight_source, weight_joint_source, vcounts, index, offsets,
-                geometry, controllernode, skinnode)
+                    weight_source, weight_joint_source, vcounts, index, offsets,
+                    geometry, controllernode, skinnode)
 
 
 class BoundSkin(BoundController):
@@ -269,7 +271,7 @@ class BoundSkin(BoundController):
         self.id = skin.id
         self.index = skin.index
         self.joint_matrices = skin.joint_matrices
-        self.geometry = skin.geometry.bind(numpy.dot(matrix,skin.bind_shape_matrix), materialnodebysymbol)
+        self.geometry = skin.geometry.bind(numpy.dot(matrix, skin.bind_shape_matrix), materialnodebysymbol)
 
     def __len__(self):
         return len(self.index)
@@ -301,7 +303,7 @@ class BoundSkinPrimitive(object):
 
     def shapes(self):
         for shape in self.primitive.shapes():
-            indices = shape.indices
+            shape.indices
             yield shape
 
 
@@ -331,7 +333,7 @@ class Morph(Controller):
             a Geometry (g) and a float weight value (w)"""
 
         self.xmlnode = xmlnode
-        #TODO
+        # TODO
 
     def __len__(self):
         return len(self.target_list)
@@ -344,7 +346,7 @@ class Morph(Controller):
         return BoundMorph(self, matrix, materialnodebysymbol)
 
     @staticmethod
-    def load( collada, localscope, morphnode, controllernode ):
+    def load(collada, localscope, morphnode, controllernode):
         baseid = morphnode.get('source')
         if len(baseid) < 2 or baseid[0] != '#' or \
                 not baseid[1:] in collada.geometries:
@@ -357,13 +359,13 @@ class Morph(Controller):
         if not (method == 'NORMALIZED' or method == 'RELATIVE'):
             raise DaeMalformedError("Morph method must be either NORMALIZED or RELATIVE. Found '%s'" % method)
 
-        inputnodes = morphnode.findall('%s/%s'%(collada.tag('targets'), collada.tag('input')))
+        inputnodes = morphnode.findall('%s/%s' % (collada.tag('targets'), collada.tag('input')))
         if inputnodes is None or len(inputnodes) < 2:
             raise DaeIncompleteError("Not enough inputs in a morph")
 
         try:
             inputs = [(i.get('semantic'), i.get('source')) for i in inputnodes]
-        except ValueError as ex:
+        except ValueError:
             raise DaeMalformedError('Corrupted inputs in morph')
 
         target_source = None
@@ -376,8 +378,8 @@ class Morph(Controller):
             elif i[0] == 'MORPH_WEIGHT':
                 weight_source = localscope[i[1][1:]]
 
-        if not type(target_source) is source.IDRefSource or \
-                not type(weight_source) is source.FloatSource:
+        if not isinstance(target_source, source.IDRefSource) or \
+                not isinstance(weight_source, source.FloatSource):
             raise DaeIncompleteError("Not enough inputs in targets of morph")
 
         if len(target_source) != len(weight_source):
@@ -385,14 +387,14 @@ class Morph(Controller):
 
         target_list = []
         for target, weight in zip(target_source, weight_source):
-            if len(target) < 1 or not(target in collada.geometries):
-                raise DaeBrokenRefError("Targeted geometry %s in morph not found"%target)
+            if len(target) < 1 or not (target in collada.geometries):
+                raise DaeBrokenRefError("Targeted geometry %s in morph not found" % target)
             target_list.append((collada.geometries[target], weight[0]))
 
         return Morph(basegeom, target_list, controllernode)
 
     def save(self):
-        #TODO
+        # TODO
         pass
 
 
@@ -409,4 +411,3 @@ class BoundMorph(BoundController):
 
     def __getitem__(self, i):
         return self.original[i]
-

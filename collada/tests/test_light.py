@@ -12,10 +12,10 @@ class TestLight(unittest.TestCase):
         self.dummy = collada.Collada(validate_output=True)
 
     def test_directional_light_saving(self):
-        dirlight = collada.light.DirectionalLight("mydirlight", (1,1,1))
+        dirlight = collada.light.DirectionalLight("mydirlight", (1, 1, 1))
         self.assertEqual(dirlight.id, "mydirlight")
-        self.assertTupleEqual(dirlight.color, (1,1,1))
-        self.assertTupleEqual(tuple(dirlight.direction), (0,0,-1))
+        self.assertTupleEqual(dirlight.color, (1, 1, 1))
+        self.assertTupleEqual(tuple(dirlight.direction), (0, 0, -1))
         self.assertIsNotNone(str(dirlight))
         dirlight.color = (0.1, 0.2, 0.3)
         dirlight.id = "yourdirlight"
@@ -26,9 +26,9 @@ class TestLight(unittest.TestCase):
         self.assertEqual(loaded_dirlight.id, "yourdirlight")
 
     def test_ambient_light_saving(self):
-        ambientlight = collada.light.AmbientLight("myambientlight", (1,1,1))
+        ambientlight = collada.light.AmbientLight("myambientlight", (1, 1, 1))
         self.assertEqual(ambientlight.id, "myambientlight")
-        self.assertTupleEqual(ambientlight.color, (1,1,1))
+        self.assertTupleEqual(ambientlight.color, (1, 1, 1))
         self.assertIsNotNone(str(ambientlight))
         ambientlight.color = (0.1, 0.2, 0.3)
         ambientlight.id = "yourambientlight"
@@ -39,9 +39,9 @@ class TestLight(unittest.TestCase):
         self.assertEqual(ambientlight.id, "yourambientlight")
 
     def test_point_light_saving(self):
-        pointlight = collada.light.PointLight("mypointlight", (1,1,1))
+        pointlight = collada.light.PointLight("mypointlight", (1, 1, 1))
         self.assertEqual(pointlight.id, "mypointlight")
-        self.assertTupleEqual(pointlight.color, (1,1,1))
+        self.assertTupleEqual(pointlight.color, (1, 1, 1))
         self.assertEqual(pointlight.quad_att, None)
         self.assertEqual(pointlight.constant_att, None)
         self.assertEqual(pointlight.linear_att, None)
@@ -69,9 +69,9 @@ class TestLight(unittest.TestCase):
         self.assertEqual(loaded_pointlight.zfar, 0.2)
 
     def test_spot_light_saving(self):
-        spotlight = collada.light.SpotLight("myspotlight", (1,1,1))
+        spotlight = collada.light.SpotLight("myspotlight", (1, 1, 1))
         self.assertEqual(spotlight.id, "myspotlight")
-        self.assertTupleEqual(spotlight.color, (1,1,1))
+        self.assertTupleEqual(spotlight.color, (1, 1, 1))
         self.assertEqual(spotlight.constant_att, None)
         self.assertEqual(spotlight.linear_att, None)
         self.assertEqual(spotlight.quad_att, None)

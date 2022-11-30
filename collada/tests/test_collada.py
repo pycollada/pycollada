@@ -14,7 +14,7 @@ class TestCollada(unittest.TestCase):
 
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
-        self.datadir = os.path.join(os.path.dirname(os.path.realpath( __file__ )), "data")
+        self.datadir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 
     def test_collada_duck_tris(self):
         f = os.path.join(self.datadir, "duck_triangles.dae")
@@ -22,7 +22,8 @@ class TestCollada(unittest.TestCase):
 
         self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
         self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
-        self.assertEqual(mesh.assetInfo.contributors[0].source_data, 'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
+        self.assertEqual(mesh.assetInfo.contributors[0].source_data,
+                         'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
         self.assertEqual(len(mesh.assetInfo.contributors[0].copyright), 595)
         self.assertEqual(len(mesh.assetInfo.contributors[0].comments), 449)
 
@@ -62,7 +63,8 @@ class TestCollada(unittest.TestCase):
 
         self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
         self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
-        self.assertEqual(mesh.assetInfo.contributors[0].source_data, 'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
+        self.assertEqual(mesh.assetInfo.contributors[0].source_data,
+                         'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
         self.assertEqual(len(mesh.assetInfo.contributors[0].copyright), 595)
         self.assertEqual(len(mesh.assetInfo.contributors[0].comments), 449)
 
@@ -147,22 +149,22 @@ class TestCollada(unittest.TestCase):
         self.assertEqual(mesh.scene, None)
         self.assertIsNotNone(str(mesh))
 
-        floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'Z'))
-        geometry1 = collada.geometry.Geometry(mesh, "geometry1", "mygeometry1", {"myfloatsource":floatsource})
+        floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1, 0.2, 0.3]), ('X', 'Y', 'Z'))
+        geometry1 = collada.geometry.Geometry(mesh, "geometry1", "mygeometry1", {"myfloatsource": floatsource})
         mesh.geometries.append(geometry1)
 
-        linefloats = [1,1,-1, 1,-1,-1, -1,-0.9999998,-1, -0.9999997,1,-1, 1,0.9999995,1, 0.9999994,-1.000001,1]
+        linefloats = [1, 1, -1, 1, -1, -1, -1, -0.9999998, -1, -0.9999997, 1, -1, 1, 0.9999995, 1, 0.9999994, -1.000001, 1]
         linefloatsrc = collada.source.FloatSource("mylinevertsource", numpy.array(linefloats), ('X', 'Y', 'Z'))
         geometry2 = collada.geometry.Geometry(mesh, "geometry2", "mygeometry2", [linefloatsrc])
         input_list = collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#mylinevertsource")
-        indices = numpy.array([0,1, 1,2, 2,3, 3,4, 4,5])
+        indices = numpy.array([0, 1, 1, 2, 2, 3, 3, 4, 4, 5])
         lineset1 = geometry2.createLineSet(indices, input_list, "mymaterial2")
         geometry2.primitives.append(lineset1)
         mesh.geometries.append(geometry2)
 
-        ambientlight = collada.light.AmbientLight("myambientlight", (1,1,1))
-        pointlight = collada.light.PointLight("mypointlight", (1,1,1))
+        ambientlight = collada.light.AmbientLight("myambientlight", (1, 1, 1))
+        pointlight = collada.light.PointLight("mypointlight", (1, 1, 1))
         mesh.lights.append(ambientlight)
         mesh.lights.append(pointlight)
 
@@ -242,7 +244,7 @@ class TestCollada(unittest.TestCase):
         loaded_mesh.geometries.pop(0)
         loaded_mesh.geometries.append(geometry3)
 
-        dirlight = collada.light.DirectionalLight("mydirlight", (1,1,1))
+        dirlight = collada.light.DirectionalLight("mydirlight", (1, 1, 1))
         loaded_mesh.lights.pop(0)
         loaded_mesh.lights.append(dirlight)
 
@@ -378,6 +380,7 @@ class TestCollada(unittest.TestCase):
             self.assertEqual(len(mesh.geometries), 8)
             # scene should have one root node
             self.assertEqual(len(mesh.scene.nodes), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

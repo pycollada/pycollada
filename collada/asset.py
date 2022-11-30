@@ -12,15 +12,11 @@
 
 """Contains COLLADA asset information."""
 
-import numpy
 import datetime
 import dateutil.parser
 
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-        DaeMalformedError, DaeUnsupportedError
+from collada.common import DaeObject, E
 from collada.util import _correctValInNode
-from collada.xmlutil import etree as ElementTree
 
 
 class UP_AXIS:
@@ -31,6 +27,7 @@ class UP_AXIS:
     """Indicates Y direction is up"""
     Z_UP = 'Z_UP'
     """Indicates Z direction is up"""
+
 
 class Contributor(DaeObject):
     """Defines authoring information for asset management"""
@@ -81,16 +78,21 @@ class Contributor(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        author = node.find(collada.tag('author') )
-        authoring_tool = node.find(collada.tag('authoring_tool') )
-        comments = node.find(collada.tag('comments') )
-        copyright = node.find(collada.tag('copyright') )
-        source_data = node.find(collada.tag('source_data') )
-        if author is not None: author = author.text
-        if authoring_tool is not None: authoring_tool = authoring_tool.text
-        if comments is not None: comments = comments.text
-        if copyright is not None: copyright = copyright.text
-        if source_data is not None: source_data = source_data.text
+        author = node.find(collada.tag('author'))
+        authoring_tool = node.find(collada.tag('authoring_tool'))
+        comments = node.find(collada.tag('comments'))
+        copyright = node.find(collada.tag('copyright'))
+        source_data = node.find(collada.tag('source_data'))
+        if author is not None:
+            author = author.text
+        if authoring_tool is not None:
+            authoring_tool = authoring_tool.text
+        if comments is not None:
+            comments = comments.text
+        if copyright is not None:
+            copyright = copyright.text
+        if source_data is not None:
+            source_data = source_data.text
         return Contributor(author=author, authoring_tool=authoring_tool,
                            comments=comments, copyright=copyright, source_data=source_data, xmlnode=node)
 
@@ -102,14 +104,18 @@ class Contributor(DaeObject):
         _correctValInNode(self.xmlnode, 'copyright', self.copyright)
         _correctValInNode(self.xmlnode, 'source_data', self.source_data)
 
-    def __str__(self): return '<Contributor author=%s>' % (str(self.author),)
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<Contributor author=%s>' % (str(self.author),)
+
+    def __repr__(self):
+        return str(self)
+
 
 class Asset(DaeObject):
     """Defines asset-management information"""
 
     def __init__(self, created=None, modified=None, title=None, subject=None, revision=None,
-               keywords=None, unitname=None, unitmeter=None, upaxis=None, contributors=None, xmlnode=None):
+                 keywords=None, unitname=None, unitmeter=None, upaxis=None, contributors=None, xmlnode=None):
         """Create a new set of information about an asset
 
         :param datetime.datetime created:
@@ -200,59 +206,68 @@ class Asset(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        contributornodes = node.findall(collada.tag('contributor') )
+        contributornodes = node.findall(collada.tag('contributor'))
         contributors = []
         for contributornode in contributornodes:
             contributors.append(Contributor.load(collada, localscope, contributornode))
 
-        created = node.find(collada.tag('created') )
+        created = node.find(collada.tag('created'))
         if created is not None:
-            try: created = dateutil.parser.parse(created.text)
-            except: created = None
+            try:
+                created = dateutil.parser.parse(created.text)
+            except BaseException:
+                created = None
 
-        keywords = node.find(collada.tag('keywords') )
-        if keywords is not None: keywords = keywords.text
+        keywords = node.find(collada.tag('keywords'))
+        if keywords is not None:
+            keywords = keywords.text
 
-        modified = node.find(collada.tag('modified') )
+        modified = node.find(collada.tag('modified'))
         if modified is not None:
-            try: modified = dateutil.parser.parse(modified.text)
-            except: modified = None
+            try:
+                modified = dateutil.parser.parse(modified.text)
+            except BaseException:
+                modified = None
 
-        revision = node.find(collada.tag('revision') )
-        if revision is not None: revision = revision.text
+        revision = node.find(collada.tag('revision'))
+        if revision is not None:
+            revision = revision.text
 
-        subject = node.find(collada.tag('subject') )
-        if subject is not None: subject = subject.text
+        subject = node.find(collada.tag('subject'))
+        if subject is not None:
+            subject = subject.text
 
-        title = node.find(collada.tag('title') )
-        if title is not None: title = title.text
+        title = node.find(collada.tag('title'))
+        if title is not None:
+            title = title.text
 
-        unitnode = node.find(collada.tag('unit') )
+        unitnode = node.find(collada.tag('unit'))
         if unitnode is not None:
             unitname = unitnode.get('name')
-            try: unitmeter = float(unitnode.get('meter'))
-            except:
+            try:
+                unitmeter = float(unitnode.get('meter'))
+            except BaseException:
                 unitname = None
                 unitmeter = None
         else:
             unitname = None
             unitmeter = None
 
-        upaxis = node.find(collada.tag('up_axis') )
+        upaxis = node.find(collada.tag('up_axis'))
         if upaxis is not None:
             upaxis = upaxis.text
-            if not(upaxis == UP_AXIS.X_UP or upaxis == UP_AXIS.Y_UP or \
+            if not (upaxis == UP_AXIS.X_UP or
+                    upaxis == UP_AXIS.Y_UP or
                     upaxis == UP_AXIS.Z_UP):
                 upaxis = None
 
         return Asset(created=created, modified=modified, title=title,
-                subject=subject, revision=revision, keywords=keywords,
-                unitname=unitname, unitmeter=unitmeter, upaxis=upaxis,
-                contributors=contributors, xmlnode=node)
+                     subject=subject, revision=revision, keywords=keywords,
+                     unitname=unitname, unitmeter=unitmeter, upaxis=upaxis,
+                     contributors=contributors, xmlnode=node)
 
     def __str__(self):
         return '<Asset title=%s>' % (str(self.title),)
 
     def __repr__(self):
         return str(self)
-

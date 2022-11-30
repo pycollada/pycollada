@@ -15,16 +15,15 @@
 import numpy
 
 from collada import primitive
-from collada.util import toUnitVec, checkSource, xrange
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-        DaeMalformedError, DaeUnsupportedError
-from collada.xmlutil import etree as ElementTree
+from collada.util import checkSource, xrange
+from collada.common import E
+from collada.common import DaeIncompleteError, DaeMalformedError
 
 
 class Line(object):
     """Single line representation. Represents the line between two points
     ``(x0,y0,z0)`` and ``(x1,y1,z1)``. A Line is read-only."""
+
     def __init__(self, indices, vertices, normals, texcoords, material):
         """A Line should not be created manually."""
 
@@ -46,7 +45,7 @@ class Line(object):
         # Note: we can't generate normals for lines if there are none
 
     def __repr__(self):
-        return '<Line (%s, %s, "%s")>'%(str(self.vertices[0]), str(self.vertices[1]), str(self.material))
+        return '<Line (%s, %s, "%s")>' % (str(self.vertices[0]), str(self.vertices[1]), str(self.material))
 
     def __str__(self):
         return repr(self)
@@ -67,11 +66,13 @@ class LineSet(primitive.Primitive):
         creating a geometry instance.
         """
 
-        if len(sources) == 0: raise DaeIncompleteError('A line set needs at least one input for vertex positions')
-        if not sources.get('VERTEX'): raise DaeIncompleteError('Line set requires vertex input')
+        if len(sources) == 0:
+            raise DaeIncompleteError('A line set needs at least one input for vertex positions')
+        if not sources.get('VERTEX'):
+            raise DaeIncompleteError('Line set requires vertex input')
 
-        #find max offset
-        max_offset = max([ max([input[0] for input in input_type_array])
+        # find max offset
+        max_offset = max([max([input[0] for input in input_type_array])
                           for input_type_array in sources.values() if len(input_type_array) > 0])
 
         self.sources = sources
@@ -84,10 +85,10 @@ class LineSet(primitive.Primitive):
 
         if len(self.index) > 0:
             self._vertex = sources['VERTEX'][0][4].data
-            self._vertex_index = self.index[:,:, sources['VERTEX'][0][0]]
-            self.maxvertexindex = numpy.max( self._vertex_index )
+            self._vertex_index = self.index[:, :, sources['VERTEX'][0][0]]
+            self.maxvertexindex = numpy.max(self._vertex_index)
             checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'),
-                    self.maxvertexindex)
+                        self.maxvertexindex)
         else:
             self._vertex = None
             self._vertex_index = None
@@ -96,10 +97,10 @@ class LineSet(primitive.Primitive):
         if 'NORMAL' in sources and len(sources['NORMAL']) > 0 \
                 and len(self.index) > 0:
             self._normal = sources['NORMAL'][0][4].data
-            self._normal_index = self.index[:,:, sources['NORMAL'][0][0]]
-            self.maxnormalindex = numpy.max( self._normal_index )
+            self._normal_index = self.index[:, :, sources['NORMAL'][0][0]]
+            self.maxnormalindex = numpy.max(self._normal_index)
             checkSource(sources['NORMAL'][0][4], ('X', 'Y', 'Z'),
-                    self.maxnormalindex)
+                        self.maxnormalindex)
         else:
             self._normal = None
             self._normal_index = None
@@ -108,11 +109,11 @@ class LineSet(primitive.Primitive):
         if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 \
                 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data
-                for texinput in sources['TEXCOORD']])
-            self._texcoord_indexset = tuple([ self.index[:,:, sources['TEXCOORD'][i][0]]
-                for i in xrange(len(sources['TEXCOORD'])) ])
+                                       for texinput in sources['TEXCOORD']])
+            self._texcoord_indexset = tuple([self.index[:, :, sources['TEXCOORD'][i][0]]
+                                             for i in xrange(len(sources['TEXCOORD']))])
             self.maxtexcoordsetindex = [numpy.max(tex_index)
-                for tex_index in self._texcoord_indexset]
+                                        for tex_index in self._texcoord_indexset]
             for i, texinput in enumerate(sources['TEXCOORD']):
                 checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
         else:
@@ -125,7 +126,7 @@ class LineSet(primitive.Primitive):
             """ElementTree representation of the line set."""
         else:
             self.index.shape = (-1)
-            acclen = len(self.index)
+            len(self.index)
             txtindices = ' '.join(map(str, self.index.tolist()))
             self.index.shape = (-1, 2, self.nindices)
 
@@ -138,7 +139,7 @@ class LineSet(primitive.Primitive):
                 all_inputs.extend(semantic_list)
             for offset, semantic, sourceid, set, src in all_inputs:
                 inpnode = E.input(offset=str(offset), semantic=semantic,
-                        source=sourceid)
+                                  source=sourceid)
                 if set is not None:
                     inpnode.set('set', str(set))
                 self.xmlnode.append(inpnode)
@@ -150,30 +151,32 @@ class LineSet(primitive.Primitive):
         return len(self.index)
 
     def __getitem__(self, i):
-        v = self._vertex[ self._vertex_index[i] ]
+        v = self._vertex[self._vertex_index[i]]
         if self._normal is None:
             n = None
         else:
-            n = self._normal[ self._normal_index[i] ]
+            n = self._normal[self._normal_index[i]]
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uv.append( self._texcoordset[j][ uvindex[i] ] )
+            uv.append(self._texcoordset[j][uvindex[i]])
         return Line(self._vertex_index[i], v, n, uv, self.material)
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load(collada, localscope, node):
         indexnode = node.find(collada.tag('p'))
-        if indexnode is None: raise DaeIncompleteError('Missing index in line set')
+        if indexnode is None:
+            raise DaeIncompleteError('Missing index in line set')
 
         source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
 
         try:
             if indexnode.text is None or indexnode.text.isspace():
-                index = numpy.array([],  dtype=numpy.int32)
+                index = numpy.array([], dtype=numpy.int32)
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
             index[numpy.isnan(index)] = 0
-        except: raise DaeMalformedError('Corrupted index in line set')
+        except BaseException:
+            raise DaeMalformedError('Corrupted index in line set')
 
         lineset = LineSet(source_array, node.get('material'), index, node)
         lineset.xmlnode = node
@@ -181,7 +184,7 @@ class LineSet(primitive.Primitive):
 
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound line set from this line set, transform and material mapping"""
-        return BoundLineSet( self, matrix, materialnodebysymbol)
+        return BoundLineSet(self, matrix, materialnodebysymbol)
 
     def __str__(self):
         return '<LineSet length=%d>' % len(self)
@@ -205,17 +208,18 @@ class BoundLineSet(primitive.BoundPrimitive):
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None
         if ls._vertex is not None:
-            self._vertex = numpy.asarray(ls._vertex * M[:3,:3]) + matrix[:3,3]
+            self._vertex = numpy.asarray(ls._vertex * M[:3, :3]) + matrix[:3, 3]
         self._normal = None
         if ls._normal is not None:
-            self._normal = numpy.asarray(ls._normal * M[:3,:3])
+            self._normal = numpy.asarray(ls._normal * M[:3, :3])
         self._texcoordset = ls._texcoordset
-        matnode = materialnodebysymbol.get( ls.material )
+        matnode = materialnodebysymbol.get(ls.material)
         if matnode:
             self.material = matnode.target
-            self.inputmap = dict([ (sem, (input_sem, set))
-                for sem, input_sem, set in matnode.inputs ])
-        else: self.inputmap = self.material = None
+            self.inputmap = dict([(sem, (input_sem, set))
+                                  for sem, input_sem, set in matnode.inputs])
+        else:
+            self.inputmap = self.material = None
         self.index = ls.index
         self._vertex_index = ls._vertex_index
         self._normal_index = ls._normal_index
@@ -227,14 +231,14 @@ class BoundLineSet(primitive.BoundPrimitive):
         return len(self.index)
 
     def __getitem__(self, i):
-        v = self._vertex[ self._vertex_index[i] ]
+        v = self._vertex[self._vertex_index[i]]
         if self._normal is None:
             n = None
         else:
-            n = self._normal[ self._normal_index[i] ]
+            n = self._normal[self._normal_index[i]]
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uv.append( self._texcoordset[j][ uvindex[i] ] )
+            uv.append(self._texcoordset[j][uvindex[i]])
         return Line(self._vertex_index[i], v, n, uv, self.material)
 
     def lines(self):
@@ -242,7 +246,8 @@ class BoundLineSet(primitive.BoundPrimitive):
 
         :rtype: generator of :class:`collada.lineset.Line`
         """
-        for i in xrange(self.nlines): yield self[i]
+        for i in xrange(self.nlines):
+            yield self[i]
 
     def shapes(self):
         """Iterate through all the lines contained in the set.
@@ -256,4 +261,3 @@ class BoundLineSet(primitive.BoundPrimitive):
 
     def __repr__(self):
         return str(self)
-

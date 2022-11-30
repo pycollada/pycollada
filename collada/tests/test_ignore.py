@@ -1,5 +1,4 @@
 import os
-import numpy
 import unittest
 
 import collada
@@ -25,7 +24,7 @@ class TestColladaIgnore(unittest.TestCase):
         f = os.path.join(self.datadir, "cube_tristrips.dae")
         raised = False
         try:
-            mesh = collada.Collada(f)
+            collada.Collada(f)
         except DaeIncompleteError:
             # this should have raised
             raised = True
@@ -34,7 +33,7 @@ class TestColladaIgnore(unittest.TestCase):
 
         raised = False
         try:
-            mesh = collada.Collada(
+            collada.Collada(
                 f, ignore=[DaeMalformedError])
         except DaeIncompleteError:
             raised = True
@@ -62,7 +61,7 @@ class TestColladaIgnore(unittest.TestCase):
         f = os.path.join(self.datadir, "earthCylindrical.DAE")
         raised = False
         try:
-            mesh = collada.Collada(f)
+            collada.Collada(f)
         except DaeMalformedError:
             # this should have raised
             raised = True
@@ -71,7 +70,7 @@ class TestColladaIgnore(unittest.TestCase):
 
         raised = False
         try:
-            mesh = collada.Collada(f, ignore=[DaeMalformedError])
+            collada.Collada(f, ignore=[DaeMalformedError])
         except DaeError:
             # this should have raised
             raised = True
@@ -79,10 +78,10 @@ class TestColladaIgnore(unittest.TestCase):
             raise ValueError('should have raised an error!')
 
         # should't have crashed
-        m = collada.Collada(f, ignore=[DaeMalformedError,
-                                       DaeBrokenRefError])
+        collada.Collada(f, ignore=[DaeMalformedError,
+                                   DaeBrokenRefError])
         # should have also loaded using the parent class
-        m = collada.Collada(f, ignore=[DaeError])
+        collada.Collada(f, ignore=[DaeError])
 
 
 if __name__ == '__main__':

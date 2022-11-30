@@ -16,6 +16,7 @@ from collada import source
 from collada.common import DaeObject
 from collada.common import DaeError
 
+
 class Animation(DaeObject):
     """Class for holding animation data coming from <animation> tags."""
 
@@ -29,7 +30,7 @@ class Animation(DaeObject):
             self.xmlnode = None
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load(collada, localscope, node):
         id = node.get('id') or ''
         name = node.get('name') or ''
 
@@ -53,5 +54,8 @@ class Animation(DaeObject):
         anim = Animation(id, name, sourcebyid, children, node)
         return anim
 
-    def __str__(self): return '<Animation id=%s, children=%d>' % (self.id, len(self.children))
-    def __repr__(self): return str(self)
+    def __str__(self):
+        return '<Animation id=%s, children=%d>' % (self.id, len(self.children))
+
+    def __repr__(self):
+        return str(self)

@@ -1,4 +1,4 @@
-#encoding:UTF-8
+# encoding:UTF-8
 ####################################################################
 #                                                                  #
 # THIS FILE IS PART OF THE pycollada LIBRARY SOURCE CODE.          #
@@ -30,11 +30,13 @@ XML_XSD = str(resource_string(
     'collada',
     'resources/xsd.xml').decode('utf-8'))
 
+
 class ColladaResolver(lxml.etree.Resolver):
     """COLLADA XML Resolver. If a known URL referenced
     from the COLLADA spec is resolved, a cached local
     copy is returned instead of initiating a network
     request"""
+
     def resolve(self, url, id, context):
         """Currently Resolves:
          * http://www.w3.org/2001/03/xml.xsd
@@ -58,10 +60,10 @@ class ColladaValidator(object):
             self._parser = lxml.etree.XMLParser()
             self._parser.resolvers.add(ColladaResolver())
             self.COLLADA_SCHEMA_1_4_1_DOC = lxml.etree.parse(
-                    BytesIO(bytes(COLLADA_SCHEMA_1_4_1, encoding='utf-8')),
-                    self._parser)
+                BytesIO(bytes(COLLADA_SCHEMA_1_4_1, encoding='utf-8')),
+                self._parser)
             self._COLLADA_SCHEMA_1_4_1_INSTANCE = lxml.etree.XMLSchema(
-                    self.COLLADA_SCHEMA_1_4_1_DOC)
+                self.COLLADA_SCHEMA_1_4_1_DOC)
         return self._COLLADA_SCHEMA_1_4_1_INSTANCE
 
     COLLADA_SCHEMA_1_4_1_INSTANCE = property(_getColladaSchemaInstance)
@@ -70,4 +72,3 @@ class ColladaValidator(object):
     def validate(self, *args, **kwargs):
         """A wrapper for lxml.XMLSchema.validate"""
         return self.COLLADA_SCHEMA_1_4_1_INSTANCE.validate(*args, **kwargs)
-

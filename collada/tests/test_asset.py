@@ -99,5 +99,6 @@ class TestAsset(unittest.TestCase):
         self.assertEqual(asset.modified, time2)
         self.assertEqual(len(asset.contributors), 2)
 
+
 if __name__ == '__main__':
     unittest.main()

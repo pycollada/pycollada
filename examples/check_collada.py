@@ -5,9 +5,9 @@ import traceback
 print('Attempting to load file %s' % sys.argv[1])
 
 try:
-    col = collada.Collada(sys.argv[1], \
-            ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError])
-except:
+    col = collada.Collada(sys.argv[1],
+                          ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError])
+except BaseException:
     traceback.print_exc()
     print()
     print("Failed to load collada file.")
