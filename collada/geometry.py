@@ -182,9 +182,7 @@ class Geometry(DaeObject):
             sourcebyid[ch.id] = ch
 
         verticesnode = meshnode.find(collada.tag('vertices'))
-        if verticesnode is None:
-            pass
-        else:
+        if verticesnode is not None:
             inputnodes = {}
             for inputnode in verticesnode.findall(collada.tag('input')):
                 semantic = inputnode.get('semantic')
