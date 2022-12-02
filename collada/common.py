@@ -23,7 +23,7 @@ def tagger(namespace=None):
     """
     A closure, or function that returns a function.
     Returned function tags using a specified namespace.
-    
+
     :param string namespace:
       The XML namespace to use to tag elements
 
@@ -33,6 +33,7 @@ def tagger(namespace=None):
     def tag(text):
         return str(etree.QName(namespace, text))
     return tag
+
 
 class DaeObject(object):
     """This class is the abstract interface to all collada objects.
@@ -71,10 +72,12 @@ class DaeObject(object):
     def save(self):
         """Put all the data to the internal xml node (xmlnode) so it can be serialized."""
 
+
 class DaeError(Exception):
     """General DAE exception."""
+
     def __init__(self, msg):
-        super(DaeError,self).__init__()
+        super(DaeError, self).__init__()
         self.msg = msg
 
     def __str__(self):
@@ -83,23 +86,22 @@ class DaeError(Exception):
     def __repr__(self):
         return type(self).__name__ + '("' + self.msg + '")'
 
+
 class DaeIncompleteError(DaeError):
     """Raised when needed data for an object isn't there."""
-    pass
+
 
 class DaeBrokenRefError(DaeError):
     """Raised when a referenced object is not found in the scope."""
-    pass
+
 
 class DaeMalformedError(DaeError):
     """Raised when data is found to be corrupted in some way."""
-    pass
+
 
 class DaeUnsupportedError(DaeError):
     """Raised when some unexpectedly unsupported feature is found."""
-    pass
+
 
 class DaeSaveValidationError(DaeError):
     """Raised when XML validation fails when saving."""
-    pass
-

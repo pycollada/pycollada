@@ -16,15 +16,14 @@ import numpy
 
 from collada import primitive
 from collada import triangleset
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-        DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource, xrange
-from collada.xmlutil import etree as ElementTree
+from collada.common import E
+from collada.common import DaeIncompleteError, DaeMalformedError
+from collada.util import checkSource, xrange
 
 
 class Polygon(object):
     """Single polygon representation. Represents a polygon of N points."""
+
     def __init__(self, indices, vertices, normal_indices, normals, texcoord_indices, texcoords, material):
         """A Polygon should not be created manually."""
 
@@ -59,28 +58,28 @@ class Polygon(object):
 
         npts = len(self.vertices)
 
-        for i in range(npts-2):
+        for i in range(npts - 2):
 
             tri_indices = numpy.array([
-                self.indices[0], self.indices[i+1], self.indices[i+2]
-                ], dtype=numpy.float32)
+                self.indices[0], self.indices[i + 1], self.indices[i + 2]
+            ], dtype=numpy.float32)
 
             tri_vertices = numpy.array([
-                self.vertices[0], self.vertices[i+1], self.vertices[i+2]
-                ], dtype=numpy.float32)
+                self.vertices[0], self.vertices[i + 1], self.vertices[i + 2]
+            ], dtype=numpy.float32)
 
             if self.normals is None:
                 tri_normals = None
                 normal_indices = None
             else:
                 tri_normals = numpy.array([
-                    self.normals[0], self.normals[i+1], self.normals[i+2]
-                    ], dtype=numpy.float32)
+                    self.normals[0], self.normals[i + 1], self.normals[i + 2]
+                ], dtype=numpy.float32)
                 normal_indices = numpy.array([
                     self.normal_indices[0],
-                    self.normal_indices[i+1],
-                    self.normal_indices[i+2]
-                    ], dtype=numpy.float32)
+                    self.normal_indices[i + 1],
+                    self.normal_indices[i + 2]
+                ], dtype=numpy.float32)
 
             tri_texcoords = []
             tri_texcoord_indices = []
@@ -88,20 +87,20 @@ class Polygon(object):
                     self.texcoords, self.texcoord_indices):
                 tri_texcoords.append(numpy.array([
                     texcoord[0],
-                    texcoord[i+1],
-                    texcoord[i+2]
-                    ], dtype=numpy.float32))
+                    texcoord[i + 1],
+                    texcoord[i + 2]
+                ], dtype=numpy.float32))
                 tri_texcoord_indices.append(numpy.array([
                     texcoord_indices[0],
-                    texcoord_indices[i+1],
-                    texcoord_indices[i+2]
-                    ], dtype=numpy.float32))
+                    texcoord_indices[i + 1],
+                    texcoord_indices[i + 2]
+                ], dtype=numpy.float32))
 
             tri = triangleset.Triangle(
-                    tri_indices, tri_vertices,
-                    normal_indices, tri_normals,
-                    tri_texcoord_indices, tri_texcoords,
-                    self.material)
+                tri_indices, tri_vertices,
+                normal_indices, tri_normals,
+                tri_texcoord_indices, tri_texcoords,
+                self.material)
             yield tri
 
     def __repr__(self):
@@ -127,11 +126,13 @@ class Polylist(primitive.Primitive):
         creating a geometry instance.
         """
 
-        if len(sources) == 0: raise DaeIncompleteError('A polylist set needs at least one input for vertex positions')
-        if not 'VERTEX' in sources: raise DaeIncompleteError('Polylist requires vertex input')
+        if len(sources) == 0:
+            raise DaeIncompleteError('A polylist set needs at least one input for vertex positions')
+        if 'VERTEX' not in sources:
+            raise DaeIncompleteError('Polylist requires vertex input')
 
-        #find max offset
-        max_offset = max([ max([input[0] for input in input_type_array])
+        # find max offset
+        max_offset = max([max([input[0] for input in input_type_array])
                           for input_type_array in sources.values() if len(input_type_array) > 0])
 
         self.material = material
@@ -149,8 +150,8 @@ class Polylist(primitive.Primitive):
 
         if len(self.index) > 0:
             self._vertex = sources['VERTEX'][0][4].data
-            self._vertex_index = self.index[:,sources['VERTEX'][0][0]]
-            self.maxvertexindex = numpy.max( self._vertex_index )
+            self._vertex_index = self.index[:, sources['VERTEX'][0][0]]
+            self.maxvertexindex = numpy.max(self._vertex_index)
             checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
         else:
             self._vertex = None
@@ -159,8 +160,8 @@ class Polylist(primitive.Primitive):
 
         if 'NORMAL' in sources and len(sources['NORMAL']) > 0 and len(self.index) > 0:
             self._normal = sources['NORMAL'][0][4].data
-            self._normal_index = self.index[:,sources['NORMAL'][0][0]]
-            self.maxnormalindex = numpy.max( self._normal_index )
+            self._normal_index = self.index[:, sources['NORMAL'][0][0]]
+            self.maxnormalindex = numpy.max(self._normal_index)
             checkSource(sources['NORMAL'][0][4], ('X', 'Y', 'Z'), self.maxnormalindex)
         else:
             self._normal = None
@@ -170,11 +171,11 @@ class Polylist(primitive.Primitive):
         if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 \
                 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data
-                for texinput in sources['TEXCOORD']])
-            self._texcoord_indexset = tuple([ self.index[:,sources['TEXCOORD'][i][0]]
-                for i in xrange(len(sources['TEXCOORD'])) ])
+                                       for texinput in sources['TEXCOORD']])
+            self._texcoord_indexset = tuple([self.index[:, sources['TEXCOORD'][i][0]]
+                                             for i in xrange(len(sources['TEXCOORD']))])
             self.maxtexcoordsetindex = [numpy.max(each)
-                for each in self._texcoord_indexset]
+                                        for each in self._texcoord_indexset]
             for i, texinput in enumerate(sources['TEXCOORD']):
                 checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
         else:
@@ -187,7 +188,6 @@ class Polylist(primitive.Primitive):
             """ElementTree representation of the line set."""
         else:
             txtindices = ' '.join(map(str, self.indices.flatten().tolist()))
-            acclen = len(self.indices)
 
             self.xmlnode = E.polylist(count=str(self.npolygons))
             if self.material is not None:
@@ -198,7 +198,7 @@ class Polylist(primitive.Primitive):
                 all_inputs.extend(semantic_list)
             for offset, semantic, sourceid, set, src in all_inputs:
                 inpnode = E.input(offset=str(offset), semantic=semantic,
-                        source=sourceid)
+                                  source=sourceid)
                 if set is not None:
                     inpnode.set('set', str(set))
                 self.xmlnode.append(inpnode)
@@ -225,12 +225,13 @@ class Polylist(primitive.Primitive):
         uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uvindices.append( uvindex[polyrange[0]:polyrange[1]] )
-            uv.append( self._texcoordset[j][ uvindex[polyrange[0]:polyrange[1]] ] )
+            uvindices.append(uvindex[polyrange[0]:polyrange[1]])
+            uv.append(self._texcoordset[j][uvindex[polyrange[0]:polyrange[1]]])
 
         return Polygon(vertindex, v, normalindex, n, uvindices, uv, self.material)
 
     _triangleset = None
+
     def triangleset(self):
         """This performs a simple triangulation of the polylist using the fanning method.
 
@@ -239,8 +240,8 @@ class Polylist(primitive.Primitive):
 
         if self._triangleset is None:
             indexselector = numpy.zeros(self.nvertices) == 0
-            indexselector[self.polyindex[:,1]-1] = False
-            indexselector[self.polyindex[:,1]-2] = False
+            indexselector[self.polyindex[:, 1] - 1] = False
+            indexselector[self.polyindex[:, 1] - 2] = False
             indexselector = numpy.arange(self.nvertices)[indexselector]
 
             firstpolyindex = numpy.arange(self.nvertices)
@@ -248,10 +249,10 @@ class Polylist(primitive.Primitive):
             firstpolyindex = firstpolyindex[indexselector]
 
             if len(self.index) > 0:
-                triindex = numpy.dstack( (self.index[indexselector-firstpolyindex],
-                                          self.index[indexselector+1],
-                                          self.index[indexselector+2]) )
-                triindex = numpy.swapaxes(triindex, 1,2).flatten()
+                triindex = numpy.dstack((self.index[indexselector - firstpolyindex],
+                                         self.index[indexselector + 1],
+                                         self.index[indexselector + 2]))
+                triindex = numpy.swapaxes(triindex, 1, 2).flatten()
             else:
                 triindex = numpy.array([], dtype=self.index.dtype)
 
@@ -261,11 +262,13 @@ class Polylist(primitive.Primitive):
         return self._triangleset
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load(collada, localscope, node):
         indexnode = node.find(collada.tag('p'))
-        if indexnode is None: raise DaeIncompleteError('Missing index in polylist')
+        if indexnode is None:
+            raise DaeIncompleteError('Missing index in polylist')
         vcountnode = node.find(collada.tag('vcount'))
-        if vcountnode is None: raise DaeIncompleteError('Missing vcount in polylist')
+        if vcountnode is None:
+            raise DaeIncompleteError('Missing vcount in polylist')
 
         try:
             if vcountnode.text is None or vcountnode.text.isspace():
@@ -273,7 +276,7 @@ class Polylist(primitive.Primitive):
             else:
                 vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
             vcounts[numpy.isnan(vcounts)] = 0
-        except ValueError as ex:
+        except ValueError:
             raise DaeMalformedError('Corrupted vcounts in polylist')
 
         all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
@@ -284,14 +287,15 @@ class Polylist(primitive.Primitive):
             else:
                 index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
             index[numpy.isnan(index)] = 0
-        except: raise DaeMalformedError('Corrupted index in polylist')
+        except BaseException:
+            raise DaeMalformedError('Corrupted index in polylist')
 
         polylist = Polylist(all_inputs, node.get('material'), index, vcounts, node)
         return polylist
 
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound polylist from this polylist, transform and material mapping"""
-        return BoundPolylist( self, matrix, materialnodebysymbol)
+        return BoundPolylist(self, matrix, materialnodebysymbol)
 
     def __str__(self):
         return '<Polylist length=%d>' % len(self)
@@ -312,14 +316,15 @@ class BoundPolylist(primitive.BoundPrimitive):
         """Create a bound polylist from a polylist, transform and material mapping.
         This gets created when a polylist is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
-        self._vertex = None if pl._vertex is None else numpy.asarray(pl._vertex * M[:3,:3]) + matrix[:3,3]
-        self._normal = None if pl._normal is None else numpy.asarray(pl._normal * M[:3,:3])
+        self._vertex = None if pl._vertex is None else numpy.asarray(pl._vertex * M[:3, :3]) + matrix[:3, 3]
+        self._normal = None if pl._normal is None else numpy.asarray(pl._normal * M[:3, :3])
         self._texcoordset = pl._texcoordset
-        matnode = materialnodebysymbol.get( pl.material )
+        matnode = materialnodebysymbol.get(pl.material)
         if matnode:
             self.material = matnode.target
-            self.inputmap = dict([ (sem, (input_sem, set)) for sem, input_sem, set in matnode.inputs ])
-        else: self.inputmap = self.material = None
+            self.inputmap = dict([(sem, (input_sem, set)) for sem, input_sem, set in matnode.inputs])
+        else:
+            self.inputmap = self.material = None
         self.index = pl.index
         self.nvertices = pl.nvertices
         self._vertex_index = pl._vertex_index
@@ -331,7 +336,8 @@ class BoundPolylist(primitive.BoundPrimitive):
         self.materialnodebysymbol = materialnodebysymbol
         self.original = pl
 
-    def __len__(self): return self.npolygons
+    def __len__(self):
+        return self.npolygons
 
     def __getitem__(self, i):
         polyrange = self.polyindex[i]
@@ -348,12 +354,13 @@ class BoundPolylist(primitive.BoundPrimitive):
         uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uvindices.append( uvindex[polyrange[0]:polyrange[1]] )
-            uv.append( self._texcoordset[j][ uvindex[polyrange[0]:polyrange[1]] ] )
+            uvindices.append(uvindex[polyrange[0]:polyrange[1]])
+            uv.append(self._texcoordset[j][uvindex[polyrange[0]:polyrange[1]]])
 
         return Polygon(vertindex, v, normalindex, n, uvindices, uv, self.material)
 
     _triangleset = None
+
     def triangleset(self):
         """This performs a simple triangulation of the polylist using the fanning method.
 
@@ -370,7 +377,8 @@ class BoundPolylist(primitive.BoundPrimitive):
 
         :rtype: generator of :class:`collada.polylist.Polygon`
         """
-        for i in xrange(self.npolygons): yield self[i]
+        for i in xrange(self.npolygons):
+            yield self[i]
 
     def shapes(self):
         """Iterate through all the polygons contained in the set.
@@ -384,4 +392,3 @@ class BoundPolylist(primitive.BoundPrimitive):
 
     def __repr__(self):
         return str(self)
-

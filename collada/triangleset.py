@@ -15,17 +15,16 @@
 import numpy
 
 from collada import primitive
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-        DaeMalformedError, DaeUnsupportedError
+from collada.common import E
+from collada.common import DaeIncompleteError, DaeMalformedError
 from collada.util import toUnitVec, checkSource, normalize_v3, dot_v3, xrange
-from collada.xmlutil import etree as ElementTree
 
 
 class Triangle(object):
     """Single triangle representation."""
+
     def __init__(self, indices, vertices, normal_indices, normals,
-            texcoord_indices, texcoords, material):
+                 texcoord_indices, texcoords, material):
         """A triangle should not be created manually."""
 
         self.vertices = vertices
@@ -52,7 +51,7 @@ class Triangle(object):
            vertices in the texcoord array."""
 
         if self.normals is None:
-            #generate normals
+            # generate normals
             vec1 = numpy.subtract(vertices[0], vertices[1])
             vec2 = numpy.subtract(vertices[2], vertices[0])
             vec3 = toUnitVec(numpy.cross(toUnitVec(vec2), toUnitVec(vec1)))
@@ -60,8 +59,9 @@ class Triangle(object):
 
     def __repr__(self):
         return '<Triangle (%s, %s, %s, "%s")>' % (str(self.vertices[0]),
-                str(self.vertices[1]), str(self.vertices[2]),
-                str(self.material))
+                                                  str(self.vertices[1]), str(self.vertices[2]),
+                                                  str(self.material))
+
     def __str__(self):
         return repr(self)
 
@@ -85,10 +85,10 @@ class TriangleSet(primitive.Primitive):
 
         if len(sources) == 0:
             raise DaeIncompleteError('A triangle set needs at least one input for vertex positions')
-        if not 'VERTEX' in sources:
+        if 'VERTEX' not in sources:
             raise DaeIncompleteError('Triangle set requires vertex input')
 
-        max_offset = max([ max([input[0] for input in input_type_array])
+        max_offset = max([max([input[0] for input in input_type_array])
                           for input_type_array in sources.values()
                           if len(input_type_array) > 0])
 
@@ -102,8 +102,8 @@ class TriangleSet(primitive.Primitive):
 
         if len(self.index) > 0:
             self._vertex = sources['VERTEX'][0][4].data
-            self._vertex_index = self.index[:,:, sources['VERTEX'][0][0]]
-            self.maxvertexindex = numpy.max( self._vertex_index )
+            self._vertex_index = self.index[:, :, sources['VERTEX'][0][0]]
+            self.maxvertexindex = numpy.max(self._vertex_index)
             checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'), self.maxvertexindex)
         else:
             self._vertex = None
@@ -112,8 +112,8 @@ class TriangleSet(primitive.Primitive):
 
         if 'NORMAL' in sources and len(sources['NORMAL']) > 0 and len(self.index) > 0:
             self._normal = sources['NORMAL'][0][4].data
-            self._normal_index = self.index[:,:, sources['NORMAL'][0][0]]
-            self.maxnormalindex = numpy.max( self._normal_index )
+            self._normal_index = self.index[:, :, sources['NORMAL'][0][0]]
+            self.maxnormalindex = numpy.max(self._normal_index)
             checkSource(sources['NORMAL'][0][4], ('X', 'Y', 'Z'), self.maxnormalindex)
         else:
             self._normal = None
@@ -122,9 +122,9 @@ class TriangleSet(primitive.Primitive):
 
         if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
-            self._texcoord_indexset = tuple([ self.index[:,:, sources['TEXCOORD'][i][0]]
-                                             for i in xrange(len(sources['TEXCOORD'])) ])
-            self.maxtexcoordsetindex = [ numpy.max( tex_index ) for tex_index in self._texcoord_indexset ]
+            self._texcoord_indexset = tuple([self.index[:, :, sources['TEXCOORD'][i][0]]
+                                             for i in xrange(len(sources['TEXCOORD']))])
+            self.maxtexcoordsetindex = [numpy.max(tex_index) for tex_index in self._texcoord_indexset]
             for i, texinput in enumerate(sources['TEXCOORD']):
                 checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
         else:
@@ -134,9 +134,9 @@ class TriangleSet(primitive.Primitive):
 
         if 'TEXTANGENT' in sources and len(sources['TEXTANGENT']) > 0 and len(self.index) > 0:
             self._textangentset = tuple([texinput[4].data for texinput in sources['TEXTANGENT']])
-            self._textangent_indexset = tuple([ self.index[:,:, sources['TEXTANGENT'][i][0]]
-                                             for i in xrange(len(sources['TEXTANGENT'])) ])
-            self.maxtextangentsetindex = [ numpy.max( tex_index ) for tex_index in self._textangent_indexset ]
+            self._textangent_indexset = tuple([self.index[:, :, sources['TEXTANGENT'][i][0]]
+                                               for i in xrange(len(sources['TEXTANGENT']))])
+            self.maxtextangentsetindex = [numpy.max(tex_index) for tex_index in self._textangent_indexset]
             for i, texinput in enumerate(sources['TEXTANGENT']):
                 checkSource(texinput[4], ('X', 'Y', 'Z'), self.maxtextangentsetindex[i])
         else:
@@ -146,9 +146,9 @@ class TriangleSet(primitive.Primitive):
 
         if 'TEXBINORMAL' in sources and len(sources['TEXBINORMAL']) > 0 and len(self.index) > 0:
             self._texbinormalset = tuple([texinput[4].data for texinput in sources['TEXBINORMAL']])
-            self._texbinormal_indexset = tuple([ self.index[:,:, sources['TEXBINORMAL'][i][0]]
-                                             for i in xrange(len(sources['TEXBINORMAL'])) ])
-            self.maxtexbinormalsetindex = [ numpy.max( tex_index ) for tex_index in self._texbinormal_indexset ]
+            self._texbinormal_indexset = tuple([self.index[:, :, sources['TEXBINORMAL'][i][0]]
+                                                for i in xrange(len(sources['TEXBINORMAL']))])
+            self.maxtexbinormalsetindex = [numpy.max(tex_index) for tex_index in self._texbinormal_indexset]
             for i, texinput in enumerate(sources['TEXBINORMAL']):
                 checkSource(texinput[4], ('X', 'Y', 'Z'), self.maxtexbinormalsetindex[i])
         else:
@@ -156,7 +156,8 @@ class TriangleSet(primitive.Primitive):
             self._texbinormal_indexset = tuple()
             self.maxtexbinormalsetindex = -1
 
-        if xmlnode is not None: self.xmlnode = xmlnode
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
         else:
             self._recreateXmlNode()
 
@@ -165,7 +166,7 @@ class TriangleSet(primitive.Primitive):
 
     def _recreateXmlNode(self):
         self.index.shape = (-1)
-        acclen = len(self.index)
+        len(self.index)
         txtindices = ' '.join(map(str, self.index.tolist()))
         self.index.shape = (-1, 3, self.nindices)
 
@@ -185,19 +186,20 @@ class TriangleSet(primitive.Primitive):
         self.xmlnode.append(E.p(txtindices))
 
     def __getitem__(self, i):
-        v = self._vertex[ self._vertex_index[i] ]
-        n = self._normal[ self._normal_index[i] ] if self._normal is not None else None
+        v = self._vertex[self._vertex_index[i]]
+        n = self._normal[self._normal_index[i]] if self._normal is not None else None
         uvindices = []
         uv = []
         for j, uvindex in enumerate(self._texcoord_indexset):
-            uvindices.append( uvindex[i] )
-            uv.append( self._texcoordset[j][ uvindex[i] ] )
+            uvindices.append(uvindex[i])
+            uv.append(self._texcoordset[j][uvindex[i]])
         return Triangle(self._vertex_index[i], v, self._normal_index[i] if self._normal_index is not None else 0, n, uvindices, uv, self.material)
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load(collada, localscope, node):
         indexnodes = node.findall(collada.tag('p'))
-        if not indexnodes: raise DaeIncompleteError('Missing index in triangle set')
+        if not indexnodes:
+            raise DaeIncompleteError('Missing index in triangle set')
 
         source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
 
@@ -211,9 +213,9 @@ class TriangleSet(primitive.Primitive):
 
         indexlist = []
         tag_bare = node.tag.split('}')[-1]
-         
+
         extendfunc = _indexExtendFunctions[tag_bare]
-        
+
         max_offset = max(input[0] for input_type_array in source_array.values()
                          for input in input_type_array)
 
@@ -226,7 +228,7 @@ class TriangleSet(primitive.Primitive):
                 extendfunc(indexlist, index.reshape((-1, max_offset + 1)))
             else:
                 index = numpy.concatenate(indexlist)
-        except:
+        except BaseException:
             raise DaeMalformedError('Corrupted index in triangleset')
 
         triset = TriangleSet(source_array, node.get('material'), index, node)
@@ -235,18 +237,18 @@ class TriangleSet(primitive.Primitive):
 
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound triangle set from this triangle set, transform and material mapping"""
-        return BoundTriangleSet( self, matrix, materialnodebysymbol)
+        return BoundTriangleSet(self, matrix, materialnodebysymbol)
 
     def generateNormals(self):
         """If :attr:`normals` is `None` or you wish for normals to be
         recomputed, call this method to recompute them."""
-        norms = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
+        norms = numpy.zeros(self._vertex.shape, dtype=self._vertex.dtype)
         tris = self._vertex[self._vertex_index]
-        n = numpy.cross( tris[::,1] - tris[::,0], tris[::,2] - tris[::,0] )
+        n = numpy.cross(tris[::, 1] - tris[::, 0], tris[::, 2] - tris[::, 0])
         normalize_v3(n)
-        norms[ self._vertex_index[:,0] ] += n
-        norms[ self._vertex_index[:,1] ] += n
-        norms[ self._vertex_index[:,2] ] += n
+        norms[self._vertex_index[:, 0]] += n
+        norms[self._vertex_index[:, 1]] += n
+        norms[self._vertex_index[:, 2]] += n
         normalize_v3(norms)
 
         self._normal = norms
@@ -256,24 +258,24 @@ class TriangleSet(primitive.Primitive):
         """If there are no texture tangents, this method will compute them.
         Texture coordinates must exist and it uses the first texture coordinate set."""
 
-        #The following is taken from:
+        # The following is taken from:
         # http://www.terathon.com/code/tangent.html
         # It's pretty much a direct translation, using numpy arrays
 
         tris = self._vertex[self._vertex_index]
         uvs = self._texcoordset[0][self._texcoord_indexset[0]]
 
-        x1 = tris[:,1,0]-tris[:,0,0]
-        x2 = tris[:,2,0]-tris[:,1,0]
-        y1 = tris[:,1,1]-tris[:,0,1]
-        y2 = tris[:,2,1]-tris[:,1,1]
-        z1 = tris[:,1,2]-tris[:,0,2]
-        z2 = tris[:,2,2]-tris[:,1,2]
+        x1 = tris[:, 1, 0] - tris[:, 0, 0]
+        x2 = tris[:, 2, 0] - tris[:, 1, 0]
+        y1 = tris[:, 1, 1] - tris[:, 0, 1]
+        y2 = tris[:, 2, 1] - tris[:, 1, 1]
+        z1 = tris[:, 1, 2] - tris[:, 0, 2]
+        z2 = tris[:, 2, 2] - tris[:, 1, 2]
 
-        s1 = uvs[:,1,0]-uvs[:,0,0]
-        s2 = uvs[:,2,0]-uvs[:,1,0]
-        t1 = uvs[:,1,1]-uvs[:,0,1]
-        t2 = uvs[:,2,1]-uvs[:,1,1]
+        s1 = uvs[:, 1, 0] - uvs[:, 0, 0]
+        s2 = uvs[:, 2, 0] - uvs[:, 1, 0]
+        t1 = uvs[:, 1, 1] - uvs[:, 0, 1]
+        t2 = uvs[:, 2, 1] - uvs[:, 1, 1]
 
         r = 1.0 / (s1 * t2 - s2 * t1)
 
@@ -282,20 +284,20 @@ class TriangleSet(primitive.Primitive):
         sdirz = (t2 * z1 - t1 * z2) * r
         sdir = numpy.vstack((sdirx, sdiry, sdirz)).T
 
-        tans1 = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
-        tans1[ self._vertex_index[:,0] ] += sdir
-        tans1[ self._vertex_index[:,1] ] += sdir
-        tans1[ self._vertex_index[:,2] ] += sdir
+        tans1 = numpy.zeros(self._vertex.shape, dtype=self._vertex.dtype)
+        tans1[self._vertex_index[:, 0]] += sdir
+        tans1[self._vertex_index[:, 1]] += sdir
+        tans1[self._vertex_index[:, 2]] += sdir
 
         norm = self._normal[self._normal_index]
         norm.shape = (-1, 3)
         tan1 = tans1[self._vertex_index]
         tan1.shape = (-1, 3)
 
-        tangent = normalize_v3(tan1 - norm * dot_v3(norm, tan1)[:,numpy.newaxis])
+        tangent = normalize_v3(tan1 - norm * dot_v3(norm, tan1)[:, numpy.newaxis])
 
         self._textangentset = (tangent,)
-        self._textangent_indexset = (numpy.arange(len(self._vertex_index)*3, dtype=self._vertex_index.dtype),)
+        self._textangent_indexset = (numpy.arange(len(self._vertex_index) * 3, dtype=self._vertex_index.dtype),)
         self._textangent_indexset[0].shape = (len(self._vertex_index), 3)
 
         tdirx = (s1 * x2 - s2 * x1) * r
@@ -303,10 +305,10 @@ class TriangleSet(primitive.Primitive):
         tdirz = (s1 * z2 - s2 * z1) * r
         tdir = numpy.vstack((tdirx, tdiry, tdirz)).T
 
-        tans2 = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
-        tans2[ self._vertex_index[:,0] ] += tdir
-        tans2[ self._vertex_index[:,1] ] += tdir
-        tans2[ self._vertex_index[:,2] ] += tdir
+        tans2 = numpy.zeros(self._vertex.shape, dtype=self._vertex.dtype)
+        tans2[self._vertex_index[:, 0]] += tdir
+        tans2[self._vertex_index[:, 1]] += tdir
+        tans2[self._vertex_index[:, 2]] += tdir
 
         tan2 = tans2[self._vertex_index]
         tan2.shape = (-1, 3)
@@ -316,11 +318,11 @@ class TriangleSet(primitive.Primitive):
 
         binorm = numpy.cross(norm, tangent).flatten()
         binorm.shape = (-1, 3)
-        binorm = binorm * tanw[:,numpy.newaxis]
+        binorm = binorm * tanw[:, numpy.newaxis]
 
         self._texbinormalset = (binorm,)
         self._texbinormal_indexset = (numpy.arange(len(self._vertex_index) * 3,
-            dtype=self._vertex_index.dtype),)
+                                                   dtype=self._vertex_index.dtype),)
         self._texbinormal_indexset[0].shape = (len(self._vertex_index), 3)
 
     def __str__(self):
@@ -342,16 +344,17 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         """Create a bound triangle set from a triangle set, transform and material mapping.
         This gets created when a triangle set is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
-        self._vertex = None if ts.vertex is None else numpy.asarray(ts._vertex * M[:3,:3]) + matrix[:3,3]
-        self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3,:3])
+        self._vertex = None if ts.vertex is None else numpy.asarray(ts._vertex * M[:3, :3]) + matrix[:3, 3]
+        self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3, :3])
         self._texcoordset = ts._texcoordset
         self._textangentset = ts._textangentset
         self._texbinormalset = ts._texbinormalset
-        matnode = materialnodebysymbol.get( ts.material )
+        matnode = materialnodebysymbol.get(ts.material)
         if matnode:
             self.material = matnode.target
-            self.inputmap = dict([ (sem, (input_sem, set)) for sem, input_sem, set in matnode.inputs ])
-        else: self.inputmap = self.material = None
+            self.inputmap = dict([(sem, (input_sem, set)) for sem, input_sem, set in matnode.inputs])
+        else:
+            self.inputmap = self.material = None
         self.index = ts.index
         self._vertex_index = ts._vertex_index
         self._normal_index = ts._normal_index
@@ -388,7 +391,8 @@ class BoundTriangleSet(primitive.BoundPrimitive):
 
         :rtype: generator of :class:`collada.triangleset.Triangle`
         """
-        for i in xrange(self.ntriangles): yield self[i]
+        for i in xrange(self.ntriangles):
+            yield self[i]
 
     def shapes(self):
         """Iterate through all the triangles contained in the set.
@@ -400,13 +404,13 @@ class BoundTriangleSet(primitive.BoundPrimitive):
     def generateNormals(self):
         """If :attr:`normals` is `None` or you wish for normals to be
         recomputed, call this method to recompute them."""
-        norms = numpy.zeros( self._vertex.shape, dtype=self._vertex.dtype )
+        norms = numpy.zeros(self._vertex.shape, dtype=self._vertex.dtype)
         tris = self._vertex[self._vertex_index]
-        n = numpy.cross( tris[::,1] - tris[::,0], tris[::,2] - tris[::,0] )
+        n = numpy.cross(tris[::, 1] - tris[::, 0], tris[::, 2] - tris[::, 0])
         normalize_v3(n)
-        norms[ self._vertex_index[:,0] ] += n
-        norms[ self._vertex_index[:,1] ] += n
-        norms[ self._vertex_index[:,2] ] += n
+        norms[self._vertex_index[:, 0]] += n
+        norms[self._vertex_index[:, 1]] += n
+        norms[self._vertex_index[:, 2]] += n
         normalize_v3(norms)
 
         self._normal = norms
@@ -432,6 +436,7 @@ def _extendFromStrip(indexlist, index):
     indexlist.append(cw_.swapaxes(0, 1).ravel())
     indexlist.append(ccw.swapaxes(0, 1).ravel())
 
+
 def _extendFromFan(indexlist, index):
     """Convert triangle fan indices to triangle indices
     """
@@ -440,6 +445,7 @@ def _extendFromFan(indexlist, index):
         index[1:-1],
         index[2:]), 1)
     indexlist.append(c.reshape(-1))
+
 
 _indexExtendFunctions = {
     'tristrips': _extendFromStrip,

@@ -14,7 +14,7 @@ class TestSource(unittest.TestCase):
         self.dummy = collada.Collada(validate_output=True)
 
     def test_float_source_saving(self):
-        floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1,0.2,0.3]), ('X', 'Y', 'X'))
+        floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1, 0.2, 0.3]), ('X', 'Y', 'X'))
         self.assertEqual(floatsource.id, "myfloatsource")
         self.assertEqual(len(floatsource), 1)
         self.assertTupleEqual(floatsource.components, ('X', 'Y', 'X'))
@@ -31,8 +31,8 @@ class TestSource(unittest.TestCase):
 
     def test_idref_source_saving(self):
         idrefsource = collada.source.IDRefSource("myidrefsource",
-                                numpy.array(['Ref1', 'Ref2'], dtype=numpy.string_),
-                                ('MORPH_TARGET',))
+                                                 numpy.array(['Ref1', 'Ref2'], dtype=numpy.string_),
+                                                 ('MORPH_TARGET',))
         self.assertEqual(idrefsource.id, "myidrefsource")
         self.assertEqual(len(idrefsource), 2)
         self.assertTupleEqual(idrefsource.components, ('MORPH_TARGET',))
@@ -49,8 +49,8 @@ class TestSource(unittest.TestCase):
 
     def test_name_source_saving(self):
         namesource = collada.source.NameSource("mynamesource",
-                                numpy.array(['Name1', 'Name2'], dtype=numpy.string_),
-                                ('JOINT',))
+                                               numpy.array(['Name1', 'Name2'], dtype=numpy.string_),
+                                               ('JOINT',))
         self.assertEqual(namesource.id, "mynamesource")
         self.assertEqual(len(namesource), 2)
         self.assertTupleEqual(namesource.components, ('JOINT',))
@@ -64,6 +64,7 @@ class TestSource(unittest.TestCase):
         self.assertEqual(loaded_namesource.id, "yournamesource")
         self.assertEqual(len(loaded_namesource), 3)
         self.assertTupleEqual(loaded_namesource.components, ('WEIGHT', 'WHATEVER'))
+
 
 if __name__ == '__main__':
     unittest.main()

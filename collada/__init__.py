@@ -23,9 +23,7 @@ __version__ = "0.4.1"
 import os.path
 import posixpath
 import traceback
-import types
 import zipfile
-from datetime import datetime
 
 from collada import animation
 from collada import asset
@@ -36,9 +34,8 @@ from collada import light
 from collada import material
 from collada import scene
 from collada.common import E, tagger, tag
-from collada.common import DaeError, DaeObject, DaeIncompleteError, \
-    DaeBrokenRefError, DaeMalformedError, DaeUnsupportedError, \
-    DaeSaveValidationError
+from collada.common import DaeError, DaeIncompleteError, DaeBrokenRefError, \
+    DaeMalformedError, DaeSaveValidationError
 from collada.util import basestring, BytesIO
 from collada.util import IndexedList
 from collada.xmlutil import etree as ElementTree
@@ -46,33 +43,33 @@ from collada.xmlutil import writeXML
 
 try:
     from collada import schema
-except ImportError: # no lxml
+except ImportError:  # no lxml
     schema = None
 
 
 class Collada(object):
     """This is the main class used to create and load collada documents"""
 
-    geometries = property( lambda s: s._geometries, lambda s,v: s._setIndexedList('_geometries', v), doc="""
-    A list of :class:`collada.geometry.Geometry` objects. Can also be indexed by id""" )
-    controllers = property( lambda s: s._controllers, lambda s,v: s._setIndexedList('_controllers', v), doc="""
-    A list of :class:`collada.controller.Controller` objects. Can also be indexed by id""" )
-    animations = property( lambda s: s._animations, lambda s,v: s._setIndexedList('_animations', v), doc="""
-    A list of :class:`collada.animation.Animation` objects. Can also be indexed by id""" )
-    lights = property( lambda s: s._lights, lambda s,v: s._setIndexedList('_lights', v), doc="""
-    A list of :class:`collada.light.Light` objects. Can also be indexed by id""" )
-    cameras = property( lambda s: s._cameras, lambda s,v: s._setIndexedList('_cameras', v), doc="""
-    A list of :class:`collada.camera.Camera` objects. Can also be indexed by id""" )
-    images = property( lambda s: s._images, lambda s,v: s._setIndexedList('_images', v), doc="""
-    A list of :class:`collada.material.CImage` objects. Can also be indexed by id""" )
-    effects = property( lambda s: s._effects, lambda s,v: s._setIndexedList('_effects', v), doc="""
-    A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
-    materials = property( lambda s: s._materials, lambda s,v: s._setIndexedList('_materials', v), doc="""
-    A list of :class:`collada.material.Effect` objects. Can also be indexed by id""" )
-    nodes = property( lambda s: s._nodes, lambda s,v: s._setIndexedList('_nodes', v), doc="""
-    A list of :class:`collada.scene.Node` objects. Can also be indexed by id""" )
-    scenes = property( lambda s: s._scenes, lambda s,v: s._setIndexedList('_scenes', v), doc="""
-    A list of :class:`collada.scene.Scene` objects. Can also be indexed by id""" )
+    geometries = property(lambda s: s._geometries, lambda s, v: s._setIndexedList('_geometries', v), doc="""
+    A list of :class:`collada.geometry.Geometry` objects. Can also be indexed by id""")
+    controllers = property(lambda s: s._controllers, lambda s, v: s._setIndexedList('_controllers', v), doc="""
+    A list of :class:`collada.controller.Controller` objects. Can also be indexed by id""")
+    animations = property(lambda s: s._animations, lambda s, v: s._setIndexedList('_animations', v), doc="""
+    A list of :class:`collada.animation.Animation` objects. Can also be indexed by id""")
+    lights = property(lambda s: s._lights, lambda s, v: s._setIndexedList('_lights', v), doc="""
+    A list of :class:`collada.light.Light` objects. Can also be indexed by id""")
+    cameras = property(lambda s: s._cameras, lambda s, v: s._setIndexedList('_cameras', v), doc="""
+    A list of :class:`collada.camera.Camera` objects. Can also be indexed by id""")
+    images = property(lambda s: s._images, lambda s, v: s._setIndexedList('_images', v), doc="""
+    A list of :class:`collada.material.CImage` objects. Can also be indexed by id""")
+    effects = property(lambda s: s._effects, lambda s, v: s._setIndexedList('_effects', v), doc="""
+    A list of :class:`collada.material.Effect` objects. Can also be indexed by id""")
+    materials = property(lambda s: s._materials, lambda s, v: s._setIndexedList('_materials', v), doc="""
+    A list of :class:`collada.material.Effect` objects. Can also be indexed by id""")
+    nodes = property(lambda s: s._nodes, lambda s, v: s._setIndexedList('_nodes', v), doc="""
+    A list of :class:`collada.scene.Node` objects. Can also be indexed by id""")
+    scenes = property(lambda s: s._scenes, lambda s, v: s._setIndexedList('_scenes', v), doc="""
+    A list of :class:`collada.scene.Scene` objects. Can also be indexed by id""")
 
     def __init__(self,
                  filename=None,
@@ -138,7 +135,7 @@ class Collada(object):
 
         self.maskedErrors = []
         if ignore is not None:
-            self.ignoreErrors( *ignore )
+            self.ignoreErrors(*ignore)
 
         if filename is None:
             self.filename = None
@@ -148,18 +145,18 @@ class Collada(object):
                 self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
             self.xmlnode = ElementTree.ElementTree(
-                               E.COLLADA(
-                                   E.library_cameras(),
-                                   E.library_controllers(),
-                                   E.library_effects(),
-                                   E.library_geometries(),
-                                   E.library_images(),
-                                   E.library_lights(),
-                                   E.library_materials(),
-                                   E.library_nodes(),
-                                   E.library_visual_scenes(),
-                                   E.scene(),
-                               version='1.4.1'))
+                E.COLLADA(
+                    E.library_cameras(),
+                    E.library_controllers(),
+                    E.library_effects(),
+                    E.library_geometries(),
+                    E.library_images(),
+                    E.library_lights(),
+                    E.library_materials(),
+                    E.library_nodes(),
+                    E.library_visual_scenes(),
+                    E.scene(),
+                    version='1.4.1'))
             """ElementTree representation of the collada document"""
 
             self.assetInfo = asset.Asset()
@@ -172,13 +169,13 @@ class Collada(object):
             self.filename = filename
             self.getFileData = self._getFileFromDisk
         else:
-            strdata = filename.read() # assume it is a file like object
+            strdata = filename.read()  # assume it is a file like object
             self.filename = None
             self.getFileData = self._nullGetFile
 
         try:
             self.zfile = zipfile.ZipFile(BytesIO(strdata), 'r')
-        except:
+        except BaseException:
             self.zfile = None
 
         if self.zfile:
@@ -205,10 +202,9 @@ class Collada(object):
         if aux_file_loader is not None:
             self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
-        etree_parser = ElementTree.XMLParser()
         try:
             self.xmlnode = ElementTree.ElementTree(element=None,
-                    file=BytesIO(data))
+                                                   file=BytesIO(data))
         except ElementTree.ParseError as e:
             raise DaeMalformedError("XML Parsing Error: %s" % e)
 
@@ -259,29 +255,30 @@ class Collada(object):
         mask so all exceptions abort the load just call c.ignoreErrors(None).
 
         """
-        if args == [ None ]:
+        if args == [None]:
             self.maskedErrors = []
         else:
-            for e in args: self.maskedErrors.append(e)
+            for e in args:
+                self.maskedErrors.append(e)
 
     def _getFileFromZip(self, fname):
         """Return the binary data of an auxiliary file from a zip archive as a string."""
         if not self.zfile:
-            raise DaeBrokenRefError('Trying to load an auxiliary file %s but we are not reading from a zip'%fname)
+            raise DaeBrokenRefError('Trying to load an auxiliary file %s but we are not reading from a zip' % fname)
         basepath = posixpath.dirname(self.filename)
         aux_path = posixpath.normpath(posixpath.join(basepath, fname))
         if aux_path not in self.zfile.namelist():
             raise DaeBrokenRefError('Auxiliar file %s not found in archive' % fname)
-        return self.zfile.read( aux_path )
+        return self.zfile.read(aux_path)
 
     def _getFileFromDisk(self, fname):
         """Return the binary data of an auxiliary file from the local disk relative to the file path loaded."""
         if self.zfile:
-            raise DaeBrokenRefError('Trying to load an auxiliary file %s from disk but we are reading from a zip file'%fname)
+            raise DaeBrokenRefError('Trying to load an auxiliary file %s from disk but we are reading from a zip file' % fname)
         basepath = os.path.dirname(self.filename)
         aux_path = os.path.normpath(os.path.join(basepath, fname))
         if not os.path.exists(aux_path):
-            raise DaeBrokenRefError('Auxiliar file %s not found on disk'%fname)
+            raise DaeBrokenRefError('Auxiliar file %s not found on disk' % fname)
         fdata = open(aux_path, 'rb')
         return fdata.read()
 
@@ -476,10 +473,10 @@ class Collada(object):
         """Loads the default scene from <scene> tag in the root node."""
         node = self.xmlnode.find('%s/%s' % (self.tag('scene'), self.tag('instance_visual_scene')))
         try:
-            if node != None:
+            if node is not None:
                 sceneid = node.get('url')
                 if not sceneid.startswith('#'):
-                    raise DaeMalformedError('Malformed default scene reference to %s: '%sceneid)
+                    raise DaeMalformedError('Malformed default scene reference to %s: ' % sceneid)
                 self.scene = self.scenes.get(sceneid[1:])
                 if not self.scene:
                     raise DaeBrokenRefError('Default scene %s not found' % sceneid)
@@ -507,15 +504,15 @@ class Collada(object):
         library_loc = 0
         for i, node in enumerate(self.xmlnode.getroot()):
             if node.tag == self.tag('asset'):
-                library_loc = i+1
+                library_loc = i + 1
 
         for arr, name in libraries:
-            node = self.xmlnode.find( self.tag(name) )
+            node = self.xmlnode.find(self.tag(name))
             if node is None:
                 if len(arr) == 0:
                     continue
                 self.xmlnode.getroot().insert(library_loc, E(name))
-                node = self.xmlnode.find( self.tag(name) )
+                node = self.xmlnode.find(self.tag(name))
             elif node is not None and len(arr) == 0:
                 self.xmlnode.getroot().remove(node)
                 continue
@@ -539,8 +536,9 @@ class Collada(object):
 
         if self.validator is not None:
             if not self.validator.validate(self.xmlnode):
-                raise DaeSaveValidationError("Validation error when saving: " + 
-                        self.validator.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message)
+                raise DaeSaveValidationError(
+                    "Validation error when saving: {}".format(
+                        self.validator.COLLADA_SCHEMA_1_4_1_INSTANCE.error_log.last_error.message))
 
     def write(self, fp):
         """Writes out the collada document to a file. Note that this also
@@ -561,4 +559,3 @@ class Collada(object):
 
     def __repr__(self):
         return str(self)
-

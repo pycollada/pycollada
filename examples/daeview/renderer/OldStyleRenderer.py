@@ -11,7 +11,7 @@ import ctypes
 from . import glutils
 
 
-class OldStyleRenderer: 
+class OldStyleRenderer:
 
     def __init__(self, dae, window):
         self.dae = dae
@@ -21,20 +21,20 @@ class OldStyleRenderer:
         self.z_min = 100000.0
         self.textures = {}
 
-        glShadeModel(GL_SMOOTH) # Enable Smooth Shading
-        glClearColor(0.0, 0.0, 0.0, 0.5) # Black Background
-        glClearDepth(1.0) # Depth Buffer Setup
-        glEnable(GL_DEPTH_TEST) # Enables Depth Testing
-        glDepthFunc(GL_LEQUAL) # The Type Of Depth Testing To Do
-        
-        glEnable(GL_MULTISAMPLE);
+        glShadeModel(GL_SMOOTH)  # Enable Smooth Shading
+        glClearColor(0.0, 0.0, 0.0, 0.5)  # Black Background
+        glClearDepth(1.0)  # Depth Buffer Setup
+        glEnable(GL_DEPTH_TEST)  # Enables Depth Testing
+        glDepthFunc(GL_LEQUAL)  # The Type Of Depth Testing To Do
+
+        glEnable(GL_MULTISAMPLE)
 
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         glCullFace(GL_BACK)
 
-        glEnable(GL_TEXTURE_2D) # Enable Texture Mapping
+        glEnable(GL_TEXTURE_2D)  # Enable Texture Mapping
         # glEnable(GL_TEXTURE_RECTANGLE_ARB) # Enable Texture Mapping
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
@@ -51,13 +51,13 @@ class OldStyleRenderer:
 
     def drawPrimitives(self):
         glBegin(GL_TRIANGLES)
-        
+
         if self.dae.scene is not None:
             for geom in self.dae.scene.objects('geometry'):
                 for prim in geom.primitives():
                     mat = prim.material
-                    diff_color = (GLfloat * 4)(*(0.3,0.3,0.3,0.0))
-                    spec_color = None 
+                    diff_color = (GLfloat * 4)(*(0.3, 0.3, 0.3, 0.0))
+                    spec_color = None
                     shininess = None
                     amb_color = None
                     tex_id = None
@@ -71,7 +71,7 @@ class OldStyleRenderer:
                             # loading of the image using PIL if
                             # available. Unless it is already loaded.
                             img = colladaimage.pilimage
-                            if img: # can read and PIL available
+                            if img:  # can read and PIL available
                                 # See if we already have texture for this image
                                 if colladaimage.id in self.textures:
                                     tex_id = self.textures[colladaimage.id]
@@ -102,7 +102,7 @@ class OldStyleRenderer:
 
                                     self.textures[colladaimage.id] = tex_id
                             else:
-                                print('  %s = Texture %s: (not available)'%(
+                                print('  %s = Texture %s: (not available)' % (
                                     prop, colladaimage.id))
                         else:
                             if prop == 'diffuse' and value is not None:
@@ -128,7 +128,6 @@ class OldStyleRenderer:
                         glBindTexture(GL_TEXTURE_2D, tex_id)
                     else:
                         glBindTexture(GL_TEXTURE_2D, 0)
-
 
                     # add triangles to the display list
                     for t in triangles:
@@ -166,16 +165,15 @@ class OldStyleRenderer:
         glutils.getGLError()
         glEnd()
 
-
     def render(self, rotate_x, rotate_y, rotate_z):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glMatrixMode(GL_PROJECTION) # Select The Projection Matrix
-        glLoadIdentity() # Reset The Projection Matrix
-        if self.window.height == 0: # Calculate The Aspect Ratio Of The Window
+        glMatrixMode(GL_PROJECTION)  # Select The Projection Matrix
+        glLoadIdentity()  # Reset The Projection Matrix
+        if self.window.height == 0:  # Calculate The Aspect Ratio Of The Window
             gluPerspective(100, self.window.width, 1.0, 5000.0)
         else:
             gluPerspective(100, self.window.width / self.window.height, 1.0, 5000.0)
-        glMatrixMode(GL_MODELVIEW) # Select The Model View Matrix
+        glMatrixMode(GL_MODELVIEW)  # Select The Model View Matrix
         glLoadIdentity()
         z_offset = self.z_min - (self.z_max - self.z_min) * 3
         light_pos = (GLfloat * 3)(100.0, 100.0, 100.0 * -z_offset)
@@ -184,10 +182,9 @@ class OldStyleRenderer:
         glRotatef(rotate_x, 1.0, 0.0, 0.0)
         glRotatef(rotate_y, 0.0, 1.0, 0.0)
         glRotatef(rotate_z, 0.0, 0.0, 1.0)
-        
+
         # draw the display list
         glCallList(self.displist)
-
 
     def cleanup(self):
         print('Renderer cleaning up')

@@ -1,18 +1,18 @@
 ######################################################################
 # Flat Shader
-# This shader applies the given model view matrix to the vertices, 
+# This shader applies the given model view matrix to the vertices,
 # and uses a uniform color value.
 flatShader = (['''
 uniform mat4 mvpMatrix;
 attribute vec4 vVertex;
 void main(void)
 {
-  gl_Position = mvpMatrix * vVertex; 
+  gl_Position = mvpMatrix * vVertex;
 }'''],
-['''
+              ['''
 //precision mediump float;
 uniform vec4 vColor;
-void main(void) 
+void main(void)
 {
   gl_FragColor = vColor;
 }'''])
@@ -39,18 +39,18 @@ void main(void)
   ecPosition = mvMatrix * vVertex;
   ecPosition3 = ecPosition.xyz /ecPosition.w;
   vec3 vLightDir = normalize(vLightPos - ecPosition3);
-  float fDot = max(0.0, dot(vNorm, vLightDir)); 
+  float fDot = max(0.0, dot(vNorm, vLightDir));
   vFragColor.rgb = vColor.rgb * fDot;
   vFragColor.a = vColor.a;
 //  vFragColor = vColor;
   mat4 mvpMatrix;
   mvpMatrix = pMatrix * mvMatrix;
-  gl_Position = mvpMatrix * vVertex; 
+  gl_Position = mvpMatrix * vVertex;
 }'''],
-['''
+                  ['''
 //precision mediump float;
-varying vec4 vFragColor; 
-void main(void) 
+varying vec4 vFragColor;
+void main(void)
 {
   gl_FragColor = vFragColor;
 }'''])
@@ -93,7 +93,7 @@ void main(void)
   vec4 attenuatedLight = lightColor * attenuation;
 //  float attenuation = 1.0f;
 // Dot product gives us diffuse intensity
-  float diff = max(0.0, dot(vEyeNormal, vLightDir)); 
+  float diff = max(0.0, dot(vEyeNormal, vLightDir));
 // Multiply intensity by diffuse color, force alpha to 1.0
   vVaryingColor = attenuatedLight * diffuseColor * diff;
 // Add in ambient light
@@ -107,12 +107,12 @@ void main(void)
   }
 // Don't forget to transform the geometry
   mat4 mvpMatrix = pMatrix * mvMatrix;
-  gl_Position = mvpMatrix * vVertex; 
+  gl_Position = mvpMatrix * vVertex;
 }'''],
-['''
+              ['''
 //precision mediump float;
-varying vec4 vVaryingColor; 
-void main(void) 
+varying vec4 vVaryingColor;
+void main(void)
 {
   gl_FragColor = vVaryingColor;
 }'''])
@@ -133,8 +133,8 @@ void main()
   eyeVec = -vVertex;
   gl_Position = ftransform();
 }
-'''], 
-['''
+'''],
+               ['''
 uniform vec4 diffuse, specular, ambient;
 uniform float shininess;
 varying vec3 normal, lightDir0, eyeVec;
@@ -192,9 +192,9 @@ void main(void)
 
 // Don't forget to transform the geometry
   mat4 mvpMatrix = pMatrix * mvMatrix;
-  gl_Position = mvpMatrix * vVertex; 
+  gl_Position = mvpMatrix * vVertex;
 }'''],
-['''
+            ['''
 precision mediump float;
 uniform vec4 ambientColor;
 uniform vec4 diffuseColor;
@@ -208,7 +208,7 @@ varying vec3 vVaryingNormal;
 varying vec3 vVaryingLightDir;
 varying float distanceToLight;
 //varying float spotEffect;
-void main(void) 
+void main(void)
 {
 //  float attenuation = 1.0 / (fConstantAttenuation + fLinearAttenuation * distanceToLight + fQuadraticAttenuation * distanceToLight * distanceToLight);
   float attenuation = fConstantAttenuation / ((1.0 + fLinearAttenuation * distanceToLight) * (1.0 + fQuadraticAttenuation * distanceToLight * distanceToLight));
@@ -228,7 +228,7 @@ void main(void)
     float fSpec = pow(spec, shininess);
     gl_FragColor.rgb += attenuatedLight.rgb * vec3(fSpec, fSpec, fSpec);
   }
-// For some reaseons, without following multiplications, all scenes exported from Blender are dark. 
+// For some reaseons, without following multiplications, all scenes exported from Blender are dark.
 // Need to investigate the real reason. For now, it is just workaround to make scene brighter.
 //  gl_FragColor.rgb *= vec3(5.5, 5.5, 5.5);
 //  gl_FragColor.rgb *= vec3(2.5, 2.5, 2.5);
@@ -249,7 +249,7 @@ varying vec4 vFragColor;
 attribute vec2 vTexCoord0;
 varying vec2 vTex;
 void main(void)
-{ 
+{
  mat3 mNormalMatrix;
  mNormalMatrix[0] = normalize(mvMatrix[0].xyz);
  mNormalMatrix[1] = normalize(mvMatrix[1].xyz);
@@ -260,15 +260,15 @@ void main(void)
  ecPosition = mvMatrix * vVertex;
  ecPosition3 = ecPosition.xyz /ecPosition.w;
  vec3 vLightDir = normalize(vLightPos - ecPosition3);
- float fDot = max(0.0, dot(vNorm, vLightDir)); 
+ float fDot = max(0.0, dot(vNorm, vLightDir));
  vFragColor.rgb = vColor.rgb * fDot;
  vFragColor.a = vColor.a;
  vTex = vTexCoord0;
  mat4 mvpMatrix;
  mvpMatrix = pMatrix * mvMatrix;
- gl_Position = mvpMatrix * vVertex; 
+ gl_Position = mvpMatrix * vVertex;
 }'''],
-['''
+                         ['''
 precision mediump float;
 varying vec4 vFragColor;
 varying vec2 vTex;
@@ -311,8 +311,8 @@ void main()
 	gl_Position = ftransform();
         gl_TexCoord[0]  = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 }
-'''], 
-['''
+'''],
+                ['''
 varying vec3 normal, lightDir0, eyeVec;
 uniform sampler2D my_color_texture[1]; //0 = ColorMap
 
@@ -323,7 +323,7 @@ void main (void)
 
 /*	final_color = (gl_FrontLightModelProduct.sceneColor * vec4(texColor.rgb,1.0)) +
 		      gl_LightSource[0].ambient * vec4(texColor.rgb,1.0);*/
-	final_color = (gl_FrontLightModelProduct.sceneColor * vec4(texColor.rgb,1.0)) + 
+	final_color = (gl_FrontLightModelProduct.sceneColor * vec4(texColor.rgb,1.0)) +
 		       vec4(texColor.rgb,1.0);
 
 	vec3 N = normalize(normal);

@@ -9,20 +9,20 @@ if sys.version_info[0] < 3:
         install_requires.append('unittest2')
 
 setup(
-    name = "pycollada",
-    version = "0.7.2",
-    description = "python library for reading and writing collada documents",
-    author = "Jeff Terrace and contributors",
-    author_email = 'jterrace@gmail.com',
+    name="pycollada",
+    version="0.7.2",
+    description="python library for reading and writing collada documents",
+    author="Jeff Terrace and contributors",
+    author_email='jterrace@gmail.com',
     platforms=["any"],
     license="BSD",
     install_requires=install_requires,
-    extras_require = {
+    extras_require={
         'prettyprint': ["lxml"],
         'validation': ["lxml"]
     },
-    url = "http://pycollada.readthedocs.org/",
-    test_suite = "collada.tests",
-    packages = find_packages(),
+    url="http://pycollada.readthedocs.org/",
+    test_suite="collada.tests",
+    packages=find_packages(),
     package_data={'collada': ['resources/*.xml']}
 )

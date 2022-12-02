@@ -21,7 +21,7 @@ if sys.version_info[0] > 2:
     from io import StringIO, BytesIO
 
     bytes = bytes
-    basestring = (str,bytes)
+    basestring = (str, bytes)
     xrange = range
 else:
     import unittest
@@ -31,6 +31,7 @@ else:
     from StringIO import StringIO
 
     BytesIO = StringIO
+
     def bytes(s, encoding='utf-8'):
         return s
     basestring = basestring
@@ -58,6 +59,7 @@ def falmostEqual(a, b, rtol=1.0000000000000001e-05, atol=1e-08):
 
     return math.fabs(a - b) <= (atol + rtol * math.fabs(b))
 
+
 def toUnitVec(vec):
     """Converts the given vector to a unit vector
 
@@ -69,7 +71,8 @@ def toUnitVec(vec):
     """
     return vec / numpy.sqrt(numpy.vdot(vec, vec))
 
-def checkSource( source, components, maxindex):
+
+def checkSource(source, components, maxindex):
     """Check if a source objects complies with the needed `components` and has the needed length
 
     :param collada.source.Source source:
@@ -83,17 +86,18 @@ def checkSource( source, components, maxindex):
     if len(source.data) <= maxindex:
         raise DaeMalformedError(
             "Indexes (maxindex=%d) for source '%s' (len=%d) go beyond the limits of the source"
-            % (maxindex, source.id, len(source.data)) )
+            % (maxindex, source.id, len(source.data)))
 
-    #some files will write sources with no named parameters
-    #by spec, these params should just be skipped, but we need to
-    #adapt to the failed output of others...
+    # some files will write sources with no named parameters
+    # by spec, these params should just be skipped, but we need to
+    # adapt to the failed output of others...
     if len(source.components) == len(components):
         source.components = components
 
     if source.components != components:
-        raise DaeMalformedError('Wrong format in source %s'%source.id)
+        raise DaeMalformedError('Wrong format in source %s' % source.id)
     return source
+
 
 def normalize_v3(arr):
     """Normalize a numpy array of 3 component vectors with shape (N,3)
@@ -104,12 +108,13 @@ def normalize_v3(arr):
     :rtype: numpy.array
 
     """
-    lens = numpy.sqrt( arr[:,0]**2 + arr[:,1]**2 + arr[:,2]**2 )
+    lens = numpy.sqrt(arr[:, 0]**2 + arr[:, 1]**2 + arr[:, 2]**2)
     lens[numpy.equal(lens, 0)] = 1
-    arr[:,0] /= lens
-    arr[:,1] /= lens
-    arr[:,2] /= lens
+    arr[:, 0] /= lens
+    arr[:, 1] /= lens
+    arr[:, 2] /= lens
     return arr
+
 
 def dot_v3(arr1, arr2):
     """Calculates the dot product for each vector in two arrays
@@ -122,7 +127,8 @@ def dot_v3(arr1, arr2):
     :rtype: numpy.array
 
     """
-    return arr1[:,0]*arr2[:,0] + arr1[:,1]*arr2[:,1] + arr2[:,2]*arr1[:,2]
+    return arr1[:, 0] * arr2[:, 0] + arr1[:, 1] * arr2[:, 1] + arr2[:, 2] * arr1[:, 2]
+
 
 class IndexedList(list):
     """
@@ -139,6 +145,7 @@ class IndexedList(list):
        L[0] # = o
        L['test'] # = o
     """
+
     def __init__(self, items, attrs):
         super(IndexedList, self).__init__(items)
         # do indexing
@@ -246,7 +253,7 @@ class IndexedList(list):
         self._addindex(new_obj)
         return list.insert(self, ind, new_obj)
 
-    def pop(self, ind= -1):
+    def pop(self, ind=-1):
         # ensure that ind is a numeric index
         try:
             obj = list.__getitem__(self, ind)
@@ -266,12 +273,12 @@ class IndexedList(list):
         self._delindex(obj)
         return list.remove(self, ind)
 
+
 def _correctValInNode(outernode, tagname, value):
-    innernode = outernode.find( tag(tagname) )
+    innernode = outernode.find(tag(tagname))
     if value is None and innernode is not None:
         outernode.remove(innernode)
     elif innernode is not None:
         innernode.text = str(value)
     elif value is not None:
         outernode.append(E(tagname, str(value)))
-

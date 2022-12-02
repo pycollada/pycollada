@@ -16,12 +16,8 @@ import numpy
 
 from collada import primitive
 from collada import polylist
-from collada import triangleset
-from collada.common import E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-        DaeMalformedError, DaeUnsupportedError
-from collada.util import toUnitVec, checkSource
-from collada.xmlutil import etree as ElementTree
+from collada.common import E
+from collada.common import DaeIncompleteError
 
 
 class Polygons(polylist.Polylist):
@@ -42,9 +38,9 @@ class Polygons(polylist.Polylist):
         creating a geometry instance.
         """
 
-        max_offset = max([ max([input[0] for input in input_type_array])
-            for input_type_array in sources.values()
-            if len(input_type_array) > 0])
+        max_offset = max([max([input[0] for input in input_type_array])
+                          for input_type_array in sources.values()
+                          if len(input_type_array) > 0])
 
         vcounts = numpy.zeros(len(polygons), dtype=numpy.int32)
         for i, poly in enumerate(polygons):
@@ -57,7 +53,8 @@ class Polygons(polylist.Polylist):
 
         super(Polygons, self).__init__(sources, material, indices, vcounts, xmlnode)
 
-        if xmlnode is not None: self.xmlnode = xmlnode
+        if xmlnode is not None:
+            self.xmlnode = xmlnode
         else:
             acclen = len(polygons)
 
@@ -78,9 +75,10 @@ class Polygons(polylist.Polylist):
                 self.xmlnode.append(E.p(' '.join(map(str, poly.flatten().tolist()))))
 
     @staticmethod
-    def load( collada, localscope, node ):
+    def load(collada, localscope, node):
         indexnodes = node.findall(collada.tag('p'))
-        if indexnodes is None: raise DaeIncompleteError('Missing indices in polygons')
+        if indexnodes is None:
+            raise DaeIncompleteError('Missing indices in polygons')
 
         polygon_indices = []
         for indexnode in indexnodes:
@@ -95,7 +93,7 @@ class Polygons(polylist.Polylist):
 
     def bind(self, matrix, materialnodebysymbol):
         """Create a bound polygons from this polygons, transform and material mapping"""
-        return BoundPolygons( self, matrix, materialnodebysymbol )
+        return BoundPolygons(self, matrix, materialnodebysymbol)
 
     def __str__(self):
         return '<Polygons length=%d>' % len(self)
@@ -116,4 +114,3 @@ class BoundPolygons(polylist.BoundPolylist):
 
     def __repr__(self):
         return str(self)
-

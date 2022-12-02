@@ -13,14 +13,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-
+  formatting:
+    name: Check Formatting
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - name: Install Formatting
+      run: |
+        pip install autopep8 flake8 flake8-no-implicit-concat
+    - name: Check Formatting
+      run: |
+        # stop the build if the library fails any of the
+        # default flake8 rule or the extended list here
+        flake8 collada --extend-select=E9,F63,F7,F82,W605 --show-source --statistics
+        # generate a report for the whole package
+        # exit-zero treats all errors as warnings
+        # extend-select will add rules in addition to defaults
+        flake8 . --extend-select=E9,F63,F7,F82,W605 --count --exit-zero --max-complexity=10 --statistics
+  build:
+    runs-on: ubuntu-latest
+    needs: formatting
     strategy:
       fail-fast: false
       matrix:
         python-version: ["2.7", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10"]
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -29,16 +49,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        python -m pip install numpy python-dateutil
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82,W605 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        python -m pip install --upgrade pip pytest
+        # use setup.py to install the library 
+        pip install -e .
     - name: Test with pytest
       run: |
         pytest

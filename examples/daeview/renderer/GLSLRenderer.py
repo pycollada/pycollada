@@ -18,7 +18,7 @@ from .shader import Shader
 from . import shaders
 
 
-class GLSLRenderer: 
+class GLSLRenderer:
 
     def __init__(self, dae):
         self.dae = dae
@@ -30,10 +30,10 @@ class GLSLRenderer:
         self.batch_list = []
 
         # Initialize OpenGL
-        glClearColor(0.0, 0.0, 0.0, 0.5) # Black Background
-        glEnable(GL_DEPTH_TEST) # Enables Depth Testing
+        glClearColor(0.0, 0.0, 0.0, 0.5)  # Black Background
+        glEnable(GL_DEPTH_TEST)  # Enables Depth Testing
         glEnable(GL_CULL_FACE)
-        glEnable(GL_MULTISAMPLE);
+        glEnable(GL_MULTISAMPLE)
 
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -77,8 +77,8 @@ class GLSLRenderer:
             for geom in self.dae.scene.objects('geometry'):
                 for prim in geom.primitives():
                     mat = prim.material
-                    diff_color = VecF(0.3,0.3,0.3,1.0)
-                    spec_color = None 
+                    diff_color = VecF(0.3, 0.3, 0.3, 1.0)
+                    spec_color = None
                     shininess = None
                     amb_color = None
                     tex_id = None
@@ -94,7 +94,7 @@ class GLSLRenderer:
                             # loading of the image using PIL if
                             # available. Unless it is already loaded.
                             img = colladaimage.pilimage
-                            if img: # can read and PIL available
+                            if img:  # can read and PIL available
                                 shader_prog = self.shaders['texture']
                                 # See if we already have texture for this image
                                 if colladaimage.id in self.textures:
@@ -125,7 +125,7 @@ class GLSLRenderer:
 
                                     self.textures[colladaimage.id] = tex_id
                             else:
-                                print('  %s = Texture %s: (not available)'%(
+                                print('  %s = Texture %s: (not available)' % (
                                     prop, colladaimage.id))
                         else:
                             if prop == 'diffuse' and value is not None:
@@ -151,7 +151,7 @@ class GLSLRenderer:
                         triangles.generateNormals()
                         # We will need flat lists for VBO (batch) initialization
                         vertices = triangles.vertex.flatten().tolist()
-                        batch_len = len(vertices)//3
+                        batch_len = len(vertices) // 3
                         indices = triangles.vertex_index.flatten().tolist()
                         normals = triangles.normal.flatten().tolist()
 
@@ -180,7 +180,7 @@ class GLSLRenderer:
                             # to work. Feel free to improve the way
                             # texture coordinates (uv) are collected
                             # for batch.add_indexed() invocation.
-                            uv = [[0.0,0.0]] * batch_len
+                            uv = [[0.0, 0.0]] * batch_len
                             for t in triangles:
                                 nidx = 0
                                 texcoords = t.texcoords[0]
@@ -191,7 +191,7 @@ class GLSLRenderer:
                             uv = [item for sublist in uv for item in sublist]
 
                             # Create textured batch
-                            batch.add_indexed(batch_len, 
+                            batch.add_indexed(batch_len,
                                               GL_TRIANGLES,
                                               None,
                                               indices,
@@ -200,7 +200,7 @@ class GLSLRenderer:
                                               ('t2f/static', uv))
                         else:
                             # Create colored batch
-                            batch.add_indexed(batch_len, 
+                            batch.add_indexed(batch_len,
                                               GL_TRIANGLES,
                                               None,
                                               indices,
@@ -210,7 +210,7 @@ class GLSLRenderer:
                         # Append the batch with supplementary
                         # information to the batch list
                         self.batch_list.append(
-                            (batch, shader_prog, tex_id, diff_color, 
+                            (batch, shader_prog, tex_id, diff_color,
                              spec_color, amb_color, shininess))
         print('done. Ready to render.')
 
@@ -223,7 +223,7 @@ class GLSLRenderer:
         z_offset = self.z_min - (self.z_max - self.z_min) * 3
         light_pos = VecF(100.0, 100.0, 10.0 * -z_offset)
         glLightfv(GL_LIGHT0, GL_POSITION, light_pos)
-        
+
         # Move the object deeper to the screen and rotate
         glTranslatef(0, 0, z_offset)
         glRotatef(rotate_x, 1.0, 0.0, 0.0)
@@ -261,7 +261,6 @@ class GLSLRenderer:
             batch.draw()
         if prev_shader_prog is not None:
             prev_shader_prog.unbind()
-
 
     def cleanup(self):
         print('Renderer cleaning up')
