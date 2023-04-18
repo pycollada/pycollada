@@ -207,6 +207,8 @@ Releasing
 
 #. Update setup.py to change version to new version.
 
+#. Update ``collada/__init__.py`` to new version.
+
 #. Update docs/conf.py to change version string to new version.
 
 #. Commit changes.
