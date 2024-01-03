@@ -129,3 +129,11 @@ else:
     def writeXML(xmlnode, fp):
         indent(xmlnode.getroot())
         xmlnode.write(fp)
+
+
+def createElementTree(file):
+    if not HAVE_LXML:
+        return etree.ElementTree(element=None, file=file)
+    from lxml.etree import XMLParser, parse
+    parser = XMLParser(huge_tree=True)
+    return parse(file, parser=parser)
