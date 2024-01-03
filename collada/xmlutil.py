@@ -133,4 +133,4 @@ else:
         xmlnode.write(fp)
 
 def createElementTree(data):
-    return ElementTree.ElementTree(element=None, file=BytesIO(data))
+    return etree.ElementTree(element=None, file=BytesIO(data))
