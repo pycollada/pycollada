@@ -204,7 +204,7 @@ class Collada(object):
             self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
         try:
-            self.xmlnode = createElementTree(data)
+            self.xmlnode = createElementTree(BytesIO(data))
         except ElementTree.ParseError as e:
             raise DaeMalformedError("XML Parsing Error: %s" % e)
 
