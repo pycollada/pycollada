@@ -1,5 +1,7 @@
 import functools
 
+from collada.util import BytesIO
+
 COLLADA_NS = 'http://www.collada.org/2005/11/COLLADASchema'
 HAVE_LXML = False
 
@@ -129,3 +131,6 @@ else:
     def writeXML(xmlnode, fp):
         indent(xmlnode.getroot())
         xmlnode.write(fp)
+
+def createElementTree(data):
+    return ElementTree.ElementTree(element=None, file=BytesIO(data))

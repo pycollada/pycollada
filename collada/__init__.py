@@ -38,6 +38,7 @@ from collada.common import DaeError, DaeIncompleteError, DaeBrokenRefError, \
     DaeMalformedError, DaeSaveValidationError
 from collada.util import basestring, BytesIO
 from collada.util import IndexedList
+from collada.xmlutil import createElementTree
 from collada.xmlutil import etree as ElementTree
 from collada.xmlutil import writeXML
 
@@ -203,8 +204,7 @@ class Collada(object):
             self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
         try:
-            self.xmlnode = ElementTree.ElementTree(element=None,
-                                                   file=BytesIO(data))
+            self.xmlnode = createElementTree(data)
         except ElementTree.ParseError as e:
             raise DaeMalformedError("XML Parsing Error: %s" % e)
 
