@@ -246,4 +246,4 @@ Releasing
 #. Build source distribution::
 
        python setup.py sdist
-       twine upload dist/pycollada-0.7.tar.gz -u user -p "pass"
+       twine upload dist/pycollada-0.7.tar.gz -u __token__
