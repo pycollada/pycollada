@@ -1,6 +1,29 @@
 pycollada Changelog
 ###################
 
+0.8 (2024-01-07)
+****************
+
+Bug Fixes
+=========
+* Add huge_tree support for lxml to fix large XML document loading.
+* Allow base class exceptions to be passed to ignore list, and fix FloatSource shape mismatch.
+* Fix various typos.
+* Stop using nsmap of lxml to support multiple name space.
+
+Backwards Compatibility Notes
+=============================
+* Support for Python versions prior to 3.8 dropped.
+* Support for Python 3.12 has been added.
+* Make numpy an explicit install requirement.
+
+New Features
+============
+* Add node name property.
+* Fixes and formatting to make pycollada pass flake8.
+* Make material optional when creating geometry.
+
+
 0.7.2 (2021-12-12)
 ******************
 

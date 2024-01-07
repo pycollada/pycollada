@@ -18,7 +18,7 @@ file is not what is expected.
 
 """
 
-__version__ = "0.7.2"
+__version__ = "0.8"
 
 import os.path
 import posixpath
