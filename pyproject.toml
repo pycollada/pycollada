@@ -3,3 +3,34 @@ build-backend = "setuptools.build_meta"
 requires = [
     "setuptools >= 42",
 ]
+
+[project]
+name = "pycollada"
+version = "0.8"
+description = "python library for reading and writing collada documents"
+authors = [
+    {name = "Jeff Terrace and contributors", email = "jterrace@gmail.com"},
+]
+license = {text = "BSD"}
+dependencies = [
+    "python-dateutil>=2.2",
+    "numpy",
+    'unittest2; python_version<"2.7"',
+]
+
+[project.optional-dependencies]
+prettyprint = ["lxml"]
+validation = ["lxml"]
+
+[project.urls]
+Homepage = "http://pycollada.readthedocs.org/"
+
+[tool.setuptools]
+platforms = ["any"]
+include-package-data = false
+
+[tool.setuptools.packages]
+find = {namespaces = false}
+
+[tool.setuptools.package-data]
+collada = ["resources/*.xml"]
