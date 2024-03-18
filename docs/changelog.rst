@@ -228,7 +228,7 @@ Releasing
 
    Add this to docs/changelog.rst.
 
-#. Update setup.py to change version to new version.
+#. Update pyproject.toml to change version to new version.
 
 #. Update ``collada/__init__.py`` to new version.
 
