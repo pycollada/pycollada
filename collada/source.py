@@ -318,7 +318,7 @@ class IDRefSource(Source):
                 values = [v for v in arraynode.text.split()]
             except ValueError:
                 raise DaeMalformedError('Corrupted IDREF array')
-        data = numpy.array(values, dtype=numpy.unicode_)
+        data = numpy.array(values, dtype=numpy.str_)
         paramnodes = node.findall('%s/%s/%s' % (collada.tag('technique_common'), collada.tag('accessor'), collada.tag('param')))
         if not paramnodes:
             raise DaeIncompleteError('No accessor info in source node')
@@ -425,7 +425,7 @@ class NameSource(Source):
                 values = [v for v in arraynode.text.split()]
             except ValueError:
                 raise DaeMalformedError('Corrupted Name array')
-        data = numpy.array(values, dtype=numpy.unicode_)
+        data = numpy.array(values, dtype=numpy.str_)
         paramnodes = node.findall('%s/%s/%s' % (tag('technique_common'), tag('accessor'), tag
                                                 ('param')))
         if not paramnodes:
