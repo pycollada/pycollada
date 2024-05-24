@@ -31,7 +31,7 @@ class TestSource(unittest.TestCase):
 
     def test_idref_source_saving(self):
         idrefsource = collada.source.IDRefSource("myidrefsource",
-                                                 numpy.array(['Ref1', 'Ref2'], dtype=numpy.string_),
+                                                 numpy.array(['Ref1', 'Ref2'], dtype=numpy.bytes_),
                                                  ('MORPH_TARGET',))
         self.assertEqual(idrefsource.id, "myidrefsource")
         self.assertEqual(len(idrefsource), 2)
@@ -39,7 +39,7 @@ class TestSource(unittest.TestCase):
         self.assertIsNotNone(str(idrefsource))
         idrefsource.id = "youridrefsource"
         idrefsource.components = ('JOINT_TARGET', 'WHATEVER_TARGET')
-        idrefsource.data = numpy.array(['Ref5', 'Ref6', 'Ref7', 'Ref8', 'Ref9', 'Ref10'], dtype=numpy.string_)
+        idrefsource.data = numpy.array(['Ref5', 'Ref6', 'Ref7', 'Ref8', 'Ref9', 'Ref10'], dtype=numpy.bytes_)
         idrefsource.save()
         loaded_idrefsource = collada.source.Source.load(self.dummy, {}, fromstring(tostring(idrefsource.xmlnode)))
         self.assertTrue(isinstance(loaded_idrefsource, collada.source.IDRefSource))
@@ -49,7 +49,7 @@ class TestSource(unittest.TestCase):
 
     def test_name_source_saving(self):
         namesource = collada.source.NameSource("mynamesource",
-                                               numpy.array(['Name1', 'Name2'], dtype=numpy.string_),
+                                               numpy.array(['Name1', 'Name2'], dtype=numpy.bytes_),
                                                ('JOINT',))
         self.assertEqual(namesource.id, "mynamesource")
         self.assertEqual(len(namesource), 2)
@@ -57,7 +57,7 @@ class TestSource(unittest.TestCase):
         self.assertIsNotNone(str(namesource))
         namesource.id = "yournamesource"
         namesource.components = ('WEIGHT', 'WHATEVER')
-        namesource.data = numpy.array(['Name1', 'Name2', 'Name3', 'Name4', 'Name5', 'Name6'], dtype=numpy.string_)
+        namesource.data = numpy.array(['Name1', 'Name2', 'Name3', 'Name4', 'Name5', 'Name6'], dtype=numpy.bytes_)
         namesource.save()
         loaded_namesource = collada.source.Source.load(self.dummy, {}, fromstring(tostring(namesource.xmlnode)))
         self.assertTrue(isinstance(loaded_namesource, collada.source.NameSource))
