@@ -35,3 +35,38 @@ find = {namespaces = false}
 
 [tool.setuptools.package-data]
 collada = ["resources/*.xml"]
+
+# See https://github.com/charliermarsh/ruff#rules for error code definitions.
+[tool.ruff.lint]
+select = [
+    # "ANN", # annotations
+    "B", # bugbear
+    "C", # comprehensions
+    "E", # style errors
+    "F", # flakes
+    "I", # import sorting
+    "RUF", # ruff specific rules
+    "UP", # upgrade
+    "W", # style warnings
+    "YTT", # sys.version
+    "ISC002",
+    "NPY201",
+    "TID251"
+]
+
+ignore = [
+  "C901", # Comprehension is too complex (11 > 10)
+  "N802", # Function name should be lowercase
+  "N806", # Variable in function should be lowercase
+  "E501", # Line too long ({width} > {limit} characters)
+  "B904", # raise ... from err
+  "B905", # zip() without an explicit strict= parameter
+  "RUF005", # recommends non-type-aware expansion
+]
+
+# don't allow implicit string concatenation
+flake8-implicit-str-concat = {"allow-multiline" = false}
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"IPython.embed".msg = "you forgot to remove a debug embed ;)"
+"numpy.empty".msg = "uninitialized arrays are haunted try numpy.zeros"
