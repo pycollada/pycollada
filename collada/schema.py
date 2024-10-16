@@ -14,22 +14,36 @@
 """This module contains helper classes and functions for working
 with the COLLADA 1.4.1 schema."""
 
+import os
 import lxml
 import lxml.etree
 from collada.util import bytes, BytesIO
 
-from pkg_resources import resource_string
+# the absolute directory of this file
+_cwd = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
+
+def resource_string(file_name: str) -> str:
+    """
+    Get the value of a file in `collada/resources/{file_name}`
+    as a string.
+
+    Parameters
+    -----------
+    file_name
+      The name of the file in `collada/resources/{file_name}`
+
+    Returns
+    ----------
+    value
+      The contents of the file.
+    """
+    with open(os.path.join(_cwd, "resources", file_name)) as f:
+        return f.read()
 
 # get a copy of the XML schema
 # resource_string returns bytes so decode into string
-COLLADA_SCHEMA_1_4_1 = str(resource_string(
-    'collada',
-    'resources/schema-1.4.1.xml').decode('utf-8'))
-
-XML_XSD = str(resource_string(
-    'collada',
-    'resources/xsd.xml').decode('utf-8'))
-
+COLLADA_SCHEMA_1_4_1 = resource_string('schema-1.4.1.xml')
+XML_XSD = resource_string('xsd.xml')
 
 class ColladaResolver(lxml.etree.Resolver):
     """COLLADA XML Resolver. If a known URL referenced
