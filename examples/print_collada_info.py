@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 
-import collada
 import sys
+
+import collada
 
 
 def inspectController(controller):
     """Display contents of a controller object found in the scene."""
-    print('    Controller (id=%s) (type=%s)' % (controller.skin.id, type(controller).__name__))
-    print('       Vertex weights:%d, joints:%d' % (len(controller), len(controller.joint_matrices)))
+    print(
+        f"    Controller (id={controller.skin.id}) (type={type(controller).__name__})"
+    )
+    print(
+        "       Vertex weights:%d, joints:%d"
+        % (len(controller), len(controller.joint_matrices))
+    )
     for controlled_prim in controller.primitives():
-        print('       Primitive', type(controlled_prim.primitive).__name__)
+        print("       Primitive", type(controlled_prim.primitive).__name__)
 
 
 def inspectGeometry(obj):
@@ -18,9 +24,12 @@ def inspectGeometry(obj):
     for prim in obj.primitives():
         materials.add(prim.material)
 
-    print('    Geometry (id=%s): %d primitives' % (obj.original.id, len(obj)))
+    print("    Geometry (id=%s): %d primitives" % (obj.original.id, len(obj)))
     for prim in obj.primitives():
-        print('        Primitive (type=%s): len=%d vertices=%d' % (type(prim).__name__, len(prim), len(prim.vertex)))
+        print(
+            "        Primitive (type=%s): len=%d vertices=%d"
+            % (type(prim).__name__, len(prim), len(prim.vertex))
+        )
     for mat in materials:
         if mat:
             inspectMaterial(mat)
@@ -28,7 +37,7 @@ def inspectGeometry(obj):
 
 def inspectMaterial(mat):
     """Display material contents."""
-    print('        Material %s: shading %s' % (mat.effect.id, mat.effect.shadingtype))
+    print(f"        Material {mat.effect.id}: shading {mat.effect.shadingtype}")
     for prop in mat.effect.supported:
         value = getattr(mat.effect, prop)
         # it can be a float, a color (tuple) or a Map ( a texture )
@@ -38,47 +47,53 @@ def inspectMaterial(mat):
             # using PIL if available. Unless it is already loaded.
             img = colladaimage.pilimage
             if img:  # can read and PIL available
-                print('            %s = Texture %s:' % (prop, colladaimage.id),
-                      img.format, img.mode, img.size)
+                print(
+                    f"            {prop} = Texture {colladaimage.id}:",
+                    img.format,
+                    img.mode,
+                    img.size,
+                )
             else:
-                print('            %s = Texture %s: (not available)' % (
-                    prop, colladaimage.id))
+                print(
+                    f"            {prop} = Texture {colladaimage.id}: (not available)"
+                )
         else:
-            print('            %s =' % (prop), value)
+            print(f"            {prop} =", value)
 
 
 def inspectCollada(col):
     # Display the file contents
-    print('File Contents:')
-    print('  Geometry:')
+    print("File Contents:")
+    print("  Geometry:")
     if col.scene is not None:
-        for geom in col.scene.objects('geometry'):
+        for geom in col.scene.objects("geometry"):
             inspectGeometry(geom)
-    print('  Controllers:')
+    print("  Controllers:")
     if col.scene is not None:
-        for controller in col.scene.objects('controller'):
+        for controller in col.scene.objects("controller"):
             inspectController(controller)
-    print('  Cameras:')
+    print("  Cameras:")
     if col.scene is not None:
-        for cam in col.scene.objects('camera'):
-            print('    Camera %s: ' % cam.original.id)
-    print('  Lights:')
+        for cam in col.scene.objects("camera"):
+            print(f"    Camera {cam.original.id}: ")
+    print("  Lights:")
     if col.scene is not None:
-        for light in col.scene.objects('light'):
-            print('    Light %s: color =' % light.original.id, light.color)
+        for light in col.scene.objects("light"):
+            print(f"    Light {light.original.id}: color =", light.color)
 
     if not col.errors:
-        print('File read without errors')
+        print("File read without errors")
     else:
-        print('Errors:')
+        print("Errors:")
         for error in col.errors:
-            print(' ', error)
+            print(" ", error)
 
 
-if __name__ == '__main__':
-    filename = sys.argv[1] if len(sys.argv) > 1 else 'misc/base.zip'
+if __name__ == "__main__":
+    filename = sys.argv[1] if len(sys.argv) > 1 else "misc/base.zip"
 
     # open COLLADA file ignoring some errors in case they appear
-    col = collada.Collada(filename, ignore=[collada.DaeUnsupportedError,
-                                            collada.DaeBrokenRefError])
+    col = collada.Collada(
+        filename, ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError]
+    )
     inspectCollada(col)

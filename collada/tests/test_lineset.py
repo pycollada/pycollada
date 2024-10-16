@@ -2,16 +2,15 @@ import numpy
 from numpy.testing import assert_array_equal
 
 import collada
+from collada.common import DaeIncompleteError
 from collada.util import unittest
 from collada.xmlutil import etree
-from collada.common import DaeIncompleteError
 
 fromstring = etree.fromstring
 tostring = etree.tostring
 
 
 class TestLineset(unittest.TestCase):
-
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
 
@@ -28,15 +27,38 @@ class TestLineset(unittest.TestCase):
 
         # Adding an input list with vertex defined, but empty should raise an error.
         with self.assertRaises(DaeIncompleteError) as e:
-            collada.lineset.LineSet({'VERTEX': []}, None, None)
+            collada.lineset.LineSet({"VERTEX": []}, None, None)
         self.assertIn("requires vertex", e.exception.msg)
 
     def test_empty_lineset_saving(self):
-        linefloats = [1, 1, -1, 1, -1, -1, -1, -0.9999998, -1, -0.9999997, 1, -1, 1, 0.9999995, 1, 0.9999994, -1.000001, 1]
-        linefloatsrc = collada.source.FloatSource("mylinevertsource", numpy.array(linefloats), ('X', 'Y', 'Z'))
-        geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mygeometry", [linefloatsrc])
+        linefloats = [
+            1,
+            1,
+            -1,
+            1,
+            -1,
+            -1,
+            -1,
+            -0.9999998,
+            -1,
+            -0.9999997,
+            1,
+            -1,
+            1,
+            0.9999995,
+            1,
+            0.9999994,
+            -1.000001,
+            1,
+        ]
+        linefloatsrc = collada.source.FloatSource(
+            "mylinevertsource", numpy.array(linefloats), ("X", "Y", "Z")
+        )
+        geometry = collada.geometry.Geometry(
+            self.dummy, "geometry0", "mygeometry", [linefloatsrc]
+        )
         input_list = collada.source.InputList()
-        input_list.addInput(0, 'VERTEX', "#mylinevertsource")
+        input_list.addInput(0, "VERTEX", "#mylinevertsource")
         indices = numpy.array([0, 1, 1, 2, 2, 3, 3, 4, 4, 5])
         lineset = geometry.createLineSet(indices, input_list, "mymaterial")
 
@@ -48,7 +70,11 @@ class TestLineset(unittest.TestCase):
 
         # Serialize and deserialize.
         lineset.save()
-        loaded_lineset = collada.lineset.LineSet.load(collada, {'mylinevertsource': linefloatsrc}, fromstring(tostring(lineset.xmlnode)))
+        loaded_lineset = collada.lineset.LineSet.load(
+            collada,
+            {"mylinevertsource": linefloatsrc},
+            fromstring(tostring(lineset.xmlnode)),
+        )
 
         # Check that the deserialized version has all of the same properties.
         self.assertEqual(loaded_lineset.sources, lineset.sources)
@@ -59,5 +85,5 @@ class TestLineset(unittest.TestCase):
         self.assertEqual(loaded_lineset.nlines, lineset.nlines)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -9,7 +9,6 @@ tostring = etree.tostring
 
 
 class TestAsset(unittest.TestCase):
-
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
 
@@ -22,7 +21,9 @@ class TestAsset(unittest.TestCase):
         self.assertIsNone(contributor.source_data)
 
         contributor.save()
-        contributor = collada.asset.Contributor.load(self.dummy, {}, fromstring(tostring(contributor.xmlnode)))
+        contributor = collada.asset.Contributor.load(
+            self.dummy, {}, fromstring(tostring(contributor.xmlnode))
+        )
         self.assertIsNone(contributor.author)
         self.assertIsNone(contributor.authoring_tool)
         self.assertIsNone(contributor.comments)
@@ -36,7 +37,9 @@ class TestAsset(unittest.TestCase):
         contributor.source_data = "data5"
 
         contributor.save()
-        contributor = collada.asset.Contributor.load(self.dummy, {}, fromstring(tostring(contributor.xmlnode)))
+        contributor = collada.asset.Contributor.load(
+            self.dummy, {}, fromstring(tostring(contributor.xmlnode))
+        )
         self.assertEqual(contributor.author, "author1")
         self.assertEqual(contributor.authoring_tool, "tool2")
         self.assertEqual(contributor.comments, "comments3")
@@ -58,7 +61,9 @@ class TestAsset(unittest.TestCase):
         self.assertIsInstance(asset.modified, datetime.datetime)
 
         asset.save()
-        asset = collada.asset.Asset.load(self.dummy, {}, fromstring(tostring(asset.xmlnode)))
+        asset = collada.asset.Asset.load(
+            self.dummy, {}, fromstring(tostring(asset.xmlnode))
+        )
 
         self.assertIsNone(asset.title)
         self.assertIsNone(asset.subject)
@@ -71,11 +76,11 @@ class TestAsset(unittest.TestCase):
         self.assertIsInstance(asset.created, datetime.datetime)
         self.assertIsInstance(asset.modified, datetime.datetime)
 
-        asset.title = 'title1'
-        asset.subject = 'subject2'
-        asset.revision = 'revision3'
-        asset.keywords = 'keywords4'
-        asset.unitname = 'feet'
+        asset.title = "title1"
+        asset.subject = "subject2"
+        asset.revision = "revision3"
+        asset.keywords = "keywords4"
+        asset.unitname = "feet"
         asset.unitmeter = 3.1
         contrib1 = collada.asset.Contributor(author="jeff")
         contrib2 = collada.asset.Contributor(author="bob")
@@ -87,12 +92,14 @@ class TestAsset(unittest.TestCase):
         asset.modified = time2
 
         asset.save()
-        asset = collada.asset.Asset.load(self.dummy, {}, fromstring(tostring(asset.xmlnode)))
-        self.assertEqual(asset.title, 'title1')
-        self.assertEqual(asset.subject, 'subject2')
-        self.assertEqual(asset.revision, 'revision3')
-        self.assertEqual(asset.keywords, 'keywords4')
-        self.assertEqual(asset.unitname, 'feet')
+        asset = collada.asset.Asset.load(
+            self.dummy, {}, fromstring(tostring(asset.xmlnode))
+        )
+        self.assertEqual(asset.title, "title1")
+        self.assertEqual(asset.subject, "subject2")
+        self.assertEqual(asset.revision, "revision3")
+        self.assertEqual(asset.keywords, "keywords4")
+        self.assertEqual(asset.unitname, "feet")
         self.assertEqual(asset.unitmeter, 3.1)
         self.assertEqual(asset.upaxis, collada.asset.UP_AXIS.Z_UP)
         self.assertEqual(asset.created, time1)
@@ -100,5 +107,5 @@ class TestAsset(unittest.TestCase):
         self.assertEqual(len(asset.contributors), 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

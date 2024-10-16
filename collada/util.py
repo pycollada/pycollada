@@ -12,19 +12,21 @@
 
 """This module contains utility functions"""
 
-import numpy
 import math
 import sys
 
+import numpy
+
 if sys.version_info[0] > 2:
     import unittest
-    from io import StringIO, BytesIO
+    from io import BytesIO, StringIO
 
     bytes = bytes
     basestring = (str, bytes)
     xrange = range
 else:
     import unittest
+
     if not hasattr(unittest.TestCase, "assertIsNone"):
         # external dependency unittest2 required for Python <= 2.6
         import unittest2 as unittest
@@ -32,8 +34,9 @@ else:
 
     BytesIO = StringIO
 
-    def bytes(s, encoding='utf-8'):
+    def bytes(s, encoding="utf-8"):
         return s
+
     basestring = basestring
     xrange = xrange
 
@@ -86,7 +89,8 @@ def checkSource(source, components, maxindex):
     if len(source.data) <= maxindex:
         raise DaeMalformedError(
             "Indexes (maxindex=%d) for source '%s' (len=%d) go beyond the limits of the source"
-            % (maxindex, source.id, len(source.data)))
+            % (maxindex, source.id, len(source.data))
+        )
 
     # some files will write sources with no named parameters
     # by spec, these params should just be skipped, but we need to
@@ -95,7 +99,7 @@ def checkSource(source, components, maxindex):
         source.components = components
 
     if source.components != components:
-        raise DaeMalformedError('Wrong format in source %s' % source.id)
+        raise DaeMalformedError(f"Wrong format in source {source.id}")
     return source
 
 
@@ -108,7 +112,7 @@ def normalize_v3(arr):
     :rtype: numpy.array
 
     """
-    lens = numpy.sqrt(arr[:, 0]**2 + arr[:, 1]**2 + arr[:, 2]**2)
+    lens = numpy.sqrt(arr[:, 0] ** 2 + arr[:, 1] ** 2 + arr[:, 2] ** 2)
     lens[numpy.equal(lens, 0)] = 1
     arr[:, 0] /= lens
     arr[:, 1] /= lens
@@ -147,7 +151,7 @@ class IndexedList(list):
     """
 
     def __init__(self, items, attrs):
-        super(IndexedList, self).__init__(items)
+        super().__init__(items)
         # do indexing
         self._attrs = tuple(attrs)
         self._index = {}

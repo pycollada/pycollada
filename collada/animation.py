@@ -13,8 +13,7 @@
 """Contains objects representing animations."""
 
 from collada import source
-from collada.common import DaeObject
-from collada.common import DaeError
+from collada.common import DaeError, DaeObject
 
 
 class Animation(DaeObject):
@@ -31,18 +30,18 @@ class Animation(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        id = node.get('id') or ''
-        name = node.get('name') or ''
+        id = node.get("id") or ""
+        name = node.get("name") or ""
 
         sourcebyid = localscope
         sources = []
-        sourcenodes = node.findall(collada.tag('source'))
+        sourcenodes = node.findall(collada.tag("source"))
         for sourcenode in sourcenodes:
             ch = source.Source.load(collada, {}, sourcenode)
             sources.append(ch)
             sourcebyid[ch.id] = ch
 
-        child_nodes = node.findall(collada.tag('animation'))
+        child_nodes = node.findall(collada.tag("animation"))
         children = []
         for child in child_nodes:
             try:
@@ -55,7 +54,7 @@ class Animation(DaeObject):
         return anim
 
     def __str__(self):
-        return '<Animation id=%s, children=%d>' % (self.id, len(self.children))
+        return "<Animation id=%s, children=%d>" % (self.id, len(self.children))
 
     def __repr__(self):
         return str(self)

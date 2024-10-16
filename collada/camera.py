@@ -12,11 +12,13 @@
 
 """Contains objects for representing cameras"""
 
-from collada.common import DaeIncompleteError
-from collada.common import DaeMalformedError
-from collada.common import DaeObject
-from collada.common import DaeUnsupportedError
-from collada.common import E
+from collada.common import (
+    DaeIncompleteError,
+    DaeMalformedError,
+    DaeObject,
+    DaeUnsupportedError,
+    E,
+)
 
 
 class Camera(DaeObject):
@@ -24,23 +26,26 @@ class Camera(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        tecnode = node.find('%s/%s' % (collada.tag('optics'), collada.tag('technique_common')))
+        tecnode = node.find(
+            "{}/{}".format(collada.tag("optics"), collada.tag("technique_common"))
+        )
         if tecnode is None or len(tecnode) == 0:
-            raise DaeIncompleteError('Missing common technique in camera')
+            raise DaeIncompleteError("Missing common technique in camera")
         camnode = tecnode[0]
-        if camnode.tag == collada.tag('perspective'):
+        if camnode.tag == collada.tag("perspective"):
             return PerspectiveCamera.load(collada, localscope, node)
-        elif camnode.tag == collada.tag('orthographic'):
+        elif camnode.tag == collada.tag("orthographic"):
             return OrthographicCamera.load(collada, localscope, node)
         else:
-            raise DaeUnsupportedError('Unrecognized camera type: %s' % camnode.tag)
+            raise DaeUnsupportedError(f"Unrecognized camera type: {camnode.tag}")
 
 
 class PerspectiveCamera(Camera):
     """Perspective camera as defined in COLLADA tag <perspective>."""
 
-    def __init__(self, id, znear, zfar, xfov=None, yfov=None,
-                 aspect_ratio=None, xmlnode=None):
+    def __init__(
+        self, id, znear, zfar, xfov=None, yfov=None, aspect_ratio=None, xmlnode=None
+    ):
         """Create a new perspective camera.
 
         Note: ``aspect_ratio = tan(0.5*xfov) / tan(0.5*yfov)``
@@ -103,29 +108,36 @@ class PerspectiveCamera(Camera):
         perspective_node.append(E.znear(str(self.znear)))
         perspective_node.append(E.zfar(str(self.zfar)))
         self.xmlnode = E.camera(
-            E.optics(
-                E.technique_common(perspective_node)
-            ), id=self.id, name=self.id)
+            E.optics(E.technique_common(perspective_node)), id=self.id, name=self.id
+        )
 
     def _checkValidParams(self):
-        if self.xfov is not None and self.yfov is None \
-                and self.aspect_ratio is None:
+        if self.xfov is not None and self.yfov is None and self.aspect_ratio is None:
             pass
-        elif self.xfov is None and self.yfov is not None \
-                and self.aspect_ratio is None:
+        elif self.xfov is None and self.yfov is not None and self.aspect_ratio is None:
             pass
-        elif self.xfov is not None and self.yfov is None \
-                and self.aspect_ratio is not None:
+        elif (
+            self.xfov is not None
+            and self.yfov is None
+            and self.aspect_ratio is not None
+        ):
             pass
-        elif self.xfov is None and self.yfov is not None \
-                and self.aspect_ratio is not None:
+        elif (
+            self.xfov is None
+            and self.yfov is not None
+            and self.aspect_ratio is not None
+        ):
             pass
-        elif self.xfov is not None and self.yfov is not None \
-                and self.aspect_ratio is None:
+        elif (
+            self.xfov is not None
+            and self.yfov is not None
+            and self.aspect_ratio is None
+        ):
             pass
         else:
-            raise DaeMalformedError("Received invalid combination of xfov (%s), yfov (%s), and aspect_ratio (%s)" %
-                                    (str(self.xfov), str(self.yfov), str(self.aspect_ratio)))
+            raise DaeMalformedError(
+                f"Received invalid combination of xfov ({self.xfov!s}), yfov ({self.yfov!s}), and aspect_ratio ({self.aspect_ratio!s})"
+            )
 
     def save(self):
         """Saves the perspective camera's properties back to xmlnode"""
@@ -134,18 +146,23 @@ class PerspectiveCamera(Camera):
 
     @staticmethod
     def load(collada, localscope, node):
-        persnode = node.find('%s/%s/%s' % (collada.tag('optics'), collada.tag('technique_common'),
-                                           collada.tag('perspective')))
+        persnode = node.find(
+            "{}/{}/{}".format(
+                collada.tag("optics"),
+                collada.tag("technique_common"),
+                collada.tag("perspective"),
+            )
+        )
 
         if persnode is None:
-            raise DaeIncompleteError('Missing perspective for camera definition')
+            raise DaeIncompleteError("Missing perspective for camera definition")
 
-        xfov = persnode.find(collada.tag('xfov'))
-        yfov = persnode.find(collada.tag('yfov'))
-        aspect_ratio = persnode.find(collada.tag('aspect_ratio'))
-        znearnode = persnode.find(collada.tag('znear'))
-        zfarnode = persnode.find(collada.tag('zfar'))
-        id = node.get('id', '')
+        xfov = persnode.find(collada.tag("xfov"))
+        yfov = persnode.find(collada.tag("yfov"))
+        aspect_ratio = persnode.find(collada.tag("aspect_ratio"))
+        znearnode = persnode.find(collada.tag("znear"))
+        zfarnode = persnode.find(collada.tag("zfar"))
+        id = node.get("id", "")
 
         try:
             if xfov is not None:
@@ -157,7 +174,7 @@ class PerspectiveCamera(Camera):
             znear = float(znearnode.text)
             zfar = float(zfarnode.text)
         except (TypeError, ValueError):
-            raise DaeMalformedError('Corrupted float values in camera definition')
+            raise DaeMalformedError("Corrupted float values in camera definition")
 
         # There are some exporters that incorrectly output all three of these.
         # Worse, they actually got the calculation of aspect_ratio wrong!
@@ -165,8 +182,15 @@ class PerspectiveCamera(Camera):
         if xfov is not None and yfov is not None and aspect_ratio is not None:
             aspect_ratio = None
 
-        return PerspectiveCamera(id, znear, zfar, xfov=xfov, yfov=yfov,
-                                 aspect_ratio=aspect_ratio, xmlnode=node)
+        return PerspectiveCamera(
+            id,
+            znear,
+            zfar,
+            xfov=xfov,
+            yfov=yfov,
+            aspect_ratio=aspect_ratio,
+            xmlnode=node,
+        )
 
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.
@@ -180,7 +204,7 @@ class PerspectiveCamera(Camera):
         return BoundPerspectiveCamera(self, matrix)
 
     def __str__(self):
-        return '<PerspectiveCamera id=%s>' % self.id
+        return f"<PerspectiveCamera id={self.id}>"
 
     def __repr__(self):
         return str(self)
@@ -189,7 +213,9 @@ class PerspectiveCamera(Camera):
 class OrthographicCamera(Camera):
     """Orthographic camera as defined in COLLADA tag <orthographic>."""
 
-    def __init__(self, id, znear, zfar, xmag=None, ymag=None, aspect_ratio=None, xmlnode=None):
+    def __init__(
+        self, id, znear, zfar, xmag=None, ymag=None, aspect_ratio=None, xmlnode=None
+    ):
         """Create a new orthographic camera.
 
         Note: ``aspect_ratio = xmag / ymag``
@@ -252,29 +278,36 @@ class OrthographicCamera(Camera):
         orthographic_node.append(E.znear(str(self.znear)))
         orthographic_node.append(E.zfar(str(self.zfar)))
         self.xmlnode = E.camera(
-            E.optics(
-                E.technique_common(orthographic_node)
-            ), id=self.id, name=self.id)
+            E.optics(E.technique_common(orthographic_node)), id=self.id, name=self.id
+        )
 
     def _checkValidParams(self):
-        if self.xmag is not None and self.ymag is None \
-                and self.aspect_ratio is None:
+        if self.xmag is not None and self.ymag is None and self.aspect_ratio is None:
             pass
-        elif self.xmag is None and self.ymag is not None \
-                and self.aspect_ratio is None:
+        elif self.xmag is None and self.ymag is not None and self.aspect_ratio is None:
             pass
-        elif self.xmag is not None and self.ymag is None \
-                and self.aspect_ratio is not None:
+        elif (
+            self.xmag is not None
+            and self.ymag is None
+            and self.aspect_ratio is not None
+        ):
             pass
-        elif self.xmag is None and self.ymag is not None \
-                and self.aspect_ratio is not None:
+        elif (
+            self.xmag is None
+            and self.ymag is not None
+            and self.aspect_ratio is not None
+        ):
             pass
-        elif self.xmag is not None and self.ymag is not None \
-                and self.aspect_ratio is None:
+        elif (
+            self.xmag is not None
+            and self.ymag is not None
+            and self.aspect_ratio is None
+        ):
             pass
         else:
-            raise DaeMalformedError("Received invalid combination of xmag (%s), ymag (%s), and aspect_ratio (%s)" %
-                                    (str(self.xmag), str(self.ymag), str(self.aspect_ratio)))
+            raise DaeMalformedError(
+                f"Received invalid combination of xmag ({self.xmag!s}), ymag ({self.ymag!s}), and aspect_ratio ({self.aspect_ratio!s})"
+            )
 
     def save(self):
         """Saves the orthographic camera's properties back to xmlnode"""
@@ -283,20 +316,23 @@ class OrthographicCamera(Camera):
 
     @staticmethod
     def load(collada, localscope, node):
-        orthonode = node.find('%s/%s/%s' % (
-            collada.tag('optics'),
-            collada.tag('technique_common'),
-            collada.tag('orthographic')))
+        orthonode = node.find(
+            "{}/{}/{}".format(
+                collada.tag("optics"),
+                collada.tag("technique_common"),
+                collada.tag("orthographic"),
+            )
+        )
 
         if orthonode is None:
-            raise DaeIncompleteError('Missing orthographic for camera definition')
+            raise DaeIncompleteError("Missing orthographic for camera definition")
 
-        xmag = orthonode.find(collada.tag('xmag'))
-        ymag = orthonode.find(collada.tag('ymag'))
-        aspect_ratio = orthonode.find(collada.tag('aspect_ratio'))
-        znearnode = orthonode.find(collada.tag('znear'))
-        zfarnode = orthonode.find(collada.tag('zfar'))
-        id = node.get('id', '')
+        xmag = orthonode.find(collada.tag("xmag"))
+        ymag = orthonode.find(collada.tag("ymag"))
+        aspect_ratio = orthonode.find(collada.tag("aspect_ratio"))
+        znearnode = orthonode.find(collada.tag("znear"))
+        zfarnode = orthonode.find(collada.tag("zfar"))
+        id = node.get("id", "")
 
         try:
             if xmag is not None:
@@ -308,7 +344,7 @@ class OrthographicCamera(Camera):
             znear = float(znearnode.text)
             zfar = float(zfarnode.text)
         except (TypeError, ValueError):
-            raise DaeMalformedError('Corrupted float values in camera definition')
+            raise DaeMalformedError("Corrupted float values in camera definition")
 
         # There are some exporters that incorrectly output all three of these.
         # Worse, they actually got the calculation of aspect_ratio wrong!
@@ -316,8 +352,15 @@ class OrthographicCamera(Camera):
         if xmag is not None and ymag is not None and aspect_ratio is not None:
             aspect_ratio = None
 
-        return OrthographicCamera(id, znear, zfar, xmag=xmag, ymag=ymag,
-                                  aspect_ratio=aspect_ratio, xmlnode=node)
+        return OrthographicCamera(
+            id,
+            znear,
+            zfar,
+            xmag=xmag,
+            ymag=ymag,
+            aspect_ratio=aspect_ratio,
+            xmlnode=node,
+        )
 
     def bind(self, matrix):
         """Create a bound camera of itself based on a transform matrix.
@@ -331,19 +374,19 @@ class OrthographicCamera(Camera):
         return BoundOrthographicCamera(self, matrix)
 
     def __str__(self):
-        return '<OrthographicCamera id=%s>' % self.id
+        return f"<OrthographicCamera id={self.id}>"
 
     def __repr__(self):
         return str(self)
 
 
-class BoundCamera(object):
+class BoundCamera:
     """Base class for bound cameras"""
 
 
 class BoundPerspectiveCamera(BoundCamera):
     """Perspective camera bound to a scene with a transform. This gets created when a
-        camera is instantiated in a scene. Do not create this manually."""
+    camera is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, cam, matrix):
         self.xfov = cam.xfov
@@ -368,7 +411,7 @@ class BoundPerspectiveCamera(BoundCamera):
         """Original :class:`collada.camera.PerspectiveCamera` object this is bound to."""
 
     def __str__(self):
-        return '<BoundPerspectiveCamera bound to %s>' % self.original.id
+        return f"<BoundPerspectiveCamera bound to {self.original.id}>"
 
     def __repr__(self):
         return str(self)
@@ -376,7 +419,7 @@ class BoundPerspectiveCamera(BoundCamera):
 
 class BoundOrthographicCamera(BoundCamera):
     """Orthographic camera bound to a scene with a transform. This gets created when a
-        camera is instantiated in a scene. Do not create this manually."""
+    camera is instantiated in a scene. Do not create this manually."""
 
     def __init__(self, cam, matrix):
         self.xmag = cam.xmag
@@ -401,7 +444,7 @@ class BoundOrthographicCamera(BoundCamera):
         """Original :class:`collada.camera.OrthographicCamera` object this is bound to."""
 
     def __str__(self):
-        return '<BoundOrthographicCamera bound to %s>' % self.original.id
+        return f"<BoundOrthographicCamera bound to {self.original.id}>"
 
     def __repr__(self):
         return str(self)

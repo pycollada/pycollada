@@ -1,4 +1,4 @@
-from collada.xmlutil import etree, ElementMaker, COLLADA_NS
+from collada.xmlutil import COLLADA_NS, ElementMaker, etree
 
 E = ElementMaker(namespace=COLLADA_NS, nsmap={None: COLLADA_NS})
 
@@ -30,12 +30,14 @@ def tagger(namespace=None):
     :return:
       tag() function
     """
+
     def tag(text):
         return str(etree.QName(namespace, text))
+
     return tag
 
 
-class DaeObject(object):
+class DaeObject:
     """This class is the abstract interface to all collada objects.
 
     Every <tag> in a COLLADA that we recognize and load has mirror
@@ -67,7 +69,7 @@ class DaeObject(object):
           An Element from python's ElementTree API
 
         """
-        raise Exception('Not implemented')
+        raise Exception("Not implemented")
 
     def save(self):
         """Put all the data to the internal xml node (xmlnode) so it can be serialized."""
@@ -77,11 +79,11 @@ class DaeError(Exception):
     """General DAE exception."""
 
     def __init__(self, msg):
-        super(DaeError, self).__init__()
+        super().__init__()
         self.msg = msg
 
     def __str__(self):
-        return type(self).__name__ + ': ' + self.msg
+        return type(self).__name__ + ": " + self.msg
 
     def __repr__(self):
         return type(self).__name__ + '("' + self.msg + '")'

@@ -1,9 +1,10 @@
 import os
-import numpy
+
 import dateutil.parser
+import numpy
 
 import collada
-from collada.util import unittest, BytesIO
+from collada.util import BytesIO, unittest
 from collada.xmlutil import etree
 
 fromstring = etree.fromstring
@@ -11,7 +12,6 @@ tostring = etree.tostring
 
 
 class TestCollada(unittest.TestCase):
-
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
         self.datadir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
@@ -20,40 +20,49 @@ class TestCollada(unittest.TestCase):
         f = os.path.join(self.datadir, "duck_triangles.dae")
         mesh = collada.Collada(f, validate_output=True)
 
-        self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
-        self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
-        self.assertEqual(mesh.assetInfo.contributors[0].source_data,
-                         'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
+        self.assertEqual(mesh.assetInfo.contributors[0].author, "gcorson")
+        self.assertEqual(
+            mesh.assetInfo.contributors[0].authoring_tool,
+            "Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2",
+        )
+        self.assertEqual(
+            mesh.assetInfo.contributors[0].source_data,
+            "file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled",
+        )
         self.assertEqual(len(mesh.assetInfo.contributors[0].copyright), 595)
         self.assertEqual(len(mesh.assetInfo.contributors[0].comments), 449)
 
         self.assertEqual(mesh.assetInfo.unitmeter, 0.01)
-        self.assertEqual(mesh.assetInfo.unitname, 'centimeter')
+        self.assertEqual(mesh.assetInfo.unitname, "centimeter")
         self.assertEqual(mesh.assetInfo.upaxis, collada.asset.UP_AXIS.Y_UP)
         self.assertIsNone(mesh.assetInfo.title)
         self.assertIsNone(mesh.assetInfo.subject)
         self.assertIsNone(mesh.assetInfo.revision)
         self.assertIsNone(mesh.assetInfo.keywords)
-        self.assertEqual(mesh.assetInfo.created, dateutil.parser.parse('2006-08-23T22:29:59Z'))
-        self.assertEqual(mesh.assetInfo.modified, dateutil.parser.parse('2007-02-21T22:52:44Z'))
+        self.assertEqual(
+            mesh.assetInfo.created, dateutil.parser.parse("2006-08-23T22:29:59Z")
+        )
+        self.assertEqual(
+            mesh.assetInfo.modified, dateutil.parser.parse("2007-02-21T22:52:44Z")
+        )
 
-        self.assertEqual(mesh.scene.id, 'VisualSceneNode')
-        self.assertIn('LOD3spShape-lib', mesh.geometries)
-        self.assertIn('directionalLightShape1-lib', mesh.lights)
-        self.assertIn('cameraShape1', mesh.cameras)
-        self.assertIn('file2', mesh.images)
-        self.assertIn('blinn3-fx', mesh.effects)
-        self.assertIn('blinn3', mesh.materials)
+        self.assertEqual(mesh.scene.id, "VisualSceneNode")
+        self.assertIn("LOD3spShape-lib", mesh.geometries)
+        self.assertIn("directionalLightShape1-lib", mesh.lights)
+        self.assertIn("cameraShape1", mesh.cameras)
+        self.assertIn("file2", mesh.images)
+        self.assertIn("blinn3-fx", mesh.effects)
+        self.assertIn("blinn3", mesh.materials)
         self.assertEqual(len(mesh.nodes), 0)
-        self.assertIn('VisualSceneNode', mesh.scenes)
+        self.assertIn("VisualSceneNode", mesh.scenes)
 
         triset = mesh.geometries[0].primitives[0]
         input_list = triset.getInputList().getList()
         self.assertEqual(3, len(input_list))
 
-        self.assertIsNotNone(str(list(mesh.scene.objects('geometry'))))
-        self.assertIsNotNone(str(list(mesh.scene.objects('light'))))
-        self.assertIsNotNone(str(list(mesh.scene.objects('camera'))))
+        self.assertIsNotNone(str(list(mesh.scene.objects("geometry"))))
+        self.assertIsNotNone(str(list(mesh.scene.objects("light"))))
+        self.assertIsNotNone(str(list(mesh.scene.objects("camera"))))
 
         s = BytesIO()
         mesh.write(s)
@@ -61,49 +70,58 @@ class TestCollada(unittest.TestCase):
         t = BytesIO(out)
         mesh = collada.Collada(t, validate_output=True)
 
-        self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
-        self.assertEqual(mesh.assetInfo.contributors[0].authoring_tool, 'Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2')
-        self.assertEqual(mesh.assetInfo.contributors[0].source_data,
-                         'file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled')
+        self.assertEqual(mesh.assetInfo.contributors[0].author, "gcorson")
+        self.assertEqual(
+            mesh.assetInfo.contributors[0].authoring_tool,
+            "Maya 8.0 | ColladaMaya v3.02 | FCollada v3.2",
+        )
+        self.assertEqual(
+            mesh.assetInfo.contributors[0].source_data,
+            "file:///C:/vs2005/sample_data/Complete_Packages/SCEA_Private/Maya_MoonLander/Moonlander/untitled",
+        )
         self.assertEqual(len(mesh.assetInfo.contributors[0].copyright), 595)
         self.assertEqual(len(mesh.assetInfo.contributors[0].comments), 449)
 
         self.assertEqual(mesh.assetInfo.unitmeter, 0.01)
-        self.assertEqual(mesh.assetInfo.unitname, 'centimeter')
+        self.assertEqual(mesh.assetInfo.unitname, "centimeter")
         self.assertEqual(mesh.assetInfo.upaxis, collada.asset.UP_AXIS.Y_UP)
         self.assertIsNone(mesh.assetInfo.title)
         self.assertIsNone(mesh.assetInfo.subject)
         self.assertIsNone(mesh.assetInfo.revision)
         self.assertIsNone(mesh.assetInfo.keywords)
-        self.assertEqual(mesh.assetInfo.created, dateutil.parser.parse('2006-08-23T22:29:59Z'))
-        self.assertEqual(mesh.assetInfo.modified, dateutil.parser.parse('2007-02-21T22:52:44Z'))
+        self.assertEqual(
+            mesh.assetInfo.created, dateutil.parser.parse("2006-08-23T22:29:59Z")
+        )
+        self.assertEqual(
+            mesh.assetInfo.modified, dateutil.parser.parse("2007-02-21T22:52:44Z")
+        )
 
-        self.assertEqual(mesh.scene.id, 'VisualSceneNode')
-        self.assertIn('LOD3spShape-lib', mesh.geometries)
-        self.assertIn('directionalLightShape1-lib', mesh.lights)
-        self.assertIn('cameraShape1', mesh.cameras)
-        self.assertIn('file2', mesh.images)
-        self.assertIn('blinn3-fx', mesh.effects)
-        self.assertIn('blinn3', mesh.materials)
+        self.assertEqual(mesh.scene.id, "VisualSceneNode")
+        self.assertIn("LOD3spShape-lib", mesh.geometries)
+        self.assertIn("directionalLightShape1-lib", mesh.lights)
+        self.assertIn("cameraShape1", mesh.cameras)
+        self.assertIn("file2", mesh.images)
+        self.assertIn("blinn3-fx", mesh.effects)
+        self.assertIn("blinn3", mesh.materials)
         self.assertEqual(len(mesh.nodes), 0)
-        self.assertIn('VisualSceneNode', mesh.scenes)
+        self.assertIn("VisualSceneNode", mesh.scenes)
 
-        self.assertIsNotNone(str(list(mesh.scene.objects('geometry'))))
-        self.assertIsNotNone(str(list(mesh.scene.objects('light'))))
-        self.assertIsNotNone(str(list(mesh.scene.objects('camera'))))
+        self.assertIsNotNone(str(list(mesh.scene.objects("geometry"))))
+        self.assertIsNotNone(str(list(mesh.scene.objects("light"))))
+        self.assertIsNotNone(str(list(mesh.scene.objects("camera"))))
 
     def test_collada_duck_poly(self):
         f = os.path.join(self.datadir, "duck_polylist.dae")
         mesh = collada.Collada(f, validate_output=True)
-        self.assertEqual(mesh.scene.id, 'VisualSceneNode')
-        self.assertIn('LOD3spShape-lib', mesh.geometries)
-        self.assertIn('directionalLightShape1-lib', mesh.lights)
-        self.assertIn('cameraShape1', mesh.cameras)
-        self.assertIn('file2', mesh.images)
-        self.assertIn('blinn3-fx', mesh.effects)
-        self.assertIn('blinn3', mesh.materials)
+        self.assertEqual(mesh.scene.id, "VisualSceneNode")
+        self.assertIn("LOD3spShape-lib", mesh.geometries)
+        self.assertIn("directionalLightShape1-lib", mesh.lights)
+        self.assertIn("cameraShape1", mesh.cameras)
+        self.assertIn("file2", mesh.images)
+        self.assertIn("blinn3-fx", mesh.effects)
+        self.assertIn("blinn3", mesh.materials)
         self.assertEqual(len(mesh.nodes), 0)
-        self.assertIn('VisualSceneNode', mesh.scenes)
+        self.assertIn("VisualSceneNode", mesh.scenes)
 
         s = BytesIO()
         mesh.write(s)
@@ -111,28 +129,28 @@ class TestCollada(unittest.TestCase):
         t = BytesIO(out)
         mesh = collada.Collada(t, validate_output=True)
 
-        self.assertEqual(mesh.scene.id, 'VisualSceneNode')
-        self.assertIn('LOD3spShape-lib', mesh.geometries)
-        self.assertIn('directionalLightShape1-lib', mesh.lights)
-        self.assertIn('cameraShape1', mesh.cameras)
-        self.assertIn('file2', mesh.images)
-        self.assertIn('blinn3-fx', mesh.effects)
-        self.assertIn('blinn3', mesh.materials)
+        self.assertEqual(mesh.scene.id, "VisualSceneNode")
+        self.assertIn("LOD3spShape-lib", mesh.geometries)
+        self.assertIn("directionalLightShape1-lib", mesh.lights)
+        self.assertIn("cameraShape1", mesh.cameras)
+        self.assertIn("file2", mesh.images)
+        self.assertIn("blinn3-fx", mesh.effects)
+        self.assertIn("blinn3", mesh.materials)
         self.assertEqual(len(mesh.nodes), 0)
-        self.assertIn('VisualSceneNode', mesh.scenes)
+        self.assertIn("VisualSceneNode", mesh.scenes)
 
     def test_collada_duck_zip(self):
         f = os.path.join(self.datadir, "duck.zip")
         mesh = collada.Collada(f, validate_output=True)
-        self.assertEqual(mesh.scene.id, 'VisualSceneNode')
-        self.assertIn('LOD3spShape-lib', mesh.geometries)
-        self.assertIn('directionalLightShape1-lib', mesh.lights)
-        self.assertIn('cameraShape1', mesh.cameras)
-        self.assertIn('file2', mesh.images)
-        self.assertIn('blinn3-fx', mesh.effects)
-        self.assertIn('blinn3', mesh.materials)
+        self.assertEqual(mesh.scene.id, "VisualSceneNode")
+        self.assertIn("LOD3spShape-lib", mesh.geometries)
+        self.assertIn("directionalLightShape1-lib", mesh.lights)
+        self.assertIn("cameraShape1", mesh.cameras)
+        self.assertIn("file2", mesh.images)
+        self.assertIn("blinn3-fx", mesh.effects)
+        self.assertIn("blinn3", mesh.materials)
         self.assertEqual(len(mesh.nodes), 0)
-        self.assertIn('VisualSceneNode', mesh.scenes)
+        self.assertIn("VisualSceneNode", mesh.scenes)
 
     def test_collada_saving(self):
         mesh = collada.Collada(validate_output=True)
@@ -149,15 +167,42 @@ class TestCollada(unittest.TestCase):
         self.assertEqual(mesh.scene, None)
         self.assertIsNotNone(str(mesh))
 
-        floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1, 0.2, 0.3]), ('X', 'Y', 'Z'))
-        geometry1 = collada.geometry.Geometry(mesh, "geometry1", "mygeometry1", {"myfloatsource": floatsource})
+        floatsource = collada.source.FloatSource(
+            "myfloatsource", numpy.array([0.1, 0.2, 0.3]), ("X", "Y", "Z")
+        )
+        geometry1 = collada.geometry.Geometry(
+            mesh, "geometry1", "mygeometry1", {"myfloatsource": floatsource}
+        )
         mesh.geometries.append(geometry1)
 
-        linefloats = [1, 1, -1, 1, -1, -1, -1, -0.9999998, -1, -0.9999997, 1, -1, 1, 0.9999995, 1, 0.9999994, -1.000001, 1]
-        linefloatsrc = collada.source.FloatSource("mylinevertsource", numpy.array(linefloats), ('X', 'Y', 'Z'))
-        geometry2 = collada.geometry.Geometry(mesh, "geometry2", "mygeometry2", [linefloatsrc])
+        linefloats = [
+            1,
+            1,
+            -1,
+            1,
+            -1,
+            -1,
+            -1,
+            -0.9999998,
+            -1,
+            -0.9999997,
+            1,
+            -1,
+            1,
+            0.9999995,
+            1,
+            0.9999994,
+            -1.000001,
+            1,
+        ]
+        linefloatsrc = collada.source.FloatSource(
+            "mylinevertsource", numpy.array(linefloats), ("X", "Y", "Z")
+        )
+        geometry2 = collada.geometry.Geometry(
+            mesh, "geometry2", "mygeometry2", [linefloatsrc]
+        )
         input_list = collada.source.InputList()
-        input_list.addInput(0, 'VERTEX', "#mylinevertsource")
+        input_list.addInput(0, "VERTEX", "#mylinevertsource")
         indices = numpy.array([0, 1, 1, 2, 2, 3, 3, 4, 4, 5])
         lineset1 = geometry2.createLineSet(indices, input_list, "mymaterial2")
         geometry2.primitives.append(lineset1)
@@ -190,16 +235,16 @@ class TestCollada(unittest.TestCase):
 
         rotate = collada.scene.RotateTransform(0.1, 0.2, 0.3, 90)
         scale = collada.scene.ScaleTransform(0.1, 0.2, 0.3)
-        mynode1 = collada.scene.Node('mynode1', children=[], transforms=[rotate, scale])
-        mynode2 = collada.scene.Node('mynode2', children=[], transforms=[])
+        mynode1 = collada.scene.Node("mynode1", children=[], transforms=[rotate, scale])
+        mynode2 = collada.scene.Node("mynode2", children=[], transforms=[])
         mesh.nodes.append(mynode1)
         mesh.nodes.append(mynode2)
 
         geomnode = collada.scene.GeometryNode(geometry2)
-        mynode3 = collada.scene.Node('mynode3', children=[geomnode], transforms=[])
-        mynode4 = collada.scene.Node('mynode4', children=[], transforms=[])
-        scene1 = collada.scene.Scene('myscene1', [mynode3])
-        scene2 = collada.scene.Scene('myscene2', [mynode4])
+        mynode3 = collada.scene.Node("mynode3", children=[geomnode], transforms=[])
+        mynode4 = collada.scene.Node("mynode4", children=[], transforms=[])
+        scene1 = collada.scene.Scene("myscene1", [mynode3])
+        scene2 = collada.scene.Scene("myscene2", [mynode4])
         mesh.scenes.append(scene1)
         mesh.scenes.append(scene2)
 
@@ -222,25 +267,29 @@ class TestCollada(unittest.TestCase):
         self.assertEqual(len(loaded_mesh.scenes), 2)
         self.assertEqual(loaded_mesh.scene.id, scene1.id)
 
-        self.assertIn('geometry1', loaded_mesh.geometries)
-        self.assertIn('geometry2', loaded_mesh.geometries)
-        self.assertIn('mypointlight', loaded_mesh.lights)
-        self.assertIn('myambientlight', loaded_mesh.lights)
-        self.assertIn('mycam1', loaded_mesh.cameras)
-        self.assertIn('mycam2', loaded_mesh.cameras)
-        self.assertIn('mycimage1', loaded_mesh.images)
-        self.assertIn('mycimage2', loaded_mesh.images)
-        self.assertIn('myeffect1', loaded_mesh.effects)
-        self.assertIn('myeffect2', loaded_mesh.effects)
-        self.assertIn('mymaterial1', loaded_mesh.materials)
-        self.assertIn('mymaterial2', loaded_mesh.materials)
-        self.assertIn('mynode1', loaded_mesh.nodes)
-        self.assertIn('mynode2', loaded_mesh.nodes)
-        self.assertIn('myscene1', loaded_mesh.scenes)
-        self.assertIn('myscene2', loaded_mesh.scenes)
+        self.assertIn("geometry1", loaded_mesh.geometries)
+        self.assertIn("geometry2", loaded_mesh.geometries)
+        self.assertIn("mypointlight", loaded_mesh.lights)
+        self.assertIn("myambientlight", loaded_mesh.lights)
+        self.assertIn("mycam1", loaded_mesh.cameras)
+        self.assertIn("mycam2", loaded_mesh.cameras)
+        self.assertIn("mycimage1", loaded_mesh.images)
+        self.assertIn("mycimage2", loaded_mesh.images)
+        self.assertIn("myeffect1", loaded_mesh.effects)
+        self.assertIn("myeffect2", loaded_mesh.effects)
+        self.assertIn("mymaterial1", loaded_mesh.materials)
+        self.assertIn("mymaterial2", loaded_mesh.materials)
+        self.assertIn("mynode1", loaded_mesh.nodes)
+        self.assertIn("mynode2", loaded_mesh.nodes)
+        self.assertIn("myscene1", loaded_mesh.scenes)
+        self.assertIn("myscene2", loaded_mesh.scenes)
 
-        linefloatsrc2 = collada.source.FloatSource("mylinevertsource2", numpy.array(linefloats), ('X', 'Y', 'Z'))
-        geometry3 = collada.geometry.Geometry(mesh, "geometry3", "mygeometry3", [linefloatsrc2])
+        linefloatsrc2 = collada.source.FloatSource(
+            "mylinevertsource2", numpy.array(linefloats), ("X", "Y", "Z")
+        )
+        geometry3 = collada.geometry.Geometry(
+            mesh, "geometry3", "mygeometry3", [linefloatsrc2]
+        )
         loaded_mesh.geometries.pop(0)
         loaded_mesh.geometries.append(geometry3)
 
@@ -264,12 +313,12 @@ class TestCollada(unittest.TestCase):
         loaded_mesh.materials.pop(0)
         loaded_mesh.materials.append(mat3)
 
-        mynode5 = collada.scene.Node('mynode5', children=[], transforms=[])
+        mynode5 = collada.scene.Node("mynode5", children=[], transforms=[])
         loaded_mesh.nodes.pop(0)
         loaded_mesh.nodes.append(mynode5)
 
-        mynode6 = collada.scene.Node('mynode6', children=[], transforms=[])
-        scene3 = collada.scene.Scene('myscene3', [mynode6])
+        mynode6 = collada.scene.Node("mynode6", children=[], transforms=[])
+        scene3 = collada.scene.Scene("myscene3", [mynode6])
         loaded_mesh.scenes.pop(0)
         loaded_mesh.scenes.append(scene3)
 
@@ -282,22 +331,22 @@ class TestCollada(unittest.TestCase):
         loaded_mesh2 = collada.Collada(indata, validate_output=True)
 
         self.assertEqual(loaded_mesh2.scene.id, scene3.id)
-        self.assertIn('geometry3', loaded_mesh2.geometries)
-        self.assertIn('geometry2', loaded_mesh2.geometries)
-        self.assertIn('mydirlight', loaded_mesh2.lights)
-        self.assertIn('mypointlight', loaded_mesh2.lights)
-        self.assertIn('mycam3', loaded_mesh2.cameras)
-        self.assertIn('mycam2', loaded_mesh2.cameras)
-        self.assertIn('mycimage3', loaded_mesh2.images)
-        self.assertIn('mycimage2', loaded_mesh2.images)
-        self.assertIn('myeffect3', loaded_mesh2.effects)
-        self.assertIn('myeffect2', loaded_mesh2.effects)
-        self.assertIn('mymaterial3', loaded_mesh2.materials)
-        self.assertIn('mymaterial2', loaded_mesh2.materials)
-        self.assertIn('mynode5', loaded_mesh2.nodes)
-        self.assertIn('mynode2', loaded_mesh2.nodes)
-        self.assertIn('myscene3', loaded_mesh2.scenes)
-        self.assertIn('myscene2', loaded_mesh2.scenes)
+        self.assertIn("geometry3", loaded_mesh2.geometries)
+        self.assertIn("geometry2", loaded_mesh2.geometries)
+        self.assertIn("mydirlight", loaded_mesh2.lights)
+        self.assertIn("mypointlight", loaded_mesh2.lights)
+        self.assertIn("mycam3", loaded_mesh2.cameras)
+        self.assertIn("mycam2", loaded_mesh2.cameras)
+        self.assertIn("mycimage3", loaded_mesh2.images)
+        self.assertIn("mycimage2", loaded_mesh2.images)
+        self.assertIn("myeffect3", loaded_mesh2.effects)
+        self.assertIn("myeffect2", loaded_mesh2.effects)
+        self.assertIn("mymaterial3", loaded_mesh2.materials)
+        self.assertIn("mymaterial2", loaded_mesh2.materials)
+        self.assertIn("mynode5", loaded_mesh2.nodes)
+        self.assertIn("mynode2", loaded_mesh2.nodes)
+        self.assertIn("myscene3", loaded_mesh2.scenes)
+        self.assertIn("myscene2", loaded_mesh2.scenes)
 
     def test_collada_attribute_replace(self):
         mesh = collada.Collada(validate_output=True)
@@ -371,7 +420,7 @@ class TestCollada(unittest.TestCase):
 
         # a 1.5 spec collada file with a different namespace
         # check both the zipped ("zae") and plain text ("dae") versions
-        for name in ['wam.zae', 'wam.dae']:
+        for name in ["wam.zae", "wam.dae"]:
             # full path to test file
             file_name = os.path.join(self.datadir, name)
             # load the scene
@@ -382,5 +431,5 @@ class TestCollada(unittest.TestCase):
             self.assertEqual(len(mesh.scene.nodes), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -20,12 +20,19 @@ This module contains all the functionality to load and manage:
 """
 
 import copy
+
 import numpy
 
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeBrokenRefError, \
-    DaeMalformedError, DaeUnsupportedError
-from collada.util import falmostEqual, BytesIO
+from collada.common import (
+    DaeBrokenRefError,
+    DaeIncompleteError,
+    DaeMalformedError,
+    DaeObject,
+    DaeUnsupportedError,
+    E,
+    tag,
+)
+from collada.util import BytesIO, falmostEqual
 
 try:
     from PIL import Image as pil
@@ -33,7 +40,7 @@ except BaseException:
     pil = None
 
 # internally used constant
-_FAILED = 'failed'
+_FAILED = "failed"
 
 
 class DaeMissingSampler2D(Exception):
@@ -77,15 +84,14 @@ class CImage(DaeObject):
             self.xmlnode = xmlnode
             """ElementTree representation of the image."""
         else:
-            self.xmlnode = E.image(
-                E.init_from(path), id=self.id, name=self.id)
+            self.xmlnode = E.image(E.init_from(path), id=self.id, name=self.id)
 
     def getData(self):
         if self._data is None:
             try:
                 self._data = self.collada.getFileData(self.path)
             except DaeBrokenRefError as ex:
-                self._data = ''
+                self._data = ""
                 self.collada.handleError(ex)
         return self._data
 
@@ -102,7 +108,7 @@ class CImage(DaeObject):
             try:
                 self._pilimage = pil.open(BytesIO(data))
                 self._pilimage.load()
-            except IOError:
+            except OSError:
                 self._pilimage = _FAILED
                 return None
             return self._pilimage
@@ -154,23 +160,23 @@ class CImage(DaeObject):
 
     @staticmethod
     def load(collada, localspace, node):
-        id = node.get('id')
-        initnode = node.find(collada.tag('init_from'))
+        id = node.get("id")
+        initnode = node.find(collada.tag("init_from"))
         if initnode is None:
-            raise DaeIncompleteError('Image has no file path')
+            raise DaeIncompleteError("Image has no file path")
         path = initnode.text
         return CImage(id, path, collada, xmlnode=node)
 
     def save(self):
         """Saves the image back to :attr:`xmlnode`. Only the :attr:`id` attribute is saved.
         The image itself will have to be saved to its original source to make modifications."""
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.id)
-        initnode = self.xmlnode.find(tag('init_from'))
+        self.xmlnode.set("id", self.id)
+        self.xmlnode.set("name", self.id)
+        initnode = self.xmlnode.find(tag("init_from"))
         initnode.text = self.path
 
     def __str__(self):
-        return '<CImage id=%s path=%s>' % (self.id, self.path)
+        return f"<CImage id={self.id} path={self.path}>"
 
     def __repr__(self):
         return str(self)
@@ -210,50 +216,50 @@ class Surface(DaeObject):
             """ElementTree representation of the surface."""
         else:
             self.xmlnode = E.newparam(
-                E.surface(
-                    E.init_from(self.image.id),
-                    E.format(self.format), type="2D"), sid=self.id)
+                E.surface(E.init_from(self.image.id), E.format(self.format), type="2D"),
+                sid=self.id,
+            )
 
     @staticmethod
     def load(collada, localscope, node):
-        surfacenode = node.find(collada.tag('surface'))
+        surfacenode = node.find(collada.tag("surface"))
         if surfacenode is None:
-            raise DaeIncompleteError('No surface found in newparam')
-        if surfacenode.get('type') != '2D':
-            raise DaeMalformedError('Hard to imagine a non-2D surface, isn\'t it?')
-        initnode = surfacenode.find(collada.tag('init_from'))
+            raise DaeIncompleteError("No surface found in newparam")
+        if surfacenode.get("type") != "2D":
+            raise DaeMalformedError("Hard to imagine a non-2D surface, isn't it?")
+        initnode = surfacenode.find(collada.tag("init_from"))
         if initnode is None:
-            raise DaeIncompleteError('No init image found in surface')
-        formatnode = surfacenode.find(collada.tag('format'))
+            raise DaeIncompleteError("No init image found in surface")
+        formatnode = surfacenode.find(collada.tag("format"))
         if formatnode is None:
             format = None
         else:
             format = formatnode.text
         imgid = initnode.text
-        id = node.get('sid')
+        id = node.get("sid")
         if imgid in localscope:
             img = localscope[imgid]
         else:
             img = collada.images.get(imgid)
         if img is None:
-            raise DaeBrokenRefError("Missing image '%s' in surface '%s'" % (imgid, id))
+            raise DaeBrokenRefError(f"Missing image '{imgid}' in surface '{id}'")
         return Surface(id, img, format, xmlnode=node)
 
     def save(self):
         """Saves the surface data back to :attr:`xmlnode`"""
-        surfacenode = self.xmlnode.find(tag('surface'))
-        initnode = surfacenode.find(tag('init_from'))
+        surfacenode = self.xmlnode.find(tag("surface"))
+        initnode = surfacenode.find(tag("init_from"))
         if self.format:
-            formatnode = surfacenode.find(tag('format'))
+            formatnode = surfacenode.find(tag("format"))
             if formatnode is None:
                 surfacenode.append(E.format(self.format))
             else:
                 formatnode.text = self.format
         initnode.text = self.image.id
-        self.xmlnode.set('sid', self.id)
+        self.xmlnode.set("sid", self.id)
 
     def __str__(self):
-        return '<Surface id=%s>' % (self.id,)
+        return f"<Surface id={self.id}>"
 
     def __repr__(self):
         return str(self)
@@ -307,45 +313,45 @@ class Sampler2D(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        samplernode = node.find(collada.tag('sampler2D'))
+        samplernode = node.find(collada.tag("sampler2D"))
         if samplernode is None:
-            raise DaeIncompleteError('No sampler found in newparam')
-        sourcenode = samplernode.find(collada.tag('source'))
+            raise DaeIncompleteError("No sampler found in newparam")
+        sourcenode = samplernode.find(collada.tag("source"))
         if sourcenode is None:
-            raise DaeIncompleteError('No source found in sampler')
-        minnode = samplernode.find(collada.tag('minfilter'))
+            raise DaeIncompleteError("No source found in sampler")
+        minnode = samplernode.find(collada.tag("minfilter"))
         if minnode is None:
             minfilter = None
         else:
             minfilter = minnode.text
-        magnode = samplernode.find(collada.tag('magfilter'))
+        magnode = samplernode.find(collada.tag("magfilter"))
         if magnode is None:
             magfilter = None
         else:
             magfilter = magnode.text
 
         surfaceid = sourcenode.text
-        id = node.get('sid')
+        id = node.get("sid")
         surface = localscope.get(surfaceid)
         if surface is None or not isinstance(surface, Surface):
-            raise DaeBrokenRefError('Missing surface ' + surfaceid)
+            raise DaeBrokenRefError("Missing surface " + surfaceid)
         return Sampler2D(id, surface, minfilter, magfilter, xmlnode=node)
 
     def save(self):
         """Saves the sampler data back to :attr:`xmlnode`"""
-        samplernode = self.xmlnode.find(tag('sampler2D'))
-        sourcenode = samplernode.find(tag('source'))
+        samplernode = self.xmlnode.find(tag("sampler2D"))
+        sourcenode = samplernode.find(tag("source"))
         if self.minfilter:
-            minnode = samplernode.find(tag('minfilter'))
+            minnode = samplernode.find(tag("minfilter"))
             minnode.text = self.minfilter
         if self.magfilter:
-            maxnode = samplernode.find(tag('magfilter'))
+            maxnode = samplernode.find(tag("magfilter"))
             maxnode.text = self.magfilter
         sourcenode.text = self.surface.id
-        self.xmlnode.set('sid', self.id)
+        self.xmlnode.set("sid", self.id)
 
     def __str__(self):
-        return '<Sampler2D id=%s>' % (self.id,)
+        return f"<Sampler2D id={self.id}>"
 
     def __repr__(self):
         return str(self)
@@ -385,8 +391,8 @@ class Map(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        samplerid = node.get('texture')
-        texcoord = node.get('texcoord')
+        samplerid = node.get("texture")
+        texcoord = node.get("texcoord")
         sampler = localscope.get(samplerid)
         # Check for the sampler ID as the texture ID because some exporters suck
         if sampler is None:
@@ -395,18 +401,20 @@ class Map(DaeObject):
                     if s2d.surface.image.id == samplerid:
                         sampler = s2d
         if sampler is None or not isinstance(sampler, Sampler2D):
-            err = DaeMissingSampler2D('Missing sampler ' + samplerid + ' in node ' + node.tag)
+            err = DaeMissingSampler2D(
+                "Missing sampler " + samplerid + " in node " + node.tag
+            )
             err.samplerid = samplerid
             raise err
         return Map(sampler, texcoord, xmlnode=node)
 
     def save(self):
         """Saves the map back to :attr:`xmlnode`"""
-        self.xmlnode.set('texture', self.sampler.id)
-        self.xmlnode.set('texcoord', self.texcoord)
+        self.xmlnode.set("texture", self.sampler.id)
+        self.xmlnode.set("texcoord", self.texcoord)
 
     def __str__(self):
-        return '<Map sampler=%s texcoord=%s>' % (self.sampler.id, self.texcoord)
+        return f"<Map sampler={self.sampler.id} texcoord={self.texcoord}>"
 
     def __repr__(self):
         return str(self)
@@ -414,37 +422,54 @@ class Map(DaeObject):
 
 class OPAQUE_MODE:
     """The opaque mode of an effect."""
-    A_ONE = 'A_ONE'
+
+    A_ONE = "A_ONE"
     """Takes the transparency information from the color's alpha channel, where the value 1.0 is opaque (default)."""
-    RGB_ZERO = 'RGB_ZERO'
+    RGB_ZERO = "RGB_ZERO"
     """Takes the transparency information from the color's red, green, and blue
     channels, where the value 0.0 is opaque, with each channel modulated
     independently."""
 
 
 class Effect(DaeObject):
-    """Class containing data coming from an <effect> tag.
-    """
-    supported = ['emission', 'ambient', 'diffuse', 'specular',
-                 'shininess', 'reflective', 'reflectivity',
-                 'transparent', 'transparency', 'index_of_refraction']
+    """Class containing data coming from an <effect> tag."""
+
+    supported = [
+        "emission",
+        "ambient",
+        "diffuse",
+        "specular",
+        "shininess",
+        "reflective",
+        "reflectivity",
+        "transparent",
+        "transparency",
+        "index_of_refraction",
+    ]
     """Supported material properties list."""
-    shaders = ['phong', 'lambert', 'blinn', 'constant']
+    shaders = ["phong", "lambert", "blinn", "constant"]
     """Supported shader list."""
 
-    def __init__(self, id, params, shadingtype, bumpmap=None, double_sided=False,
-                 emission=(0.0, 0.0, 0.0, 1.0),
-                 ambient=(0.0, 0.0, 0.0, 1.0),
-                 diffuse=(0.0, 0.0, 0.0, 1.0),
-                 specular=(0.0, 0.0, 0.0, 1.0),
-                 shininess=0.0,
-                 reflective=(0.0, 0.0, 0.0, 1.0),
-                 reflectivity=0.0,
-                 transparent=(0.0, 0.0, 0.0, 1.0),
-                 transparency=None,
-                 index_of_refraction=None,
-                 opaque_mode=None,
-                 xmlnode=None):
+    def __init__(
+        self,
+        id,
+        params,
+        shadingtype,
+        bumpmap=None,
+        double_sided=False,
+        emission=(0.0, 0.0, 0.0, 1.0),
+        ambient=(0.0, 0.0, 0.0, 1.0),
+        diffuse=(0.0, 0.0, 0.0, 1.0),
+        specular=(0.0, 0.0, 0.0, 1.0),
+        shininess=0.0,
+        reflective=(0.0, 0.0, 0.0, 1.0),
+        reflectivity=0.0,
+        transparent=(0.0, 0.0, 0.0, 1.0),
+        transparency=None,
+        index_of_refraction=None,
+        opaque_mode=None,
+        xmlnode=None,
+    ):
         """Create an effect instance out of properties.
 
         :param str id:
@@ -553,56 +578,63 @@ class Effect(DaeObject):
                 if value is None:
                     continue
                 propnode = E(prop)
-                if prop == 'transparent' and self.opaque_mode == OPAQUE_MODE.RGB_ZERO:
-                    propnode.set('opaque', OPAQUE_MODE.RGB_ZERO)
+                if prop == "transparent" and self.opaque_mode == OPAQUE_MODE.RGB_ZERO:
+                    propnode.set("opaque", OPAQUE_MODE.RGB_ZERO)
                 shadnode.append(propnode)
                 if isinstance(value, Map):
                     propnode.append(value.xmlnode)
                 elif isinstance(value, float):
                     propnode.append(E.float(str(value)))
                 else:
-                    propnode.append(E.color(' '.join(map(str, value))))
+                    propnode.append(E.color(" ".join(map(str, value))))
 
             effect_nodes = [param.xmlnode for param in self.params]
-            effect_nodes.append(E.technique(shadnode, sid='common'))
+            effect_nodes.append(E.technique(shadnode, sid="common"))
             self.xmlnode = E.effect(
-                E.profile_COMMON(*effect_nodes), id=self.id, name=self.id)
+                E.profile_COMMON(*effect_nodes), id=self.id, name=self.id
+            )
 
     @staticmethod
     def getEffectParameters(collada, parentnode, localscope, params):
-
-        for paramnode in parentnode.findall(collada.tag('newparam')):
-            if paramnode.find(collada.tag('surface')) is not None:
+        for paramnode in parentnode.findall(collada.tag("newparam")):
+            if paramnode.find(collada.tag("surface")) is not None:
                 param = Surface.load(collada, localscope, paramnode)
                 params.append(param)
                 localscope[param.id] = param
-            elif paramnode.find(collada.tag('sampler2D')) is not None:
+            elif paramnode.find(collada.tag("sampler2D")) is not None:
                 param = Sampler2D.load(collada, localscope, paramnode)
                 params.append(param)
                 localscope[param.id] = param
             else:
-                floatnode = paramnode.find(collada.tag('float'))
+                floatnode = paramnode.find(collada.tag("float"))
                 if floatnode is None:
-                    floatnode = paramnode.find(collada.tag('float2'))
+                    floatnode = paramnode.find(collada.tag("float2"))
                 if floatnode is None:
-                    floatnode = paramnode.find(collada.tag('float3'))
+                    floatnode = paramnode.find(collada.tag("float3"))
                 if floatnode is None:
-                    floatnode = paramnode.find(collada.tag('float4'))
-                paramid = paramnode.get('sid')
-                if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
+                    floatnode = paramnode.find(collada.tag("float4"))
+                paramid = paramnode.get("sid")
+                if (
+                    floatnode is not None
+                    and paramid is not None
+                    and len(paramid) > 0
+                    and floatnode.text is not None
+                ):
                     localscope[paramid] = [float(v) for v in floatnode.text.split()]
 
     @staticmethod
     def load(collada, localscope, node):
         localscope = {}  # we have our own scope, shadow it
         params = []
-        id = node.get('id')
-        profilenode = node.find(collada.tag('profile_COMMON'))
+        id = node.get("id")
+        profilenode = node.find(collada.tag("profile_COMMON"))
         if profilenode is None:
-            raise DaeUnsupportedError('Found effect with profile other than profile_COMMON')
+            raise DaeUnsupportedError(
+                "Found effect with profile other than profile_COMMON"
+            )
 
         # <image> can be local to a material instead of global in <library_images>
-        for imgnode in profilenode.findall(collada.tag('image')):
+        for imgnode in profilenode.findall(collada.tag("image")):
             local_image = CImage.load(collada, localscope, imgnode)
             localscope[local_image.id] = local_image
 
@@ -615,7 +647,7 @@ class Effect(DaeObject):
 
         Effect.getEffectParameters(collada, profilenode, localscope, params)
 
-        tecnode = profilenode.find(collada.tag('technique'))
+        tecnode = profilenode.find(collada.tag("technique"))
 
         Effect.getEffectParameters(collada, tecnode, localscope, params)
 
@@ -626,7 +658,7 @@ class Effect(DaeObject):
             if shadnode is not None:
                 break
         if shadnode is None:
-            raise DaeIncompleteError('No material properties found in effect')
+            raise DaeIncompleteError("No material properties found in effect")
         props = {}
         for key in Effect.supported:
             pnode = shadnode.find(collada.tag(key))
@@ -638,7 +670,11 @@ class Effect(DaeObject):
                 except DaeMissingSampler2D as ex:
                     if ex.samplerid in collada.images:
                         # Whoever exported this collada file didn't include the proper references so we will create them
-                        surf = Surface(ex.samplerid + '-surface', collada.images[ex.samplerid], 'A8R8G8B8')
+                        surf = Surface(
+                            ex.samplerid + "-surface",
+                            collada.images[ex.samplerid],
+                            "A8R8G8B8",
+                        )
                         sampler = Sampler2D(ex.samplerid, surf, None, None)
                         params.append(surf)
                         params.append(sampler)
@@ -646,27 +682,34 @@ class Effect(DaeObject):
                         localscope[sampler.id] = sampler
                         try:
                             props[key] = Effect._loadShadingParam(
-                                collada, localscope, pnode)
+                                collada, localscope, pnode
+                            )
                         except DaeUnsupportedError as ex:
                             props[key] = None
                             collada.handleError(ex)
                 except DaeUnsupportedError as ex:
                     props[key] = None
-                    collada.handleError(ex)  # Give the chance to ignore error and load the rest
+                    collada.handleError(
+                        ex
+                    )  # Give the chance to ignore error and load the rest
 
-                if key == 'transparent' and key in props and props[key] is not None:
-                    opaque_mode = pnode.get('opaque')
+                if key == "transparent" and key in props and props[key] is not None:
+                    opaque_mode = pnode.get("opaque")
                     if opaque_mode is not None and opaque_mode == OPAQUE_MODE.RGB_ZERO:
-                        props['opaque_mode'] = OPAQUE_MODE.RGB_ZERO
-        props['xmlnode'] = node
+                        props["opaque_mode"] = OPAQUE_MODE.RGB_ZERO
+        props["xmlnode"] = node
 
-        bumpnode = node.find('.//%s//%s' % (collada.tag('extra'), collada.tag('texture')))
+        bumpnode = node.find(
+            ".//{}//{}".format(collada.tag("extra"), collada.tag("texture"))
+        )
         if bumpnode is not None:
             bumpmap = Map.load(collada, localscope, bumpnode)
         else:
             bumpmap = None
 
-        double_sided_node = node.find('.//%s//%s' % (collada.tag('extra'), collada.tag('double_sided')))
+        double_sided_node = node.find(
+            ".//{}//{}".format(collada.tag("extra"), collada.tag("double_sided"))
+        )
         double_sided = False
         if double_sided_node is not None and double_sided_node.text is not None:
             try:
@@ -682,31 +725,32 @@ class Effect(DaeObject):
         """Load from the node a definition for a material property."""
         children = list(node)
         if not children:
-            raise DaeIncompleteError('Incorrect effect shading parameter ' + node.tag)
+            raise DaeIncompleteError("Incorrect effect shading parameter " + node.tag)
         vnode = children[0]
-        if vnode.tag == collada.tag('color'):
+        if vnode.tag == collada.tag("color"):
             try:
                 value = tuple([float(v) for v in vnode.text.split()])
             except ValueError:
-                raise DaeMalformedError('Corrupted color definition in effect `{}`'.format(id))
+                raise DaeMalformedError(f"Corrupted color definition in effect `{id}`")
             except IndexError:
-                raise DaeMalformedError('Corrupted color definition in effect `{}`'.format(id))
-        elif vnode.tag == collada.tag('float'):
+                raise DaeMalformedError(f"Corrupted color definition in effect `{id}`")
+        elif vnode.tag == collada.tag("float"):
             try:
                 value = float(vnode.text)
             except ValueError:
-                raise DaeMalformedError('Corrupted float definition in effect ' + id)
-        elif vnode.tag == collada.tag('texture'):
+                raise DaeMalformedError("Corrupted float definition in effect " + id)
+        elif vnode.tag == collada.tag("texture"):
             value = Map.load(collada, localscope, vnode)
-        elif vnode.tag == collada.tag('param'):
-            refid = vnode.get('ref')
+        elif vnode.tag == collada.tag("param"):
+            refid = vnode.get("ref")
             if refid is not None and refid in localscope:
                 value = localscope[refid]
             else:
                 return None
         else:
-            raise DaeUnsupportedError('Unknown shading param definition ' +
-                                      str(vnode.tag))
+            raise DaeUnsupportedError(
+                "Unknown shading param definition " + str(vnode.tag)
+            )
         return value
 
     def _fixColorValues(self):
@@ -723,22 +767,21 @@ class Effect(DaeObject):
 
     def save(self):
         """Saves the effect back to :attr:`xmlnode`"""
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.id)
-        profilenode = self.xmlnode.find(tag('profile_COMMON'))
-        tecnode = profilenode.find(tag('technique'))
-        tecnode.set('sid', 'common')
+        self.xmlnode.set("id", self.id)
+        self.xmlnode.set("name", self.id)
+        profilenode = self.xmlnode.find(tag("profile_COMMON"))
+        tecnode = profilenode.find(tag("technique"))
+        tecnode.set("sid", "common")
 
         self._fixColorValues()
 
         for param in self.params:
             param.save()
             if param.xmlnode not in profilenode:
-                profilenode.insert(list(profilenode).index(tecnode),
-                                   param.xmlnode)
+                profilenode.insert(list(profilenode).index(tecnode), param.xmlnode)
 
         deletenodes = []
-        for oldparam in profilenode.findall(tag('newparam')):
+        for oldparam in profilenode.findall(tag("newparam")):
             if oldparam not in [param.xmlnode for param in self.params]:
                 deletenodes.append(oldparam)
         for d in deletenodes:
@@ -751,14 +794,14 @@ class Effect(DaeObject):
 
         def getPropNode(prop, value):
             propnode = E(prop)
-            if prop == 'transparent' and self.opaque_mode == OPAQUE_MODE.RGB_ZERO:
-                propnode.set('opaque', OPAQUE_MODE.RGB_ZERO)
+            if prop == "transparent" and self.opaque_mode == OPAQUE_MODE.RGB_ZERO:
+                propnode.set("opaque", OPAQUE_MODE.RGB_ZERO)
             if isinstance(value, Map):
                 propnode.append(copy.deepcopy(value.xmlnode))
             elif isinstance(value, float):
                 propnode.append(E.float(str(value)))
             else:
-                propnode.append(E.color(' '.join(map(str, value))))
+                propnode.append(E.color(" ".join(map(str, value))))
             return propnode
 
         shadnode = tecnode.find(tag(self.shadingtype))
@@ -779,23 +822,25 @@ class Effect(DaeObject):
                 if value is not None:
                     shadnode.append(getPropNode(prop, value))
 
-        double_sided_node = profilenode.find('.//%s//%s' % (tag('extra'), tag('double_sided')))
+        double_sided_node = profilenode.find(
+            ".//{}//{}".format(tag("extra"), tag("double_sided"))
+        )
         if double_sided_node is None or double_sided_node.text is None:
-            extranode = profilenode.find(tag('extra'))
+            extranode = profilenode.find(tag("extra"))
             if extranode is None:
                 extranode = E.extra()
                 profilenode.append(extranode)
 
-            teqnodes = extranode.findall(tag('technique'))
+            teqnodes = extranode.findall(tag("technique"))
             goognode = None
             for teqnode in teqnodes:
-                if teqnode.get('profile') == 'GOOGLEEARTH':
+                if teqnode.get("profile") == "GOOGLEEARTH":
                     goognode = teqnode
                     break
             if goognode is None:
-                goognode = E.technique(profile='GOOGLEEARTH')
+                goognode = E.technique(profile="GOOGLEEARTH")
                 extranode.append(goognode)
-            double_sided_node = goognode.find(tag('double_sided'))
+            double_sided_node = goognode.find(tag("double_sided"))
             if double_sided_node is None:
                 double_sided_node = E.double_sided()
                 goognode.append(double_sided_node)
@@ -803,7 +848,7 @@ class Effect(DaeObject):
         double_sided_node.text = "1" if self.double_sided else "0"
 
     def __str__(self):
-        return '<Effect id=%s type=%s>' % (self.id, self.shadingtype)
+        return f"<Effect id={self.id} type={self.shadingtype}>"
 
     def __repr__(self):
         return str(self)
@@ -831,7 +876,11 @@ class Effect(DaeObject):
                 if not falmostEqual(thisprop, otherprop):
                     return False
             elif isinstance(thisprop, Map):
-                if thisprop.sampler.surface.image.id != otherprop.sampler.surface.image.id or thisprop.texcoord != otherprop.texcoord:
+                if (
+                    thisprop.sampler.surface.image.id
+                    != otherprop.sampler.surface.image.id
+                    or thisprop.texcoord != otherprop.texcoord
+                ):
                     return False
             elif isinstance(thisprop, tuple):
                 if len(thisprop) != len(otherprop):
@@ -878,36 +927,41 @@ class Material(DaeObject):
             """ElementTree representation of the surface."""
         else:
             self.xmlnode = E.material(
-                E.instance_effect(url="#%s" % self.effect.id), id=str(self.id), name=str(self.name))
+                E.instance_effect(url=f"#{self.effect.id}"),
+                id=str(self.id),
+                name=str(self.name),
+            )
 
     @staticmethod
     def load(collada, localscope, node):
-        matid = node.get('id')
-        matname = node.get('name')
+        matid = node.get("id")
+        matname = node.get("name")
 
-        effnode = node.find(collada.tag('instance_effect'))
+        effnode = node.find(collada.tag("instance_effect"))
         if effnode is None:
-            raise DaeIncompleteError('No effect inside material')
-        effectid = effnode.get('url')
+            raise DaeIncompleteError("No effect inside material")
+        effectid = effnode.get("url")
 
-        if not effectid.startswith('#'):
-            raise DaeMalformedError('Corrupted effect reference in material %s' % effectid)
+        if not effectid.startswith("#"):
+            raise DaeMalformedError(
+                f"Corrupted effect reference in material {effectid}"
+            )
 
         effect = collada.effects.get(effectid[1:])
         if not effect:
-            raise DaeBrokenRefError('Effect not found: ' + effectid)
+            raise DaeBrokenRefError("Effect not found: " + effectid)
 
         return Material(matid, matname, effect, xmlnode=node)
 
     def save(self):
         """Saves the material data back to :attr:`xmlnode`"""
-        self.xmlnode.set('id', str(self.id))
-        self.xmlnode.set('name', str(self.name))
-        effnode = self.xmlnode.find(tag('instance_effect'))
-        effnode.set('url', '#%s' % self.effect.id)
+        self.xmlnode.set("id", str(self.id))
+        self.xmlnode.set("name", str(self.name))
+        effnode = self.xmlnode.find(tag("instance_effect"))
+        effnode.set("url", f"#{self.effect.id}")
 
     def __str__(self):
-        return '<Material id=%s effect=%s>' % (self.id, self.effect.id)
+        return f"<Material id={self.id} effect={self.effect.id}>"
 
     def __repr__(self):
         return str(self)

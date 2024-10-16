@@ -12,42 +12,43 @@
 
 """Contains objects for representing a geometry."""
 
-
-from collada import source
-from collada import triangleset
-from collada import lineset
-from collada import polylist
-from collada import polygons
-from collada import primitive
-from collada.common import DaeObject, E, tag
-from collada.common import DaeIncompleteError, DaeUnsupportedError
+from collada import lineset, polygons, polylist, primitive, source, triangleset
+from collada.common import DaeIncompleteError, DaeObject, DaeUnsupportedError, E, tag
 
 
 class Geometry(DaeObject):
     """A class containing the data coming from a COLLADA <geometry> tag"""
 
-    def __init__(self, collada, id, name, sourcebyid, primitives=None,
-                 xmlnode=None, double_sided=False):
+    def __init__(
+        self,
+        collada,
+        id,
+        name,
+        sourcebyid,
+        primitives=None,
+        xmlnode=None,
+        double_sided=False,
+    ):
         """Create a geometry instance
 
-          :param collada.Collada collada:
-            The collada object this geometry belongs to
-          :param str id:
-            A unique string identifier for the geometry
-          :param str name:
-            A text string naming the geometry
-          :param sourcebyid:
-            A list of :class:`collada.source.Source` objects or
-            a dictionary mapping source ids to the actual objects
-          :param list primitives:
-            List of primitive objects contained within the geometry.
-            Do not set this argument manually. Instead, create a
-            :class:`collada.geometry.Geometry` first and then append
-            to :attr:`primitives` with the `create*` functions.
-          :param xmlnode:
-            When loaded, the xmlnode it comes from.
-          :param bool double_sided:
-            Whether or not the geometry should be rendered double sided
+        :param collada.Collada collada:
+          The collada object this geometry belongs to
+        :param str id:
+          A unique string identifier for the geometry
+        :param str name:
+          A text string naming the geometry
+        :param sourcebyid:
+          A list of :class:`collada.source.Source` objects or
+          a dictionary mapping source ids to the actual objects
+        :param list primitives:
+          List of primitive objects contained within the geometry.
+          Do not set this argument manually. Instead, create a
+          :class:`collada.geometry.Geometry` first and then append
+          to :attr:`primitives` with the `create*` functions.
+        :param xmlnode:
+          When loaded, the xmlnode it comes from.
+        :param bool double_sided:
+          Whether or not the geometry should be rendered double sided
 
         """
         self.collada = collada
@@ -85,8 +86,10 @@ class Geometry(DaeObject):
                 sourcenodes.append(src.xmlnode)
                 if verticesnode is None:
                     # pick first source to be in the useless <vertices> tag
-                    verticesnode = E.vertices(E.input(semantic='POSITION', source="#%s" % srcid),
-                                              id=srcid + '-vertices')
+                    verticesnode = E.vertices(
+                        E.input(semantic="POSITION", source=f"#{srcid}"),
+                        id=srcid + "-vertices",
+                    )
             meshnode = E.mesh(*sourcenodes)
             meshnode.append(verticesnode)
             self.xmlnode = E.geometry(meshnode)
@@ -109,7 +112,9 @@ class Geometry(DaeObject):
 
         :rtype: :class:`collada.lineset.LineSet`
         """
-        inputdict = primitive.Primitive._getInputsFromList(self.collada, self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(
+            self.collada, self.sourceById, inputlist.getList()
+        )
         return lineset.LineSet(inputdict, materialid, indices)
 
     def createTriangleSet(self, indices, inputlist, materialid=None):
@@ -126,7 +131,9 @@ class Geometry(DaeObject):
 
         :rtype: :class:`collada.triangleset.TriangleSet`
         """
-        inputdict = primitive.Primitive._getInputsFromList(self.collada, self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(
+            self.collada, self.sourceById, inputlist.getList()
+        )
         return triangleset.TriangleSet(inputdict, materialid, indices)
 
     def createPolylist(self, indices, vcounts, inputlist, materialid=None):
@@ -146,7 +153,9 @@ class Geometry(DaeObject):
 
         :rtype: :class:`collada.polylist.Polylist`
         """
-        inputdict = primitive.Primitive._getInputsFromList(self.collada, self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(
+            self.collada, self.sourceById, inputlist.getList()
+        )
         return polylist.Polylist(inputdict, materialid, indices, vcounts)
 
     def createPolygons(self, indices, inputlist, materialid=None):
@@ -163,40 +172,49 @@ class Geometry(DaeObject):
 
         :rtype: :class:`collada.polygons.Polygons`
         """
-        inputdict = primitive.Primitive._getInputsFromList(self.collada, self.sourceById, inputlist.getList())
+        inputdict = primitive.Primitive._getInputsFromList(
+            self.collada, self.sourceById, inputlist.getList()
+        )
         return polygons.Polygons(inputdict, materialid, indices)
 
     @staticmethod
     def load(collada, localscope, node):
         id = node.get("id") or ""
         name = node.get("name") or ""
-        meshnode = node.find(collada.tag('mesh'))
+        meshnode = node.find(collada.tag("mesh"))
         if meshnode is None:
-            raise DaeUnsupportedError('Unknown geometry node')
+            raise DaeUnsupportedError("Unknown geometry node")
         sourcebyid = {}
         sources = []
-        sourcenodes = node.findall('%s/%s' % (collada.tag('mesh'), collada.tag('source')))
+        sourcenodes = node.findall(
+            "{}/{}".format(collada.tag("mesh"), collada.tag("source"))
+        )
         for sourcenode in sourcenodes:
             ch = source.Source.load(collada, {}, sourcenode)
             sources.append(ch)
             sourcebyid[ch.id] = ch
 
-        verticesnode = meshnode.find(collada.tag('vertices'))
+        verticesnode = meshnode.find(collada.tag("vertices"))
         if verticesnode is not None:
             inputnodes = {}
-            for inputnode in verticesnode.findall(collada.tag('input')):
-                semantic = inputnode.get('semantic')
-                inputsource = inputnode.get('source')
-                if not semantic or not inputsource or not inputsource.startswith('#'):
-                    raise DaeIncompleteError('Bad input definition inside vertices')
+            for inputnode in verticesnode.findall(collada.tag("input")):
+                semantic = inputnode.get("semantic")
+                inputsource = inputnode.get("source")
+                if not semantic or not inputsource or not inputsource.startswith("#"):
+                    raise DaeIncompleteError("Bad input definition inside vertices")
                 inputnodes[semantic] = sourcebyid.get(inputsource[1:])
-            if (not verticesnode.get('id') or len(inputnodes) == 0 or
-                    'POSITION' not in inputnodes):
-                raise DaeIncompleteError('Bad vertices definition in mesh')
-            sourcebyid[verticesnode.get('id')] = inputnodes
-            verticesnode.get('id')
+            if (
+                not verticesnode.get("id")
+                or len(inputnodes) == 0
+                or "POSITION" not in inputnodes
+            ):
+                raise DaeIncompleteError("Bad vertices definition in mesh")
+            sourcebyid[verticesnode.get("id")] = inputnodes
+            verticesnode.get("id")
 
-        double_sided_node = node.find('.//%s//%s' % (collada.tag('extra'), collada.tag('double_sided')))
+        double_sided_node = node.find(
+            ".//{}//{}".format(collada.tag("extra"), collada.tag("double_sided"))
+        )
         double_sided = False
         if double_sided_node is not None and double_sided_node.text is not None:
             try:
@@ -208,22 +226,40 @@ class Geometry(DaeObject):
 
         _primitives = []
         for subnode in meshnode:
-            if subnode.tag == collada.tag('polylist'):
+            if subnode.tag == collada.tag("polylist"):
                 _primitives.append(polylist.Polylist.load(collada, sourcebyid, subnode))
-            elif subnode.tag in (collada.tag('triangles'), collada.tag('tristrips'), collada.tag('trifans')):
-                _primitives.append(triangleset.TriangleSet.load(collada, sourcebyid, subnode))
-            elif subnode.tag == collada.tag('lines'):
+            elif subnode.tag in (
+                collada.tag("triangles"),
+                collada.tag("tristrips"),
+                collada.tag("trifans"),
+            ):
+                _primitives.append(
+                    triangleset.TriangleSet.load(collada, sourcebyid, subnode)
+                )
+            elif subnode.tag == collada.tag("lines"):
                 _primitives.append(lineset.LineSet.load(collada, sourcebyid, subnode))
-            elif subnode.tag == collada.tag('polygons'):
+            elif subnode.tag == collada.tag("polygons"):
                 _primitives.append(polygons.Polygons.load(collada, sourcebyid, subnode))
-            elif subnode.tag != collada.tag('source') and subnode.tag != collada.tag('vertices') and subnode.tag != collada.tag('extra'):
-                raise DaeUnsupportedError('Unknown geometry tag %s' % subnode.tag)
-        geom = Geometry(collada, id, name, sourcebyid, _primitives, xmlnode=node, double_sided=double_sided)
+            elif (
+                subnode.tag != collada.tag("source")
+                and subnode.tag != collada.tag("vertices")
+                and subnode.tag != collada.tag("extra")
+            ):
+                raise DaeUnsupportedError(f"Unknown geometry tag {subnode.tag}")
+        geom = Geometry(
+            collada,
+            id,
+            name,
+            sourcebyid,
+            _primitives,
+            xmlnode=node,
+            double_sided=double_sided,
+        )
         return geom
 
     def save(self):
         """Saves the geometry back to :attr:`xmlnode`"""
-        meshnode = self.xmlnode.find(tag('mesh'))
+        meshnode = self.xmlnode.find(tag("mesh"))
         for src in self.sourceById.values():
             if isinstance(src, source.Source):
                 src.save()
@@ -231,24 +267,26 @@ class Geometry(DaeObject):
                     meshnode.insert(0, src.xmlnode)
 
         deletenodes = []
-        for oldsrcnode in meshnode.findall(tag('source')):
-            if oldsrcnode not in [src.xmlnode
-                                  for src in self.sourceById.values()
-                                  if isinstance(src, source.Source)]:
+        for oldsrcnode in meshnode.findall(tag("source")):
+            if oldsrcnode not in [
+                src.xmlnode
+                for src in self.sourceById.values()
+                if isinstance(src, source.Source)
+            ]:
                 deletenodes.append(oldsrcnode)
         for d in deletenodes:
             meshnode.remove(d)
 
         # Look through primitives to find a vertex source
-        vnode = self.xmlnode.find(tag('mesh')).find(tag('vertices'))
+        vnode = self.xmlnode.find(tag("mesh")).find(tag("vertices"))
 
         # delete any inputs in vertices tag that no longer exist and find the vertex input
         delete_inputs = []
-        for input_node in vnode.findall(tag('input')):
-            if input_node.get('semantic') == 'POSITION':
+        for input_node in vnode.findall(tag("input")):
+            if input_node.get("semantic") == "POSITION":
                 input_vnode = input_node
             else:
-                srcid = input_node.get('source')[1:]
+                srcid = input_node.get("source")[1:]
                 if srcid not in self.sourceById:
                     delete_inputs.append(input_node)
 
@@ -257,37 +295,42 @@ class Geometry(DaeObject):
 
         vert_sources = []
         for prim in self.primitives:
-            for src in prim.sources['VERTEX']:
+            for src in prim.sources["VERTEX"]:
                 vert_sources.append(src[2][1:])
 
-        vert_src = vnode.get('id')
-        vert_ref = input_vnode.get('source')[1:]
+        vert_src = vnode.get("id")
+        vert_ref = input_vnode.get("source")[1:]
 
-        if not (vert_src in vert_sources or vert_ref in vert_sources) and len(vert_sources) > 0:
+        if (
+            not (vert_src in vert_sources or vert_ref in vert_sources)
+            and len(vert_sources) > 0
+        ):
             if vert_ref in self.sourceById and vert_ref in vert_sources:
                 new_source = vert_ref
             else:
                 new_source = vert_sources[0]
-            self.sourceById[new_source + '-vertices'] = self.sourceById[new_source]
-            input_vnode.set('source', '#' + new_source)
-            vnode.set('id', new_source + '-vertices')
+            self.sourceById[new_source + "-vertices"] = self.sourceById[new_source]
+            input_vnode.set("source", "#" + new_source)
+            vnode.set("id", new_source + "-vertices")
 
         # any source references in primitives that are pointing to the
         # same source that the vertices tag is pointing to to instead
         # point to the vertices id
-        vert_src = vnode.get('id')
-        vert_ref = input_vnode.get('source')[1:]
+        vert_src = vnode.get("id")
+        vert_ref = input_vnode.get("source")[1:]
         for prim in self.primitives:
-            for node in prim.xmlnode.findall(tag('input')):
-                src = node.get('source')[1:]
+            for node in prim.xmlnode.findall(tag("input")):
+                src = node.get("source")[1:]
                 if src == vert_ref:
-                    node.set('source', '#%s' % vert_src)
+                    node.set("source", f"#{vert_src}")
 
-        self.xmlnode.set('id', self.id)
-        self.xmlnode.set('name', self.name)
+        self.xmlnode.set("id", self.id)
+        self.xmlnode.set("name", self.name)
 
         for prim in self.primitives:
-            if isinstance(prim, triangleset.TriangleSet) and prim.xmlnode.tag != tag('triangles'):
+            if isinstance(prim, triangleset.TriangleSet) and prim.xmlnode.tag != tag(
+                "triangles"
+            ):
                 prim._recreateXmlNode()
             if prim.xmlnode not in meshnode:
                 meshnode.append(prim.xmlnode)
@@ -295,7 +338,11 @@ class Geometry(DaeObject):
         deletenodes = []
         primnodes = [prim.xmlnode for prim in self.primitives]
         for child in meshnode:
-            if child.tag != tag('vertices') and child.tag != tag('source') and child not in primnodes:
+            if (
+                child.tag != tag("vertices")
+                and child.tag != tag("source")
+                and child not in primnodes
+            ):
                 deletenodes.append(child)
         for d in deletenodes:
             meshnode.remove(d)
@@ -318,16 +365,16 @@ class Geometry(DaeObject):
         return BoundGeometry(self, matrix, materialnodebysymbol)
 
     def __str__(self):
-        return '<Geometry id=%s, %d primitives>' % (self.id, len(self.primitives))
+        return "<Geometry id=%s, %d primitives>" % (self.id, len(self.primitives))
 
     def __repr__(self):
         return str(self)
 
 
-class BoundGeometry(object):
+class BoundGeometry:
     """A geometry bound to a transform matrix and material mapping.
-        This gets created when a geometry is instantiated in a scene.
-        Do not create this manually."""
+    This gets created when a geometry is instantiated in a scene.
+    Do not create this manually."""
 
     def __init__(self, geom, matrix, materialnodebysymbol):
         self.matrix = matrix
@@ -354,7 +401,7 @@ class BoundGeometry(object):
             yield boundp
 
     def __str__(self):
-        return '<BoundGeometry id=%s, %d primitives>' % (self.original.id, len(self))
+        return "<BoundGeometry id=%s, %d primitives>" % (self.original.id, len(self))
 
     def __repr__(self):
         return str(self)

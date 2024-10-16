@@ -15,12 +15,15 @@
 with the COLLADA 1.4.1 schema."""
 
 import os
+
 import lxml
 import lxml.etree
-from collada.util import bytes, BytesIO
+
+from collada.util import BytesIO, bytes
 
 # the absolute directory of this file
 _cwd = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
+
 
 def resource_string(file_name: str) -> str:
     """
@@ -40,10 +43,12 @@ def resource_string(file_name: str) -> str:
     with open(os.path.join(_cwd, "resources", file_name)) as f:
         return f.read()
 
+
 # get a copy of the XML schema
 # resource_string returns bytes so decode into string
-COLLADA_SCHEMA_1_4_1 = resource_string('schema-1.4.1.xml')
-XML_XSD = resource_string('xsd.xml')
+COLLADA_SCHEMA_1_4_1 = resource_string("schema-1.4.1.xml")
+XML_XSD = resource_string("xsd.xml")
+
 
 class ColladaResolver(lxml.etree.Resolver):
     """COLLADA XML Resolver. If a known URL referenced
@@ -53,15 +58,15 @@ class ColladaResolver(lxml.etree.Resolver):
 
     def resolve(self, url, id, context):
         """Currently Resolves:
-         * http://www.w3.org/2001/03/xml.xsd
+        * http://www.w3.org/2001/03/xml.xsd
         """
-        if url == 'http://www.w3.org/2001/03/xml.xsd':
+        if url == "http://www.w3.org/2001/03/xml.xsd":
             return self.resolve_string(XML_XSD, context)
         else:
             return None
 
 
-class ColladaValidator(object):
+class ColladaValidator:
     """Validates a collada lxml document"""
 
     def __init__(self):
@@ -74,10 +79,11 @@ class ColladaValidator(object):
             self._parser = lxml.etree.XMLParser()
             self._parser.resolvers.add(ColladaResolver())
             self.COLLADA_SCHEMA_1_4_1_DOC = lxml.etree.parse(
-                BytesIO(bytes(COLLADA_SCHEMA_1_4_1, encoding='utf-8')),
-                self._parser)
+                BytesIO(bytes(COLLADA_SCHEMA_1_4_1, encoding="utf-8")), self._parser
+            )
             self._COLLADA_SCHEMA_1_4_1_INSTANCE = lxml.etree.XMLSchema(
-                self.COLLADA_SCHEMA_1_4_1_DOC)
+                self.COLLADA_SCHEMA_1_4_1_DOC
+            )
         return self._COLLADA_SCHEMA_1_4_1_INSTANCE
 
     COLLADA_SCHEMA_1_4_1_INSTANCE = property(_getColladaSchemaInstance)

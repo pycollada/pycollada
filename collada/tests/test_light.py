@@ -7,7 +7,6 @@ tostring = etree.tostring
 
 
 class TestLight(unittest.TestCase):
-
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
 
@@ -20,7 +19,9 @@ class TestLight(unittest.TestCase):
         dirlight.color = (0.1, 0.2, 0.3)
         dirlight.id = "yourdirlight"
         dirlight.save()
-        loaded_dirlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(dirlight.xmlnode)))
+        loaded_dirlight = collada.light.Light.load(
+            self.dummy, {}, fromstring(tostring(dirlight.xmlnode))
+        )
         self.assertTrue(isinstance(loaded_dirlight, collada.light.DirectionalLight))
         self.assertTupleEqual(loaded_dirlight.color, (0.1, 0.2, 0.3))
         self.assertEqual(loaded_dirlight.id, "yourdirlight")
@@ -33,7 +34,9 @@ class TestLight(unittest.TestCase):
         ambientlight.color = (0.1, 0.2, 0.3)
         ambientlight.id = "yourambientlight"
         ambientlight.save()
-        loaded_ambientlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(ambientlight.xmlnode)))
+        loaded_ambientlight = collada.light.Light.load(
+            self.dummy, {}, fromstring(tostring(ambientlight.xmlnode))
+        )
         self.assertTrue(isinstance(loaded_ambientlight, collada.light.AmbientLight))
         self.assertTupleEqual(ambientlight.color, (0.1, 0.2, 0.3))
         self.assertEqual(ambientlight.id, "yourambientlight")
@@ -54,7 +57,9 @@ class TestLight(unittest.TestCase):
         pointlight.quad_att = 0.9
         pointlight.id = "yourpointlight"
         pointlight.save()
-        loaded_pointlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(pointlight.xmlnode)))
+        loaded_pointlight = collada.light.Light.load(
+            self.dummy, {}, fromstring(tostring(pointlight.xmlnode))
+        )
         self.assertTrue(isinstance(loaded_pointlight, collada.light.PointLight))
         self.assertTupleEqual(loaded_pointlight.color, (0.1, 0.2, 0.3))
         self.assertEqual(loaded_pointlight.constant_att, 0.7)
@@ -65,7 +70,9 @@ class TestLight(unittest.TestCase):
 
         loaded_pointlight.zfar = 0.2
         loaded_pointlight.save()
-        loaded_pointlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(loaded_pointlight.xmlnode)))
+        loaded_pointlight = collada.light.Light.load(
+            self.dummy, {}, fromstring(tostring(loaded_pointlight.xmlnode))
+        )
         self.assertEqual(loaded_pointlight.zfar, 0.2)
 
     def test_spot_light_saving(self):
@@ -85,7 +92,9 @@ class TestLight(unittest.TestCase):
         spotlight.quad_att = 0.9
         spotlight.id = "yourspotlight"
         spotlight.save()
-        loaded_spotlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(spotlight.xmlnode)))
+        loaded_spotlight = collada.light.Light.load(
+            self.dummy, {}, fromstring(tostring(spotlight.xmlnode))
+        )
         self.assertTrue(isinstance(loaded_spotlight, collada.light.SpotLight))
         self.assertTupleEqual(loaded_spotlight.color, (0.1, 0.2, 0.3))
         self.assertEqual(loaded_spotlight.constant_att, 0.7)
@@ -98,10 +107,12 @@ class TestLight(unittest.TestCase):
         loaded_spotlight.falloff_ang = 180
         loaded_spotlight.falloff_exp = 2
         loaded_spotlight.save()
-        loaded_spotlight = collada.light.Light.load(self.dummy, {}, fromstring(tostring(loaded_spotlight.xmlnode)))
+        loaded_spotlight = collada.light.Light.load(
+            self.dummy, {}, fromstring(tostring(loaded_spotlight.xmlnode))
+        )
         self.assertEqual(loaded_spotlight.falloff_ang, 180)
         self.assertEqual(loaded_spotlight.falloff_exp, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

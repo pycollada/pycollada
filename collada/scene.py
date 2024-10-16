@@ -23,16 +23,18 @@ Supported scene nodes are:
 
 """
 
-import collada
 import numpy
 
-from collada.common import DaeBrokenRefError
-from collada.common import DaeError
-from collada.common import DaeMalformedError
-from collada.common import DaeObject
-from collada.common import DaeUnsupportedError
-from collada.common import E
-from collada.common import tag
+import collada
+from collada.common import (
+    DaeBrokenRefError,
+    DaeError,
+    DaeMalformedError,
+    DaeObject,
+    DaeUnsupportedError,
+    E,
+    tag,
+)
 from collada.util import toUnitVec
 from collada.xmlutil import etree as ElementTree
 
@@ -41,7 +43,7 @@ class DaeInstanceNotLoadedError(Exception):
     """Raised when an instance_node refers to a node that isn't loaded yet. Will always be caught"""
 
     def __init__(self, msg):
-        super(DaeInstanceNotLoadedError, self).__init__()
+        super().__init__()
         self.msg = msg
 
 
@@ -68,12 +70,16 @@ def makeRotationMatrix(x, y, z, angle):
     around (`x`,`y`,`z`) axis."""
     c = numpy.cos(angle)
     s = numpy.sin(angle)
-    t = (1 - c)
-    return numpy.array([[t * x * x + c, t * x * y - s * z, t * x * z + s * y, 0],
-                        [t * x * y + s * z, t * y * y + c, t * y * z - s * x, 0],
-                        [t * x * z - s * y, t * y * z + s * x, t * z * z + c, 0],
-                        [0, 0, 0, 1]],
-                       dtype=numpy.float32)
+    t = 1 - c
+    return numpy.array(
+        [
+            [t * x * x + c, t * x * y - s * z, t * x * z + s * y, 0],
+            [t * x * y + s * z, t * y * y + c, t * y * z - s * x, 0],
+            [t * x * z - s * y, t * y * z + s * x, t * z * z + c, 0],
+            [0, 0, 0, 1],
+        ],
+        dtype=numpy.float32,
+    )
 
 
 class Transform(DaeObject):
@@ -111,17 +117,17 @@ class TranslateTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.translate(' '.join([str(x), str(y), str(z)]))
+            self.xmlnode = E.translate(" ".join([str(x), str(y), str(z)]))
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=" ")
         if len(floats) != 3:
             raise DaeMalformedError("Translate node requires three float values")
         return TranslateTransform(floats[0], floats[1], floats[2], node)
 
     def __str__(self):
-        return '<TranslateTransform (%s, %s, %s)>' % (self.x, self.y, self.z)
+        return f"<TranslateTransform ({self.x}, {self.y}, {self.z})>"
 
     def __repr__(self):
         return str(self)
@@ -158,17 +164,17 @@ class RotateTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.rotate(' '.join([str(x), str(y), str(z), str(angle)]))
+            self.xmlnode = E.rotate(" ".join([str(x), str(y), str(z), str(angle)]))
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=" ")
         if len(floats) != 4:
             raise DaeMalformedError("Rotate node requires four float values")
         return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
 
     def __str__(self):
-        return '<RotateTransform (%s, %s, %s) angle=%s>' % (self.x, self.y, self.z, self.angle)
+        return f"<RotateTransform ({self.x}, {self.y}, {self.z}) angle={self.angle}>"
 
     def __repr__(self):
         return str(self)
@@ -204,17 +210,17 @@ class ScaleTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.scale(' '.join([str(x), str(y), str(z)]))
+            self.xmlnode = E.scale(" ".join([str(x), str(y), str(z)]))
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=" ")
         if len(floats) != 3:
             raise DaeMalformedError("Scale node requires three float values")
         return ScaleTransform(floats[0], floats[1], floats[2], node)
 
     def __str__(self):
-        return '<ScaleTransform (%s, %s, %s)>' % (self.x, self.y, self.z)
+        return f"<ScaleTransform ({self.x}, {self.y}, {self.z})>"
 
     def __repr__(self):
         return str(self)
@@ -235,20 +241,20 @@ class MatrixTransform(Transform):
         self.matrix = matrix
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         if len(self.matrix) != 16:
-            raise DaeMalformedError('Corrupted matrix transformation node')
+            raise DaeMalformedError("Corrupted matrix transformation node")
         self.matrix.shape = (4, 4)
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.matrix(' '.join(map(str, self.matrix.flat)))
+            self.xmlnode = E.matrix(" ".join(map(str, self.matrix.flat)))
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=" ")
         return MatrixTransform(floats, node)
 
     def __str__(self):
-        return '<MatrixTransform>'
+        return "<MatrixTransform>"
 
     def __repr__(self):
         return str(self)
@@ -278,7 +284,7 @@ class LookAtTransform(Transform):
         """A numpy array of length 3 containing the up-axis direction"""
 
         if len(eye) != 3 or len(interest) != 3 or len(upvector) != 3:
-            raise DaeMalformedError('Corrupted lookat transformation node')
+            raise DaeMalformedError("Corrupted lookat transformation node")
 
         self.matrix = numpy.identity(4, dtype=numpy.float32)
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
@@ -293,18 +299,23 @@ class LookAtTransform(Transform):
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
-            self.xmlnode = E.lookat(' '.join(map(str,
-                                                 numpy.concatenate((self.eye, self.interest, self.upvector)))))
+            self.xmlnode = E.lookat(
+                " ".join(
+                    map(
+                        str, numpy.concatenate((self.eye, self.interest, self.upvector))
+                    )
+                )
+            )
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=" ")
         if len(floats) != 9:
             raise DaeMalformedError("Lookat node requires 9 float values")
         return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], node)
 
     def __str__(self):
-        return '<LookAtTransform>'
+        return "<LookAtTransform>"
 
     def __repr__(self):
         return str(self)
@@ -384,8 +395,7 @@ class Node(SceneNode):
         else:
             M = self.matrix
         for node in self.children:
-            for obj in node.objects(tipo, M):
-                yield obj
+            yield from node.objects(tipo, M)
 
     def save(self):
         """Saves the geometry back to :attr:`xmlnode`. Also updates
@@ -398,9 +408,9 @@ class Node(SceneNode):
             child.save()
 
         if self.id is not None:
-            self.xmlnode.set('id', self.id)
+            self.xmlnode.set("id", self.id)
         if self.name is not None:
-            self.xmlnode.set('name', self.name)
+            self.xmlnode.set("name", self.name)
 
         for t in self.transforms:
             if t.xmlnode not in self.xmlnode:
@@ -416,8 +426,8 @@ class Node(SceneNode):
 
     @staticmethod
     def load(collada, node, localscope):
-        id = node.get('id')
-        name = node.get('name')
+        id = node.get("id")
+        name = node.get("name")
         children = []
         transforms = []
 
@@ -434,7 +444,10 @@ class Node(SceneNode):
         return Node(id, children, transforms, xmlnode=node, name=name)
 
     def __str__(self):
-        return '<Node transforms=%d, children=%d>' % (len(self.transforms), len(self.children))
+        return "<Node transforms=%d, children=%d>" % (
+            len(self.transforms),
+            len(self.children),
+        )
 
     def __repr__(self):
         return str(self)
@@ -459,11 +472,10 @@ class NodeNode(Node):
             self.xmlnode = xmlnode
             """ElementTree representation of the node node."""
         else:
-            self.xmlnode = E.instance_node(url="#%s" % self.node.id)
+            self.xmlnode = E.instance_node(url=f"#{self.node.id}")
 
     def objects(self, tipo, matrix=None):
-        for obj in self.node.objects(tipo, matrix):
-            yield obj
+        yield from self.node.objects(tipo, matrix)
 
     id = property(lambda s: s.node.id)
     children = property(lambda s: s.node.children)
@@ -471,22 +483,22 @@ class NodeNode(Node):
 
     @staticmethod
     def load(collada, node, localscope):
-        url = node.get('url')
-        if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in node instance %s' % url)
+        url = node.get("url")
+        if not url.startswith("#"):
+            raise DaeMalformedError(f"Invalid url in node instance {url}")
         referred_node = localscope.get(url[1:])
         if not referred_node:
             referred_node = collada.nodes.get(url[1:])
         if not referred_node:
-            raise DaeInstanceNotLoadedError('Node %s not found in library' % url)
+            raise DaeInstanceNotLoadedError(f"Node {url} not found in library")
         return NodeNode(referred_node, xmlnode=node)
 
     def save(self):
         """Saves the node node back to :attr:`xmlnode`"""
-        self.xmlnode.set('url', "#%s" % self.node.id)
+        self.xmlnode.set("url", f"#{self.node.id}")
 
     def __str__(self):
-        return '<NodeNode node=%s>' % (self.node.id,)
+        return f"<NodeNode node={self.node.id}>"
 
     def __repr__(self):
         return str(self)
@@ -520,17 +532,17 @@ class GeometryNode(SceneNode):
             self.xmlnode = xmlnode
             """ElementTree representation of the geometry node."""
         else:
-            self.xmlnode = E.instance_geometry(url="#%s" % self.geometry.id)
+            self.xmlnode = E.instance_geometry(url=f"#{self.geometry.id}")
             if len(self.materials) > 0:
-                self.xmlnode.append(E.bind_material(
-                    E.technique_common(
-                        *[mat.xmlnode for mat in self.materials]
+                self.xmlnode.append(
+                    E.bind_material(
+                        E.technique_common(*[mat.xmlnode for mat in self.materials])
                     )
-                ))
+                )
 
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.geometry.BoundGeometry` if ``tipo=='geometry'``"""
-        if tipo == 'geometry':
+        if tipo == "geometry":
             if matrix is None:
                 matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
@@ -540,13 +552,19 @@ class GeometryNode(SceneNode):
 
     @staticmethod
     def load(collada, node):
-        url = node.get('url')
-        if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in geometry instance %s' % url)
+        url = node.get("url")
+        if not url.startswith("#"):
+            raise DaeMalformedError(f"Invalid url in geometry instance {url}")
         geometry = collada.geometries.get(url[1:])
         if not geometry:
-            raise DaeBrokenRefError('Geometry %s not found in library' % url)
-        matnodes = node.findall('%s/%s/%s' % (collada.tag('bind_material'), collada.tag('technique_common'), collada.tag('instance_material')))
+            raise DaeBrokenRefError(f"Geometry {url} not found in library")
+        matnodes = node.findall(
+            "{}/{}/{}".format(
+                collada.tag("bind_material"),
+                collada.tag("technique_common"),
+                collada.tag("instance_material"),
+            )
+        )
         materials = []
         for matnode in matnodes:
             materials.append(MaterialNode.load(collada, matnode))
@@ -554,19 +572,21 @@ class GeometryNode(SceneNode):
 
     def save(self):
         """Saves the geometry node back to :attr:`xmlnode`"""
-        self.xmlnode.set('url', "#%s" % self.geometry.id)
+        self.xmlnode.set("url", f"#{self.geometry.id}")
 
         for m in self.materials:
             m.save()
 
-        matparent = self.xmlnode.find('%s/%s' % (tag('bind_material'), tag('technique_common')))
+        matparent = self.xmlnode.find(
+            "{}/{}".format(tag("bind_material"), tag("technique_common"))
+        )
         if matparent is None and len(self.materials) == 0:
             return
         elif matparent is None:
             matparent = E.technique_common()
             self.xmlnode.append(E.bind_material(matparent))
         elif len(self.materials) == 0 and matparent is not None:
-            bindnode = self.xmlnode.find('%s' % tag('bind_material'))
+            bindnode = self.xmlnode.find("{}".format(tag("bind_material")))
             self.xmlnode.remove(bindnode)
             return
 
@@ -579,7 +599,7 @@ class GeometryNode(SceneNode):
                 matparent.remove(n)
 
     def __str__(self):
-        return '<GeometryNode geometry=%s>' % (self.geometry.id,)
+        return f"<GeometryNode geometry={self.geometry.id}>"
 
     def __repr__(self):
         return str(self)
@@ -612,9 +632,9 @@ class ControllerNode(SceneNode):
             self.xmlnode = xmlnode
             """ElementTree representation of the controller node."""
         else:
-            self.xmlnode = ElementTree.Element(collada.tag('instance_controller'))
-            bindnode = ElementTree.Element(collada.tag('bind_material'))
-            technode = ElementTree.Element(collada.tag('technique_common'))
+            self.xmlnode = ElementTree.Element(collada.tag("instance_controller"))
+            bindnode = ElementTree.Element(collada.tag("bind_material"))
+            technode = ElementTree.Element(collada.tag("technique_common"))
             bindnode.append(technode)
             self.xmlnode.append(bindnode)
             for mat in materials:
@@ -622,7 +642,7 @@ class ControllerNode(SceneNode):
 
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.controller.BoundController` if ``tipo=='controller'``"""
-        if tipo == 'controller':
+        if tipo == "controller":
             if matrix is None:
                 matrix = numpy.identity(4, dtype=numpy.float32)
             materialnodesbysymbol = {}
@@ -632,13 +652,19 @@ class ControllerNode(SceneNode):
 
     @staticmethod
     def load(collada, node):
-        url = node.get('url')
-        if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in controller instance %s' % url)
+        url = node.get("url")
+        if not url.startswith("#"):
+            raise DaeMalformedError(f"Invalid url in controller instance {url}")
         controller = collada.controllers.get(url[1:])
         if not controller:
-            raise DaeBrokenRefError('Controller %s not found in library' % url)
-        matnodes = node.findall('%s/%s/%s' % (collada.tag('bind_material'), collada.tag('technique_common'), collada.tag('instance_material')))
+            raise DaeBrokenRefError(f"Controller {url} not found in library")
+        matnodes = node.findall(
+            "{}/{}/{}".format(
+                collada.tag("bind_material"),
+                collada.tag("technique_common"),
+                collada.tag("instance_material"),
+            )
+        )
         materials = []
         for matnode in matnodes:
             materials.append(MaterialNode.load(collada, matnode))
@@ -646,12 +672,12 @@ class ControllerNode(SceneNode):
 
     def save(self):
         """Saves the controller node back to :attr:`xmlnode`"""
-        self.xmlnode.set('url', '#' + self.controller.id)
+        self.xmlnode.set("url", "#" + self.controller.id)
         for mat in self.materials:
             mat.save()
 
     def __str__(self):
-        return '<ControllerNode controller=%s>' % (self.controller.id,)
+        return f"<ControllerNode controller={self.controller.id}>"
 
     def __repr__(self):
         return str(self)
@@ -692,43 +718,63 @@ class MaterialNode(SceneNode):
             """ElementTree representation of the material node."""
         else:
             self.xmlnode = E.instance_material(
-                *[E.bind_vertex_input(semantic=sem, input_semantic=input_sem, input_set=set)
-                  for sem, input_sem, set in self.inputs], **{'symbol': self.symbol, 'target': "#%s" % self.target.id})
+                *[
+                    E.bind_vertex_input(
+                        semantic=sem, input_semantic=input_sem, input_set=set
+                    )
+                    for sem, input_sem, set in self.inputs
+                ],
+                **{"symbol": self.symbol, "target": f"#{self.target.id}"},
+            )
 
     @staticmethod
     def load(collada, node):
         inputs = []
-        for inputnode in node.findall(collada.tag('bind_vertex_input')):
-            inputs.append((inputnode.get('semantic'), inputnode.get('input_semantic'), inputnode.get('input_set')))
-        targetid = node.get('target')
-        if not targetid.startswith('#'):
-            raise DaeMalformedError('Incorrect target id in material ' + targetid)
+        for inputnode in node.findall(collada.tag("bind_vertex_input")):
+            inputs.append(
+                (
+                    inputnode.get("semantic"),
+                    inputnode.get("input_semantic"),
+                    inputnode.get("input_set"),
+                )
+            )
+        targetid = node.get("target")
+        if not targetid.startswith("#"):
+            raise DaeMalformedError("Incorrect target id in material " + targetid)
         target = collada.materials.get(targetid[1:])
         if not target:
-            raise DaeBrokenRefError('Material %s not found' % targetid)
-        return MaterialNode(node.get('symbol'), target, inputs, xmlnode=node)
+            raise DaeBrokenRefError(f"Material {targetid} not found")
+        return MaterialNode(node.get("symbol"), target, inputs, xmlnode=node)
 
     def objects(self):
         pass
 
     def save(self):
         """Saves the material node back to :attr:`xmlnode`"""
-        self.xmlnode.set('symbol', self.symbol)
-        self.xmlnode.set('target', "#%s" % self.target.id)
+        self.xmlnode.set("symbol", self.symbol)
+        self.xmlnode.set("target", f"#{self.target.id}")
 
         inputs_in = []
-        for i in self.xmlnode.findall(tag('bind_vertex_input')):
-            input_tuple = (i.get('semantic'), i.get('input_semantic'), i.get('input_set'))
+        for i in self.xmlnode.findall(tag("bind_vertex_input")):
+            input_tuple = (
+                i.get("semantic"),
+                i.get("input_semantic"),
+                i.get("input_set"),
+            )
             if input_tuple not in self.inputs:
                 self.xmlnode.remove(i)
             else:
                 inputs_in.append(input_tuple)
         for i in self.inputs:
             if i not in inputs_in:
-                self.xmlnode.append(E.bind_vertex_input(semantic=i[0], input_semantic=i[1], input_set=i[2]))
+                self.xmlnode.append(
+                    E.bind_vertex_input(
+                        semantic=i[0], input_semantic=i[1], input_set=i[2]
+                    )
+                )
 
     def __str__(self):
-        return '<MaterialNode symbol=%s targetid=%s>' % (self.symbol, self.target.id)
+        return f"<MaterialNode symbol={self.symbol} targetid={self.target.id}>"
 
     def __repr__(self):
         return str(self)
@@ -752,31 +798,31 @@ class CameraNode(SceneNode):
             self.xmlnode = xmlnode
             """ElementTree representation of the camera node."""
         else:
-            self.xmlnode = E.instance_camera(url="#%s" % camera.id)
+            self.xmlnode = E.instance_camera(url=f"#{camera.id}")
 
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.camera.BoundCamera` if ``tipo=='camera'``"""
-        if tipo == 'camera':
+        if tipo == "camera":
             if matrix is None:
                 matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.camera.bind(matrix)
 
     @staticmethod
     def load(collada, node):
-        url = node.get('url')
-        if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in camera instance %s' % url)
+        url = node.get("url")
+        if not url.startswith("#"):
+            raise DaeMalformedError(f"Invalid url in camera instance {url}")
         camera = collada.cameras.get(url[1:])
         if not camera:
-            raise DaeBrokenRefError('Camera %s not found in library' % url)
+            raise DaeBrokenRefError(f"Camera {url} not found in library")
         return CameraNode(camera, xmlnode=node)
 
     def save(self):
         """Saves the camera node back to :attr:`xmlnode`"""
-        self.xmlnode.set('url', '#' + self.camera.id)
+        self.xmlnode.set("url", "#" + self.camera.id)
 
     def __str__(self):
-        return '<CameraNode camera=%s>' % (self.camera.id,)
+        return f"<CameraNode camera={self.camera.id}>"
 
     def __repr__(self):
         return str(self)
@@ -800,31 +846,31 @@ class LightNode(SceneNode):
             self.xmlnode = xmlnode
             """ElementTree representation of the light node."""
         else:
-            self.xmlnode = E.instance_light(url="#%s" % light.id)
+            self.xmlnode = E.instance_light(url=f"#{light.id}")
 
     def objects(self, tipo, matrix=None):
         """Yields a :class:`collada.light.BoundLight` if ``tipo=='light'``"""
-        if tipo == 'light':
+        if tipo == "light":
             if matrix is None:
                 matrix = numpy.identity(4, dtype=numpy.float32)
             yield self.light.bind(matrix)
 
     @staticmethod
     def load(collada, node):
-        url = node.get('url')
-        if not url.startswith('#'):
-            raise DaeMalformedError('Invalid url in light instance %s' % url)
+        url = node.get("url")
+        if not url.startswith("#"):
+            raise DaeMalformedError(f"Invalid url in light instance {url}")
         light = collada.lights.get(url[1:])
         if not light:
-            raise DaeBrokenRefError('Light %s not found in library' % url)
+            raise DaeBrokenRefError(f"Light {url} not found in library")
         return LightNode(light, xmlnode=node)
 
     def save(self):
         """Saves the light node back to :attr:`xmlnode`"""
-        self.xmlnode.set('url', '#' + self.light.id)
+        self.xmlnode.set("url", "#" + self.light.id)
 
     def __str__(self):
-        return '<LightNode light=%s>' % (self.light.id,)
+        return f"<LightNode light={self.light.id}>"
 
     def __repr__(self):
         return str(self)
@@ -847,9 +893,8 @@ class ExtraNode(SceneNode):
             self.xmlnode = E.extra()
 
     def objects(self, tipo, matrix=None):
-        if tipo == 'extra':
-            for e in self.xmlnode.findall(tag(tipo)):
-                yield e
+        if tipo == "extra":
+            yield from self.xmlnode.findall(tag(tipo))
 
     @staticmethod
     def load(collada, node):
@@ -866,34 +911,34 @@ def loadNode(collada, node, localscope):
     and return it.
 
     """
-    if node.tag == collada.tag('node'):
+    if node.tag == collada.tag("node"):
         return Node.load(collada, node, localscope)
-    elif node.tag == collada.tag('translate'):
+    elif node.tag == collada.tag("translate"):
         return TranslateTransform.load(collada, node)
-    elif node.tag == collada.tag('rotate'):
+    elif node.tag == collada.tag("rotate"):
         return RotateTransform.load(collada, node)
-    elif node.tag == collada.tag('scale'):
+    elif node.tag == collada.tag("scale"):
         return ScaleTransform.load(collada, node)
-    elif node.tag == collada.tag('matrix'):
+    elif node.tag == collada.tag("matrix"):
         return MatrixTransform.load(collada, node)
-    elif node.tag == collada.tag('lookat'):
+    elif node.tag == collada.tag("lookat"):
         return LookAtTransform.load(collada, node)
-    elif node.tag == collada.tag('instance_geometry'):
+    elif node.tag == collada.tag("instance_geometry"):
         return GeometryNode.load(collada, node)
-    elif node.tag == collada.tag('instance_camera'):
+    elif node.tag == collada.tag("instance_camera"):
         return CameraNode.load(collada, node)
-    elif node.tag == collada.tag('instance_light'):
+    elif node.tag == collada.tag("instance_light"):
         return LightNode.load(collada, node)
-    elif node.tag == collada.tag('instance_controller'):
+    elif node.tag == collada.tag("instance_controller"):
         return ControllerNode.load(collada, node)
-    elif node.tag == collada.tag('instance_node'):
+    elif node.tag == collada.tag("instance_node"):
         return NodeNode.load(collada, node, localscope)
-    elif node.tag == collada.tag('extra'):
+    elif node.tag == collada.tag("extra"):
         return ExtraNode.load(collada, node)
-    elif node.tag == collada.tag('asset'):
+    elif node.tag == collada.tag("asset"):
         return None
     else:
-        raise DaeUnsupportedError('Unknown scene node %s' % str(node.tag))
+        raise DaeUnsupportedError(f"Unknown scene node {node.tag!s}")
 
 
 class Scene(DaeObject):
@@ -939,17 +984,16 @@ class Scene(DaeObject):
         """
         matrix = None
         for node in self.nodes:
-            for obj in node.objects(tipo, matrix):
-                yield obj
+            yield from node.objects(tipo, matrix)
 
     @staticmethod
     def load(collada, node):
-        id = node.get('id')
+        id = node.get("id")
         nodes = []
         tried_loading = []
         succeeded = False
         localscope = {}
-        for nodenode in node.findall(collada.tag('node')):
+        for nodenode in node.findall(collada.tag("node")):
             try:
                 N = loadNode(collada, nodenode, localscope)
             except DaeInstanceNotLoadedError as ex:
@@ -985,7 +1029,7 @@ class Scene(DaeObject):
 
     def save(self):
         """Saves the scene back to :attr:`xmlnode`"""
-        self.xmlnode.set('id', self.id)
+        self.xmlnode.set("id", self.id)
         for node in self.nodes:
             node.save()
             if node.xmlnode not in self.xmlnode:
@@ -996,7 +1040,7 @@ class Scene(DaeObject):
                 self.xmlnode.remove(node)
 
     def __str__(self):
-        return '<Scene id=%s nodes=%d>' % (self.id, len(self.nodes))
+        return "<Scene id=%s nodes=%d>" % (self.id, len(self.nodes))
 
     def __repr__(self):
         return str(self)

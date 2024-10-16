@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-from __future__ import absolute_import
+
+import ctypes
+
+from pyglet.gl import *
 
 import collada
-import numpy
-import pyglet
-from pyglet.gl import *
-import ctypes
+
 from . import glutils
 
 
 class OldStyleRenderer:
-
     def __init__(self, dae, window):
         self.dae = dae
         self.window = window
@@ -40,20 +38,20 @@ class OldStyleRenderer:
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 
         # create one display list
-        print('Creating display list...')
-        print('It could take some time. Please be patient :-) .')
+        print("Creating display list...")
+        print("It could take some time. Please be patient :-) .")
         self.displist = glGenLists(1)
         # compile the display list, store a triangle in it
         glNewList(self.displist, GL_COMPILE)
         self.drawPrimitives()
         glEndList()
-        print('done. Ready to render.')
+        print("done. Ready to render.")
 
     def drawPrimitives(self):
         glBegin(GL_TRIANGLES)
 
         if self.dae.scene is not None:
-            for geom in self.dae.scene.objects('geometry'):
+            for geom in self.dae.scene.objects("geometry"):
                 for prim in geom.primitives():
                     mat = prim.material
                     diff_color = (GLfloat * 4)(*(0.3, 0.3, 0.3, 0.0))
@@ -80,48 +78,75 @@ class OldStyleRenderer:
                                     try:
                                         # get image meta-data
                                         # (dimensions) and data
-                                        (ix, iy, tex_data) = (img.size[0], img.size[1], img.tostring("raw", "RGBA", 0, -1))
+                                        (ix, iy, tex_data) = (
+                                            img.size[0],
+                                            img.size[1],
+                                            img.tostring("raw", "RGBA", 0, -1),
+                                        )
                                     except SystemError:
                                         # has no alpha channel,
                                         # synthesize one
-                                        (ix, iy, tex_data) = (img.size[0], img.size[1], img.tostring("raw", "RGBX", 0, -1))
+                                        (ix, iy, tex_data) = (
+                                            img.size[0],
+                                            img.size[1],
+                                            img.tostring("raw", "RGBX", 0, -1),
+                                        )
                                     # generate a texture ID
                                     tid = GLuint()
                                     glGenTextures(1, ctypes.byref(tid))
                                     tex_id = tid.value
                                     # make it current
                                     glBindTexture(GL_TEXTURE_2D, tex_id)
-                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-                                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-                                    #glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
+                                    glTexParameteri(
+                                        GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+                                    )
+                                    glTexParameteri(
+                                        GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR
+                                    )
+                                    glTexParameteri(
+                                        GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT
+                                    )
+                                    glTexParameteri(
+                                        GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT
+                                    )
+                                    # glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
                                     # copy the texture into the
                                     # current texture ID
-                                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ix, iy, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data)
+                                    glTexImage2D(
+                                        GL_TEXTURE_2D,
+                                        0,
+                                        GL_RGBA,
+                                        ix,
+                                        iy,
+                                        0,
+                                        GL_RGBA,
+                                        GL_UNSIGNED_BYTE,
+                                        tex_data,
+                                    )
 
                                     self.textures[colladaimage.id] = tex_id
                             else:
-                                print('  %s = Texture %s: (not available)' % (
-                                    prop, colladaimage.id))
+                                print(
+                                    f"  {prop} = Texture {colladaimage.id}: (not available)"
+                                )
                         else:
-                            if prop == 'diffuse' and value is not None:
+                            if prop == "diffuse" and value is not None:
                                 diff_color = (GLfloat * 4)(*value)
-                            elif prop == 'specular' and value is not None:
+                            elif prop == "specular" and value is not None:
                                 spec_color = (GLfloat * 4)(*value)
-                            elif prop == 'ambient' and value is not None:
+                            elif prop == "ambient" and value is not None:
                                 amb_color = (GLfloat * 4)(*value)
-                            elif prop == 'shininess' and value is not None:
+                            elif prop == "shininess" and value is not None:
                                 shininess = value
 
                     # use primitive-specific ways to get triangles
                     prim_type = type(prim).__name__
-                    if prim_type == 'BoundTriangleSet':
+                    if prim_type == "BoundTriangleSet":
                         triangles = prim
-                    elif prim_type == 'BoundPolylist':
+                    elif prim_type == "BoundPolylist":
                         triangles = prim.triangleset()
                     else:
-                        print('Unsupported mesh used:', prim_type)
+                        print("Unsupported mesh used:", prim_type)
                         triangles = []
 
                     if tex_id is not None:
@@ -145,7 +170,9 @@ class OldStyleRenderer:
                             if amb_color is not None:
                                 glMaterialfv(GL_FRONT, GL_AMBIENT, amb_color)
                             if shininess is not None:
-                                glMaterialfv(GL_FRONT, GL_SHININESS, (GLfloat * 1)(shininess))
+                                glMaterialfv(
+                                    GL_FRONT, GL_SHININESS, (GLfloat * 1)(shininess)
+                                )
 
                             # if not t.normals is None:
                             glNormal3fv((GLfloat * 3)(*t.normals[nidx]))
@@ -187,5 +214,5 @@ class OldStyleRenderer:
         glCallList(self.displist)
 
     def cleanup(self):
-        print('Renderer cleaning up')
+        print("Renderer cleaning up")
         glDeleteLists(self.displist, 1)

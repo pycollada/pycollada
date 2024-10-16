@@ -1,9 +1,9 @@
-import sys
+import argparse
 import os
 import os.path
-import traceback
+import sys
 import time
-import argparse
+import traceback
 
 try:
     import collada
@@ -12,25 +12,50 @@ except BaseException:
 
 
 def main():
-
     parser = argparse.ArgumentParser(
-        description='Recursively scans a directory, loading any .dae file found.')
-    parser.add_argument('directory', help='Directory to scan')
-    parser.add_argument('--show-time', '-t', default=False, action='store_true',
-                        help='Show how much time (in seconds) it took to load file')
-    parser.add_argument('--show-warnings', '-w', default=False, action='store_true',
-                        help='If warnings present, print warning type')
-    parser.add_argument('--show-errors', '-e', default=False, action='store_true',
-                        help='If errors present, print error and traceback')
-    parser.add_argument('--show-summary', '-s', default=False, action='store_true',
-                        help='Print a summary at the end of how many files had warnings and errors')
-    parser.add_argument('--zip', '-z', default=False, action='store_true',
-                        help='Include .zip files when searching for files to load')
+        description="Recursively scans a directory, loading any .dae file found."
+    )
+    parser.add_argument("directory", help="Directory to scan")
+    parser.add_argument(
+        "--show-time",
+        "-t",
+        default=False,
+        action="store_true",
+        help="Show how much time (in seconds) it took to load file",
+    )
+    parser.add_argument(
+        "--show-warnings",
+        "-w",
+        default=False,
+        action="store_true",
+        help="If warnings present, print warning type",
+    )
+    parser.add_argument(
+        "--show-errors",
+        "-e",
+        default=False,
+        action="store_true",
+        help="If errors present, print error and traceback",
+    )
+    parser.add_argument(
+        "--show-summary",
+        "-s",
+        default=False,
+        action="store_true",
+        help="Print a summary at the end of how many files had warnings and errors",
+    )
+    parser.add_argument(
+        "--zip",
+        "-z",
+        default=False,
+        action="store_true",
+        help="Include .zip files when searching for files to load",
+    )
 
     args = parser.parse_args()
 
     if not os.path.isdir(args.directory):
-        sys.exit("Given path '%s' is not a directory." % args.directory)
+        sys.exit(f"Given path '{args.directory}' is not a directory.")
 
     directories = [args.directory]
     collada_files = []
@@ -54,14 +79,17 @@ def main():
 
     for c in collada_files:
         (root, leaf) = os.path.split(c)
-        print("'%s'..." % leaf,)
+        print(
+            f"'{leaf}'...",
+        )
         sys.stdout.flush()
 
         start_time = time.time()
 
         try:
-            col = collada.Collada(c,
-                                  ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError])
+            col = collada.Collada(
+                c, ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError]
+            )
 
             if len(col.errors) > 0:
                 print("WARNINGS:", len(col.errors))
@@ -73,21 +101,24 @@ def main():
                     for e, ct in type_cts:
                         for err in col.errors:
                             if type(err).__name__ == e:
-                                print("   %s" % str(err))
+                                print(f"   {err!s}")
                                 break
                         if ct > 1:
-                            print("   %s: %d additional warnings of this type" % (e, ct - 1))
+                            print(
+                                "   %s: %d additional warnings of this type"
+                                % (e, ct - 1)
+                            )
             else:
                 print("SUCCESS")
                 file_success_count += 1
 
             # do some sanity checks looping through result
-            if not col.scene is None:
-                for geom in col.scene.objects('geometry'):
+            if col.scene is not None:
+                for geom in col.scene.objects("geometry"):
                     for prim in geom.primitives():
-                        assert(len(prim) >= 0)
-                for cam in col.scene.objects('camera'):
-                    assert(cam.original.id)
+                        assert len(prim) >= 0
+                for cam in col.scene.objects("camera"):
+                    assert cam.original.id
         except (KeyboardInterrupt, SystemExit):
             print()
             sys.exit("Keyboard interrupt. Exiting.")

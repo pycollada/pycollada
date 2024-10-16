@@ -2,24 +2,32 @@
 # Flat Shader
 # This shader applies the given model view matrix to the vertices,
 # and uses a uniform color value.
-flatShader = (['''
+flatShader = (
+    [
+        """
 uniform mat4 mvpMatrix;
 attribute vec4 vVertex;
 void main(void)
 {
   gl_Position = mvpMatrix * vVertex;
-}'''],
-              ['''
+}"""
+    ],
+    [
+        """
 //precision mediump float;
 uniform vec4 vColor;
 void main(void)
 {
   gl_FragColor = vColor;
-}'''])
+}"""
+    ],
+)
 
 ######################################################################
 # Point light, diffuse lighting only
-pointLightDiff = (['''
+pointLightDiff = (
+    [
+        """
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
 uniform vec3 vLightPos;
@@ -46,19 +54,25 @@ void main(void)
   mat4 mvpMatrix;
   mvpMatrix = pMatrix * mvMatrix;
   gl_Position = mvpMatrix * vVertex;
-}'''],
-                  ['''
+}"""
+    ],
+    [
+        """
 //precision mediump float;
 varying vec4 vFragColor;
 void main(void)
 {
   gl_FragColor = vFragColor;
-}'''])
+}"""
+    ],
+)
 
 
 ######################################################################
 # ADS Gouraud shader
-ADSGouraud = (['''
+ADSGouraud = (
+    [
+        """
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
 uniform vec3 vLightPos;
@@ -108,14 +122,18 @@ void main(void)
 // Don't forget to transform the geometry
   mat4 mvpMatrix = pMatrix * mvMatrix;
   gl_Position = mvpMatrix * vVertex;
-}'''],
-              ['''
+}"""
+    ],
+    [
+        """
 //precision mediump float;
 varying vec4 vVaryingColor;
 void main(void)
 {
   gl_FragColor = vVaryingColor;
-}'''])
+}"""
+    ],
+)
 
 
 ##############################################################################
@@ -123,7 +141,9 @@ void main(void)
 # [dot] net see
 # http://www.ozone3d.net/tutorials/glsl_lighting_phong.php
 
-simplePhong = (['''
+simplePhong = (
+    [
+        """
 varying vec3 normal, lightDir0, eyeVec;
 void main()
 {
@@ -133,8 +153,10 @@ void main()
   eyeVec = -vVertex;
   gl_Position = ftransform();
 }
-'''],
-               ['''
+"""
+    ],
+    [
+        """
 uniform vec4 diffuse, specular, ambient;
 uniform float shininess;
 varying vec3 normal, lightDir0, eyeVec;
@@ -156,11 +178,15 @@ void main (void)
   }
   gl_FragColor = final_color;
 }
-'''])
+"""
+    ],
+)
 
 ##############################################################################
 # ADS Phong shader
-ADSPhong = (['''
+ADSPhong = (
+    [
+        """
 attribute vec4 vVertex;
 attribute vec3 vNormal;
 uniform mat4 mvMatrix;
@@ -193,8 +219,10 @@ void main(void)
 // Don't forget to transform the geometry
   mat4 mvpMatrix = pMatrix * mvMatrix;
   gl_Position = mvpMatrix * vVertex;
-}'''],
-            ['''
+}"""
+    ],
+    [
+        """
 precision mediump float;
 uniform vec4 ambientColor;
 uniform vec4 diffuseColor;
@@ -234,11 +262,15 @@ void main(void)
 //  gl_FragColor.rgb *= vec3(2.5, 2.5, 2.5);
 //  gl_FragColor.rgb += vec3(0.3, 0.3, 0.3);
 //  gl_FragColor = diffuseColor + ambientColor;
-}'''])
+}"""
+    ],
+)
 
 ######################################################################
 # Point light (Diffuse only), with texture (modulated)
-texturePointLightDiff = (['''
+texturePointLightDiff = (
+    [
+        """
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
 uniform vec3 vLightPos;
@@ -267,8 +299,10 @@ void main(void)
  mat4 mvpMatrix;
  mvpMatrix = pMatrix * mvMatrix;
  gl_Position = mvpMatrix * vVertex;
-}'''],
-                         ['''
+}"""
+    ],
+    [
+        """
 precision mediump float;
 varying vec4 vFragColor;
 varying vec2 vTex;
@@ -291,12 +325,16 @@ void main(void)
 //  discard;
 // gl_FragColor = texture2D(textureUnit0, vTex);
 // gl_FragColor = vFragColor;
-}'''])
+}"""
+    ],
+)
 
 
 ######################################################################
 # Phong with textures
-texturePhong = (['''
+texturePhong = (
+    [
+        """
 varying vec3 normal, lightDir0, eyeVec;
 
 void main()
@@ -311,8 +349,10 @@ void main()
 	gl_Position = ftransform();
         gl_TexCoord[0]  = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 }
-'''],
-                ['''
+"""
+    ],
+    [
+        """
 varying vec3 normal, lightDir0, eyeVec;
 uniform sampler2D my_color_texture[1]; //0 = ColorMap
 
@@ -347,4 +387,6 @@ void main (void)
 	}
 	gl_FragColor = final_color;
 }
-'''])
+"""
+    ],
+)

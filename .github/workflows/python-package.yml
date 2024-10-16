@@ -24,16 +24,11 @@ jobs:
         python-version: "3.12"
     - name: Install Formatting
       run: |
-        pip install autopep8 flake8 flake8-no-implicit-concat
+        pip install ruff
     - name: Check Formatting
       run: |
-        # stop the build if the library fails any of the
-        # default flake8 rule or the extended list here
-        flake8 collada --extend-select=E9,F63,F7,F82,W605 --show-source --statistics
-        # generate a report for the whole package
-        # exit-zero treats all errors as warnings
-        # extend-select will add rules in addition to defaults
-        flake8 . --extend-select=E9,F63,F7,F82,W605 --count --exit-zero --max-complexity=10 --statistics
+        # stop the build if the library fails ruff checks
+        ruff check collada
   build:
     runs-on: ubuntu-latest
     needs: formatting

@@ -1,17 +1,16 @@
 #!/usr/bin/env python
-import collada
-import sys
 import os
-import renderer
+import sys
 
 import pyglet
+import renderer
 from pyglet.gl import *
 
+import collada
 
 try:
     # Try and create a window with multisampling (antialiasing)
-    config = Config(sample_buffers=1, samples=4,
-                    depth_size=16, double_buffer=True)
+    config = Config(sample_buffers=1, samples=4, depth_size=16, double_buffer=True)
     window = pyglet.window.Window(resizable=False, config=config, vsync=True)
 except pyglet.window.NoSuchConfigException:
     # Fall back to no multisampling for old hardware
@@ -50,21 +49,26 @@ def on_resize(width, height):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(60., width / float(height), .1, 1000.)
+    gluPerspective(60.0, width / float(height), 0.1, 1000.0)
     glMatrixMode(GL_MODELVIEW)
     return pyglet.event.EVENT_HANDLED
 
 
-if __name__ == '__main__':
-    filename = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), 'data', 'cockpit.zip')
+if __name__ == "__main__":
+    filename = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else os.path.join(os.path.dirname(__file__), "data", "cockpit.zip")
+    )
 
     # open COLLADA file ignoring some errors in case they appear
-    collada_file = collada.Collada(filename, ignore=[
-        collada.common.DaeUnsupportedError,
-        collada.common.DaeBrokenRefError])
+    collada_file = collada.Collada(
+        filename,
+        ignore=[collada.common.DaeUnsupportedError, collada.common.DaeBrokenRefError],
+    )
 
     daerender = renderer.GLSLRenderer(collada_file)
-    #daerender = renderer.OldStyleRenderer(collada_file, window)
+    # daerender = renderer.OldStyleRenderer(collada_file, window)
 
     window.width = 1024
     window.height = 768

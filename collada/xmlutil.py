@@ -1,10 +1,12 @@
+import builtins
 import functools
 
-COLLADA_NS = 'http://www.collada.org/2005/11/COLLADASchema'
+COLLADA_NS = "http://www.collada.org/2005/11/COLLADASchema"
 HAVE_LXML = False
 
 try:
     from lxml import etree
+
     HAVE_LXML = True
 except ImportError:
     from xml.etree import ElementTree as etree
@@ -18,12 +20,14 @@ except ImportError:
     def partial(func, tag):
         return lambda *args, **kwargs: func(tag, *args, **kwargs)
 
+
 try:
     callable
 except NameError:
     # Python 3
     def callable(f):
-        return hasattr(f, '__call__')
+        return builtins.callable(f)
+
 
 try:
     basestring
@@ -41,15 +45,16 @@ if HAVE_LXML:
     def writeXML(xmlnode, fp):
         xmlnode.write(fp, pretty_print=True)
 else:
-    class ElementMaker(object):
+
+    class ElementMaker:
         def __init__(self, namespace=None, nsmap=None):
             if namespace is not None:
-                self._namespace = '{' + namespace + '}'
+                self._namespace = "{" + namespace + "}"
             else:
                 self._namespace = None
 
         def __call__(self, tag, *children, **attrib):
-            if self._namespace is not None and tag[0] != '{':
+            if self._namespace is not None and tag[0] != "{":
                 tag = self._namespace + tag
 
             elem = etree.Element(tag, attrib)
@@ -64,7 +69,7 @@ else:
                 elif etree.iselement(item):
                     elem.append(item)
                 else:
-                    raise TypeError("bad argument: %r" % item)
+                    raise TypeError(f"bad argument: {item!r}")
             return elem
 
         def __getattr__(self, tag):
@@ -72,11 +77,12 @@ else:
 
     E = ElementMaker()
 
-    if etree.VERSION[0:3] == '1.2':
+    if etree.VERSION[0:3] == "1.2":
         # in etree < 1.3, this is a workaround for suppressing prefixes
 
         def fixtag(tag, namespaces):
             import string
+
             # given a decorated tag (of the form {uri}tag), return prefixed
             # tag and namespace declaration, if any
             if isinstance(tag, etree.QName):
@@ -92,24 +98,24 @@ else:
                     xmlns = None
                 else:
                     if prefix is not None:
-                        nsprefix = ':' + prefix
+                        nsprefix = ":" + prefix
                     else:
-                        nsprefix = ''
-                    xmlns = ("xmlns%s" % nsprefix, namespace_uri)
+                        nsprefix = ""
+                    xmlns = (f"xmlns{nsprefix}", namespace_uri)
             else:
                 xmlns = None
             if prefix is not None:
                 prefix += ":"
             else:
-                prefix = ''
+                prefix = ""
 
-            return "%s%s" % (prefix, tag), xmlns
+            return f"{prefix}{tag}", xmlns
 
         etree.fixtag = fixtag
         etree._namespace_map[COLLADA_NS] = None
     else:
         # For etree > 1.3, use register_namespace function
-        etree.register_namespace('', COLLADA_NS)
+        etree.register_namespace("", COLLADA_NS)
 
     def indent(elem, level=0):
         i = "\n" + level * "  "
@@ -135,5 +141,6 @@ def createElementTree(file):
     if not HAVE_LXML:
         return etree.ElementTree(element=None, file=file)
     from lxml.etree import XMLParser, parse
+
     parser = XMLParser(huge_tree=True)
     return parse(file, parser=parser)

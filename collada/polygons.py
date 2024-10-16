@@ -14,10 +14,8 @@
 
 import numpy
 
-from collada import primitive
-from collada import polylist
-from collada.common import E
-from collada.common import DaeIncompleteError
+from collada import polylist, primitive
+from collada.common import DaeIncompleteError, E
 
 
 class Polygons(polylist.Polylist):
@@ -38,9 +36,13 @@ class Polygons(polylist.Polylist):
         creating a geometry instance.
         """
 
-        max_offset = max([max([input[0] for input in input_type_array])
-                          for input_type_array in sources.values()
-                          if len(input_type_array) > 0])
+        max_offset = max(
+            [
+                max([input[0] for input in input_type_array])
+                for input_type_array in sources.values()
+                if len(input_type_array) > 0
+            ]
+        )
 
         vcounts = numpy.zeros(len(polygons), dtype=numpy.int32)
         for i, poly in enumerate(polygons):
@@ -51,7 +53,7 @@ class Polygons(polylist.Polylist):
         else:
             indices = numpy.array([], dtype=numpy.int32)
 
-        super(Polygons, self).__init__(sources, material, indices, vcounts, xmlnode)
+        super().__init__(sources, material, indices, vcounts, xmlnode)
 
         if xmlnode is not None:
             self.xmlnode = xmlnode
@@ -60,35 +62,39 @@ class Polygons(polylist.Polylist):
 
             self.xmlnode = E.polygons(count=str(acclen))
             if self.material is not None:
-                self.xmlnode.set('material', self.material)
+                self.xmlnode.set("material", self.material)
 
             all_inputs = []
             for semantic_list in self.sources.values():
                 all_inputs.extend(semantic_list)
-            for offset, semantic, sourceid, set, src in all_inputs:
-                inpnode = E.input(offset=str(offset), semantic=semantic, source=sourceid)
+            for offset, semantic, sourceid, set, _src in all_inputs:
+                inpnode = E.input(
+                    offset=str(offset), semantic=semantic, source=sourceid
+                )
                 if set is not None:
-                    inpnode.set('set', str(set))
+                    inpnode.set("set", str(set))
                 self.xmlnode.append(inpnode)
 
             for poly in polygons:
-                self.xmlnode.append(E.p(' '.join(map(str, poly.flatten().tolist()))))
+                self.xmlnode.append(E.p(" ".join(map(str, poly.flatten().tolist()))))
 
     @staticmethod
     def load(collada, localscope, node):
-        indexnodes = node.findall(collada.tag('p'))
+        indexnodes = node.findall(collada.tag("p"))
         if indexnodes is None:
-            raise DaeIncompleteError('Missing indices in polygons')
+            raise DaeIncompleteError("Missing indices in polygons")
 
         polygon_indices = []
         for indexnode in indexnodes:
-            index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+            index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=" ")
             index[numpy.isnan(index)] = 0
             polygon_indices.append(index)
 
-        all_inputs = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
+        all_inputs = primitive.Primitive._getInputs(
+            collada, localscope, node.findall(collada.tag("input"))
+        )
 
-        polygons = Polygons(all_inputs, node.get('material'), polygon_indices, node)
+        polygons = Polygons(all_inputs, node.get("material"), polygon_indices, node)
         return polygons
 
     def bind(self, matrix, materialnodebysymbol):
@@ -96,7 +102,7 @@ class Polygons(polylist.Polylist):
         return BoundPolygons(self, matrix, materialnodebysymbol)
 
     def __str__(self):
-        return '<Polygons length=%d>' % len(self)
+        return "<Polygons length=%d>" % len(self)
 
     def __repr__(self):
         return str(self)
@@ -107,10 +113,10 @@ class BoundPolygons(polylist.BoundPolylist):
 
     def __init__(self, pl, matrix, materialnodebysymbol):
         """Create a BoundPolygons from a Polygons, transform and material mapping"""
-        super(BoundPolygons, self).__init__(pl, matrix, materialnodebysymbol)
+        super().__init__(pl, matrix, materialnodebysymbol)
 
     def __str__(self):
-        return '<BoundPolygons length=%d>' % len(self)
+        return "<BoundPolygons length=%d>" % len(self)
 
     def __repr__(self):
         return str(self)

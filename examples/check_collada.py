@@ -1,12 +1,14 @@
-import collada
 import sys
 import traceback
 
-print('Attempting to load file %s' % sys.argv[1])
+import collada
+
+print(f"Attempting to load file {sys.argv[1]}")
 
 try:
-    col = collada.Collada(sys.argv[1],
-                          ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError])
+    col = collada.Collada(
+        sys.argv[1], ignore=[collada.DaeUnsupportedError, collada.DaeBrokenRefError]
+    )
 except BaseException:
     traceback.print_exc()
     print()
@@ -14,8 +16,8 @@ except BaseException:
     sys.exit(1)
 
 print()
-print('Successfully loaded collada file.')
-print('There were %d errors' % len(col.errors))
+print("Successfully loaded collada file.")
+print("There were %d errors" % len(col.errors))
 
 for e in col.errors:
     print(e)

@@ -2,10 +2,12 @@ import os
 import unittest
 
 import collada
-from collada.common import (DaeError,
-                            DaeBrokenRefError,
-                            DaeIncompleteError,
-                            DaeMalformedError)
+from collada.common import (
+    DaeBrokenRefError,
+    DaeError,
+    DaeIncompleteError,
+    DaeMalformedError,
+)
 
 
 class TestColladaIgnore(unittest.TestCase):
@@ -16,8 +18,7 @@ class TestColladaIgnore(unittest.TestCase):
 
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
-        self.datadir = os.path.join(os.path.dirname(
-            os.path.realpath(__file__)), "data")
+        self.datadir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 
     def test_incomplete(self):
         # this has an incomplete error
@@ -29,16 +30,15 @@ class TestColladaIgnore(unittest.TestCase):
             # this should have raised
             raised = True
         if not raised:
-            raise ValueError('should have raised an error!')
+            raise ValueError("should have raised an error!")
 
         raised = False
         try:
-            collada.Collada(
-                f, ignore=[DaeMalformedError])
+            collada.Collada(f, ignore=[DaeMalformedError])
         except DaeIncompleteError:
             raised = True
         if not raised:
-            raise ValueError('should have raised an error')
+            raise ValueError("should have raised an error")
 
         # should have loaded if we ignore the specific error
         m = collada.Collada(f, ignore=[DaeIncompleteError])
@@ -66,7 +66,7 @@ class TestColladaIgnore(unittest.TestCase):
             # this should have raised
             raised = True
         if not raised:
-            raise ValueError('should have raised an error!')
+            raise ValueError("should have raised an error!")
 
         raised = False
         try:
@@ -75,14 +75,13 @@ class TestColladaIgnore(unittest.TestCase):
             # this should have raised
             raised = True
         if not raised:
-            raise ValueError('should have raised an error!')
+            raise ValueError("should have raised an error!")
 
         # should't have crashed
-        collada.Collada(f, ignore=[DaeMalformedError,
-                                   DaeBrokenRefError])
+        collada.Collada(f, ignore=[DaeMalformedError, DaeBrokenRefError])
         # should have also loaded using the parent class
         collada.Collada(f, ignore=[DaeError])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

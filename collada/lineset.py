@@ -15,12 +15,11 @@
 import numpy
 
 from collada import primitive
+from collada.common import DaeIncompleteError, DaeMalformedError, E
 from collada.util import checkSource, xrange
-from collada.common import E
-from collada.common import DaeIncompleteError, DaeMalformedError
 
 
-class Line(object):
+class Line:
     """Single line representation. Represents the line between two points
     ``(x0,y0,z0)`` and ``(x1,y1,z1)``. A Line is read-only."""
 
@@ -45,7 +44,9 @@ class Line(object):
         # Note: we can't generate normals for lines if there are none
 
     def __repr__(self):
-        return '<Line (%s, %s, "%s")>' % (str(self.vertices[0]), str(self.vertices[1]), str(self.material))
+        return (
+            f'<Line ({self.vertices[0]!s}, {self.vertices[1]!s}, "{self.material!s}")>'
+        )
 
     def __str__(self):
         return repr(self)
@@ -67,13 +68,20 @@ class LineSet(primitive.Primitive):
         """
 
         if len(sources) == 0:
-            raise DaeIncompleteError('A line set needs at least one input for vertex positions')
-        if not sources.get('VERTEX'):
-            raise DaeIncompleteError('Line set requires vertex input')
+            raise DaeIncompleteError(
+                "A line set needs at least one input for vertex positions"
+            )
+        if not sources.get("VERTEX"):
+            raise DaeIncompleteError("Line set requires vertex input")
 
         # find max offset
-        max_offset = max([max([input[0] for input in input_type_array])
-                          for input_type_array in sources.values() if len(input_type_array) > 0])
+        max_offset = max(
+            [
+                max([input[0] for input in input_type_array])
+                for input_type_array in sources.values()
+                if len(input_type_array) > 0
+            ]
+        )
 
         self.sources = sources
         self.material = material
@@ -84,63 +92,70 @@ class LineSet(primitive.Primitive):
         self.nlines = len(self.index)
 
         if len(self.index) > 0:
-            self._vertex = sources['VERTEX'][0][4].data
-            self._vertex_index = self.index[:, :, sources['VERTEX'][0][0]]
+            self._vertex = sources["VERTEX"][0][4].data
+            self._vertex_index = self.index[:, :, sources["VERTEX"][0][0]]
             self.maxvertexindex = numpy.max(self._vertex_index)
-            checkSource(sources['VERTEX'][0][4], ('X', 'Y', 'Z'),
-                        self.maxvertexindex)
+            checkSource(sources["VERTEX"][0][4], ("X", "Y", "Z"), self.maxvertexindex)
         else:
             self._vertex = None
             self._vertex_index = None
             self.maxvertexindex = -1
 
-        if 'NORMAL' in sources and len(sources['NORMAL']) > 0 \
-                and len(self.index) > 0:
-            self._normal = sources['NORMAL'][0][4].data
-            self._normal_index = self.index[:, :, sources['NORMAL'][0][0]]
+        if "NORMAL" in sources and len(sources["NORMAL"]) > 0 and len(self.index) > 0:
+            self._normal = sources["NORMAL"][0][4].data
+            self._normal_index = self.index[:, :, sources["NORMAL"][0][0]]
             self.maxnormalindex = numpy.max(self._normal_index)
-            checkSource(sources['NORMAL'][0][4], ('X', 'Y', 'Z'),
-                        self.maxnormalindex)
+            checkSource(sources["NORMAL"][0][4], ("X", "Y", "Z"), self.maxnormalindex)
         else:
             self._normal = None
             self._normal_index = None
             self.maxnormalindex = -1
 
-        if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 \
-                and len(self.index) > 0:
-            self._texcoordset = tuple([texinput[4].data
-                                       for texinput in sources['TEXCOORD']])
-            self._texcoord_indexset = tuple([self.index[:, :, sources['TEXCOORD'][i][0]]
-                                             for i in xrange(len(sources['TEXCOORD']))])
-            self.maxtexcoordsetindex = [numpy.max(tex_index)
-                                        for tex_index in self._texcoord_indexset]
-            for i, texinput in enumerate(sources['TEXCOORD']):
-                checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
+        if (
+            "TEXCOORD" in sources
+            and len(sources["TEXCOORD"]) > 0
+            and len(self.index) > 0
+        ):
+            self._texcoordset = tuple(
+                [texinput[4].data for texinput in sources["TEXCOORD"]]
+            )
+            self._texcoord_indexset = tuple(
+                [
+                    self.index[:, :, sources["TEXCOORD"][i][0]]
+                    for i in xrange(len(sources["TEXCOORD"]))
+                ]
+            )
+            self.maxtexcoordsetindex = [
+                numpy.max(tex_index) for tex_index in self._texcoord_indexset
+            ]
+            for i, texinput in enumerate(sources["TEXCOORD"]):
+                checkSource(texinput[4], ("S", "T"), self.maxtexcoordsetindex[i])
         else:
-            self._texcoordset = tuple()
-            self._texcoord_indexset = tuple()
+            self._texcoordset = ()
+            self._texcoord_indexset = ()
             self.maxtexcoordsetindex = -1
 
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the line set."""
         else:
-            self.index.shape = (-1)
-            txtindices = ' '.join(map(str, self.index.tolist()))
+            self.index.shape = -1
+            txtindices = " ".join(map(str, self.index.tolist()))
             self.index.shape = (-1, 2, self.nindices)
 
             self.xmlnode = E.lines(count=str(self.nlines))
             if self.material is not None:
-                self.xmlnode.set('material', self.material)
+                self.xmlnode.set("material", self.material)
 
             all_inputs = []
             for semantic_list in self.sources.values():
                 all_inputs.extend(semantic_list)
-            for offset, semantic, sourceid, set, src in all_inputs:
-                inpnode = E.input(offset=str(offset), semantic=semantic,
-                                  source=sourceid)
+            for offset, semantic, sourceid, set, _src in all_inputs:
+                inpnode = E.input(
+                    offset=str(offset), semantic=semantic, source=sourceid
+                )
                 if set is not None:
-                    inpnode.set('set', str(set))
+                    inpnode.set("set", str(set))
                 self.xmlnode.append(inpnode)
 
             self.xmlnode.append(E.p(txtindices))
@@ -162,22 +177,24 @@ class LineSet(primitive.Primitive):
 
     @staticmethod
     def load(collada, localscope, node):
-        indexnode = node.find(collada.tag('p'))
+        indexnode = node.find(collada.tag("p"))
         if indexnode is None:
-            raise DaeIncompleteError('Missing index in line set')
+            raise DaeIncompleteError("Missing index in line set")
 
-        source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(collada.tag('input')))
+        source_array = primitive.Primitive._getInputs(
+            collada, localscope, node.findall(collada.tag("input"))
+        )
 
         try:
             if indexnode.text is None or indexnode.text.isspace():
                 index = numpy.array([], dtype=numpy.int32)
             else:
-                index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+                index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=" ")
             index[numpy.isnan(index)] = 0
         except BaseException:
-            raise DaeMalformedError('Corrupted index in line set')
+            raise DaeMalformedError("Corrupted index in line set")
 
-        lineset = LineSet(source_array, node.get('material'), index, node)
+        lineset = LineSet(source_array, node.get("material"), index, node)
         lineset.xmlnode = node
         return lineset
 
@@ -186,7 +203,7 @@ class LineSet(primitive.Primitive):
         return BoundLineSet(self, matrix, materialnodebysymbol)
 
     def __str__(self):
-        return '<LineSet length=%d>' % len(self)
+        return "<LineSet length=%d>" % len(self)
 
     def __repr__(self):
         return str(self)
@@ -215,8 +232,9 @@ class BoundLineSet(primitive.BoundPrimitive):
         matnode = materialnodebysymbol.get(ls.material)
         if matnode:
             self.material = matnode.target
-            self.inputmap = dict([(sem, (input_sem, set))
-                                  for sem, input_sem, set in matnode.inputs])
+            self.inputmap = {
+                sem: (input_sem, set) for sem, input_sem, set in matnode.inputs
+            }
         else:
             self.inputmap = self.material = None
         self.index = ls.index
@@ -256,7 +274,7 @@ class BoundLineSet(primitive.BoundPrimitive):
         return self.lines()
 
     def __str__(self):
-        return '<BoundLineSet length=%d>' % len(self)
+        return "<BoundLineSet length=%d>" % len(self)
 
     def __repr__(self):
         return str(self)

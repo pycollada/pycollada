@@ -1,9 +1,6 @@
-from __future__ import print_function
-from __future__ import absolute_import
-
-import pyglet
-from pyglet.gl import *
 import ctypes
+
+from pyglet.gl import *
 
 
 def VecF(*args):
@@ -21,7 +18,7 @@ def getGLError():
     e = glGetError()
     if e != 0:
         errstr = gluErrorString(e)
-        print('GL ERROR:', errstr)
+        print("GL ERROR:", errstr)
         return errstr
     else:
         return None

@@ -5,21 +5,28 @@
 # (see http://www.boost.org/LICENSE_1_0.txt)
 #
 
-from pyglet.gl import *
 import ctypes
+
+from pyglet.gl import *
 
 
 def _as_bytes(s):
     if isinstance(s, bytes):
         return s
-    return s.encode('utf-8')
+    return s.encode("utf-8")
 
 
 class Shader:
     # vert, frag and geom take arrays of source strings
     # the arrays will be concatenated into one string by OpenGL
-    def __init__(self, vert=[], frag=[], geom=[]):
+    def __init__(self, vert=None, frag=None, geom=None):
         # create the program handle
+        if geom is None:
+            geom = []
+        if frag is None:
+            frag = []
+        if vert is None:
+            vert = []
         self.handle = glCreateProgram()
         # we are not linked yet
         self.linked = False
@@ -47,8 +54,14 @@ class Shader:
         # this is deep, dark, dangerous black magick - don't try stuff like this at home!
         strings = [_as_bytes(s) for s in strings]
         src = (ctypes.c_char_p * count)(*strings)
-        glShaderSource(shader, count, ctypes.cast(ctypes.pointer(src),
-                       ctypes.POINTER(ctypes.POINTER(ctypes.c_char))), None)
+        glShaderSource(
+            shader,
+            count,
+            ctypes.cast(
+                ctypes.pointer(src), ctypes.POINTER(ctypes.POINTER(ctypes.c_char))
+            ),
+            None,
+        )
 
         # compile the shader
         glCompileShader(shader)
@@ -81,7 +94,7 @@ class Shader:
 
         # if linking failed, print the log
         if not temp:
-            #	retrieve the log length
+            # retrieve the log length
             glGetProgramiv(self.handle, GL_INFO_LOG_LENGTH, ctypes.byref(temp))
             # create a buffer for the log
             buffer = create_string_buffer(temp.value)
@@ -109,12 +122,13 @@ class Shader:
         # check there are 1-4 values
         if len(vals) in range(1, 5):
             # select the correct function
-            {1: glUniform1f,
-             2: glUniform2f,
-             3: glUniform3f,
-             4: glUniform4f
-             # retrieve the uniform location, and set
-             }[len(vals)](glGetUniformLocation(self.handle, name), *vals)
+            {
+                1: glUniform1f,
+                2: glUniform2f,
+                3: glUniform3f,
+                4: glUniform4f,
+                # retrieve the uniform location, and set
+            }[len(vals)](glGetUniformLocation(self.handle, name), *vals)
 
     # upload an integer uniform
     # this program must be currently bound
@@ -123,12 +137,13 @@ class Shader:
         # check there are 1-4 values
         if len(vals) in range(1, 5):
             # select the correct function
-            {1: glUniform1i,
-             2: glUniform2i,
-             3: glUniform3i,
-             4: glUniform4i
-             # retrieve the uniform location, and set
-             }[len(vals)](glGetUniformLocation(self.handle, name), *vals)
+            {
+                1: glUniform1i,
+                2: glUniform2i,
+                3: glUniform3i,
+                4: glUniform4i,
+                # retrieve the uniform location, and set
+            }[len(vals)](glGetUniformLocation(self.handle, name), *vals)
 
     # upload a uniform matrix
     # works with matrices stored as lists,
