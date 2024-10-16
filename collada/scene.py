@@ -1022,7 +1022,7 @@ class Scene(DaeObject):
                         succeeded = True
             tried_loading = next_tried
         if len(tried_loading) > 0:
-            for nodenode, ex in tried_loading:
+            for _, ex in tried_loading:
                 raise DaeBrokenRefError(ex.msg)
 
         return Scene(id, nodes, xmlnode=node, collada=collada)

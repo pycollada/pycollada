@@ -34,7 +34,7 @@ class InputList:
             self.source = src
             self.set = set
 
-    semantics = [
+    semantics = (
         "VERTEX",
         "NORMAL",
         "TEXCOORD",
@@ -43,7 +43,7 @@ class InputList:
         "COLOR",
         "TANGENT",
         "BINORMAL",
-    ]
+    )
 
     def __init__(self):
         """Create an input list"""

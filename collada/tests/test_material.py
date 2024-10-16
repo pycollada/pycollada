@@ -102,7 +102,7 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(loaded_cimage.id, "yourcimage")
         self.assertEqual(loaded_cimage.path, "./next.tga")
         with self.assertRaises(collada.DaeBrokenRefError):
-            loaded_cimage.data
+            _ = loaded_cimage.data
         self.assertEqual(loaded_cimage.data, "")
         self.assertEqual(loaded_cimage.pilimage, None)
         self.assertEqual(loaded_cimage.uintarray, None)

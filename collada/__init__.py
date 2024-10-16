@@ -516,7 +516,7 @@ class Collada:
                                     succeeded = True
                         tried_loading = next_tried
                     if len(tried_loading) > 0:
-                        for node, ex in tried_loading:
+                        for _, ex in tried_loading:
                             raise DaeBrokenRefError(ex.msg)
 
     def _loadScenes(self):

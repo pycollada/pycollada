@@ -22,7 +22,7 @@ except ImportError:
 
 
 try:
-    callable
+    callable  # noqa
 except NameError:
     # Python 3
     def callable(f):
@@ -30,12 +30,12 @@ except NameError:
 
 
 try:
-    basestring
+    basestring  # noqa
 except (NameError, KeyError):
     basestring = str
 
 try:
-    unicode
+    unicode  # noqa
 except (NameError, KeyError):
     unicode = str
 
@@ -124,10 +124,10 @@ else:
                 elem.text = i + "  "
             if not elem.tail or not elem.tail.strip():
                 elem.tail = i
-            for elem in elem:
-                indent(elem, level + 1)
-            if not elem.tail or not elem.tail.strip():
-                elem.tail = i
+            for e in elem:
+                indent(e, level + 1)
+            if not e.tail or not e.tail.strip():
+                e.tail = i
         else:
             if level and (not elem.tail or not elem.tail.strip()):
                 elem.tail = i

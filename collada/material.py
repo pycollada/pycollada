@@ -434,7 +434,7 @@ class OPAQUE_MODE:
 class Effect(DaeObject):
     """Class containing data coming from an <effect> tag."""
 
-    supported = [
+    supported = (
         "emission",
         "ambient",
         "diffuse",
@@ -445,9 +445,9 @@ class Effect(DaeObject):
         "transparent",
         "transparency",
         "index_of_refraction",
-    ]
+    )
     """Supported material properties list."""
-    shaders = ["phong", "lambert", "blinn", "constant"]
+    shaders = ("phong", "lambert", "blinn", "constant")
     """Supported shader list."""
 
     def __init__(
