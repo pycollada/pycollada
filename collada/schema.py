@@ -22,6 +22,7 @@ from collada.util import bytes, BytesIO
 # the absolute directory of this file
 _cwd = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
 
+
 def resource_string(file_name: str) -> str:
     """
     Get the value of a file in `collada/resources/{file_name}`
@@ -40,10 +41,12 @@ def resource_string(file_name: str) -> str:
     with open(os.path.join(_cwd, "resources", file_name)) as f:
         return f.read()
 
+
 # get a copy of the XML schema
 # resource_string returns bytes so decode into string
 COLLADA_SCHEMA_1_4_1 = resource_string('schema-1.4.1.xml')
 XML_XSD = resource_string('xsd.xml')
+
 
 class ColladaResolver(lxml.etree.Resolver):
     """COLLADA XML Resolver. If a known URL referenced
