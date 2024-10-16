@@ -24,7 +24,7 @@ jobs:
         python-version: "3.12"
     - name: Install Formatting
       run: |
-        pip install ruff
+        pip install ruff==0.6.9
     - name: Check Formatting
       run: |
         # stop the build if the library fails ruff checks

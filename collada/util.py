@@ -17,7 +17,7 @@ import sys
 
 import numpy
 
-if sys.version_info[0] > 2:
+if sys.version_info[0] > 2:  # noqa
     import unittest
     from io import BytesIO, StringIO
 
