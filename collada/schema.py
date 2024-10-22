@@ -14,13 +14,13 @@
 """This module contains helper classes and functions for working
 with the COLLADA 1.4.1 schema."""
 
+import sys
 import lxml
 import lxml.etree
-from importlib import resources
 from collada.util import bytes, BytesIO
 
 
-def _resource_string(file_name: str) -> str:
+def resource_string(file_name: str) -> str:
     """
     Get the value of a file in `collada/resources/{file_name}`
     as a string.
@@ -32,16 +32,24 @@ def _resource_string(file_name: str) -> str:
 
     Returns
     ----------
-       value
+    value
       The contents of the file.
     """
-    return resources.files("collada").joinpath("resources", file_name).read_text()
+    if sys.version_info <= (3, 8):
+        from pkg_resources import resource_string
+
+        return resource_string("collada", "resources/{}".format(file_name)).decode(
+            "utf-8"
+        )
+    else:
+        from importlib import resources
+
+        return resources.files("collada").joinpath("resources", file_name).read_text()
 
 
 # get a copy of the XML schema
-# resource_string returns bytes so decode into string
-COLLADA_SCHEMA_1_4_1 = _resource_string('schema-1.4.1.xml')
-XML_XSD = _resource_string('xsd.xml')
+COLLADA_SCHEMA_1_4_1 = resource_string("schema-1.4.1.xml")
+XML_XSD = resource_string("xsd.xml")
 
 
 class ColladaResolver(lxml.etree.Resolver):
