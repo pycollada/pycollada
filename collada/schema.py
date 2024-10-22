@@ -35,7 +35,7 @@ def resource_string(file_name: str) -> str:
     value
       The contents of the file.
     """
-    if sys.version_info <= (3, 8):
+    if sys.version_info <= (3, 9):
         from pkg_resources import resource_string
 
         return resource_string("collada", "resources/{}".format(file_name)).decode(
