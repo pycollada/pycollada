@@ -38,7 +38,7 @@ def resource_string(file_name: str) -> str:
     if sys.version_info <= (3, 9):
         from importlib.resources import read_text
 
-        return read_text("collada", "resources/{}".format(file_name))
+        return read_text("collada.resources", file_name)
     else:
         from importlib import resources
 
