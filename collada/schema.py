@@ -36,11 +36,9 @@ def resource_string(file_name: str) -> str:
       The contents of the file.
     """
     if sys.version_info <= (3, 9):
-        from pkg_resources import resource_string
+        from importlib.resources import read_text
 
-        return resource_string("collada", "resources/{}".format(file_name)).decode(
-            "utf-8"
-        )
+        return read_text("collada", "resources/{}".format(file_name))
     else:
         from importlib import resources
 
