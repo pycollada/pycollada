@@ -18,17 +18,11 @@ import lxml
 import lxml.etree
 from collada.util import bytes, BytesIO
 
-from pkg_resources import resource_string
+from .resources import resource_string
 
 # get a copy of the XML schema
-# resource_string returns bytes so decode into string
-COLLADA_SCHEMA_1_4_1 = str(resource_string(
-    'collada',
-    'resources/schema-1.4.1.xml').decode('utf-8'))
-
-XML_XSD = str(resource_string(
-    'collada',
-    'resources/xsd.xml').decode('utf-8'))
+COLLADA_SCHEMA_1_4_1 = resource_string("schema-1.4.1.xml")
+XML_XSD = resource_string("xsd.xml")
 
 
 class ColladaResolver(lxml.etree.Resolver):
