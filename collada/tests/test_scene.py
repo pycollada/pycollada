@@ -1,7 +1,7 @@
 import numpy
+import unittest
 
 import collada
-from collada.util import unittest
 from collada.xmlutil import etree
 
 fromstring = etree.fromstring

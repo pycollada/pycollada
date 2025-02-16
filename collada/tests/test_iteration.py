@@ -1,6 +1,6 @@
-from collada.util import unittest
 import collada
 import numpy
+import unittest
 from collada.xmlutil import etree
 fromstring = etree.fromstring
 tostring = etree.tostring

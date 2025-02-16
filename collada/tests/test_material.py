@@ -1,7 +1,7 @@
 import os
+import unittest
 
 import collada
-from collada.util import unittest
 from collada.xmlutil import etree
 from collada.material import OPAQUE_MODE
 

@@ -20,6 +20,7 @@ file is not what is expected.
 
 __version__ = "0.9"
 
+import io
 import os.path
 import posixpath
 import traceback
@@ -36,7 +37,6 @@ from collada import scene
 from collada.common import E, tagger, tag
 from collada.common import DaeError, DaeIncompleteError, DaeBrokenRefError, \
     DaeMalformedError, DaeSaveValidationError
-from collada.util import basestring, BytesIO
 from collada.util import IndexedList
 from collada.xmlutil import createElementTree
 from collada.xmlutil import etree as ElementTree
@@ -164,7 +164,7 @@ class Collada(object):
             return
 
         strdata = None
-        if isinstance(filename, basestring):
+        if isinstance(filename, (str, bytes)):
             with open(filename, 'rb') as f:
                 strdata = f.read()
             self.filename = filename
@@ -175,7 +175,7 @@ class Collada(object):
             self.getFileData = self._nullGetFile
 
         try:
-            self.zfile = zipfile.ZipFile(BytesIO(strdata), 'r')
+            self.zfile = zipfile.ZipFile(io.BytesIO(strdata), 'r')
         except BaseException:
             self.zfile = None
 
@@ -204,7 +204,7 @@ class Collada(object):
             self.getFileData = self._wrappedFileLoader(aux_file_loader)
 
         try:
-            self.xmlnode = createElementTree(BytesIO(data))
+            self.xmlnode = createElementTree(io.BytesIO(data))
         except ElementTree.ParseError as e:
             raise DaeMalformedError("XML Parsing Error: %s" % e)
 
@@ -550,7 +550,7 @@ class Collada(object):
         """
 
         self.save()
-        if isinstance(fp, basestring):
+        if isinstance(fp, (str, bytes)):
             fp = open(fp, 'wb')
         writeXML(self.xmlnode, fp)
 

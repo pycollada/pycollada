@@ -1,5 +1,4 @@
-import sys
-
+from importlib import resources
 
 def resource_string(file_name: str) -> str:
     """
@@ -16,11 +15,4 @@ def resource_string(file_name: str) -> str:
     value
       The contents of the file.
     """
-    if sys.version_info <= (3, 9):
-        from importlib.resources import read_text
-
-        return read_text("collada.resources", file_name)
-    else:
-        from importlib import resources
-
-        return resources.files("collada").joinpath("resources", file_name).read_text()
+    return resources.files("collada").joinpath("resources", file_name).read_text()

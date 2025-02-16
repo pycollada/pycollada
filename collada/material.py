@@ -20,12 +20,13 @@ This module contains all the functionality to load and manage:
 """
 
 import copy
+import io
 import numpy
 
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
     DaeMalformedError, DaeUnsupportedError
-from collada.util import falmostEqual, BytesIO
+from collada.util import falmostEqual
 
 try:
     from PIL import Image as pil
@@ -100,7 +101,7 @@ class CImage(DaeObject):
                 self._pilimage = _FAILED
                 return None
             try:
-                self._pilimage = pil.open(BytesIO(data))
+                self._pilimage = pil.open(io.BytesIO(data))
                 self._pilimage.load()
             except IOError:
                 self._pilimage = _FAILED

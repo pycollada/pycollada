@@ -18,7 +18,7 @@ from collada import primitive
 from collada import triangleset
 from collada.common import E
 from collada.common import DaeIncompleteError, DaeMalformedError
-from collada.util import checkSource, xrange
+from collada.util import checkSource
 
 
 class Polygon(object):
@@ -173,7 +173,7 @@ class Polylist(primitive.Primitive):
             self._texcoordset = tuple([texinput[4].data
                                        for texinput in sources['TEXCOORD']])
             self._texcoord_indexset = tuple([self.index[:, sources['TEXCOORD'][i][0]]
-                                             for i in xrange(len(sources['TEXCOORD']))])
+                                             for i in range(len(sources['TEXCOORD']))])
             self.maxtexcoordsetindex = [numpy.max(each)
                                         for each in self._texcoord_indexset]
             for i, texinput in enumerate(sources['TEXCOORD']):
@@ -377,7 +377,7 @@ class BoundPolylist(primitive.BoundPrimitive):
 
         :rtype: generator of :class:`collada.polylist.Polygon`
         """
-        for i in xrange(self.npolygons):
+        for i in range(self.npolygons):
             yield self[i]
 
     def shapes(self):

@@ -1,9 +1,10 @@
+import io
 import os
 import numpy
 import dateutil.parser
+import unittest
 
 import collada
-from collada.util import unittest, BytesIO
 from collada.xmlutil import etree
 
 fromstring = etree.fromstring
@@ -55,10 +56,10 @@ class TestCollada(unittest.TestCase):
         self.assertIsNotNone(str(list(mesh.scene.objects('light'))))
         self.assertIsNotNone(str(list(mesh.scene.objects('camera'))))
 
-        s = BytesIO()
+        s =io.BytesIO()
         mesh.write(s)
         out = s.getvalue()
-        t = BytesIO(out)
+        t = io.BytesIO(out)
         mesh = collada.Collada(t, validate_output=True)
 
         self.assertEqual(mesh.assetInfo.contributors[0].author, 'gcorson')
@@ -105,10 +106,10 @@ class TestCollada(unittest.TestCase):
         self.assertEqual(len(mesh.nodes), 0)
         self.assertIn('VisualSceneNode', mesh.scenes)
 
-        s = BytesIO()
+        s = io.BytesIO()
         mesh.write(s)
         out = s.getvalue()
-        t = BytesIO(out)
+        t = io.BytesIO(out)
         mesh = collada.Collada(t, validate_output=True)
 
         self.assertEqual(mesh.scene.id, 'VisualSceneNode')
@@ -205,10 +206,10 @@ class TestCollada(unittest.TestCase):
 
         mesh.scene = scene1
 
-        out = BytesIO()
+        out = io.BytesIO()
         mesh.write(out)
 
-        toload = BytesIO(out.getvalue())
+        toload = io.BytesIO(out.getvalue())
 
         loaded_mesh = collada.Collada(toload, validate_output=True)
         self.assertEqual(len(loaded_mesh.geometries), 2)
@@ -278,7 +279,7 @@ class TestCollada(unittest.TestCase):
         loaded_mesh.save()
 
         strdata = tostring(loaded_mesh.xmlnode.getroot())
-        indata = BytesIO(strdata)
+        indata = io.BytesIO(strdata)
         loaded_mesh2 = collada.Collada(indata, validate_output=True)
 
         self.assertEqual(loaded_mesh2.scene.id, scene3.id)

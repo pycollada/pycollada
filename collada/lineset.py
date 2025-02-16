@@ -15,7 +15,7 @@
 import numpy
 
 from collada import primitive
-from collada.util import checkSource, xrange
+from collada.util import checkSource
 from collada.common import E
 from collada.common import DaeIncompleteError, DaeMalformedError
 
@@ -111,7 +111,7 @@ class LineSet(primitive.Primitive):
             self._texcoordset = tuple([texinput[4].data
                                        for texinput in sources['TEXCOORD']])
             self._texcoord_indexset = tuple([self.index[:, :, sources['TEXCOORD'][i][0]]
-                                             for i in xrange(len(sources['TEXCOORD']))])
+                                             for i in range(len(sources['TEXCOORD']))])
             self.maxtexcoordsetindex = [numpy.max(tex_index)
                                         for tex_index in self._texcoord_indexset]
             for i, texinput in enumerate(sources['TEXCOORD']):
@@ -245,7 +245,7 @@ class BoundLineSet(primitive.BoundPrimitive):
 
         :rtype: generator of :class:`collada.lineset.Line`
         """
-        for i in xrange(self.nlines):
+        for i in range(self.nlines):
             yield self[i]
 
     def shapes(self):

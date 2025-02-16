@@ -1,8 +1,8 @@
 import numpy
 from numpy.testing import assert_array_equal
+import unittest
 
 import collada
-from collada.util import unittest
 from collada.xmlutil import etree
 from collada.common import DaeIncompleteError
 

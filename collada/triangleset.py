@@ -17,7 +17,7 @@ import numpy
 from collada import primitive
 from collada.common import E
 from collada.common import DaeIncompleteError, DaeMalformedError
-from collada.util import toUnitVec, checkSource, normalize_v3, dot_v3, xrange
+from collada.util import toUnitVec, checkSource, normalize_v3, dot_v3
 
 
 class Triangle(object):
@@ -123,7 +123,7 @@ class TriangleSet(primitive.Primitive):
         if 'TEXCOORD' in sources and len(sources['TEXCOORD']) > 0 and len(self.index) > 0:
             self._texcoordset = tuple([texinput[4].data for texinput in sources['TEXCOORD']])
             self._texcoord_indexset = tuple([self.index[:, :, sources['TEXCOORD'][i][0]]
-                                             for i in xrange(len(sources['TEXCOORD']))])
+                                             for i in range(len(sources['TEXCOORD']))])
             self.maxtexcoordsetindex = [numpy.max(tex_index) for tex_index in self._texcoord_indexset]
             for i, texinput in enumerate(sources['TEXCOORD']):
                 checkSource(texinput[4], ('S', 'T'), self.maxtexcoordsetindex[i])
@@ -135,7 +135,7 @@ class TriangleSet(primitive.Primitive):
         if 'TEXTANGENT' in sources and len(sources['TEXTANGENT']) > 0 and len(self.index) > 0:
             self._textangentset = tuple([texinput[4].data for texinput in sources['TEXTANGENT']])
             self._textangent_indexset = tuple([self.index[:, :, sources['TEXTANGENT'][i][0]]
-                                               for i in xrange(len(sources['TEXTANGENT']))])
+                                               for i in range(len(sources['TEXTANGENT']))])
             self.maxtextangentsetindex = [numpy.max(tex_index) for tex_index in self._textangent_indexset]
             for i, texinput in enumerate(sources['TEXTANGENT']):
                 checkSource(texinput[4], ('X', 'Y', 'Z'), self.maxtextangentsetindex[i])
@@ -147,7 +147,7 @@ class TriangleSet(primitive.Primitive):
         if 'TEXBINORMAL' in sources and len(sources['TEXBINORMAL']) > 0 and len(self.index) > 0:
             self._texbinormalset = tuple([texinput[4].data for texinput in sources['TEXBINORMAL']])
             self._texbinormal_indexset = tuple([self.index[:, :, sources['TEXBINORMAL'][i][0]]
-                                                for i in xrange(len(sources['TEXBINORMAL']))])
+                                                for i in range(len(sources['TEXBINORMAL']))])
             self.maxtexbinormalsetindex = [numpy.max(tex_index) for tex_index in self._texbinormal_indexset]
             for i, texinput in enumerate(sources['TEXBINORMAL']):
                 checkSource(texinput[4], ('X', 'Y', 'Z'), self.maxtexbinormalsetindex[i])
@@ -391,7 +391,7 @@ class BoundTriangleSet(primitive.BoundPrimitive):
 
         :rtype: generator of :class:`collada.triangleset.Triangle`
         """
-        for i in xrange(self.ntriangles):
+        for i in range(self.ntriangles):
             yield self[i]
 
     def shapes(self):

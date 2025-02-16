@@ -14,9 +14,9 @@
 """This module contains helper classes and functions for working
 with the COLLADA 1.4.1 schema."""
 
+import io
 import lxml
 import lxml.etree
-from collada.util import bytes, BytesIO
 
 from .resources import resource_string
 
@@ -54,7 +54,7 @@ class ColladaValidator(object):
             self._parser = lxml.etree.XMLParser()
             self._parser.resolvers.add(ColladaResolver())
             self.COLLADA_SCHEMA_1_4_1_DOC = lxml.etree.parse(
-                BytesIO(bytes(COLLADA_SCHEMA_1_4_1, encoding='utf-8')),
+                io.BytesIO(bytes(COLLADA_SCHEMA_1_4_1, encoding='utf-8')),
                 self._parser)
             self._COLLADA_SCHEMA_1_4_1_INSTANCE = lxml.etree.XMLSchema(
                 self.COLLADA_SCHEMA_1_4_1_DOC)

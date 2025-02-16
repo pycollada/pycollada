@@ -14,28 +14,6 @@
 
 import numpy
 import math
-import sys
-
-if sys.version_info[0] > 2:
-    import unittest
-    from io import StringIO, BytesIO
-
-    bytes = bytes
-    basestring = (str, bytes)
-    xrange = range
-else:
-    import unittest
-    if not hasattr(unittest.TestCase, "assertIsNone"):
-        # external dependency unittest2 required for Python <= 2.6
-        import unittest2 as unittest
-    from StringIO import StringIO
-
-    BytesIO = StringIO
-
-    def bytes(s, encoding='utf-8'):
-        return s
-    basestring = basestring
-    xrange = xrange
 
 from collada.common import DaeMalformedError, E, tag
 
@@ -218,7 +196,7 @@ class IndexedList(list):
         _del = self._delindex
         newItems = list(newItems)
         # remove indexing of items to remove
-        for ind in xrange(i, j):
+        for ind in range(i, j):
             _del(_get(ind))
         # add new indexing
         if isinstance(newItems, IndexedList):

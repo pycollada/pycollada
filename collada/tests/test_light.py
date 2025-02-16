@@ -1,5 +1,5 @@
 import collada
-from collada.util import unittest
+import unittest
 from collada.xmlutil import etree
 
 fromstring = etree.fromstring

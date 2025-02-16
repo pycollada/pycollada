@@ -18,23 +18,6 @@ except ImportError:
     def partial(func, tag):
         return lambda *args, **kwargs: func(tag, *args, **kwargs)
 
-try:
-    callable
-except NameError:
-    # Python 3
-    def callable(f):
-        return hasattr(f, '__call__')
-
-try:
-    basestring
-except (NameError, KeyError):
-    basestring = str
-
-try:
-    unicode
-except (NameError, KeyError):
-    unicode = str
-
 if HAVE_LXML:
     from lxml.builder import E, ElementMaker
 
@@ -56,7 +39,7 @@ else:
             for item in children:
                 if isinstance(item, dict):
                     elem.attrib.update(item)
-                elif isinstance(item, basestring):
+                elif isinstance(item, str):
                     if len(elem):
                         elem[-1].tail = (elem[-1].tail or "") + item
                     else:
