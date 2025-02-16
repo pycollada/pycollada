@@ -253,6 +253,7 @@ Releasing
        git push origin master
        git push --tags
 
+#. Create and publish release at https://github.com/pycollada/pycollada/releases.
 
 #. Build source distribution::
 
