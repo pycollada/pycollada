@@ -1,6 +1,17 @@
 pycollada Changelog
 ###################
 
+0.9 (2025-02-16)
+****************
+
+Bug Fixes
+=========
+* Fix compatibility with NumPy 2.0
+
+Backwards Compatibility Notes
+=============================
+* Add support for python 3.13.
+
 0.8 (2024-01-07)
 ****************
 

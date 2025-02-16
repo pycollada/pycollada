@@ -6,7 +6,7 @@ requires = [
 
 [project]
 name = "pycollada"
-version = "0.8"
+version = "0.9"
 description = "python library for reading and writing collada documents"
 readme = {file = "README.markdown", content-type = "text/markdown"}
 authors = [
