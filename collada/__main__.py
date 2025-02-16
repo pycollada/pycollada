@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().discover("tests")
+    suite = unittest.TestLoader().discover("collada.tests")
     ret = unittest.TextTestRunner(verbosity=2).run(suite)
     if ret.wasSuccessful():
         sys.exit(0)
