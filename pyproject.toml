@@ -14,9 +14,8 @@ authors = [
 ]
 license = {text = "BSD"}
 dependencies = [
-    "python-dateutil>=2.2",
+    "python-dateutil",
     "numpy",
-    'unittest2; python_version<"2.7"',
 ]
 
 [project.optional-dependencies]
