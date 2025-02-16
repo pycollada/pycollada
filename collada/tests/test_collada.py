@@ -56,7 +56,7 @@ class TestCollada(unittest.TestCase):
         self.assertIsNotNone(str(list(mesh.scene.objects('light'))))
         self.assertIsNotNone(str(list(mesh.scene.objects('camera'))))
 
-        s =io.BytesIO()
+        s = io.BytesIO()
         mesh.write(s)
         out = s.getvalue()
         t = io.BytesIO(out)

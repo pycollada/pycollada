@@ -1,5 +1,6 @@
 from importlib import resources
 
+
 def resource_string(file_name: str) -> str:
     """
     Get the value of a file in `collada/resources/{file_name}`
