@@ -17,7 +17,7 @@ import numpy
 from collada import primitive
 from collada import polylist
 from collada.common import E
-from collada.common import DaeIncompleteError
+from collada.common import DaeIncompleteError, DaeMalformedError
 
 
 class Polygons(polylist.Polylist):
@@ -82,7 +82,10 @@ class Polygons(polylist.Polylist):
 
         polygon_indices = []
         for indexnode in indexnodes:
-            index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+            try:
+                index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+            except ValueError:
+                raise DaeMalformedError("Failed to parse polygons index integers")
             index[numpy.isnan(index)] = 0
             polygon_indices.append(index)
 

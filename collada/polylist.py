@@ -274,7 +274,10 @@ class Polylist(primitive.Primitive):
             if vcountnode.text is None or vcountnode.text.isspace():
                 vcounts = numpy.array([], dtype=numpy.int32)
             else:
-                vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
+                try:
+                    vcounts = numpy.fromstring(vcountnode.text, dtype=numpy.int32, sep=' ')
+                except ValueError:
+                    raise DaeMalformedError("Failed to parse polylist vcount integers")
             vcounts[numpy.isnan(vcounts)] = 0
         except ValueError:
             raise DaeMalformedError('Corrupted vcounts in polylist')
@@ -285,7 +288,10 @@ class Polylist(primitive.Primitive):
             if indexnode.text is None or indexnode.text.isspace():
                 index = numpy.array([], dtype=numpy.int32)
             else:
-                index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+                try:
+                    index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+                except ValueError:
+                    raise DaeMalformedError("Failed to parse poylist index integers")
             index[numpy.isnan(index)] = 0
         except BaseException:
             raise DaeMalformedError('Corrupted index in polylist')

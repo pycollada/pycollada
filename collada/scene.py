@@ -115,7 +115,10 @@ class TranslateTransform(Transform):
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        try:
+            floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        except ValueError:
+            raise DaeMalformedError("Failed to parse translate transform floats")
         if len(floats) != 3:
             raise DaeMalformedError("Translate node requires three float values")
         return TranslateTransform(floats[0], floats[1], floats[2], node)
@@ -162,7 +165,10 @@ class RotateTransform(Transform):
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        try:
+            floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        except ValueError:
+            raise DaeMalformedError("Failed to parse rotate transform floats")
         if len(floats) != 4:
             raise DaeMalformedError("Rotate node requires four float values")
         return RotateTransform(floats[0], floats[1], floats[2], floats[3], node)
@@ -208,7 +214,10 @@ class ScaleTransform(Transform):
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        try:
+            floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        except ValueError:
+            raise DaeMalformedError("Failed to parse scale transform floats")
         if len(floats) != 3:
             raise DaeMalformedError("Scale node requires three float values")
         return ScaleTransform(floats[0], floats[1], floats[2], node)
@@ -244,7 +253,10 @@ class MatrixTransform(Transform):
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        try:
+            floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        except ValueError:
+            raise DaeMalformedError("Failed to parse matrix transform floats")
         return MatrixTransform(floats, node)
 
     def __str__(self):
@@ -298,7 +310,10 @@ class LookAtTransform(Transform):
 
     @staticmethod
     def load(collada, node):
-        floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        try:
+            floats = numpy.fromstring(node.text, dtype=numpy.float32, sep=' ')
+        except ValueError:
+            raise DaeMalformedError("Failed to parse lookat transform floats")
         if len(floats) != 9:
             raise DaeMalformedError("Lookat node requires 9 float values")
         return LookAtTransform(floats[0:3], floats[3:6], floats[6:9], node)

@@ -172,7 +172,10 @@ class LineSet(primitive.Primitive):
             if indexnode.text is None or indexnode.text.isspace():
                 index = numpy.array([], dtype=numpy.int32)
             else:
-                index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+                try:
+                    index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
+                except ValueError:
+                    raise DaeMalformedError("Failed to parse lineset index integers")
             index[numpy.isnan(index)] = 0
         except BaseException:
             raise DaeMalformedError('Corrupted index in line set')
