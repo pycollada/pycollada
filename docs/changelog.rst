@@ -8,6 +8,7 @@ pycollada Changelog
 
 Bug Fixes
 =========
+* Fix compatibility with numpy 2.3 after fromstring deprecation.
 * Fix running tests from main.
 
 0.9 (2025-02-16)
@@ -266,5 +267,5 @@ Releasing
 
 #. Build source distribution::
 
-       python setup.py sdist
-       twine upload dist/pycollada-0.7.tar.gz -u __token__
+       python -m build
+       twine upload dist/pycollada-0.9.1-py3-none-any.whl -u __token__
