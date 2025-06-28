@@ -1,6 +1,15 @@
 pycollada Changelog
 ###################
 
+0.9.1 (2025-06-28)
+****************
+
+* Minor release to publish binary package format.
+
+Bug Fixes
+=========
+* Fix running tests from main.
+
 0.9 (2025-02-16)
 ****************
 

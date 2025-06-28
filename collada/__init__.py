@@ -18,7 +18,7 @@ file is not what is expected.
 
 """
 
-__version__ = "0.9"
+__version__ = "0.9.1"
 
 import io
 import os.path
