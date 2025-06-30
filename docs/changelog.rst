@@ -1,8 +1,15 @@
 pycollada Changelog
 ###################
 
+0.9.2 (2025-06-30)
+******************
+
+Bug Fixes
+=========
+* Fix compatibility with numpy 2.3 after fromstring byte deprecation.
+
 0.9.1 (2025-06-28)
-****************
+******************
 
 * Minor release to publish binary package format.
 
@@ -268,4 +275,4 @@ Releasing
 #. Build source distribution::
 
        python -m build
-       twine upload dist/pycollada-0.9.1-py3-none-any.whl -u __token__
+       twine upload dist/* -u __token__
