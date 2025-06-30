@@ -118,7 +118,7 @@ class CImage(DaeObject):
             self._uintarray = _FAILED
             return None
         nchan = len(img.mode)
-        self._uintarray = numpy.fromstring(img.tobytes(), dtype=numpy.uint8)
+        self._uintarray = numpy.frombuffer(img.tobytes(), dtype=numpy.uint8)
         self._uintarray.shape = (img.size[1], img.size[0], nchan)
         return self._uintarray
 
