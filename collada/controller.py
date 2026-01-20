@@ -39,11 +39,9 @@ class Controller(DaeObject):
             raise DaeUnsupportedError('Unknown controller node')
 
         sourcebyid = {}
-        sources = []
-        sourcenodes = node.findall('%s/%s' % (controller.tag, collada.tag('source')))
+        sourcenodes = node.findall(f"{controller.tag}/{collada.tag('source')}")
         for sourcenode in sourcenodes:
             ch = source.Source.load(collada, {}, sourcenode)
-            sources.append(ch)
             sourcebyid[ch.id] = ch
 
         if controller.tag == collada.tag('skin'):
@@ -130,9 +128,7 @@ class Skin(Controller):
         joint_matrices.shape = (-1, 4, 4)
         if len(joint_names) != len(joint_matrices):
             raise DaeMalformedError("Skin joint and matrix inputs must be same length")
-        self.joint_matrices = {}
-        for n, m in zip(joint_names, joint_matrices):
-            self.joint_matrices[n] = m
+        self.joint_matrices = dict(zip(joint_names, joint_matrices))
 
         if not (weight_source in sourcebyid and weight_joint_source in sourcebyid):
             raise DaeBrokenRefError("Weights input in joints not found")
@@ -200,7 +196,7 @@ class Skin(Controller):
                 raise DaeMalformedError('Corrupted bind shape matrix in skin')
             bind_shape_mat = numpy.array(values, dtype=numpy.float32)
 
-        inputnodes = skinnode.findall('%s/%s' % (collada.tag('joints'), collada.tag('input')))
+        inputnodes = skinnode.findall(f"{collada.tag('joints')}/{collada.tag('input')}")
         if inputnodes is None or len(inputnodes) < 2:
             raise DaeIncompleteError("Not enough inputs in skin joints")
 
@@ -358,7 +354,7 @@ class Morph(Controller):
         if not (method == 'NORMALIZED' or method == 'RELATIVE'):
             raise DaeMalformedError("Morph method must be either NORMALIZED or RELATIVE. Found '%s'" % method)
 
-        inputnodes = morphnode.findall('%s/%s' % (collada.tag('targets'), collada.tag('input')))
+        inputnodes = morphnode.findall(f"{collada.tag('targets')}/{collada.tag('input')}")
         if inputnodes is None or len(inputnodes) < 2:
             raise DaeIncompleteError("Not enough inputs in a morph")
 

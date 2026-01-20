@@ -582,15 +582,14 @@ class Effect(DaeObject):
                 params.append(param)
                 localscope[param.id] = param
             else:
-                floatnode = paramnode.find(collada.tag('float'))
-                if floatnode is None:
-                    floatnode = paramnode.find(collada.tag('float2'))
-                if floatnode is None:
-                    floatnode = paramnode.find(collada.tag('float3'))
-                if floatnode is None:
-                    floatnode = paramnode.find(collada.tag('float4'))
+                # Try float variants in order
+                floatnode = None
+                for float_type in ('float', 'float2', 'float3', 'float4'):
+                    floatnode = paramnode.find(collada.tag(float_type))
+                    if floatnode is not None:
+                        break
                 paramid = paramnode.get('sid')
-                if floatnode is not None and paramid is not None and len(paramid) > 0 and floatnode.text is not None:
+                if floatnode is not None and paramid and len(paramid) > 0 and floatnode.text is not None:
                     localscope[paramid] = [float(v) for v in floatnode.text.split()]
 
     @staticmethod
@@ -661,13 +660,13 @@ class Effect(DaeObject):
                         props['opaque_mode'] = OPAQUE_MODE.RGB_ZERO
         props['xmlnode'] = node
 
-        bumpnode = node.find('.//%s//%s' % (collada.tag('extra'), collada.tag('texture')))
+        bumpnode = node.find(f".//{collada.tag('extra')}//{collada.tag('texture')}")
         if bumpnode is not None:
             bumpmap = Map.load(collada, localscope, bumpnode)
         else:
             bumpmap = None
 
-        double_sided_node = node.find('.//%s//%s' % (collada.tag('extra'), collada.tag('double_sided')))
+        double_sided_node = node.find(f".//{collada.tag('extra')}//{collada.tag('double_sided')}")
         double_sided = False
         if double_sided_node is not None and double_sided_node.text is not None:
             try:
@@ -687,7 +686,7 @@ class Effect(DaeObject):
         vnode = children[0]
         if vnode.tag == collada.tag('color'):
             try:
-                value = tuple([float(v) for v in vnode.text.split()])
+                value = tuple(float(v) for v in vnode.text.split())
             except ValueError:
                 raise DaeMalformedError('Corrupted color definition in effect `{}`'.format(id))
             except IndexError:
@@ -780,7 +779,7 @@ class Effect(DaeObject):
                 if value is not None:
                     shadnode.append(getPropNode(prop, value))
 
-        double_sided_node = profilenode.find('.//%s//%s' % (tag('extra'), tag('double_sided')))
+        double_sided_node = profilenode.find(f".//{tag('extra')}//{tag('double_sided')}")
         if double_sided_node is None or double_sided_node.text is None:
             extranode = profilenode.find(tag('extra'))
             if extranode is None:

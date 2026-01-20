@@ -131,7 +131,7 @@ class Polylist(primitive.Primitive):
         if 'VERTEX' not in sources:
             raise DaeIncompleteError('Polylist requires vertex input')
 
-        # find max offset
+        # find max offset - flatten and find max in one pass
         max_offset = max([max([input[0] for input in input_type_array])
                           for input_type_array in sources.values() if len(input_type_array) > 0])
 

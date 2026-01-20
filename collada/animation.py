@@ -35,11 +35,9 @@ class Animation(DaeObject):
         name = node.get('name') or ''
 
         sourcebyid = localscope
-        sources = []
         sourcenodes = node.findall(collada.tag('source'))
         for sourcenode in sourcenodes:
             ch = source.Source.load(collada, {}, sourcenode)
-            sources.append(ch)
             sourcebyid[ch.id] = ch
 
         child_nodes = node.findall(collada.tag('animation'))

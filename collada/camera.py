@@ -24,7 +24,7 @@ class Camera(DaeObject):
 
     @staticmethod
     def load(collada, localscope, node):
-        tecnode = node.find('%s/%s' % (collada.tag('optics'), collada.tag('technique_common')))
+        tecnode = node.find(f"{collada.tag('optics')}/{collada.tag('technique_common')}")
         if tecnode is None or len(tecnode) == 0:
             raise DaeIncompleteError('Missing common technique in camera')
         camnode = tecnode[0]
@@ -134,8 +134,7 @@ class PerspectiveCamera(Camera):
 
     @staticmethod
     def load(collada, localscope, node):
-        persnode = node.find('%s/%s/%s' % (collada.tag('optics'), collada.tag('technique_common'),
-                                           collada.tag('perspective')))
+        persnode = node.find(f"{collada.tag('optics')}/{collada.tag('technique_common')}/{collada.tag('perspective')}")
 
         if persnode is None:
             raise DaeIncompleteError('Missing perspective for camera definition')
@@ -283,10 +282,7 @@ class OrthographicCamera(Camera):
 
     @staticmethod
     def load(collada, localscope, node):
-        orthonode = node.find('%s/%s/%s' % (
-            collada.tag('optics'),
-            collada.tag('technique_common'),
-            collada.tag('orthographic')))
+        orthonode = node.find(f"{collada.tag('optics')}/{collada.tag('technique_common')}/{collada.tag('orthographic')}")
 
         if orthonode is None:
             raise DaeIncompleteError('Missing orthographic for camera definition')

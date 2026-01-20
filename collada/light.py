@@ -81,18 +81,16 @@ class DirectionalLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
-                                                    tag('directional'), tag('color')))
+        colornode = self.xmlnode.find(f"{tag('technique_common')}/{tag('directional')}/{tag('color')}")
         colornode.text = ' '.join(map(str, self.color))
 
     @staticmethod
     def load(collada, localscope, node):
-        colornode = node.find('%s/%s/%s' % (collada.tag('technique_common'), collada.tag('directional'),
-                                            collada.tag('color')))
+        colornode = node.find(f"{collada.tag('technique_common')}/{collada.tag('directional')}/{collada.tag('color')}")
         if colornode is None:
             raise DaeIncompleteError('Missing color for directional light')
         try:
-            color = tuple([float(v) for v in colornode.text.split()])
+            color = tuple(float(v) for v in colornode.text.split())
         except ValueError:
             raise DaeMalformedError('Corrupted color values in light definition')
         return DirectionalLight(node.get('id'), color, xmlnode=node)
@@ -152,18 +150,16 @@ class AmbientLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        colornode = self.xmlnode.find('%s/%s/%s' % (tag('technique_common'),
-                                                    tag('ambient'), tag('color')))
+        colornode = self.xmlnode.find(f"{tag('technique_common')}/{tag('ambient')}/{tag('color')}")
         colornode.text = ' '.join(map(str, self.color))
 
     @staticmethod
     def load(collada, localscope, node):
-        colornode = node.find('%s/%s/%s' % (collada.tag('technique_common'),
-                                            collada.tag('ambient'), collada.tag('color')))
+        colornode = node.find(f"{collada.tag('technique_common')}/{collada.tag('ambient')}/{collada.tag('color')}")
         if colornode is None:
             raise DaeIncompleteError('Missing color for ambient light')
         try:
-            color = tuple([float(v) for v in colornode.text.split()])
+            color = tuple(float(v) for v in colornode.text.split())
         except ValueError:
             raise DaeMalformedError('Corrupted color values in light definition')
         return AmbientLight(node.get('id'), color, xmlnode=node)
@@ -252,7 +248,7 @@ class PointLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        pnode = self.xmlnode.find('%s/%s' % (tag('technique_common'), tag('point')))
+        pnode = self.xmlnode.find(f"{tag('technique_common')}/{tag('point')}")
         colornode = pnode.find(tag('color'))
         colornode.text = ' '.join(map(str, self.color))
         _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
@@ -262,12 +258,12 @@ class PointLight(Light):
 
     @staticmethod
     def load(collada, localscope, node):
-        pnode = node.find('%s/%s' % (collada.tag('technique_common'), collada.tag('point')))
+        pnode = node.find(f"{collada.tag('technique_common')}/{collada.tag('point')}")
         colornode = pnode.find(collada.tag('color'))
         if colornode is None:
             raise DaeIncompleteError('Missing color for point light')
         try:
-            color = tuple([float(v) for v in colornode.text.split()])
+            color = tuple(float(v) for v in colornode.text.split())
         except ValueError:
             raise DaeMalformedError('Corrupted color values in light definition')
         constant_att = linear_att = quad_att = zfar = None
@@ -376,7 +372,7 @@ class SpotLight(Light):
         """Saves the light's properties back to :attr:`xmlnode`"""
         self.xmlnode.set('id', self.id)
         self.xmlnode.set('name', self.id)
-        pnode = self.xmlnode.find('%s/%s' % (tag('technique_common'), tag('spot')))
+        pnode = self.xmlnode.find(f"{tag('technique_common')}/{tag('spot')}")
         colornode = pnode.find(tag('color'))
         colornode.text = ' '.join(map(str, self.color))
         _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
@@ -387,12 +383,12 @@ class SpotLight(Light):
 
     @staticmethod
     def load(collada, localscope, node):
-        pnode = node.find('%s/%s' % (collada.tag('technique_common'), collada.tag('spot')))
+        pnode = node.find(f"{collada.tag('technique_common')}/{collada.tag('spot')}")
         colornode = pnode.find(collada.tag('color'))
         if colornode is None:
             raise DaeIncompleteError('Missing color for spot light')
         try:
-            color = tuple([float(v) for v in colornode.text.split()])
+            color = tuple(float(v) for v in colornode.text.split())
         except ValueError:
             raise DaeMalformedError('Corrupted color values in spot light definition')
         constant_att = linear_att = quad_att = falloff_ang = falloff_exp = None

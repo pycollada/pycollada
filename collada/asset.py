@@ -207,9 +207,7 @@ class Asset(DaeObject):
     @staticmethod
     def load(collada, localscope, node):
         contributornodes = node.findall(collada.tag('contributor'))
-        contributors = []
-        for contributornode in contributornodes:
-            contributors.append(Contributor.load(collada, localscope, contributornode))
+        contributors = [Contributor.load(collada, localscope, cn) for cn in contributornodes]
 
         created = node.find(collada.tag('created'))
         if created is not None:
