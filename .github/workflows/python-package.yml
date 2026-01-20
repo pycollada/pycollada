@@ -21,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.13"
+        python-version: "3.14"
     - name: Install Formatting
       run: |
         pip install autopep8 flake8 flake8-no-implicit-concat
@@ -43,7 +43,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
         arch: [ x86_64 ]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
         lxml-dep: ["", "lxml"]
         include:
           - os: macos-latest
