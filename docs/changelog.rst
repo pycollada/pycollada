@@ -1,6 +1,20 @@
 pycollada Changelog
 ###################
 
+0.9.3 (2026-01-24)
+******************
+
+Backwards Compatibility Notes
+=============================
+* Python 3.9 support removed since it is end of life.
+* Python 3.14 support added.
+
+New Features
+============
+* More speed-ups (~8%) and clean-ups for DAE loading. (#160)
+* Speeding up DAE loading by ~20% (#159)
+* Rename FreeCADWeb.Org ➞ FreeCAD.Org (#158)
+
 0.9.2 (2025-06-30)
 ******************
 
