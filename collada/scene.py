@@ -249,7 +249,7 @@ class MatrixTransform(Transform):
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
         if len(self.matrix) != 16:
             raise DaeMalformedError('Corrupted matrix transformation node')
-        self.matrix = self.matrix.reshape((4,4))
+        self.matrix = self.matrix.reshape((4, 4))
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
