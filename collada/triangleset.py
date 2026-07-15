@@ -168,7 +168,7 @@ class TriangleSet(primitive.Primitive):
         self.index = self.index.reshape((-1))
         len(self.index)
         txtindices = ' '.join(map(str, self.index.tolist()))
-
+        self.index = self.index.reshape((-1, 3, self.nindices))
 
         self.xmlnode = E.triangles(count=str(self.ntriangles))
         if self.material is not None:

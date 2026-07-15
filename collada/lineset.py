@@ -80,7 +80,7 @@ class LineSet(primitive.Primitive):
         self.index = index
         self.indices = self.index
         self.nindices = max_offset + 1
-        self.index = self.index.reshape((-1, 2, self.nindices)) # No SFX
+        self.index = self.index.reshape((-1, 2, self.nindices))
         self.nlines = len(self.index)
 
         if len(self.index) > 0:

@@ -164,15 +164,12 @@ class FloatSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        # self.data.shape = (-1,)
         self.data = self.data.reshape((-1))
 
         txtdata = ' '.join(map(lambda x: '%.7g' % x, self.data.tolist()))
 
         rawlen = len(self.data)
-        # Causes bug
         self.data = self.data.reshape((-1, len(self.components)))
-        # self.data.shape = (-1, len(self.components))
         acclen = len(self.data)
         node = self.xmlnode.find(tag('float_array'))
         node.text = txtdata
@@ -263,7 +260,6 @@ class IDRefSource(Source):
         self.data = data
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
         self.data = self.data.reshape((-1, len(components)))
-        # self.data.shape = (-1, len(components))
         self.components = components
         """Tuple of strings describing the semantic of the data, e.g. ``('MORPH_TARGET')``"""
         if xmlnode is not None:
