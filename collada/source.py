@@ -141,10 +141,10 @@ class FloatSource(Source):
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
         else:
-            self.data.shape = (-1,)
+            self.data = self.data.reshape((-1,))
             txtdata = ' '.join(map(str, self.data.tolist()))
             rawlen = len(self.data)
-            self.data.shape = (-1, len(self.components))
+            self.data = self.data.reshape((-1, len(self.components)))
             acclen = len(self.data)
             stridelen = len(self.components)
             sourcename = "%s-array" % self.id
@@ -164,12 +164,12 @@ class FloatSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        self.data.shape = (-1,)
+        self.data = self.data.reshape((-1))
 
         txtdata = ' '.join(map(lambda x: '%.7g' % x, self.data.tolist()))
 
         rawlen = len(self.data)
-        self.data.shape = (-1, len(self.components))
+        self.data = self.data.reshape((-1, len(self.components)))
         acclen = len(self.data)
         node = self.xmlnode.find(tag('float_array'))
         node.text = txtdata
@@ -259,17 +259,17 @@ class IDRefSource(Source):
         """The unique string identifier for the source"""
         self.data = data
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
-        self.data.shape = (-1, len(components))
+        self.data = self.data.reshape((-1, len(components)))
         self.components = components
         """Tuple of strings describing the semantic of the data, e.g. ``('MORPH_TARGET')``"""
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
         else:
-            self.data.shape = (-1,)
+            self.data = self.data.reshape((-1,))
             txtdata = ' '.join(map(str, self.data.tolist()))
             rawlen = len(self.data)
-            self.data.shape = (-1, len(self.components))
+            self.data = self.data.reshape((-1, len(self.components)))
             acclen = len(self.data)
             stridelen = len(self.components)
             sourcename = "%s-array" % self.id
@@ -289,10 +289,10 @@ class IDRefSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        self.data.shape = (-1,)
+        self.data = self.data.reshape((-1,))
         txtdata = ' '.join(map(str, self.data.tolist()))
         rawlen = len(self.data)
-        self.data.shape = (-1, len(self.components))
+        self.data = self.data.reshape((-1, len(self.components)))
         acclen = len(self.data)
 
         node = self.xmlnode.find(tag('IDREF_array'))
@@ -370,19 +370,18 @@ class NameSource(Source):
 
         self.id = id
         """The unique string identifier for the source"""
-        self.data = data
+        self.data = data.reshape((-1, len(components)))
         """Numpy array with the source values. This will be shaped as ``(-1,N)`` where ``N = len(self.components)``"""
-        self.data.shape = (-1, len(components))
         self.components = components
         """Tuple of strings describing the semantic of the data, e.g. ``('JOINT')``"""
         if xmlnode is not None:
             self.xmlnode = xmlnode
             """ElementTree representation of the source."""
         else:
-            self.data.shape = (-1,)
+            self.data = self.data.reshape((-1,))
             txtdata = ' '.join(map(str, self.data.tolist()))
             rawlen = len(self.data)
-            self.data.shape = (-1, len(self.components))
+            self.data = self.data.reshape((-1, len(self.components)))
             acclen = len(self.data)
             stridelen = len(self.components)
             sourcename = "%s-array" % self.id
@@ -402,10 +401,10 @@ class NameSource(Source):
 
     def save(self):
         """Saves the source back to :attr:`xmlnode`"""
-        self.data.shape = (-1,)
+        self.data = self.data.reshape((-1,))
         txtdata = ' '.join(map(str, self.data.tolist()))
         rawlen = len(self.data)
-        self.data.shape = (-1, len(self.components))
+        self.data = self.data.reshape((-1, len(self.components)))
         acclen = len(self.data)
 
         node = self.xmlnode.find(tag('Name_array'))

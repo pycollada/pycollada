@@ -39,11 +39,11 @@ class TestLineset(unittest.TestCase):
         input_list.addInput(0, 'VERTEX', "#mylinevertsource")
         indices = numpy.array([0, 1, 1, 2, 2, 3, 3, 4, 4, 5])
         lineset = geometry.createLineSet(indices, input_list, "mymaterial")
-
+        expected_indices = numpy.array([[[0], [1]], [[1], [2]], [[2], [3]], [[3], [4]], [[4], [5]]])
         # Check the initial values for the lineset.
         self.assertIsNotNone(str(lineset))
-        assert_array_equal(lineset.index, indices)
-        self.assertEqual(lineset.nlines, len(indices))
+        assert_array_equal(lineset.index, expected_indices)
+        self.assertEqual(lineset.nlines, len(expected_indices))
         self.assertEqual(lineset.material, "mymaterial")
 
         # Serialize and deserialize.

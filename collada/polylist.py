@@ -141,7 +141,7 @@ class Polylist(primitive.Primitive):
         self.nindices = max_offset + 1
         self.vcounts = vcounts
         self.sources = sources
-        self.index.shape = (-1, self.nindices)
+        self.index = self.index.reshape((-1, self.nindices))
         self.npolygons = len(self.vcounts)
         self.nvertices = numpy.sum(self.vcounts) if len(self.index) > 0 else 0
         self.polyends = numpy.cumsum(self.vcounts)

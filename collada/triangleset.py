@@ -96,7 +96,7 @@ class TriangleSet(primitive.Primitive):
         self.index = index
         self.indices = self.index
         self.nindices = max_offset + 1
-        self.index.shape = (-1, 3, self.nindices)
+        self.index = self.index.reshape((-1, 3, self.nindices))
         self.ntriangles = len(self.index)
         self.sources = sources
 
@@ -165,10 +165,10 @@ class TriangleSet(primitive.Primitive):
         return len(self.index)
 
     def _recreateXmlNode(self):
-        self.index.shape = (-1)
+        self.index = self.index.reshape((-1))
         len(self.index)
         txtindices = ' '.join(map(str, self.index.tolist()))
-        self.index.shape = (-1, 3, self.nindices)
+        self.index = self.index.reshape((-1, 3, self.nindices))
 
         self.xmlnode = E.triangles(count=str(self.ntriangles))
         if self.material is not None:
