@@ -294,15 +294,17 @@ class TriangleSet(primitive.Primitive):
         tans1[self._vertex_index[:, 2]] += sdir
 
         norm = self._normal[self._normal_index]
-        norm.shape = (-1, 3)
+        norm = norm.reshape((-1, 3))
         tan1 = tans1[self._vertex_index]
-        tan1.shape = (-1, 3)
+        tan1 = tan1.reshape((-1, 3))
 
         tangent = normalize_v3(tan1 - norm * dot_v3(norm, tan1)[:, numpy.newaxis])
 
         self._textangentset = (tangent,)
-        self._textangent_indexset = (numpy.arange(len(self._vertex_index) * 3, dtype=self._vertex_index.dtype),)
-        self._textangent_indexset[0].shape = (len(self._vertex_index), 3)
+        textangent_index = numpy.arange(
+            len(self._vertex_index) * 3, dtype=self._vertex_index.dtype
+        ).reshape((len(self._vertex_index), 3))
+        self._textangent_indexset = (textangent_index,)
 
         tdirx = (s1 * x2 - s2 * x1) * r
         tdiry = (s1 * y2 - s2 * y1) * r
@@ -315,19 +317,20 @@ class TriangleSet(primitive.Primitive):
         tans2[self._vertex_index[:, 2]] += tdir
 
         tan2 = tans2[self._vertex_index]
-        tan2.shape = (-1, 3)
+        tan2 = tan2.reshape((-1, 3))
 
         tanw = dot_v3(numpy.cross(norm, tan1), tan2)
         tanw = numpy.sign(tanw)
 
         binorm = numpy.cross(norm, tangent).flatten()
-        binorm.shape = (-1, 3)
+        binorm = binorm.reshape((-1, 3))
         binorm = binorm * tanw[:, numpy.newaxis]
 
         self._texbinormalset = (binorm,)
-        self._texbinormal_indexset = (numpy.arange(len(self._vertex_index) * 3,
-                                                   dtype=self._vertex_index.dtype),)
-        self._texbinormal_indexset[0].shape = (len(self._vertex_index), 3)
+        texbinormal_index = numpy.arange(
+            len(self._vertex_index) * 3, dtype=self._vertex_index.dtype
+        ).reshape((len(self._vertex_index), 3))
+        self._texbinormal_indexset = (texbinormal_index,)
 
     def __str__(self):
         return '<TriangleSet length=%d>' % len(self)
