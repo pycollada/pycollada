@@ -119,7 +119,7 @@ class CImage(DaeObject):
             return None
         nchan = len(img.mode)
         self._uintarray = numpy.frombuffer(img.tobytes(), dtype=numpy.uint8)
-        self._uintarray.shape = (img.size[1], img.size[0], nchan)
+        self._uintarray = self._uintarray.reshape((img.size[1], img.size[0], nchan))
         return self._uintarray
 
     def getFloatArray(self):

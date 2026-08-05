@@ -215,10 +215,10 @@ class FloatSource(Source):
             components = ['S', 'T']
         if len(components) == 3 and components[0] == 'S' and components[1] == 'T' and components[2] == 'P':
             components = ['S', 'T']
-            data.shape = (-1, 3)
+            data = data.reshape((-1, 3))
             # remove 3d texcoord dimension because we don't support it
             data = numpy.delete(data, -1, 1)
-            data.shape = (-1)
+            data = data.reshape((-1,))
         return FloatSource(sourceid, data, tuple(components), xmlnode=node)
 
     def __str__(self):

@@ -115,7 +115,7 @@ class Skin(Controller):
 
         if len(bind_shape_matrix) != 16:
             raise DaeMalformedError('Corrupted bind shape matrix in skin')
-        self.bind_shape_matrix.shape = (4, 4)
+        self.bind_shape_matrix = self.bind_shape_matrix.reshape((4, 4))
 
         if not (joint_source in sourcebyid and joint_matrix_source in sourcebyid):
             raise DaeBrokenRefError("Input in joints not found")
@@ -125,7 +125,7 @@ class Skin(Controller):
             raise DaeIncompleteError("Could not find joint matrix source for skin")
         joint_names = [j for j in sourcebyid[joint_source]]
         joint_matrices = sourcebyid[joint_matrix_source].data
-        joint_matrices.shape = (-1, 4, 4)
+        joint_matrices = joint_matrices.reshape((-1, 4, 4))
         if len(joint_names) != len(joint_matrices):
             raise DaeMalformedError("Skin joint and matrix inputs must be same length")
         self.joint_matrices = dict(zip(joint_names, joint_matrices))
@@ -144,7 +144,7 @@ class Skin(Controller):
             at = 0
             for ct in self.vcounts:
                 this_set = self.vertex_weight_index[self.nindices * at:self.nindices * (at + ct)]
-                this_set.shape = (ct, self.nindices)
+                this_set = this_set.reshape((ct, self.nindices))
                 newshape.append(numpy.array(this_set))
                 at += ct
             self.index = newshape
@@ -188,7 +188,7 @@ class Skin(Controller):
         bind_shape_mat = skinnode.find(collada.tag('bind_shape_matrix'))
         if bind_shape_mat is None:
             bind_shape_mat = numpy.identity(4, dtype=numpy.float32)
-            bind_shape_mat.shape = (-1,)
+            bind_shape_mat = bind_shape_mat.reshape((-1,))
         else:
             try:
                 values = [float(v) for v in bind_shape_mat.text.split()]
