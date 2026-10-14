@@ -119,7 +119,7 @@ class Primitive(DaeObject):
             inputs = [(int(i.get('offset')), i.get('semantic'),
                        i.get('source'), i.get('set'))
                       for i in inputnodes]
-        except ValueError:
+        except (ValueError, TypeError):
             raise DaeMalformedError('Corrupted offsets in primitive')
 
         return Primitive._getInputsFromList(collada, localscope, inputs)

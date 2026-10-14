@@ -2,6 +2,8 @@ import numpy
 import unittest
 
 import collada
+from collada.common import DaeMalformedError
+from collada.primitive import Primitive
 from collada.xmlutil import etree
 
 fromstring = etree.fromstring
@@ -38,6 +40,18 @@ class TestGeometry(unittest.TestCase):
         self.assertIn(othersource1.id, loaded_geometry.sourceById)
         self.assertIn(othersource2.id, loaded_geometry.sourceById)
         self.assertNotIn(floatsource.id, loaded_geometry.sourceById)
+
+    def test_primitive_input_missing_offset(self):
+        # an <input> with no "offset" attribute makes int(None) raise a
+        # TypeError inside _getInputs; it should be reported as a
+        # DaeMalformedError like a non-numeric offset already is, not escape raw
+        good = fromstring('<input offset="0" semantic="VERTEX" source="#v"/>')
+        no_offset = fromstring('<input semantic="NORMAL" source="#n"/>')
+        bad_offset = fromstring('<input offset="x" semantic="NORMAL" source="#n"/>')
+        self.assertRaises(DaeMalformedError,
+                          Primitive._getInputs, self.dummy, {}, [good, no_offset])
+        self.assertRaises(DaeMalformedError,
+                          Primitive._getInputs, self.dummy, {}, [good, bad_offset])
 
     def test_geometry_lineset_adding_with_material(self):
         linefloats = [1, 1, -1, 1, -1, -1, -1, -0.9999998, -1, -0.9999997, 1, -1, 1, 0.9999995, 1, 0.9999994, -1.000001, 1]
