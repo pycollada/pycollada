@@ -2,6 +2,8 @@ import numpy
 import unittest
 
 import collada
+from collada.common import DaeMalformedError
+from collada.primitive import Primitive
 from collada.xmlutil import etree
 
 fromstring = etree.fromstring
@@ -43,8 +45,6 @@ class TestGeometry(unittest.TestCase):
         # an <input> with no "offset" attribute makes int(None) raise a
         # TypeError inside _getInputs; it should be reported as a
         # DaeMalformedError like a non-numeric offset already is, not escape raw
-        from collada.primitive import Primitive
-        from collada.common import DaeMalformedError
         good = fromstring('<input offset="0" semantic="VERTEX" source="#v"/>')
         no_offset = fromstring('<input semantic="NORMAL" source="#n"/>')
         bad_offset = fromstring('<input offset="x" semantic="NORMAL" source="#n"/>')
