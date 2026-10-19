@@ -17,6 +17,15 @@ class TestCollada(unittest.TestCase):
         self.dummy = collada.Collada(validate_output=True)
         self.datadir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 
+    def test_collada_with_comments(self):
+        f = os.path.join(self.datadir, "duck_triangles.dae")
+        with open(f, 'rb') as fp:
+            data = fp.read()
+        data = data.replace(b'<node id="LOD3sp" name="LOD3sp">',
+                            b'<node id="LOD3sp" name="LOD3sp"><!-- a comment --><?some-pi data?>')
+        mesh = collada.Collada(io.BytesIO(data), validate_output=True)
+        self.assertEqual(mesh.scene.nodes[0].id, 'LOD3sp')
+
     def test_collada_duck_tris(self):
         f = os.path.join(self.datadir, "duck_triangles.dae")
         mesh = collada.Collada(f, validate_output=True)
