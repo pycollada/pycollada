@@ -454,9 +454,6 @@ class Node(SceneNode):
             dispatch = _build_node_dispatch(collada)
 
         for subnode in node:
-            if not isinstance(subnode.tag, str):
-                # comments and processing instructions
-                continue
             entry = dispatch.get(subnode.tag)
             if entry is None:
                 collada.handleError(DaeUnsupportedError('Unknown scene node %s' % str(subnode.tag)))

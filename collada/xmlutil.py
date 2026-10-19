@@ -118,5 +118,5 @@ def createElementTree(file):
     if not HAVE_LXML:
         return etree.ElementTree(element=None, file=file)
     from lxml.etree import XMLParser, parse
-    parser = XMLParser(huge_tree=True)
+    parser = XMLParser(huge_tree=True, remove_comments=True, remove_pis=True)
     return parse(file, parser=parser)

@@ -163,16 +163,6 @@ class TestScene(unittest.TestCase):
         self.assertEqual(len(both.children), 2)
         self.assertEqual(len(both.transforms), 1)
 
-    def test_scene_node_with_comments(self):
-        node = collada.scene.Node('mycommentnode', children=[collada.scene.Node('mychild')],
-                                  transforms=[collada.scene.ScaleTransform(0.1, 0.2, 0.3)])
-        xmlnode = fromstring(tostring(node.xmlnode))
-        xmlnode.insert(0, etree.Comment(' a comment before the transform '))
-        xmlnode.append(etree.Comment(' a comment after the child '))
-        loaded = collada.scene.Node.load(self.dummy, xmlnode, {})
-        self.assertEqual(len(loaded.children), 1)
-        self.assertEqual(len(loaded.transforms), 1)
-
     def test_scene_node_saving(self):
         myemptynode = collada.scene.Node('myemptynode')
         rotate = collada.scene.RotateTransform(0.1, 0.2, 0.3, 90)
