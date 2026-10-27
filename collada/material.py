@@ -312,7 +312,7 @@ class Sampler2D(DaeObject):
         if samplernode is None:
             raise DaeIncompleteError('No sampler found in newparam')
         sourcenode = samplernode.find(collada.tag('source'))
-        if sourcenode is None:
+        if sourcenode is None or sourcenode.text is None:
             raise DaeIncompleteError('No source found in sampler')
         minnode = samplernode.find(collada.tag('minfilter'))
         if minnode is None:
@@ -387,6 +387,8 @@ class Map(DaeObject):
     @staticmethod
     def load(collada, localscope, node):
         samplerid = node.get('texture')
+        if samplerid is None:
+            raise DaeIncompleteError('No texture reference found in texture')
         texcoord = node.get('texcoord')
         sampler = localscope.get(samplerid)
         # Check for the sampler ID as the texture ID because some exporters suck
