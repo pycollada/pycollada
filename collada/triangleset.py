@@ -290,9 +290,9 @@ class TriangleSet(primitive.Primitive):
         sdir = numpy.vstack((sdirx, sdiry, sdirz)).T
 
         tans1 = numpy.zeros(self._vertex.shape, dtype=self._vertex.dtype)
-        tans1[self._vertex_index[:, 0]] += sdir
-        tans1[self._vertex_index[:, 1]] += sdir
-        tans1[self._vertex_index[:, 2]] += sdir
+        numpy.add.at(tans1, self._vertex_index[:, 0], sdir)
+        numpy.add.at(tans1, self._vertex_index[:, 1], sdir)
+        numpy.add.at(tans1, self._vertex_index[:, 2], sdir)
 
         norm = self._normal[self._normal_index]
         norm = norm.reshape((-1, 3))
@@ -313,9 +313,9 @@ class TriangleSet(primitive.Primitive):
         tdir = numpy.vstack((tdirx, tdiry, tdirz)).T
 
         tans2 = numpy.zeros(self._vertex.shape, dtype=self._vertex.dtype)
-        tans2[self._vertex_index[:, 0]] += tdir
-        tans2[self._vertex_index[:, 1]] += tdir
-        tans2[self._vertex_index[:, 2]] += tdir
+        numpy.add.at(tans2, self._vertex_index[:, 0], tdir)
+        numpy.add.at(tans2, self._vertex_index[:, 1], tdir)
+        numpy.add.at(tans2, self._vertex_index[:, 2], tdir)
 
         tan2 = tans2[self._vertex_index]
         tan2 = tan2.reshape((-1, 3))

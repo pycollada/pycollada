@@ -15,6 +15,40 @@ class TestGeometry(unittest.TestCase):
     def setUp(self):
         self.dummy = collada.Collada(validate_output=True)
 
+    def test_generate_tangents_shared_vertices(self):
+        vertices = numpy.array([[0, 0, 0], [1, 0, 0], [0, 1, 0],
+                                [0, 2, 0], [-1, 0, 0]], dtype=numpy.float32)
+        vertex_source = collada.source.FloatSource("vertices", vertices, ('X', 'Y', 'Z'))
+        normal_source = collada.source.FloatSource("normals", numpy.array([[0, 0, 1]], dtype=numpy.float32), ('X', 'Y', 'Z'))
+        # Face tangents X and 2Y must both contribute at the shared origin.
+        diagonal = numpy.array([1, 2, 0]) / numpy.sqrt(5)
+        perpendicular = numpy.array([-2, 1, 0]) / numpy.sqrt(5)
+        expected_tangents = numpy.array([diagonal, [1, 0, 0], [1, 0, 0], [0, 1, 0], [0, 1, 0]])
+        for mirrored in (False, True):
+            uv = numpy.array([[0, 0], [1, 0], [0, 1], [0, -1 if mirrored else 1]], dtype=numpy.float32)
+            uv_source = collada.source.FloatSource("uv", uv, ('S', 'T'))
+            geometry = collada.geometry.Geometry(self.dummy, "geometry", "geometry", [vertex_source, normal_source, uv_source])
+            inputs = collada.source.InputList()
+            inputs.addInput(0, 'VERTEX', '#vertices')
+            inputs.addInput(1, 'NORMAL', '#normals')
+            inputs.addInput(2, 'TEXCOORD', '#uv', set='0')
+            # Mirroring changes the sum of bitangents and its handedness.
+            shared_binormal = -perpendicular if mirrored else perpendicular
+            second_binormal = [1, 0, 0] if mirrored else [-1, 0, 0]
+            expected_binormals = numpy.array([shared_binormal, [0, 1, 0], [0, 1, 0], second_binormal, second_binormal])
+            for corner in range(3):
+                for reverse in (False, True):
+                    with self.subTest(mirrored=mirrored, corner=corner, reverse=reverse):
+                        faces = numpy.roll(numpy.array([[0, 1, 2], [0, 3, 4]]), corner, axis=1)
+                        uv_faces = numpy.roll(numpy.array([[0, 1, 2], [0, 1, 3]]), corner, axis=1)
+                        if reverse:
+                            faces, uv_faces = faces[::-1], uv_faces[::-1]
+                        indices = numpy.column_stack((faces.ravel(), numpy.zeros(6, dtype=int), uv_faces.ravel())).ravel()
+                        triangles = geometry.createTriangleSet(indices, inputs, None)
+                        triangles.generateTexTangentsAndBinormals()
+                        numpy.testing.assert_allclose(triangles.textangentset[0], expected_tangents[faces.ravel()], atol=1e-6)
+                        numpy.testing.assert_allclose(triangles.texbinormalset[0], expected_binormals[faces.ravel()], atol=1e-6)
+
     def test_empty_geometry_saving(self):
         floatsource = collada.source.FloatSource("myfloatsource", numpy.array([0.1, 0.2, 0.3]), ('X', 'Y', 'Z'))
         geometry = collada.geometry.Geometry(self.dummy, "geometry0", "mygeometry", {"myfloatsource": floatsource})
