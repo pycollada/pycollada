@@ -127,6 +127,37 @@ class TestScene(unittest.TestCase):
         self.assertListEqual(list(loaded_lookat.interest), list(interest))
         self.assertListEqual(list(loaded_lookat.upvector), list(upvector))
 
+    def test_scene_lookat_matrix(self):
+        translated = numpy.array([[1., 0., 0., 3.], [0., 1., 0., 4.],
+                                  [0., 0., 1., 5.], [0., 0., 0., 1.]])
+        turned = numpy.array([[0., 0., 1., 3.], [0., 1., 0., 4.],
+                              [-1., 0., 0., 5.], [0., 0., 0., 1.]])
+        cases = [
+            ([0., 0., 0.], [0., 0., -1.], [0., 1., 0.], numpy.identity(4)),
+            ([3., 4., 5.], [3., 4., 4.], [0., 1., 0.], translated),
+            ([3., 4., 5.], [2., 4., 5.], [0., 1., 0.], turned),
+            # The up direction can have a component along the line of sight.
+            ([3., 4., 5.], [3., 4., 3.], [0., 2., 1.], translated),
+        ]
+        for eye, interest, up, expected in cases:
+            with self.subTest(eye=eye, interest=interest, up=up):
+                lookat = collada.scene.LookAtTransform(eye, interest, up)
+                loaded = collada.scene.LookAtTransform.load(self.dummy, fromstring(tostring(lookat.xmlnode)))
+                for transform in (lookat, loaded):
+                    numpy.testing.assert_allclose(transform.matrix, expected, atol=1e-7)
+                    # A node stores the camera pose; its inverse is the view.
+                    view = numpy.linalg.inv(transform.matrix)
+                    numpy.testing.assert_allclose(view.dot(eye + [1.]), [0., 0., 0., 1.], atol=1e-7)
+                    target = view.dot(interest + [1.])
+                    numpy.testing.assert_allclose(target[[0, 1, 3]], [0., 0., 1.], atol=1e-7)
+                    self.assertLess(target[2], 0.)
+                    node = collada.scene.Node('camera-node', [collada.scene.CameraNode(self.yourcam)], [transform])
+                    camera = next(node.objects('camera'))
+                    numpy.testing.assert_allclose(camera.position, eye, atol=1e-7)
+                    direction = numpy.subtract(interest, eye)
+                    direction /= numpy.linalg.norm(direction)
+                    numpy.testing.assert_allclose(camera.direction, direction, atol=1e-7)
+
     def test_scene_node_combos(self):
         emptynode = collada.scene.Node('myemptynode')
         self.assertEqual(len(emptynode.children), 0)
