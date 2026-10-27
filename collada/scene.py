@@ -301,10 +301,12 @@ class LookAtTransform(Transform):
 
         front = toUnitVec(numpy.subtract(eye, interest))
         side = numpy.multiply(-1, toUnitVec(numpy.cross(front, upvector)))
-        self.matrix[0, 0:3] = side
-        self.matrix[1, 0:3] = upvector
-        self.matrix[2, 0:3] = front
-        self.matrix[3, 0:3] = eye
+        up = numpy.cross(front, side)
+        # Scene nodes store the camera pose, whose inverse is the view matrix.
+        self.matrix[0:3, 0] = side
+        self.matrix[0:3, 1] = up
+        self.matrix[0:3, 2] = front
+        self.matrix[0:3, 3] = eye
 
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
