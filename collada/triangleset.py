@@ -250,9 +250,10 @@ class TriangleSet(primitive.Primitive):
         tris = self._vertex[self._vertex_index]
         n = numpy.cross(tris[::, 1] - tris[::, 0], tris[::, 2] - tris[::, 0])
         normalize_v3(n)
-        norms[self._vertex_index[:, 0]] += n
-        norms[self._vertex_index[:, 1]] += n
-        norms[self._vertex_index[:, 2]] += n
+        # Unbuffered addition preserves every face at repeated vertex indices.
+        numpy.add.at(norms, self._vertex_index[:, 0], n)
+        numpy.add.at(norms, self._vertex_index[:, 1], n)
+        numpy.add.at(norms, self._vertex_index[:, 2], n)
         normalize_v3(norms)
 
         self._normal = norms
@@ -415,9 +416,10 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         tris = self._vertex[self._vertex_index]
         n = numpy.cross(tris[::, 1] - tris[::, 0], tris[::, 2] - tris[::, 0])
         normalize_v3(n)
-        norms[self._vertex_index[:, 0]] += n
-        norms[self._vertex_index[:, 1]] += n
-        norms[self._vertex_index[:, 2]] += n
+        # Unbuffered addition preserves every face at repeated vertex indices.
+        numpy.add.at(norms, self._vertex_index[:, 0], n)
+        numpy.add.at(norms, self._vertex_index[:, 1], n)
+        numpy.add.at(norms, self._vertex_index[:, 2], n)
         normalize_v3(norms)
 
         self._normal = norms

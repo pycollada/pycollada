@@ -147,6 +147,42 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(len(loaded_geometry.primitives), 1)
         self.assertEqual(len(loaded_geometry.primitives[0]), 12)
 
+    def test_generate_normals_shared_vertices(self):
+        # Three perpendicular faces meet at vertex 0. Each face must contribute
+        # to its normal, even when that vertex has the same corner in each face.
+        vertices = numpy.array([[0., 0., 0.], [1., 0., 0.],
+                                [0., 1., 0.], [0., 0., 1.]])
+        faces = numpy.array([[0, 1, 2], [0, 2, 3], [0, 3, 1]])
+        expected = numpy.array([[1., 1., 1.], [0., 1., 1.],
+                                [1., 0., 1.], [1., 1., 0.]])
+        expected[0] /= numpy.sqrt(3)
+        expected[1:] /= numpy.sqrt(2)
+        source = collada.source.FloatSource('vertices', vertices, ('X', 'Y', 'Z'))
+        geometry = collada.geometry.Geometry(self.dummy, 'geometry', 'corner', [source])
+        inputs = collada.source.InputList()
+        inputs.addInput(0, 'VERTEX', '#vertices')
+        # Rotate 90 degrees around Z, scale uniformly, then translate.
+        transform = numpy.array([[0., -2., 0., 3.], [2., 0., 0., 4.],
+                                 [0., 0., 2., 5.], [0., 0., 0., 1.]])
+        rotated_expected = expected[:, [1, 0, 2]].copy()
+        rotated_expected[:, 0] *= -1
+
+        for corner in range(3):
+            for reverse in (False, True):
+                indices = numpy.roll(faces, corner, axis=1)
+                if reverse:
+                    indices = indices[::-1]
+                for bound in (False, True):
+                    with self.subTest(corner=corner, reverse=reverse, bound=bound):
+                        triangles = geometry.createTriangleSet(indices.copy(), inputs)
+                        if bound:
+                            triangles = triangles.bind(transform, {})
+                        triangles.generateNormals()
+                        normals = rotated_expected if bound else expected
+                        numpy.testing.assert_allclose(triangles.normal, normals, atol=1e-7)
+                        numpy.testing.assert_array_equal(triangles.normal_index, indices)
+                        numpy.testing.assert_allclose(triangles[0].normals, normals[indices[0]], atol=1e-7)
+
     def test_geometry_polylist_adding(self):
         vert_floats = [-50, 50, 50, 50, 50, 50, -50, -50, 50, 50, -50, 50, -50, 50, -50, 50, 50, -50, -50, -50, -50, 50, -50, -50]
         normal_floats = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, -1, 0, 0,
