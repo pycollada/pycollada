@@ -781,6 +781,30 @@ class Effect(DaeObject):
                 if value is not None:
                     shadnode.append(getPropNode(prop, value))
 
+        if self.bumpmap is None:
+            for extranode in self.xmlnode.findall('.//' + tag('extra')):
+                for extension in extranode.findall(tag('technique')):
+                    for bumpnode in extension.findall(tag('bump')):
+                        extension.remove(bumpnode)
+        else:
+            bumpnode = self.xmlnode.find(f".//{tag('extra')}//{tag('bump')}")
+            if bumpnode is None:
+                extranode = tecnode.find(tag('extra'))
+                if extranode is None:
+                    extranode = E.extra()
+                    tecnode.append(extranode)
+                extension = next((child for child in extranode.findall(tag('technique'))
+                                  if child.get('profile') == 'FCOLLADA'), None)
+                if extension is None:
+                    extension = E.technique(profile='FCOLLADA')
+                    extranode.append(extension)
+                bumpnode = E.bump()
+                extension.append(bumpnode)
+            self.bumpmap.save()
+            for texture in bumpnode.findall(tag('texture')):
+                bumpnode.remove(texture)
+            bumpnode.append(copy.deepcopy(self.bumpmap.xmlnode))
+
         double_sided_node = profilenode.find(f".//{tag('extra')}//{tag('double_sided')}")
         if double_sided_node is None or double_sided_node.text is None:
             extranode = profilenode.find(tag('extra'))
