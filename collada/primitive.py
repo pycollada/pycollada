@@ -12,6 +12,8 @@
 
 """Module containing the base class for primitives"""
 
+import numpy
+
 from collada.common import DaeObject
 from collada.common import DaeBrokenRefError, DaeMalformedError, \
     DaeUnsupportedError
@@ -140,6 +142,25 @@ class BoundPrimitive(object):
     """A :class:`collada.primitive.Primitive` bound to a transform matrix
     and material mapping."""
 
+    @staticmethod
+    def _transformNormals(normals, matrix):
+        """Transform row normals without renormalizing their lengths."""
+        if normals is None:
+            return None
+        linear = numpy.asarray(matrix)[:3, :3]
+        try:
+            # Row vectors multiply the inverse, equivalent to applying the
+            # inverse transpose to column vectors.
+            operator = numpy.linalg.inv(linear)
+        except numpy.linalg.LinAlgError:
+            # A collapsed transform has no inverse. Cofactors still transform
+            # normals of surviving planes, and vanish for lower-rank geometry.
+            operator = numpy.column_stack((
+                numpy.cross(linear[1], linear[2]),
+                numpy.cross(linear[2], linear[0]),
+                numpy.cross(linear[0], linear[1])))
+        return numpy.dot(normals, operator)
+
     def shapes(self):
         """Iterate through the items in this primitive. The shape returned
         depends on the primitive type. Examples: Triangle, Polygon."""
@@ -148,8 +169,9 @@ class BoundPrimitive(object):
     primitive's vertex source array. The values will be transformed according to the
     bound transformation matrix.""")
     normal = property(lambda s: s._normal, doc="""Read-only numpy.array of size Nx3 where N is the number of normal values in the
-    primitive's normal source array. The values will be transformed according to the
-    bound transformation matrix.""")
+    primitive's normal source array. The values are transformed by the inverse transpose
+    of the bound matrix's linear part, without renormalization. Singular matrices use
+    the cofactor transform instead, retaining normals of surviving planes.""")
     texcoordset = property(lambda s: s._texcoordset, doc="""Read-only tuple of texture coordinate arrays. Each value is a numpy.array of size
     Nx2 where N is the number of texture coordinates in the primitive's source array. The
     values will be transformed according to the bound transformation matrix.""")
