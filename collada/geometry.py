@@ -181,6 +181,7 @@ class Geometry(DaeObject):
         tag_tristrips = collada.tag('tristrips')
         tag_trifans = collada.tag('trifans')
         tag_lines = collada.tag('lines')
+        tag_linestrips = collada.tag('linestrips')
         tag_polygons = collada.tag('polygons')
 
         meshnode = node.find(tag_mesh)
@@ -204,7 +205,7 @@ class Geometry(DaeObject):
                 primitive_nodes.append(('polylist', subnode))
             elif tag in tri_tags:
                 primitive_nodes.append(('triangles', subnode))
-            elif tag == tag_lines:
+            elif tag in (tag_lines, tag_linestrips):
                 primitive_nodes.append(('lines', subnode))
             elif tag == tag_polygons:
                 primitive_nodes.append(('polygons', subnode))
