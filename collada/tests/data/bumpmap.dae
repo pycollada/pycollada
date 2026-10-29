@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>pycollada contributors</author>
+      <comments>Hand-authored FCOLLADA bump-map regression fixture.</comments>
+    </contributor>
+    <created>2026-10-28T00:00:00Z</created>
+    <modified>2026-10-28T00:00:00Z</modified>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images>
+    <image id="diffuse-image"><init_from>bumpmap-diffuse.png</init_from></image>
+    <image id="normal-image"><init_from>bumpmap-normal.png</init_from></image>
+  </library_images>
+  <library_effects>
+    <effect id="bump-effect">
+      <profile_COMMON>
+        <newparam sid="diffuse-surface">
+          <surface type="2D"><init_from>diffuse-image</init_from></surface>
+        </newparam>
+        <newparam sid="normal-surface">
+          <surface type="2D"><init_from>normal-image</init_from></surface>
+        </newparam>
+        <newparam sid="diffuse-sampler">
+          <sampler2D><source>diffuse-surface</source></sampler2D>
+        </newparam>
+        <newparam sid="normal-sampler">
+          <sampler2D><source>normal-surface</source></sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <diffuse><texture texture="diffuse-sampler" texcoord="UV0"/></diffuse>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump bumptype="NORMALMAP">
+                <texture texture="normal-sampler" texcoord="UV0"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="bump-material" name="BumpMaterial">
+      <instance_effect url="#bump-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="triangle" name="TexturedTriangle">
+      <mesh>
+        <source id="positions">
+          <float_array id="positions-array" count="9">0 0 0 1 0 0 0 1 0</float_array>
+          <technique_common>
+            <accessor source="#positions-array" count="3" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="uvs">
+          <float_array id="uvs-array" count="6">0 0 1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#uvs-array" count="3" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="vertices"><input semantic="POSITION" source="#positions"/></vertices>
+        <triangles count="1" material="material-symbol">
+          <input semantic="VERTEX" source="#vertices" offset="0"/>
+          <input semantic="TEXCOORD" source="#uvs" offset="1" set="0"/>
+          <p>0 0 1 1 2 2</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="scene">
+      <node id="triangle-node">
+        <instance_geometry url="#triangle">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="material-symbol" target="#bump-material">
+                <bind_vertex_input semantic="UV0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene><instance_visual_scene url="#scene"/></scene>
+</COLLADA>
