@@ -10,7 +10,7 @@
 #                                                                  #
 ####################################################################
 
-"""Module containing classes and functions for the <lines> primitive."""
+"""Classes and functions for <lines> and <linestrips> primitives."""
 
 import numpy
 
@@ -55,6 +55,8 @@ class LineSet(primitive.Primitive):
     """Class containing the data COLLADA puts in a <lines> tag, a collection of
     lines. The LineSet object is read-only. To modify a LineSet, create a new
     instance using :meth:`collada.geometry.Geometry.createLineSet`.
+
+    Loaded line strips are exposed as their individual line segments.
 
     * If ``L`` is an instance of :class:`collada.lineset.LineSet`, then ``len(L)``
       returns the number of lines in the set. ``L[i]`` returns the i\\ :sup:`th`
@@ -161,23 +163,30 @@ class LineSet(primitive.Primitive):
 
     @staticmethod
     def load(collada, localscope, node):
-        indexnode = node.find(collada.tag('p'))
+        indexnodes = node.findall(collada.tag('p'))
+        is_strip = node.tag == collada.tag('linestrips')
         input_tag = collada.tag('input')
-        if indexnode is None:
+        if not indexnodes and not is_strip:
             raise DaeIncompleteError('Missing index in line set')
 
         source_array = primitive.Primitive._getInputs(collada, localscope, node.findall(input_tag))
 
+        stride = 1 + max((input[0] for inputs in source_array.values()
+                          for input in inputs), default=0)
+        indexlist = []
         try:
-            if indexnode.text is None or indexnode.text.isspace():
-                index = numpy.array([], dtype=numpy.int32)
-            else:
-                try:
+            for indexnode in indexnodes if is_strip else indexnodes[:1]:
+                if indexnode.text is None or indexnode.text.isspace():
+                    index = numpy.array([], dtype=numpy.int32)
+                else:
                     index = numpy.fromstring(indexnode.text, dtype=numpy.int32, sep=' ')
-                except ValueError:
-                    raise DaeMalformedError("Failed to parse lineset index integers")
-            index[numpy.isnan(index)] = 0
-        except BaseException:
+                if is_strip:
+                    vertices = index.reshape((-1, stride))
+                    # Keep each <p> independent: strips must not be joined.
+                    index = numpy.stack((vertices[:-1], vertices[1:]), axis=1).ravel()
+                indexlist.append(index)
+            index = numpy.concatenate(indexlist) if indexlist else numpy.array([], dtype=numpy.int32)
+        except (ValueError, TypeError):
             raise DaeMalformedError('Corrupted index in line set')
 
         lineset = LineSet(source_array, node.get('material'), index, node)
