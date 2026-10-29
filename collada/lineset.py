@@ -220,9 +220,7 @@ class BoundLineSet(primitive.BoundPrimitive):
         self._vertex = None
         if ls._vertex is not None:
             self._vertex = numpy.asarray(ls._vertex * M[:3, :3]) + matrix[:3, 3]
-        self._normal = None
-        if ls._normal is not None:
-            self._normal = numpy.asarray(ls._normal * M[:3, :3])
+        self._normal = self._transformNormals(ls._normal, matrix)
         self._texcoordset = ls._texcoordset
         matnode = materialnodebysymbol.get(ls.material)
         if matnode:

@@ -324,7 +324,7 @@ class BoundPolylist(primitive.BoundPrimitive):
         This gets created when a polylist is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if pl._vertex is None else numpy.asarray(pl._vertex * M[:3, :3]) + matrix[:3, 3]
-        self._normal = None if pl._normal is None else numpy.asarray(pl._normal * M[:3, :3])
+        self._normal = self._transformNormals(pl._normal, matrix)
         self._texcoordset = pl._texcoordset
         matnode = materialnodebysymbol.get(pl.material)
         if matnode:

@@ -353,7 +353,7 @@ class BoundTriangleSet(primitive.BoundPrimitive):
         This gets created when a triangle set is instantiated in a scene. Do not create this manually."""
         M = numpy.asmatrix(matrix).transpose()
         self._vertex = None if ts.vertex is None else numpy.asarray(ts._vertex * M[:3, :3]) + matrix[:3, 3]
-        self._normal = None if ts._normal is None else numpy.asarray(ts._normal * M[:3, :3])
+        self._normal = self._transformNormals(ts._normal, matrix)
         self._texcoordset = ts._texcoordset
         self._textangentset = ts._textangentset
         self._texbinormalset = ts._texbinormalset
