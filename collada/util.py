@@ -133,123 +133,118 @@ class IndexedList(list):
         for obj in self:
             _add(obj)
 
-    def _addindex(self, obj):
-        _idx = self._index
-        for attr in self._attrs:
-            _idx[getattr(obj, attr)] = obj
+    def _index_items(self, items):
+        return {getattr(obj, attr): obj for obj in items for attr in self._attrs}
 
-    def _delindex(self, obj):
-        _idx = self._index
-        for attr in self._attrs:
-            try:
-                del _idx[getattr(obj, attr)]
-            except KeyError:
-                pass
+    def _addindex(self, obj):
+        self._index.update(self._index_items([obj]))
+
+    def _replace_items(self, items):
+        # Validate all keys before changing either representation.
+        index = self._index_items(items)
+        list.__setitem__(self, slice(None), items)
+        self._index = index
+
+    def _position(self, ind):
+        try:
+            list.__getitem__(self, ind)
+        except TypeError:
+            return list.index(self, self._index[ind])
+        except IndexError:
+            if ind in self._index:
+                return list.index(self, self._index[ind])
+        return ind
 
     def __delitem__(self, ind):
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._delindex(obj)
-        return list.__delitem__(self, ind)
+        items = list(self)
+        del items[self._position(ind)]
+        self._replace_items(items)
 
     def __delslice__(self, i, j):
-        return list.__delslice__(self, i, j)
+        del self[i:j]
 
     def __getitem__(self, ind):
+        if isinstance(ind, slice):
+            return IndexedList(list.__getitem__(self, ind), self._attrs)
         try:
             return self._index[ind]
-        except KeyError:
+        except (KeyError, TypeError):
             if isinstance(ind, str):
                 raise
             return list.__getitem__(self, ind)
 
     def get(self, key, default=None):
-        try:
-            return self._index[key]
-        except KeyError:
-            return default
+        return self._index.get(key, default)
 
     def __contains__(self, item):
-        if item in self._index:
-            return True
+        try:
+            if item in self._index:
+                return True
+        except TypeError:
+            pass
         return list.__contains__(self, item)
 
     def __getslice__(self, i, j):
-        return IndexedList(list.__getslice__(self, i, j), self._attrs)
+        return self[i:j]
 
     def __setitem__(self, ind, new_obj):
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._delindex(obj)
-        self._addindex(new_obj)
-        return list.__setitem__(ind, new_obj)
+        items = list(self)
+        items[self._position(ind)] = new_obj
+        self._replace_items(items)
 
     def __setslice__(self, i, j, newItems):
-        _get = self.__getitem__
-        _add = self._addindex
-        _del = self._delindex
-        newItems = list(newItems)
-        # remove indexing of items to remove
-        for ind in range(i, j):
-            _del(_get(ind))
-        # add new indexing
-        if isinstance(newItems, IndexedList):
-            self._index.update(newItems._index)
-        else:
-            for obj in newItems:
-                _add(obj)
-        # replace items
-        return list.__setslice__(self, i, j, newItems)
+        self[i:j] = newItems
 
     def append(self, obj):
-        self._addindex(obj)
-        return list.append(self, obj)
+        index = self._index_items([obj])
+        list.append(self, obj)
+        self._index.update(index)
 
     def extend(self, newList):
-        newList = list(newList)
-        if isinstance(newList, IndexedList):
-            self._index.update(newList._index)
-        else:
-            _add = self._addindex
-            for obj in newList:
-                _add(obj)
-        return list.extend(self, newList)
+        items = list(newList)
+        index = self._index_items(items)
+        list.extend(self, items)
+        self._index.update(index)
 
     def insert(self, ind, new_obj):
-        # ensure that ind is a numeric index
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._addindex(new_obj)
-        return list.insert(self, ind, new_obj)
+        items = list(self)
+        items.insert(self._position(ind), new_obj)
+        self._replace_items(items)
 
     def pop(self, ind=-1):
-        # ensure that ind is a numeric index
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._delindex(obj)
-        return list.pop(self, ind)
+        items = list(self)
+        obj = items.pop(self._position(ind))
+        self._replace_items(items)
+        return obj
 
     def remove(self, ind_or_obj):
         try:
             obj = self._index[ind_or_obj]
-            ind = list.index(self, obj)
-        except KeyError:
-            ind = list.index(self, ind_or_obj)
-            obj = list.__getitem__(self, ind)
-        self._delindex(obj)
-        return list.remove(self, ind)
+        except (KeyError, TypeError):
+            obj = ind_or_obj
+        items = list(self)
+        items.remove(obj)
+        self._replace_items(items)
+
+    def clear(self):
+        list.clear(self)
+        self._index.clear()
+
+    def __iadd__(self, items):
+        self.extend(items)
+        return self
+
+    def __imul__(self, count):
+        self._replace_items(list(self) * count)
+        return self
+
+    def reverse(self):
+        self._replace_items(list(reversed(self)))
+
+    def sort(self, *, key=None, reverse=False):
+        items = list(self)
+        items.sort(key=key, reverse=reverse)
+        self._replace_items(items)
 
 
 def _correctValInNode(outernode, tagname, value):
