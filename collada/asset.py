@@ -15,7 +15,7 @@
 import datetime
 import dateutil.parser
 
-from collada.common import DaeObject, E
+from collada.common import DaeObject, E, tag
 from collada.util import _correctValInNode
 
 
@@ -103,6 +103,13 @@ class Contributor(DaeObject):
         _correctValInNode(self.xmlnode, 'comments', self.comments)
         _correctValInNode(self.xmlnode, 'copyright', self.copyright)
         _correctValInNode(self.xmlnode, 'source_data', self.source_data)
+        # Newly added fields must precede any later fields already in the XML.
+        fields = ('author', 'authoring_tool', 'comments', 'copyright', 'source_data')
+        nodes = [self.xmlnode.find(tag(name)) for name in fields]
+        nodes = [node for node in nodes if node is not None]
+        for node in nodes:
+            self.xmlnode.remove(node)
+        self.xmlnode[:0] = nodes
 
     def __str__(self):
         return '<Contributor author=%s>' % (str(self.author),)
@@ -185,6 +192,7 @@ class Asset(DaeObject):
     def _recreateXmlNode(self):
         self.xmlnode = E.asset()
         for contributor in self.contributors:
+            contributor.save()
             self.xmlnode.append(contributor.xmlnode)
         self.xmlnode.append(E.created(self.created.isoformat()))
         if self.keywords is not None:
