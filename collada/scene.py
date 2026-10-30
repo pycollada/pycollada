@@ -432,17 +432,10 @@ class Node(SceneNode):
         if self.name is not None:
             self.xmlnode.set('name', self.name)
 
-        for t in self.transforms:
-            if t.xmlnode not in self.xmlnode:
-                self.xmlnode.append(t.xmlnode)
-        for c in self.children:
-            if c.xmlnode not in self.xmlnode:
-                self.xmlnode.append(c.xmlnode)
-        xmlnodes = [c.xmlnode for c in self.children]
-        xmlnodes.extend([t.xmlnode for t in self.transforms])
-        for n in self.xmlnode:
-            if n not in xmlnodes:
-                self.xmlnode.remove(n)
+        # Transform order determines the matrix, and transforms must precede instances.
+        # Replace the sequence as a whole so edits and removals work on both XML backends.
+        self.xmlnode[:] = ([t.xmlnode for t in self.transforms] +
+                           [c.xmlnode for c in self.children])
 
     @staticmethod
     def load(collada, node, localscope):
