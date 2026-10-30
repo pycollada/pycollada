@@ -146,8 +146,13 @@ class IndexedList(list):
         self._index = index
 
     def _position(self, ind):
-        if isinstance(ind, str):
+        try:
+            list.__getitem__(self, ind)
+        except TypeError:
             return list.index(self, self._index[ind])
+        except IndexError:
+            if ind in self._index:
+                return list.index(self, self._index[ind])
         return ind
 
     def __delitem__(self, ind):

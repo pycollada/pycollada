@@ -152,3 +152,24 @@ def test_document_library_removal_and_replacement_round_trip():
     reloaded = collada.Collada(io.BytesIO(output.getvalue()), validate_output=True)
     assert list(reloaded.geometries) == [reloaded.geometries['replacement']]
     assert next(reloaded.scene.objects('geometry')).original is reloaded.geometries['replacement']
+
+
+@pytest.mark.parametrize('key', [1.5, (1, 2), 99])
+@pytest.mark.parametrize('operation', ['replace', 'delete', 'insert', 'pop'])
+def test_non_string_aliases_keep_existing_mutation_support(key, operation):
+    first, second, replacement = Item(key, 'first'), Item('second', 'second'), Item('replacement', 'replacement')
+    items = IndexedList([first, second], ('id', 'name'))
+    if operation == 'replace':
+        items[key] = replacement
+        assert list(items) == [replacement, second]
+    elif operation == 'delete':
+        del items[key]
+        assert list(items) == [second]
+    elif operation == 'insert':
+        items.insert(key, replacement)
+        assert list(items) == [replacement, first, second]
+    else:
+        assert items.pop(key) is first
+        assert list(items) == [second]
+    for item in items:
+        assert items[item.id] is item
