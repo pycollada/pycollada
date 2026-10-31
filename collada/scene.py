@@ -117,6 +117,12 @@ class TranslateTransform(Transform):
         if xmlnode is None:
             self.xmlnode = E.translate(' '.join([str(x), str(y), str(z)]))
 
+    def save(self):
+        """Update the matrix and XML from the current x, y and z coordinates."""
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        self.matrix[:3, 3] = [self.x, self.y, self.z]
+        self.xmlnode.text = ' '.join(map(str, (self.x, self.y, self.z)))
+
     @staticmethod
     def load(collada, node):
         try:
@@ -167,6 +173,11 @@ class RotateTransform(Transform):
         if xmlnode is None:
             self.xmlnode = E.rotate(' '.join([str(x), str(y), str(z), str(angle)]))
 
+    def save(self):
+        """Update the matrix and XML from the current axis and angle."""
+        self.matrix = makeRotationMatrix(self.x, self.y, self.z, self.angle * numpy.pi / 180.0)
+        self.xmlnode.text = ' '.join(map(str, (self.x, self.y, self.z, self.angle)))
+
     @staticmethod
     def load(collada, node):
         try:
@@ -216,6 +227,14 @@ class ScaleTransform(Transform):
         if xmlnode is None:
             self.xmlnode = E.scale(' '.join([str(x), str(y), str(z)]))
 
+    def save(self):
+        """Update the matrix and XML from the current scale factors."""
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        self.matrix[0, 0] = self.x
+        self.matrix[1, 1] = self.y
+        self.matrix[2, 2] = self.z
+        self.xmlnode.text = ' '.join(map(str, (self.x, self.y, self.z)))
+
     @staticmethod
     def load(collada, node):
         try:
@@ -254,6 +273,10 @@ class MatrixTransform(Transform):
         """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.matrix(' '.join(map(str, self.matrix.flat)))
+
+    def save(self):
+        """Write the current matrix, including in-place edits, back to XML."""
+        self.xmlnode.text = ' '.join(map(str, self.matrix.flat))
 
     @staticmethod
     def load(collada, node):
@@ -296,23 +319,30 @@ class LookAtTransform(Transform):
         if len(eye) != 3 or len(interest) != 3 or len(upvector) != 3:
             raise DaeMalformedError('Corrupted lookat transformation node')
 
-        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        self._updateMatrix()
         """The resulting transformation matrix. This will be a numpy.array of size 4x4."""
-
-        front = toUnitVec(numpy.subtract(eye, interest))
-        side = numpy.multiply(-1, toUnitVec(numpy.cross(front, upvector)))
-        up = numpy.cross(front, side)
-        # Scene nodes store the camera pose, whose inverse is the view matrix.
-        self.matrix[0:3, 0] = side
-        self.matrix[0:3, 1] = up
-        self.matrix[0:3, 2] = front
-        self.matrix[0:3, 3] = eye
 
         self.xmlnode = xmlnode
         """ElementTree representation of the transform."""
         if xmlnode is None:
             self.xmlnode = E.lookat(' '.join(map(str,
                                                  numpy.concatenate((self.eye, self.interest, self.upvector)))))
+
+    def save(self):
+        """Update the camera pose and XML from the current look-at vectors."""
+        self._updateMatrix()
+        self.xmlnode.text = ' '.join(map(str, numpy.concatenate((self.eye, self.interest, self.upvector))))
+
+    def _updateMatrix(self):
+        self.matrix = numpy.identity(4, dtype=numpy.float32)
+        front = toUnitVec(numpy.subtract(self.eye, self.interest))
+        side = numpy.multiply(-1, toUnitVec(numpy.cross(front, self.upvector)))
+        up = numpy.cross(front, side)
+        # Scene nodes store the camera pose, whose inverse is the view matrix.
+        self.matrix[0:3, 0] = side
+        self.matrix[0:3, 1] = up
+        self.matrix[0:3, 2] = front
+        self.matrix[0:3, 3] = self.eye
 
     @staticmethod
     def load(collada, node):
@@ -422,6 +452,7 @@ class Node(SceneNode):
         else:
             self.matrix = numpy.identity(4, dtype=numpy.float32)
             for t in self.transforms:
+                t.save()
                 self.matrix = numpy.dot(self.matrix, t.matrix)
 
         for child in self.children:
