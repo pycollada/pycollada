@@ -117,6 +117,9 @@ class CImage(DaeObject):
         if not img:
             self._uintarray = _FAILED
             return None
+        if img.mode == '1':
+            # Expand packed bits to the 0/255 luminance samples expected by this API.
+            img = img.convert('L')
         nchan = len(img.mode)
         self._uintarray = numpy.frombuffer(img.tobytes(), dtype=numpy.uint8)
         self._uintarray = self._uintarray.reshape((img.size[1], img.size[0], nchan))
@@ -149,7 +152,8 @@ class CImage(DaeObject):
     pilimage = property(getImage)
     """PIL Image object if PIL is available and the file is readable."""
     uintarray = property(getUintArray)
-    """Numpy array (height, width, nchannels) in integer format."""
+    """Numpy array (height, width, nchannels) in integer format.
+    Bilevel images are expanded to 8-bit luminance samples (0 or 255)."""
     floatarray = property(getFloatArray)
     """Numpy float array (height, width, nchannels) with the image data normalized to 1.0."""
 
