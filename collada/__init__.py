@@ -25,6 +25,7 @@ import os.path
 import posixpath
 import traceback
 import zipfile
+from urllib.parse import unquote
 
 from collada import animation
 from collada import asset
@@ -262,21 +263,21 @@ class Collada(object):
                 self.maskedErrors.append(e)
 
     def _getFileFromZip(self, fname):
-        """Return the binary data of an auxiliary file from a zip archive as a string."""
+        """Read an auxiliary file from the archive, decoding its URI path once."""
         if not self.zfile:
             raise DaeBrokenRefError('Trying to load an auxiliary file %s but we are not reading from a zip' % fname)
         basepath = posixpath.dirname(self.filename)
-        aux_path = posixpath.normpath(posixpath.join(basepath, fname))
+        aux_path = posixpath.normpath(posixpath.join(basepath, unquote(fname)))
         if aux_path not in self.zfile.namelist():
             raise DaeBrokenRefError('Auxiliar file %s not found in archive' % fname)
         return self.zfile.read(aux_path)
 
     def _getFileFromDisk(self, fname):
-        """Return the binary data of an auxiliary file from the local disk relative to the file path loaded."""
+        """Read an auxiliary file from disk, decoding its relative URI path once."""
         if self.zfile:
             raise DaeBrokenRefError('Trying to load an auxiliary file %s from disk but we are reading from a zip file' % fname)
         basepath = os.path.dirname(self.filename)
-        aux_path = os.path.normpath(os.path.join(basepath, fname))
+        aux_path = os.path.normpath(os.path.join(basepath, unquote(fname)))
         if not os.path.exists(aux_path):
             raise DaeBrokenRefError('Auxiliar file %s not found on disk' % fname)
         fdata = open(aux_path, 'rb')
