@@ -18,6 +18,20 @@ from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeMalformedError, DaeUnsupportedError
 
 
+_FLOAT_TYPE_SIZES = {
+    'float': 1, 'float2': 2, 'float3': 3, 'float4': 4,
+    'float2x2': 4, 'float3x3': 9, 'float4x4': 16,
+}
+
+
+def get_float_type_size(param_type):
+    """Return the scalar count of a supported COLLADA float parameter type."""
+    try:
+        return _FLOAT_TYPE_SIZES[param_type]
+    except KeyError:
+        raise DaeUnsupportedError('Unsupported float source parameter type %s' % param_type)
+
+
 class InputList(object):
     """Used for defining input sources to a geometry."""
 
@@ -202,14 +216,48 @@ class FloatSource(Source):
             data[numpy.isnan(data)] = 0
 
         # Use cached xpath or build and cache it
-        accessor_path = getattr(collada, '_floatsource_accessor_xpath', None)
+        accessor_path = getattr(collada, '_floatsource_accessor_node_xpath', None)
         if accessor_path is None:
-            accessor_path = f"{collada.tag('technique_common')}/{collada.tag('accessor')}/{collada.tag('param')}"
-            collada._floatsource_accessor_xpath = accessor_path
-        paramnodes = node.findall(accessor_path)
+            accessor_path = f"{collada.tag('technique_common')}/{collada.tag('accessor')}"
+            collada._floatsource_accessor_node_xpath = accessor_path
+        accessor = node.find(accessor_path)
+        paramnodes = [] if accessor is None else accessor.findall(collada.tag('param'))
         if not paramnodes:
             raise DaeIncompleteError('No accessor info in source node')
-        components = [param.get('name') for param in paramnodes]
+
+        try:
+            count = int(accessor.get('count'))
+            offset = int(accessor.get('offset', '0'))
+            stride = int(accessor.get('stride', '1'))
+        except (TypeError, ValueError):
+            raise DaeMalformedError('Invalid float source accessor dimensions')
+
+        components = []
+        columns = []
+        width = 0
+        for param in paramnodes:
+            # Matrix parameters in skin sources consume more than one float.
+            param_type = param.get('type', 'float')
+            size = get_float_type_size(param_type)
+            if param.get('name') is not None:
+                components.append(param.get('name'))
+                columns.extend(range(width, width + size))
+            width += size
+        if not components:
+            raise DaeUnsupportedError('Float source accessor has no named parameters')
+        if count < 0 or offset < 0 or stride < 0 or (count and stride < width):
+            raise DaeMalformedError('Invalid float source accessor dimensions')
+        if count and offset + (count - 1) * stride + width > data.size:
+            raise DaeMalformedError('Float source accessor exceeds array length')
+        if count and stride == len(columns) and columns == list(range(stride)):
+            # Keep the usual packed layout as a view rather than copying every column.
+            data = data[offset:offset + count * stride]
+        elif count:
+            # A final record need not have trailing padding.
+            data = numpy.column_stack([data[offset + column:offset + column + count * stride:stride]
+                                       for column in columns]).reshape(-1)
+        else:
+            data = data[:0]
         if len(components) == 2 and components[0] == 'U' and components[1] == 'V':
             # U,V is used for "generic" arguments - convert to S,T
             components = ['S', 'T']
