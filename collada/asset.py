@@ -98,14 +98,17 @@ class Contributor(DaeObject):
 
     def save(self):
         """Saves the contributor info back to :attr:`xmlnode`"""
-        _correctValInNode(self.xmlnode, 'author', self.author)
-        _correctValInNode(self.xmlnode, 'authoring_tool', self.authoring_tool)
-        _correctValInNode(self.xmlnode, 'comments', self.comments)
-        _correctValInNode(self.xmlnode, 'copyright', self.copyright)
-        _correctValInNode(self.xmlnode, 'source_data', self.source_data)
+        field_map = {
+            'author': self.author,
+            'authoring_tool': self.authoring_tool,
+            'comments': self.comments,
+            'copyright': self.copyright,
+            'source_data': self.source_data,
+        }
+        for name, value in field_map.items():
+            _correctValInNode(self.xmlnode, name, value)
         # Newly added fields must precede any later fields already in the XML.
-        fields = ('author', 'authoring_tool', 'comments', 'copyright', 'source_data')
-        nodes = [self.xmlnode.find(tag(name)) for name in fields]
+        nodes = [self.xmlnode.find(tag(name)) for name in field_map]
         nodes = [node for node in nodes if node is not None]
         for node in nodes:
             self.xmlnode.remove(node)
