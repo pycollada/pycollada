@@ -17,7 +17,7 @@ class Item:
 def check(items, expected, known):
     assert list(items) == expected
     for key in known:
-        match = next((item for item in reversed(expected) if key in (item.id, item.name)), None)
+        match = next((item for item in reversed(expected) if key == item.id), None)
         assert (key in items) == (match is not None)
         assert items.get(key) is match
         if match is not None:
@@ -30,12 +30,12 @@ def check(items, expected, known):
 @pytest.mark.parametrize('operation', [
     'replace', 'replace-name', 'slice', 'extended-slice', 'delete', 'delete-name',
     'delete-slice', 'delete-extended', 'insert-end', 'insert-before', 'append',
-    'extend', 'iadd', 'imul-zero', 'imul-two', 'clear', 'remove-object', 'remove-name',
-    'pop', 'pop-name', 'reverse', 'sort',
+    'extend', 'iadd', 'clear', 'remove-object',
+    'pop', 'pop-name', 'reverse',
 ])
 def test_mutations_preserve_lookups(operation):
     a, b, c, d = [Item(name, name.upper()) for name in 'abcd']
-    items = IndexedList([a, b, c], ('id', 'name'))
+    items = IndexedList([a, b, c], ('id',))
     expected = [a, b, c]
     if operation == 'replace':
         items[1] = d
@@ -69,17 +69,11 @@ def test_mutations_preserve_lookups(operation):
         items += [d]
         assert items is identity
         expected += [d]
-    elif operation.startswith('imul'):
-        identity = items
-        count = 0 if operation == 'imul-zero' else 2
-        items *= count
-        assert items is identity
-        expected *= count
     elif operation == 'clear':
         items.clear()
         expected.clear()
     elif operation.startswith('remove'):
-        assert items.remove(b if operation == 'remove-object' else 'b') is None
+        assert items.remove(b) is None
         expected.remove(b)
     elif operation.startswith('pop'):
         assert items.pop(1 if operation == 'pop' else 'b') is b
@@ -87,23 +81,21 @@ def test_mutations_preserve_lookups(operation):
     elif operation == 'reverse':
         items.reverse()
         expected.reverse()
-    elif operation == 'sort':
-        items.sort(key=lambda item: item.id, reverse=True)
-        expected.sort(key=lambda item: item.id, reverse=True)
     check(items, expected, list('abcdABCD'))
 
 
 def test_slicing_preserves_indexed_lookup():
     a, b, c = [Item(name, name.upper()) for name in 'abc']
-    items = IndexedList([a, b, c], ('id', 'name'))
+    items = IndexedList([a, b, c], ('id',))
     subset = items[::-1]
     assert isinstance(subset, IndexedList)
     check(subset, [c, b, a], list('abcABC'))
 
 
-def test_duplicate_aliases_follow_remaining_list_order():
-    first, second = Item('first', 'same'), Item('second', 'same')
-    items = IndexedList([first, second], ('id', 'name'))
+def test_duplicate_ids_follow_remaining_list_order():
+    first, second = Item('same', 'first'), Item('same', 'second')
+    items = IndexedList([first, second], ('id',))
+    assert items['same'] is second
     items.reverse()
     assert items['same'] is first
     items.remove(first)
@@ -112,22 +104,15 @@ def test_duplicate_aliases_follow_remaining_list_order():
     assert items['same'] is second
 
 
-@pytest.mark.parametrize('operation', ['replace', 'extend', 'append', 'slice-length', 'missing-remove'])
-def test_failed_edits_preserve_list_and_lookup(operation):
+def test_failed_slice_and_remove_preserve_items():
     item = Item('a', 'A')
-    items = IndexedList([item], ('id', 'name'))
-    with pytest.raises((AttributeError, ValueError)):
-        if operation == 'replace':
-            items[0] = object()
-        elif operation == 'extend':
-            items.extend([Item('b', 'B'), object()])
-        elif operation == 'append':
-            items.append(object())
-        elif operation == 'slice-length':
-            items[::2] = []
-        else:
-            items.remove(Item('missing', 'MISSING'))
-    check(items, [item], list('abAB'))
+    items = IndexedList([item], ('id',))
+    assert items['a'] is item
+    with pytest.raises(ValueError):
+        items[::2] = []
+    with pytest.raises(ValueError):
+        items.remove(Item('missing', 'MISSING'))
+    check(items, [item], ['a', 'missing'])
 
 
 def test_document_library_removal_and_replacement_round_trip():
@@ -139,7 +124,7 @@ def test_document_library_removal_and_replacement_round_trip():
     inputs.addInput(0, 'VERTEX', '#positions')
     replacement.primitives.append(replacement.createTriangleSet(numpy.array([0, 1, 2]), inputs, None))
     mesh.geometries.append(original)
-    mesh.geometries.remove('old')
+    mesh.geometries.remove(original)
     assert not mesh.geometries and mesh.geometries.get('old') is None
     mesh.geometries += [original]
     mesh.geometries[:] = [replacement]
@@ -154,22 +139,48 @@ def test_document_library_removal_and_replacement_round_trip():
     assert next(reloaded.scene.objects('geometry')).original is reloaded.geometries['replacement']
 
 
-@pytest.mark.parametrize('key', [1.5, (1, 2), 99])
-@pytest.mark.parametrize('operation', ['replace', 'delete', 'insert', 'pop'])
-def test_non_string_aliases_keep_existing_mutation_support(key, operation):
-    first, second, replacement = Item(key, 'first'), Item('second', 'second'), Item('replacement', 'replacement')
-    items = IndexedList([first, second], ('id', 'name'))
-    if operation == 'replace':
-        items[key] = replacement
-        assert list(items) == [replacement, second]
-    elif operation == 'delete':
-        del items[key]
-        assert list(items) == [second]
-    elif operation == 'insert':
-        items.insert(key, replacement)
-        assert list(items) == [replacement, first, second]
-    else:
-        assert items.pop(key) is first
-        assert list(items) == [second]
-    for item in items:
-        assert items[item.id] is item
+def test_lazy_cache_and_incremental_loading():
+    from collections.abc import MutableSequence
+
+    a, b, c = [Item(name, name.upper()) for name in 'abc']
+    items = IndexedList([a], ('id',))
+    assert isinstance(items, MutableSequence) and not isinstance(items, list)
+    assert items._by_id is None
+    items.append(b)
+    assert items._by_id is None
+    assert items['a'] is a
+    cache = items._by_id
+    items.extend([c])
+    assert items._by_id is cache and items['c'] is c
+    items.append(a)
+    assert items._by_id is cache
+    items[0] = b
+    assert items._by_id is None
+    assert items['a'] is a
+
+
+def test_self_extension_and_list_equality():
+    a, b = Item('a', 'A'), Item('b', 'B')
+    items = IndexedList([a, b], ('id',))
+    assert items == [a, b] and [a, b] == items
+    assert items == IndexedList([a, b], ('id',))
+    assert items != [b, a] and items != (a, b)
+    items.extend(items)
+    assert items == [a, b, a, b]
+    items += items
+    assert items == [a, b, a, b] * 2
+    assert items['a'] is a
+    items.clear()
+    assert items == [] and items.get('a') is None
+
+
+def test_integer_ids_do_not_override_positions():
+    first, second = Item(1, 'first'), Item(0, 'second')
+    items = IndexedList([first, second], ('id',))
+    assert items[0] is first and items[1] is second
+    del items[0]
+    assert items[0] is second
+    with pytest.raises(IndexError):
+        items[1]
+    with pytest.raises(TypeError):
+        items[1.5]
