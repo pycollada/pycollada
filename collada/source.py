@@ -12,12 +12,24 @@
 
 """Module for managing data sources defined in geometry tags."""
 
-import re
-
 import numpy
 
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeMalformedError, DaeUnsupportedError
+
+
+_FLOAT_TYPE_SIZES = {
+    'float': 1, 'float2': 2, 'float3': 3, 'float4': 4,
+    'float2x2': 4, 'float3x3': 9, 'float4x4': 16,
+}
+
+
+def get_float_type_size(param_type):
+    """Return the scalar count of a supported COLLADA float parameter type."""
+    try:
+        return _FLOAT_TYPE_SIZES[param_type]
+    except KeyError:
+        raise DaeUnsupportedError('Unsupported float source parameter type %s' % param_type)
 
 
 class InputList(object):
@@ -226,10 +238,7 @@ class FloatSource(Source):
         for param in paramnodes:
             # Matrix parameters in skin sources consume more than one float.
             param_type = param.get('type', 'float')
-            match = re.fullmatch(r'float(?:([1-4])(?:x([1-4]))?)?', param_type)
-            if match is None:
-                raise DaeUnsupportedError('Unsupported float source parameter type %s' % param_type)
-            size = int(match.group(1) or 1) * int(match.group(2) or 1)
+            size = get_float_type_size(param_type)
             if param.get('name') is not None:
                 components.append(param.get('name'))
                 columns.extend(range(width, width + size))

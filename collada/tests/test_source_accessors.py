@@ -126,3 +126,17 @@ def test_full_scene_accessor_round_trip():
     numpy.testing.assert_array_equal(reloaded.geometries[0].primitives[0].vertex, expected)
     bound = next(reloaded.scene.objects('geometry'))
     numpy.testing.assert_array_equal(next(bound.primitives()).vertex, expected + [2, 3, 4])
+
+
+@pytest.mark.parametrize('param_type,size', [
+    ('float', 1), ('float2', 2), ('float3', 3), ('float4', 4),
+    ('float2x2', 4), ('float3x3', 9), ('float4x4', 16),
+])
+def test_float_type_size_lookup(param_type, size):
+    assert collada.source.get_float_type_size(param_type) == size
+
+
+@pytest.mark.parametrize('param_type', ['int', 'double', 'float1', 'float2x3', 'float5', '', 'FLOAT'])
+def test_float_type_size_rejects_unsupported_types(param_type):
+    with pytest.raises(collada.common.DaeUnsupportedError):
+        collada.source.get_float_type_size(param_type)
