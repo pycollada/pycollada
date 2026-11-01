@@ -140,3 +140,23 @@ def test_float_type_size_lookup(param_type, size):
 def test_float_type_size_rejects_unsupported_types(param_type):
     with pytest.raises(collada.common.DaeUnsupportedError):
         collada.source.get_float_type_size(param_type)
+
+
+@pytest.mark.parametrize('array_type', ['Name', 'IDREF'])
+@pytest.mark.parametrize('float_first', [False, True])
+def test_mixed_source_types_do_not_share_incompatible_xpath_cache(array_type, float_first):
+    mesh = collada.Collada()
+    xml = ('<source xmlns="http://www.collada.org/2005/11/COLLADASchema" id="names">'
+           '<%s_array id="names-array" count="2">jointA jointB</%s_array>'
+           '<technique_common><accessor source="#names-array" count="2" stride="1">'
+           '<param name="JOINT" type="%s"/></accessor></technique_common></source>') % (array_type, array_type, array_type)
+    string_node = etree.fromstring(xml)
+    float_node = load_source([1, 2], '<param name="WEIGHT" type="float"/>').xmlnode
+    for node in ([float_node, string_node] if float_first else [string_node, float_node]):
+        result = collada.source.Source.load(mesh, {}, node)
+        if node is string_node:
+            assert result.components == ('JOINT',)
+            numpy.testing.assert_array_equal(result.data, [['jointA'], ['jointB']])
+        else:
+            assert result.components == ('WEIGHT',)
+            numpy.testing.assert_array_equal(result.data, [[1], [2]])

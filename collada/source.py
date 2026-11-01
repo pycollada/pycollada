@@ -216,10 +216,10 @@ class FloatSource(Source):
             data[numpy.isnan(data)] = 0
 
         # Use cached xpath or build and cache it
-        accessor_path = getattr(collada, '_floatsource_accessor_xpath', None)
+        accessor_path = getattr(collada, '_floatsource_accessor_node_xpath', None)
         if accessor_path is None:
             accessor_path = f"{collada.tag('technique_common')}/{collada.tag('accessor')}"
-            collada._floatsource_accessor_xpath = accessor_path
+            collada._floatsource_accessor_node_xpath = accessor_path
         accessor = node.find(accessor_path)
         paramnodes = [] if accessor is None else accessor.findall(collada.tag('param'))
         if not paramnodes:
