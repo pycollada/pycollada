@@ -1,4 +1,8 @@
+import io
+
+import pytest
 import collada
+from collada.common import E, tag
 import unittest
 from collada.xmlutil import etree
 
@@ -105,3 +109,46 @@ class TestLight(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@pytest.mark.parametrize('kind,field,value', [
+    ('point', 'constant_att', 1), ('point', 'linear_att', 0.2),
+    ('spot', 'constant_att', 1), ('spot', 'linear_att', 0.2),
+    ('spot', 'quad_att', 0.3), ('spot', 'falloff_ang', 30),
+])
+def test_adding_earlier_light_parameters_keeps_schema_order(kind, field, value):
+    mesh = collada.Collada(validate_output=True)
+    if kind == 'point':
+        light = collada.light.PointLight('light', (1, 1, 1), quad_att=0.5)
+    else:
+        light = collada.light.SpotLight('light', (1, 1, 1), falloff_exp=4)
+    mesh.lights.append(light)
+    mesh.scene = collada.scene.Scene('scene', [collada.scene.Node('node', [collada.scene.LightNode(light)])])
+    mesh.scenes.append(mesh.scene)
+    light.xmlnode.append(E.extra(E.technique(E.note('keep'), profile='TEST')))
+    setattr(light, field, value)
+    for _ in range(2):
+        output = io.BytesIO()
+        mesh.write(output)
+        mesh = collada.Collada(io.BytesIO(output.getvalue()), validate_output=True)
+        light = next(mesh.scene.objects('light')).original
+        assert getattr(light, field) == value
+        assert light.xmlnode.find(f"{tag('extra')}/{tag('technique')}/{tag('note')}").text == 'keep'
+        if kind == 'point':
+            assert light.quad_att == 0.5
+        else:
+            assert light.falloff_exp == 4
+
+
+@pytest.mark.parametrize('kind', ['point', 'spot'])
+@pytest.mark.parametrize('operation', ['update', 'remove'])
+def test_existing_light_parameter_controls(kind, operation):
+    mesh = collada.Collada(validate_output=True)
+    cls = collada.light.PointLight if kind == 'point' else collada.light.SpotLight
+    light = cls('light', (1, 1, 1), constant_att=1, linear_att=0.2, quad_att=0.3)
+    mesh.lights.append(light)
+    light.linear_att = 0.4 if operation == 'update' else None
+    output = io.BytesIO()
+    mesh.write(output)
+    loaded = collada.Collada(io.BytesIO(output.getvalue()), validate_output=True).lights[0]
+    assert loaded.linear_att == light.linear_att
