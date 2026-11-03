@@ -5,6 +5,7 @@ import unittest
 
 import collada
 import numpy
+import pytest
 from collada.common import E, tag
 
 
@@ -116,3 +117,48 @@ class TestBumpmap(unittest.TestCase):
         self.assertIsNone(effect.xmlnode.find('.//' + tag('bump')))
         self.assertEqual(effect.xmlnode.find('.//' + tag('custom')).text, 'preserve me')
         self.assertEqual(effect.diffuse.texcoord, 'UV0')
+
+
+def _texture_scene_round_trip(mesh, image_bytes):
+    stream = io.BytesIO()
+    mesh.write(stream)
+    return collada.Collada(io.BytesIO(stream.getvalue()), validate_output=True,
+                           aux_file_loader=image_bytes.__getitem__)
+
+
+@pytest.mark.parametrize('prop', ['emission', 'ambient', 'diffuse', 'specular', 'reflective', 'transparent'])
+@pytest.mark.parametrize('edit', ['sampler', 'texcoord', 'both'])
+def test_editing_color_texture_maps_is_saved(prop, edit):
+    mesh = collada.Collada(str(Path(__file__).parent / 'data' / 'bumpmap.dae'), validate_output=True)
+    image_bytes = {image.path: image.data for image in mesh.images}
+    effect = mesh.effects[0]
+    setattr(effect, prop, collada.material.Map(effect.diffuse.sampler, 'UV0'))
+    mesh.scene.nodes[0].children[0].materials[0].inputs.append(('UV1', 'TEXCOORD', '0'))
+    mesh = _texture_scene_round_trip(mesh, image_bytes)
+    effect = mesh.effects[0]
+    texture = getattr(effect, prop)
+    if edit in ('sampler', 'both'):
+        texture.sampler = effect.bumpmap.sampler
+    if edit in ('texcoord', 'both'):
+        texture.texcoord = 'UV1'
+    expected_sampler = 'normal-sampler' if edit in ('sampler', 'both') else 'diffuse-sampler'
+    expected_uv = 'UV1' if edit in ('texcoord', 'both') else 'UV0'
+    for _ in range(2):
+        mesh = _texture_scene_round_trip(mesh, image_bytes)
+        primitive = next(next(mesh.scene.objects('geometry')).primitives())
+        texture = getattr(primitive.material.effect, prop)
+        assert texture.sampler.id == expected_sampler
+        assert texture.texcoord == expected_uv
+        assert primitive.inputmap[expected_uv] == ('TEXCOORD', '0')
+        assert texture.sampler.surface.image.data == image_bytes[texture.sampler.surface.image.path]
+        numpy.testing.assert_array_equal(primitive[0].texcoords[0], [[0, 0], [1, 0], [0, 1]])
+
+
+@pytest.mark.parametrize('replace', [False, True])
+def test_unchanged_and_replaced_color_map_controls(replace):
+    mesh = collada.Collada(str(Path(__file__).parent / 'data' / 'bumpmap.dae'), validate_output=True)
+    image_bytes = {image.path: image.data for image in mesh.images}
+    if replace:
+        mesh.effects[0].diffuse = collada.material.Map(mesh.effects[0].bumpmap.sampler, 'UV0')
+    mesh = _texture_scene_round_trip(mesh, image_bytes)
+    assert mesh.effects[0].diffuse.sampler.id == ('normal-sampler' if replace else 'diffuse-sampler')
