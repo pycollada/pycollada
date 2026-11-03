@@ -26,7 +26,7 @@ import numpy
 from collada.common import DaeObject, E, tag
 from collada.common import DaeIncompleteError, DaeBrokenRefError, \
     DaeMalformedError, DaeUnsupportedError
-from collada.util import falmostEqual
+from collada.util import falmostEqual, _correctValInNode
 
 try:
     from PIL import Image as pil
@@ -340,12 +340,13 @@ class Sampler2D(DaeObject):
         """Saves the sampler data back to :attr:`xmlnode`"""
         samplernode = self.xmlnode.find(tag('sampler2D'))
         sourcenode = samplernode.find(tag('source'))
-        if self.minfilter:
-            minnode = samplernode.find(tag('minfilter'))
-            minnode.text = self.minfilter
-        if self.magfilter:
-            maxnode = samplernode.find(tag('magfilter'))
-            maxnode.text = self.magfilter
+        _correctValInNode(samplernode, 'minfilter', self.minfilter)
+        _correctValInNode(samplernode, 'magfilter', self.magfilter)
+        # Newly inserted optional filters must precede later sampler settings.
+        fields = ('source', 'wrap_s', 'wrap_t', 'minfilter', 'magfilter', 'mipfilter',
+                  'border_color', 'mipmap_maxlevel', 'mipmap_bias', 'extra')
+        order = {tag(name): index for index, name in enumerate(fields)}
+        samplernode[:] = sorted(samplernode, key=lambda child: order.get(child.tag, len(order)))
         sourcenode.text = self.surface.id
         self.xmlnode.set('sid', self.id)
 
