@@ -14,6 +14,7 @@
 
 import numpy
 import math
+from collections.abc import MutableSequence
 
 from collada.common import DaeMalformedError, E, tag
 
@@ -108,148 +109,83 @@ def dot_v3(arr1, arr2):
     return arr1[:, 0] * arr2[:, 0] + arr1[:, 1] * arr2[:, 1] + arr2[:, 2] * arr1[:, 2]
 
 
-class IndexedList(list):
-    """
-    Class that combines a list and a dict into a single class
-     - Written by Hugh Bothwell (http://stackoverflow.com/users/33258/hugh-bothwell)
-     - Original source available at:
-          http://stackoverflow.com/questions/5332841/python-list-dict-property-best-practice/5334686#5334686
-     - Modifications by Jeff Terrace
-    Given an object, obj, that has a property x, this allows you to create an IndexedList like so:
-       L = IndexedList([], ('x'))
-       o = obj()
-       o.x = 'test'
-       L.append(o)
-       L[0] # = o
-       L['test'] # = o
+class IndexedList(MutableSequence):
+    """A mutable sequence of objects with string lookups by their id attribute.
+
+    Positional indexing and slicing follow list semantics. ID lookups use the
+    last object with that ID. The cache is built lazily and invalidated by edits.
     """
 
-    def __init__(self, items, attrs):
-        super(IndexedList, self).__init__(items)
-        # do indexing
-        self._attrs = tuple(attrs)
-        self._index = {}
-        _add = self._addindex
-        for obj in self:
-            _add(obj)
+    def __init__(self, items, attrs=('id',)):
+        # Retain the existing id-only constructor calls used by Collada.
+        if tuple(attrs) != ('id',):
+            raise ValueError('IndexedList indexes the id attribute only')
+        self._items = list(items)
+        self._by_id = None
 
-    def _addindex(self, obj):
-        _idx = self._index
-        for attr in self._attrs:
-            _idx[getattr(obj, attr)] = obj
+    def _index(self):
+        if self._by_id is None:
+            self._by_id = {item.id: item for item in self._items}
+        return self._by_id
 
-    def _delindex(self, obj):
-        _idx = self._index
-        for attr in self._attrs:
-            try:
-                del _idx[getattr(obj, attr)]
-            except KeyError:
-                pass
+    def _position(self, key):
+        if isinstance(key, str):
+            return self._items.index(self._index()[key])
+        return key
 
-    def __delitem__(self, ind):
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._delindex(obj)
-        return list.__delitem__(self, ind)
+    def __len__(self):
+        return len(self._items)
 
-    def __delslice__(self, i, j):
-        return list.__delslice__(self, i, j)
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return self._index()[key]
+        if isinstance(key, slice):
+            return IndexedList(self._items[key])
+        return self._items[key]
 
-    def __getitem__(self, ind):
-        try:
-            return self._index[ind]
-        except KeyError:
-            if isinstance(ind, str):
-                raise
-            return list.__getitem__(self, ind)
+    def __setitem__(self, key, value):
+        self._items[self._position(key)] = value
+        self._by_id = None
+
+    def __delitem__(self, key):
+        del self._items[self._position(key)]
+        self._by_id = None
+
+    def insert(self, index, value):
+        self._items.insert(self._position(index), value)
+        self._by_id = None
+
+    def append(self, value):
+        if self._by_id is not None:
+            key = value.id
+            hash(key)
+        self._items.append(value)
+        if self._by_id is not None:
+            self._by_id[key] = value
+
+    def extend(self, values):
+        # Snapshot self-extension and iterators before mutating the sequence.
+        values = list(values)
+        if self._by_id is not None:
+            additions = {value.id: value for value in values}
+        self._items.extend(values)
+        if self._by_id is not None:
+            self._by_id.update(additions)
 
     def get(self, key, default=None):
-        try:
-            return self._index[key]
-        except KeyError:
-            return default
+        return self._index().get(key, default)
 
-    def __contains__(self, item):
-        if item in self._index:
-            return True
-        return list.__contains__(self, item)
+    def __contains__(self, value):
+        if isinstance(value, str):
+            return value in self._index()
+        return value in self._items
 
-    def __getslice__(self, i, j):
-        return IndexedList(list.__getslice__(self, i, j), self._attrs)
-
-    def __setitem__(self, ind, new_obj):
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._delindex(obj)
-        self._addindex(new_obj)
-        return list.__setitem__(ind, new_obj)
-
-    def __setslice__(self, i, j, newItems):
-        _get = self.__getitem__
-        _add = self._addindex
-        _del = self._delindex
-        newItems = list(newItems)
-        # remove indexing of items to remove
-        for ind in range(i, j):
-            _del(_get(ind))
-        # add new indexing
-        if isinstance(newItems, IndexedList):
-            self._index.update(newItems._index)
-        else:
-            for obj in newItems:
-                _add(obj)
-        # replace items
-        return list.__setslice__(self, i, j, newItems)
-
-    def append(self, obj):
-        self._addindex(obj)
-        return list.append(self, obj)
-
-    def extend(self, newList):
-        newList = list(newList)
-        if isinstance(newList, IndexedList):
-            self._index.update(newList._index)
-        else:
-            _add = self._addindex
-            for obj in newList:
-                _add(obj)
-        return list.extend(self, newList)
-
-    def insert(self, ind, new_obj):
-        # ensure that ind is a numeric index
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._addindex(new_obj)
-        return list.insert(self, ind, new_obj)
-
-    def pop(self, ind=-1):
-        # ensure that ind is a numeric index
-        try:
-            obj = list.__getitem__(self, ind)
-        except (IndexError, TypeError):
-            obj = self._index[ind]
-            ind = list.index(self, obj)
-        self._delindex(obj)
-        return list.pop(self, ind)
-
-    def remove(self, ind_or_obj):
-        try:
-            obj = self._index[ind_or_obj]
-            ind = list.index(self, obj)
-        except KeyError:
-            ind = list.index(self, ind_or_obj)
-            obj = list.__getitem__(self, ind)
-        self._delindex(obj)
-        return list.remove(self, ind)
+    def __eq__(self, other):
+        if isinstance(other, IndexedList):
+            return self._items == other._items
+        if isinstance(other, list):
+            return self._items == other
+        return NotImplemented
 
 
 def _correctValInNode(outernode, tagname, value):
