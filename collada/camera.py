@@ -16,11 +16,25 @@ from collada.common import DaeIncompleteError
 from collada.common import DaeMalformedError
 from collada.common import DaeObject
 from collada.common import DaeUnsupportedError
-from collada.common import E
+from collada.common import E, tag
+from collada.util import _correctValInNode
 
 
 class Camera(DaeObject):
     """Base camera class holding data from <camera> tags."""
+
+    def _saveProjection(self, name, field_map):
+        """Update modeled values while preserving the camera's other XML data."""
+        self.xmlnode.set('id', self.id)
+        projection = self.xmlnode.find(f"{tag('optics')}/{tag('technique_common')}/{tag(name)}")
+        for field, value in field_map.items():
+            _correctValInNode(projection, field, value)
+        # Optional fields added during editing must retain schema ordering.
+        nodes = [projection.find(tag(field)) for field in field_map]
+        nodes = [node for node in nodes if node is not None]
+        for node in nodes:
+            projection.remove(node)
+        projection[:0] = nodes
 
     @staticmethod
     def load(collada, localscope, node):
@@ -130,7 +144,10 @@ class PerspectiveCamera(Camera):
     def save(self):
         """Saves the perspective camera's properties back to xmlnode"""
         self._checkValidParams()
-        self._recreateXmlNode()
+        self._saveProjection('perspective', {
+            'xfov': self.xfov, 'yfov': self.yfov,
+            'aspect_ratio': self.aspect_ratio, 'znear': self.znear, 'zfar': self.zfar,
+        })
 
     @staticmethod
     def load(collada, localscope, node):
@@ -278,7 +295,10 @@ class OrthographicCamera(Camera):
     def save(self):
         """Saves the orthographic camera's properties back to xmlnode"""
         self._checkValidParams()
-        self._recreateXmlNode()
+        self._saveProjection('orthographic', {
+            'xmag': self.xmag, 'ymag': self.ymag,
+            'aspect_ratio': self.aspect_ratio, 'znear': self.znear, 'zfar': self.zfar,
+        })
 
     @staticmethod
     def load(collada, localscope, node):
