@@ -1,9 +1,14 @@
+import io
 import os
+from pathlib import Path
+
+import pytest
 import unittest
 
 import collada
 from collada.xmlutil import etree
 from collada.material import OPAQUE_MODE
+from collada.common import E, tag
 
 fromstring = etree.fromstring
 tostring = etree.tostring
@@ -298,3 +303,49 @@ class TestMaterial(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+# Complete-scene regressions for edits to optional sampler filters.
+
+@pytest.mark.parametrize('initial,edited', [
+    ((None, None), ('LINEAR', 'NEAREST')),
+    ((None, 'LINEAR'), ('NEAREST', 'LINEAR')),
+    (('LINEAR', None), ('LINEAR', 'NEAREST')),
+    (('LINEAR', 'NEAREST'), (None, None)),
+    (('LINEAR', 'NEAREST'), ('NEAREST', 'LINEAR')),
+    ((None, None), (None, None)),
+    (('LINEAR', 'NEAREST'), ('LINEAR', 'NEAREST')),
+])
+def test_sampler_filter_edits_round_trip(initial, edited):
+    mesh = collada.Collada(str(Path(__file__).with_name('data') / 'bumpmap.dae'), validate_output=True)
+    image_bytes = {image.path: image.data for image in mesh.images}
+    sampler = mesh.effects[0].diffuse.sampler
+    node = sampler.xmlnode.find(tag('sampler2D'))
+    node.append(E.wrap_s('CLAMP'))
+    for name, value in zip(('minfilter', 'magfilter'), initial):
+        if value is not None:
+            node.append(E(name, value))
+    node.append(E.mipfilter('LINEAR'))
+    if mesh.validator is not None:
+        assert mesh.validator.validate(mesh.xmlnode)
+    # Reload raw initial XML without asking the broken save path to construct it.
+    mesh = collada.Collada(
+        io.BytesIO(etree.tostring(mesh.xmlnode.getroot())), validate_output=True,
+        aux_file_loader=image_bytes.__getitem__)
+    sampler = mesh.effects[0].diffuse.sampler
+    sampler.minfilter, sampler.magfilter = edited
+    for _ in range(2):
+        output = io.BytesIO()
+        mesh.write(output)
+        mesh = collada.Collada(
+            io.BytesIO(output.getvalue()), validate_output=True,
+            aux_file_loader=image_bytes.__getitem__)
+        bound = next(next(mesh.scene.objects('geometry')).primitives())
+        sampler = bound.material.effect.diffuse.sampler
+        assert (sampler.minfilter, sampler.magfilter) == edited
+        node = sampler.xmlnode.find(tag('sampler2D'))
+        expected = ['source', 'wrap_s'] + [name for name, value in zip(('minfilter', 'magfilter'), edited) if value is not None] + ['mipfilter']
+        assert [child.tag for child in node] == [tag(name) for name in expected]
+        assert node.find(tag('wrap_s')).text == 'CLAMP'
+        assert node.find(tag('mipfilter')).text == 'LINEAR'
+        assert sampler.surface.image.data == image_bytes[sampler.surface.image.path]
