@@ -24,6 +24,17 @@ class Light(DaeObject):
     """Base light class holding data from <light> tags."""
 
     @staticmethod
+    def _saveParameters(node, field_map):
+        for name, value in field_map.items():
+            _correctValInNode(node, name, value)
+        # Inserted optional parameters must follow the color in schema order.
+        nodes = [node.find(tag(name)) for name in ('color', *field_map)]
+        nodes = [child for child in nodes if child is not None]
+        for child in nodes:
+            node.remove(child)
+        node[:0] = nodes
+
+    @staticmethod
     def load(collada, localscope, node):
         tecnode = node.find(collada.tag('technique_common'))
         if tecnode is None or len(tecnode) == 0:
@@ -251,9 +262,11 @@ class PointLight(Light):
         pnode = self.xmlnode.find(f"{tag('technique_common')}/{tag('point')}")
         colornode = pnode.find(tag('color'))
         colornode.text = ' '.join(map(str, self.color))
-        _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
-        _correctValInNode(pnode, 'linear_attenuation', self.linear_att)
-        _correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
+        self._saveParameters(pnode, {
+            'constant_attenuation': self.constant_att,
+            'linear_attenuation': self.linear_att,
+            'quadratic_attenuation': self.quad_att,
+        })
         _correctValInNode(pnode, 'zfar', self.zfar)
 
     @staticmethod
@@ -375,11 +388,13 @@ class SpotLight(Light):
         pnode = self.xmlnode.find(f"{tag('technique_common')}/{tag('spot')}")
         colornode = pnode.find(tag('color'))
         colornode.text = ' '.join(map(str, self.color))
-        _correctValInNode(pnode, 'constant_attenuation', self.constant_att)
-        _correctValInNode(pnode, 'linear_attenuation', self.linear_att)
-        _correctValInNode(pnode, 'quadratic_attenuation', self.quad_att)
-        _correctValInNode(pnode, 'falloff_angle', self.falloff_ang)
-        _correctValInNode(pnode, 'falloff_exponent', self.falloff_exp)
+        self._saveParameters(pnode, {
+            'constant_attenuation': self.constant_att,
+            'linear_attenuation': self.linear_att,
+            'quadratic_attenuation': self.quad_att,
+            'falloff_angle': self.falloff_ang,
+            'falloff_exponent': self.falloff_exp,
+        })
 
     @staticmethod
     def load(collada, localscope, node):
