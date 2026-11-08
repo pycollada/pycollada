@@ -761,6 +761,7 @@ class Effect(DaeObject):
             if prop == 'transparent' and self.opaque_mode == OPAQUE_MODE.RGB_ZERO:
                 propnode.set('opaque', OPAQUE_MODE.RGB_ZERO)
             if isinstance(value, Map):
+                value.save()
                 propnode.append(copy.deepcopy(value.xmlnode))
             elif isinstance(value, float):
                 propnode.append(E.float(str(value)))
